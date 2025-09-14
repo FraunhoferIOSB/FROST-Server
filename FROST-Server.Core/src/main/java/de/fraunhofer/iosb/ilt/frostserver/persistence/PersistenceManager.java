@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -87,6 +88,17 @@ public interface PersistenceManager extends AutoCloseable {
      * @throws NoSuchEntityException If the path does not lead to an entity set.
      */
     public void delete(ResourcePath path, Query query) throws NoSuchEntityException;
+
+    /**
+     * Add a relation to the given set, if it does not already exist.
+     *
+     * @param source The entity that holds the set.
+     * @param np The navigation property of the set.
+     * @param target The Entity to add to the set.
+     * @throws NoSuchEntityException If the source or target entity does not
+     * exist.
+     */
+    public void addRelation(PathElementEntity source, NavigationPropertyEntitySet np, Entity target) throws NoSuchEntityException;
 
     /**
      * Delete the relation specified by the given NavigationProperty, between

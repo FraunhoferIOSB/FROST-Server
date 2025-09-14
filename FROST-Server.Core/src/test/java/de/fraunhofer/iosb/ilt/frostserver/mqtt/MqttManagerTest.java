@@ -350,6 +350,10 @@ class MqttManagerTest {
         }
 
         @Override
+        public void addRelation(PathElementEntity source, NavigationPropertyMain.NavigationPropertyEntitySet np, Entity target) {
+        }
+
+        @Override
         public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) {
         }
 

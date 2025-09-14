@@ -24,13 +24,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
@@ -135,21 +132,16 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException {
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) throws IncompleteEntityException, NoSuchEntityException {
+    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
         if (!distinctRequired) {
             throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
         }
-        EntityFactories entityFactories = pm.getEntityFactories();
-        if (entityFactories.entityExists(pm, target, true)) {
-            link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
-        } else {
-            throw new NoSuchEntityException("Linked Entity with no id.");
-        }
+        link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
     }
 
     /**

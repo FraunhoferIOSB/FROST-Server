@@ -24,8 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
-import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
  * The interface for table-to-table relations.
@@ -72,12 +70,8 @@ public interface Relation<S extends StaMainTable<S>> {
      * @param source The source entity of the link.
      * @param target The target entity of the link.
      * @param navProp The navigation property of the relation.
-     * @throws NoSuchEntityException if the target entity does not exist yet and
-     * can not be created.
-     * @throws IncompleteEntityException if the target entity can not be created
-     * because it is not complete.
      */
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException;
+    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
 
     /**
      * Make the links between the given source and targets, removing links that
@@ -90,12 +84,8 @@ public interface Relation<S extends StaMainTable<S>> {
      * @param source The source entity of the link.
      * @param targets The target entity of the link.
      * @param navProp The navigation property of the relation.
-     * @throws NoSuchEntityException if the target entity does not exist yet and
-     * can not be created.
-     * @throws IncompleteEntityException if the target entity can not be created
-     * because it is not complete.
      */
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) throws NoSuchEntityException, IncompleteEntityException;
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp);
 
     public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
 }

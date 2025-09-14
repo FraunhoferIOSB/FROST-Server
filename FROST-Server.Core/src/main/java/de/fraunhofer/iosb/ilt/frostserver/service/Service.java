@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityReference;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
@@ -66,6 +67,7 @@ import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.Principal;
@@ -464,8 +466,8 @@ public class Service implements AutoCloseable {
             return errorResponse(response, 403, e.getMessage());
         } catch (IllegalArgumentException e) {
             rollbackAndClose(pm);
-            return errorResponse(response, 400, "Incorrect request: " + e.getMessage());
-        } catch (IOException | RuntimeException e) {
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Incorrect request: " + e.getMessage());
+        } catch (RuntimeException e) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
             LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
@@ -475,14 +477,43 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handlePostRef(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) throws IOException {
+    private ServiceResponse handlePostRef(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) {
         //     Add one reference to a collection:
         //     POST Datastream(1)/ObservedProperties/$ref
         //     {"@id": "ObservedProperties(2)"}
-        return errorResponse(response, 400, POST_ONLY_ALLOWED_TO_COLLECTIONS);
+        PathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PathElementEntitySet mainSet) {
+            EntityType type = mainSet.getEntityType();
+            try {
+                EntityReference entityReference = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReference.class);
+                Entity targetEntity = entityReference.resolve(modelRegistry, request.getUserPrincipal().isAdmin());
+                if (targetEntity.getEntityType() != mainSet.getEntityType()) {
+                    throw new IllegalArgumentException("Can not add a " + targetEntity.getEntityType() + " to a " + mainSet.getEntityType() + " Set");
+                }
+                PathElement parent = mainSet.getParent();
+                if (parent == null) {
+                    throw new IllegalArgumentException("Set does not have a parent entity!");
+                }
+                if (parent instanceof PathElementEntity parentEntity) {
+                    if (!parentEntity.primaryKeyFullySet()) {
+                        throw new IllegalArgumentException("Can not resolve target set.");
+                    }
+                    NavigationPropertyEntitySet navProp = mainSet.getNavigationProperty();
+                    pm.addRelation(parentEntity, navProp, targetEntity);
+                }
+
+            } catch (IOException ex) {
+                throw new IllegalArgumentException("Failed to parse body as entity reference");
+            }
+
+            response.setCode(HttpURLConnection.HTTP_NO_CONTENT);
+            return response;
+        } else {
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, POST_ONLY_ALLOWED_TO_COLLECTIONS);
+        }
     }
 
-    private ServiceResponse handlePostCollection(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) throws IOException {
+    private ServiceResponse handlePostCollection(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) {
         final QueryDefaults queryDefaults = request.getQueryDefaults();
         Query query;
         ResultFormatter formatter;
@@ -508,7 +539,7 @@ public class Service implements AutoCloseable {
             }
             type.validateCreate(entity);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
-        } catch (JsonParseException | JsonMappingException | IncompleteEntityException | IllegalStateException ex) {
+        } catch (IncompleteEntityException | IllegalStateException | IOException ex) {
             LOGGER.trace("Post failed.", ex);
             return errorResponse(response, 400, ex.getMessage());
         }

@@ -73,6 +73,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -459,6 +460,21 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         message.setEntity(newEntity);
         message.setEventType(EntityChangedMessage.Type.UPDATE);
         return message;
+    }
+
+    @Override
+    public void addRelation(PathElementEntity source, NavigationPropertyEntitySet np, Entity target) throws NoSuchEntityException {
+        final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+        final StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
+        final Relation<?> relation = sourceTable.findRelation(np.getName());
+        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getPkValues());
+        if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
+            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
+        }
+        if (!entityFactories.entityExists(this, target, userIsAdmin)) {
+            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
+        }
+        relation.link(this, sourceEntity, target, np);
     }
 
     @Override
