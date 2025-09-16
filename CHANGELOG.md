@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Fixed exception when auto-detecting base url and no path header is set.
+* Fixed incorrect nullable default in XML-CSDL.
 * Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
 * Fixed missing projects-rules for Tasking.
 * Fixed expand returning null link when target can not be read.

@@ -41,7 +41,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
 
     @JsonProperty("$Type")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    public String type;
+    public String type = TYPE_DEFAULT;
 
     @JsonProperty("$Nullable")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
@@ -69,6 +69,9 @@ public class CsdlPropertyEntity implements CsdlProperty {
         }
         if (!et.getPrimaryKey().getKeyProperties().contains(ep)) {
             nullable = ep.isNullable();
+        }
+        if (collection) {
+            nullable = false;
         }
         for (Annotation an : ep.getAnnotations()) {
             annotations.add(new CsdlAnnotation().generateFrom(doc, an));
@@ -106,7 +109,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
         if (collection) {
             typeString = "Collection(" + typeString + ")";
         }
-        String nullableString = (nullable) ? " Nullable=\"" + Boolean.toString(nullable) + "\"" : "";
+        String nullableString = (nullable) ? "" : " Nullable=\"" + Boolean.toString(nullable) + "\"";
         writer.write("<Property Name=\"" + name + "\" Type=\"" + typeString + "\"" + nullableString);
         if (annotations.isEmpty()) {
             writer.write(" />");
