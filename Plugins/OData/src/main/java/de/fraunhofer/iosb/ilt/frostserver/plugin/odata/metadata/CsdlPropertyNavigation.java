@@ -38,7 +38,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
 
     @JsonProperty("$Collection")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    public Boolean collection;
+    public boolean collection;
 
     @JsonProperty("$Partner")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
@@ -50,7 +50,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
 
     @JsonProperty("$Nullable")
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    public Boolean nullable;
+    public boolean nullable;
 
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
@@ -64,7 +64,11 @@ public class CsdlPropertyNavigation implements CsdlProperty {
         if (np.isEntitySet()) {
             collection = true;
         }
-        nullable = np.isNullable();
+        if (collection) {
+            nullable = false;
+        } else {
+            nullable = np.isNullable();
+        }
         for (Annotation an : np.getAnnotations()) {
             annotations.add(new CsdlAnnotation().generateFrom(doc, an));
         }
@@ -83,11 +87,11 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     @Override
     public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
         String finalType = type;
-        if (collection != null && collection) {
+        if (collection) {
             finalType = "Collection(" + type + ")";
         }
         String nullableString = "";
-        if (nullable != null && nullable) {
+        if (collection || !nullable) {
             nullableString = " Nullable=\"" + Boolean.toString(nullable) + "\"";
         }
         String partnerString = "";

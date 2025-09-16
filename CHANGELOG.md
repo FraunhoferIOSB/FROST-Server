@@ -7,6 +7,7 @@
 * Enabled compression in Tomcat.
 
 **Internal changes & Bugfixes**
+* Fixed incorrect nullable default in XML-CSDL.
 * Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
 * Changed error when insertion fails due to constraints to 409.
 * Fixed expand returning null link when target can not be read
