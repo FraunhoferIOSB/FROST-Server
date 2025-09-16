@@ -25,9 +25,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +107,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     private final int priority;
 
     private NavigationPropertyMain(String propertyName, boolean isSet, boolean required, boolean nullable, int priority) {
-        super(propertyName, TypeComplex.STA_OBJECT, required, nullable, false);
+        super(propertyName, TypeSimplePrimitive.EDM_UNTYPED, required, nullable, false);
         this.entitySet = isSet;
         this.required = required;
         this.nullable = nullable;

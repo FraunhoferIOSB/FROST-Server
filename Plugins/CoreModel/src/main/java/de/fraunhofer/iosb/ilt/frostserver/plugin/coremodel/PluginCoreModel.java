@@ -151,7 +151,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, TypeSimplePrimitive.EDM_UNTYPED, true, true, true, true);
     public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, false, true, false, true);
     public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, true, false, false);
-    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeComplex.STA_OBJECT, false, true, true, false);
+    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeSimplePrimitive.EDM_UNTYPED, false, true, true, false);
     public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET, true, false);
     private EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeComplex.STA_TIMEINTERVAL);
@@ -271,7 +271,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(UnitOfMeasurement.EP_SYMBOL);
         mr.registerPropertyType(eptUom)
                 .registerPropertyType(TypeSimpleCustom.STA_LOCATION)
-                .registerPropertyType(TypeComplex.STA_OBJECT)
                 .registerPropertyType(TypeComplex.STA_MAP)
                 .registerPropertyType(TypeComplex.STA_TIMEINTERVAL)
                 .registerPropertyType(TypeComplex.STA_TIMEVALUE)

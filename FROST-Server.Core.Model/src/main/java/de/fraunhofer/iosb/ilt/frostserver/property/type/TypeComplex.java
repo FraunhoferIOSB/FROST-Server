@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 public class TypeComplex extends PropertyType {
 
     public static final String STA_MAP_NAME = "Object";
-    public static final String STA_OBJECT_NAME = "ANY";
     public static final String STA_TIMEINTERVAL_NAME = "TM_Period";
     public static final String STA_TIMEINTERVAL_ALIAS = "TimeInterval";
     public static final String STA_TIMEVALUE_NAME = "TM_Object";
@@ -67,8 +66,6 @@ public class TypeComplex extends PropertyType {
             .setNullable(true);
 
     public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, TypeReferencesHelper.TYPE_REFERENCE_MAP);
-    public static final TypeComplex STA_OBJECT = new TypeComplex(STA_OBJECT_NAME, "A free type, can be anything", true, null, TypeReferencesHelper.TYPE_REFERENCE_OBJECT);
-    public static final TypeComplex STA_OBJECT_UNTYPED = new TypeComplex(STA_OBJECT_NAME, "A free type, can be anything", true, null, null, null);
 
     public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex(STA_TIMEINTERVAL_NAME, "An ISO time interval.", false, TimeInterval::new, TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
             .registerProperty(EP_START_TIME)

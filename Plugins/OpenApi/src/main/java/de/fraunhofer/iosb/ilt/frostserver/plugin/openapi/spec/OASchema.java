@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService.VERSION_STA_V10_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService.VERSION_STA_V11_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_MAP_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_OBJECT_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_TIMEINTERVAL_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_TIMEVALUE_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom.STA_GEOJSON_NAME;
@@ -172,10 +171,6 @@ public final class OASchema {
 
             case EDM_UNTYPED_NAME:
                 type = null;
-                break;
-
-            case STA_OBJECT_NAME:
-                type = Type.OBJECT;
                 break;
 
             case EDM_STRING_NAME:

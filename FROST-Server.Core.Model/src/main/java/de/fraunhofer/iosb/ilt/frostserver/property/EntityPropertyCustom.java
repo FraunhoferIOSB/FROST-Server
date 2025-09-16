@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.Objects;
 
 /**
@@ -30,7 +30,7 @@ public class EntityPropertyCustom extends PropertyAbstract<Object> implements En
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
     public EntityPropertyCustom(String name) {
-        super(name, TypeComplex.STA_OBJECT, false, true, false);
+        super(name, TypeSimplePrimitive.EDM_UNTYPED, false, true, false);
         String finalName = name;
         Integer realIndex;
         if (finalName.startsWith("[") && finalName.endsWith("]")) {

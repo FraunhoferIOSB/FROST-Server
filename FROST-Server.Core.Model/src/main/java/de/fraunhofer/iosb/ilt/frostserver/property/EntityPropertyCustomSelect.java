@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -44,7 +44,7 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     private final List<String> subPath = new ArrayList<>();
 
     public EntityPropertyCustomSelect(String entityPropertyName) {
-        super(entityPropertyName, TypeComplex.STA_OBJECT, false, true, false);
+        super(entityPropertyName, TypeSimplePrimitive.EDM_UNTYPED, false, true, false);
         this.entityPropertyName = entityPropertyName;
     }
 
