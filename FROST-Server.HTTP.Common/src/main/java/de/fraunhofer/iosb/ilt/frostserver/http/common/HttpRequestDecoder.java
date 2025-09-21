@@ -186,9 +186,9 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
             } else {
                 basePath = reqBasePath;
             }
-            int versionIdx = xfPath.indexOf(version.urlPart);
+            int versionIdx = basePath.indexOf(version.urlPart);
             if (versionIdx > 0) {
-                basePath = xfPath.substring(0, versionIdx - 1);
+                basePath = basePath.substring(0, versionIdx - 1);
             }
             return xfProto + "://" + xfHost + ":" + xfPort + basePath;
         } else {
