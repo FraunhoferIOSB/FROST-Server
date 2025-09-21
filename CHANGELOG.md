@@ -7,6 +7,7 @@
 * Enabled compression in Tomcat.
 
 **Internal changes & Bugfixes**
+* Fixed exception when auto-detecting base url and no path header is set.
 * Fixed incorrect nullable default in XML-CSDL.
 * Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
 * Changed error when insertion fails due to constraints to 409.
