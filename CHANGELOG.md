@@ -1,8 +1,9 @@
 # Changelog
 
-## Version 2.6.1-SNAPSHOT
+## Version 2.6.1
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
 * Fixed exception when auto-detecting base url and no path header is set.
 * Fixed incorrect nullable default in XML-CSDL.
 * Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
