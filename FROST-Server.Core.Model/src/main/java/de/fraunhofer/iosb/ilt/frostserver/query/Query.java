@@ -226,6 +226,10 @@ public class Query {
         return modelRegistry;
     }
 
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
     public QueryDefaults getSettings() {
         return queryDefaults;
     }
