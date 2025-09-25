@@ -63,17 +63,6 @@
         <url>https://github.com/FraunhoferIOSB/FROST-Server/issues</url>
     </issueManagement>
 
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <properties>
         <congocc.sha512>bd9f03a0a78e90c2bbace005fc402a7f7d4b9f2b677feeb24466c5b219803b777fcb201a0e39d0cf532ee6f3a4e1d4c83d0b4c38e3c39629b63caea1a3c80422</congocc.sha512>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
@@ -124,6 +113,7 @@
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.6.1</version.maven.plugin.build-helper>
+        <version.maven.plugin.central-publishing>0.8.0</version.maven.plugin.central-publishing>
         <version.maven.plugin.compiler>3.14.1</version.maven.plugin.compiler>
         <version.maven.plugin.dependency>3.8.1</version.maven.plugin.dependency>
         <version.maven.plugin.dependency-check>12.1.5</version.maven.plugin.dependency-check>
@@ -134,7 +124,6 @@
         <version.maven.plugin.jacoco>0.8.13</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.4.2</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.12.0</version.maven.plugin.javadoc>
-        <version.maven.plugin.nexus-staging>1.7.0</version.maven.plugin.nexus-staging>
         <version.maven.plugin.release>3.1.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.6.1</version.maven.plugin.shade>
         <version.maven.plugin.source>3.3.1</version.maven.plugin.source>
@@ -641,14 +630,12 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${version.maven.plugin.nexus-staging}</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${version.maven.plugin.central-publishing}</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
                         </configuration>
                     </plugin>
                 </plugins>
