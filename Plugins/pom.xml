@@ -10,6 +10,7 @@
 
     <artifactId>FROST-Server.Plugins</artifactId>
     <packaging>pom</packaging>
+    <name>Plugins</name>
 
     <modules>
         <module>Actuation</module>
