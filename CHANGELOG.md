@@ -1,8 +1,9 @@
 # Changelog
 
-## Version 2.5.9-SNAPSHOT
+## Version 2.5.9
 
 **Internal changes & Bugfixes**
+* Updated depencencies.
 
 
 ## Version 2.5.8
