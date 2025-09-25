@@ -46,6 +46,8 @@ jobs:
 
     - name: Build and Deploy with Maven
       env:
+        OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
+        OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
         GPG_EXECUTABLE: gpg
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
