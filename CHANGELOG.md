@@ -1,11 +1,12 @@
 # Changelog
 
-## Development version 2.4.9
+## version 2.4.9
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
 
 
-## Release version 2.4.8
+## version 2.4.8
 
 **Internal changes & Bugfixes**
 * Updated dependencies.
@@ -14,7 +15,7 @@
 * Fixed #2114: JSON-filters not working on Datastream/observedArea.
 
 
-## Release version 2.4.7
+## version 2.4.7
 
 **Internal changes & Bugfixes**
 * When using the Projects Plugin, generated Features now get the same restricted status and Projects as the Location they are generated from.
@@ -24,7 +25,7 @@
 * Updated dependencies.
 
 
-## Release version 2.4.6
+## version 2.4.6
 
 **Internal changes & Bugfixes**
 * Fixed #2084: Helm generates trailing slash in serviceRootUrl and mqtt endpoint.
@@ -32,13 +33,13 @@
 * Updated dependencies.
 
 
-## Release version 2.4.5
+## version 2.4.5
 
 **Internal changes & Bugfixes**
 * MariaDB: avoid use of distinctOn on MariaDb, as not supported.
 
 
-## Release version 2.4.4
+## version 2.4.4
 
 **Internal changes & Bugfixes**
 * Fixed #2072: Users are always anonymous when combining keycloak, finegrained auth and anonymous access.
@@ -46,7 +47,7 @@
 * Updated depencencies.
 
 
-## Release version 2.4.3
+## version 2.4.3
 
 **Internal changes & Bugfixes**
 * Added support for spatial queries on MariaDB.
@@ -55,13 +56,13 @@
 * Updated depencencies.
 
 
-## Release version 2.4.2
+## version 2.4.2
 
 **Internal changes & Bugfixes**
 * Updated depencencies.
 
 
-## Release version 2.4.1
+## version 2.4.1
 
 **Internal changes & Bugfixes**
 * Set limit to 1 for entity-by-primary-key requests.
@@ -76,7 +77,7 @@
 * Fixed #2030: NPE when using anonymous access when authentication is enabled on MQTT.
 
 
-## Release version 2.4.0
+## version 2.4.0
 
 **New Features**
 * Implemented OData any() filters.
@@ -105,7 +106,7 @@
 * Improved settings handling code, added annotation for sensitive values.
 
 
-## Release version 2.3.0
+## version 2.3.0
 
 NOTE: The helm option `frost.http.ingress.rewriteTarget` had a typo in it
 and has been changed (was: `rewriteTraget`). If you use this HELM option,
@@ -131,7 +132,7 @@ make sure to check and update your HELM settings.
 * Improved generated queries when filtering or ordering on ID over one-to-many relations.
 
 
-## Release version 2.2.0
+## version 2.2.0
 
 **New Features**
 * Improved configuration options for logging.
@@ -160,7 +161,7 @@ make sure to check and update your HELM settings.
 * Fixed memory leak when creating Entities using MQTT.
 
 
-## Release version 2.1.0
+## version 2.1.0
 
 FROST-Server version 2.1 and higher requires Java 17. This is because some libraries that are used now require Java 17.
 
@@ -188,7 +189,7 @@ FROST-Server version 2.1 and higher requires Java 17. This is because some libra
 * Fixed handling of default settings.
 
 
-## Release version 2.0.0
+## version 2.0.0
 
 Version 2.0 contains many large updates to the FROST-Server codebase, greatly increasing its flexibility.
 Much functionality is now controlled by plugins, from the data model to result formats.
@@ -238,7 +239,7 @@ FROST 2.x does not allow `$resultMetadata` in `$expand`.
   the Location they are generated from.
 
 
-## Release Version 1.14.0
+## Version 1.14.0
 
 **New Features**
 * Added support for Batch Requests in JSON format instead of MultiPart
@@ -258,7 +259,7 @@ FROST 2.x does not allow `$resultMetadata` in `$expand`.
 * Fixed newlines in batch-request response.
 
 
-## Release Version 1.13.0
+## Version 1.13.0
 
 **New Features**
 * Added HTTP tool to index page, for simple POST/PATCH/DELETE commands.
@@ -285,7 +286,7 @@ FROST 2.x does not allow `$resultMetadata` in `$expand`.
 * [HELM]: Fixed Ingress rewrite rules to work with nginx ingress version 0.22.0 and above.
 
 
-## Release Version 1.12.0
+## Version 1.12.0
 
 **Caution**: The default values for the HELM-Chart have been changed.
 This changes the default behaviour if values are not overwritten.
@@ -309,7 +310,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed PostgreSQL triggers not running for MultiDatastreams.
 
 
-## Release Version 1.11.0
+## Version 1.11.0
 
 **New Features**
 * Initial support for SensorThings API version 1.1 was added. This is still subject
@@ -329,7 +330,7 @@ It mainly affects installations without an enabled ingress resource.
 * Removed QueryDSL based persistence manager implementations.
 
 
-## Release Version 1.10
+## Version 1.10
 
 **New Features**
 * Actuation support. By default the actuation entities are hidden from the index,
@@ -351,7 +352,7 @@ It mainly affects installations without an enabled ingress resource.
   that have no such Time.
 
 
-## Release Version 1.9
+## Version 1.9
 
 **New Features**
 * Added experimental DELETE on Collections, with filters. Allows easier data cleanup.
@@ -366,7 +367,7 @@ It mainly affects installations without an enabled ingress resource.
   without replacing the entire object.
 
 
-## Release Version 1.8
+## Version 1.8
 
 **New Features**
 * Upgraded moquette to v0.11.
@@ -383,7 +384,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed string ids in next- and selfLink not being urlEncoded.
 
 
-## Release Version 1.7
+## Version 1.7
 
 **New Features**
 * Observation.result can be explicitly set to null. This is useful in cases where
@@ -399,7 +400,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed the 'year' function not working on interval properties.
 
 
-## Release Version 1.6
+## Version 1.6
 
 **New Features**
 * User-defined-ids. FROST-Server can not be configured to allow the user to specify
@@ -442,7 +443,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed #48: creation in Observations in MultiDatastreams using DataArray formatting fails.
 
 
-## Release Version 1.5
+## Version 1.5
 
 **New Features**
 * We have a name: FROST-Server
@@ -452,7 +453,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed that the Docker image was built every time. Build it using `mvn dockerfile:build -pl SensorThingsServer`
 
 
-## Release Version 1.4
+## Version 1.4
 
 **New Features**
 * Available through dockerhub: `docker pull fraunhoferiosb/sensorthingsserver`
@@ -463,7 +464,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed EntityType initialisation sometimes failing.
 
 
-## Release Version 1.3
+## Version 1.3
 
 **New Features**
 * Added new backends, using PostgreSQL with String and UUID columns for entity ids.
@@ -473,7 +474,7 @@ It mainly affects installations without an enabled ingress resource.
 * Improved memory use when fetching large Observations with a high $top.
 
 
-## Release Version 1.2
+## Version 1.2
 
 **New Features**
 * Added support for ISO8601 Interval formats in the form of \[instant]/\[duration]
@@ -488,7 +489,7 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed GIS-filters on FeatureOfInterest/feature not working.
 
 
-## Release Version 1.1
+## Version 1.1
 
 **New Features**
 * Implemented MultiDatastream.
@@ -512,6 +513,6 @@ It mainly affects installations without an enabled ingress resource.
 * Fixed incorrect /$value response for time instance and time interval properties.
 
 
-## Release Version 1.0
+## Version 1.0
 
 First release!
