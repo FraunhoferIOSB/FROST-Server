@@ -3,6 +3,7 @@
 ## Version 2.6.2-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed primary key not always being selected in joins.
 
 
 ## Version 2.6.1
