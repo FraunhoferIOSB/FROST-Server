@@ -388,8 +388,9 @@ public class QueryBuilder implements ResourcePathVisitor {
             }
             foundProperties.add(property);
         }
-        if (query.isPkOrder() && !query.isSelectDistinct() && !foundProperties.isEmpty()) {
-            // We're ordering by PK, make sure we select it too, so we can build better nextLinks
+        if (!query.isSelectDistinct() && !foundProperties.isEmpty()) {
+            // Unless selecting distinct, always fetch the primary keys
+            // For security checks and so we can build better nextLinks
             foundProperties.addAll(query.getEntityType().getPrimaryKey().getKeyProperties());
         }
         if (!query.getExpand().isEmpty() && !foundProperties.isEmpty()) {
