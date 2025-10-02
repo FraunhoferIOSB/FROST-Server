@@ -16,6 +16,11 @@
             <id>NIST_NVD_API</id>
             <password>${env.NIST_NVD_API_KEY}</password>
         </server>
+        <server>
+            <id>ossindex</id>
+            <username>${env.OSSINDEX_USERNAME}</username>
+            <password>${env.OSSINDEX_TOKEN}</password>
+        </server>
     </servers>
     <profiles>
         <profile>
