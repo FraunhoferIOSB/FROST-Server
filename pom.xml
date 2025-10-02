@@ -502,6 +502,7 @@
                             <suppressionFile>owaspSuppressions.xml</suppressionFile>
                         </suppressionFiles>
                         <nvdApiServerId>NIST_NVD_API</nvdApiServerId>
+                        <ossIndexServerId>ossindex</ossIndexServerId>
                     </configuration>
                     <executions>
                         <execution>
