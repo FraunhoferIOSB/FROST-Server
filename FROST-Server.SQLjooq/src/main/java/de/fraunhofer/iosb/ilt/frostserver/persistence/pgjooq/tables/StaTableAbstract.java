@@ -182,8 +182,18 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
+    public SortedSet<SortingWrapper<Double, HookPreInsert>> getHooksPreInsert() {
+        return hooksPreInsert;
+    }
+
+    @Override
     public void registerHookPostInsert(double priority, HookPostInsert hook) {
         hooksPostInsert.add(new SortingWrapper<>(priority, hook));
+    }
+
+    @Override
+    public SortedSet<SortingWrapper<Double, HookPostInsert>> getHooksPostInsert() {
+        return hooksPostInsert;
     }
 
     @Override
@@ -192,8 +202,18 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
+    public SortedSet<SortingWrapper<Double, HookPreUpdate>> getHooksPreUpdate() {
+        return hooksPreUpdate;
+    }
+
+    @Override
     public void registerHookPostUpdate(double priority, HookPostUpdate hook) {
         hooksPostUpdate.add(new SortingWrapper<>(priority, hook));
+    }
+
+    @Override
+    public SortedSet<SortingWrapper<Double, HookPostUpdate>> getHooksPostUpdate() {
+        return hooksPostUpdate;
     }
 
     @Override
@@ -202,8 +222,18 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     }
 
     @Override
+    public SortedSet<SortingWrapper<Double, HookPreDelete>> getHooksPreDelete() {
+        return hooksPreDelete;
+    }
+
+    @Override
     public void registerHookPostDelete(double priority, HookPostDelete hook) {
         hooksPostDelete.add(new SortingWrapper<>(priority, hook));
+    }
+
+    @Override
+    public SortedSet<SortingWrapper<Double, HookPostDelete>> getHooksPostDelete() {
+        return hooksPostDelete;
     }
 
     @Override

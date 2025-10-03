@@ -35,12 +35,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.List;
+import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Name;
@@ -123,6 +125,13 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public void registerHookPreInsert(double priority, HookPreInsert hook);
 
     /**
+     * get the PreInsert hooks.
+     *
+     * @return the PreInsert hooks.
+     */
+    public Set<SortingWrapper<Double, HookPreInsert>> getHooksPreInsert();
+
+    /**
      * Add a hook that runs post-insert.
      *
      * @param priority The priority. Lower priority hooks run first. This is a
@@ -131,6 +140,13 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
      * @param hook The hook
      */
     public void registerHookPostInsert(double priority, HookPostInsert hook);
+
+    /**
+     * get the PostInsert hooks.
+     *
+     * @return the PostInsert hooks.
+     */
+    public Set<SortingWrapper<Double, HookPostInsert>> getHooksPostInsert();
 
     /**
      * Add a hook that runs pre-update.
@@ -143,6 +159,13 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public void registerHookPreUpdate(double priority, HookPreUpdate hook);
 
     /**
+     * get the PreUpdate hooks.
+     *
+     * @return the PreUpdate hooks.
+     */
+    public Set<SortingWrapper<Double, HookPreUpdate>> getHooksPreUpdate();
+
+    /**
      * Add a hook that runs post-update.
      *
      * @param priority The priority. Lower priority hooks run first. This is a
@@ -151,6 +174,13 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
      * @param hook The hook
      */
     public void registerHookPostUpdate(double priority, HookPostUpdate hook);
+
+    /**
+     * get the PostUpdatehooks.
+     *
+     * @return the PostUpdate hooks.
+     */
+    public Set<SortingWrapper<Double, HookPostUpdate>> getHooksPostUpdate();
 
     /**
      * Add a hook that runs pre-delete.
@@ -163,6 +193,13 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public void registerHookPreDelete(double priority, HookPreDelete hook);
 
     /**
+     * get the PreDelete hooks.
+     *
+     * @return the PreDelete hooks.
+     */
+    public Set<SortingWrapper<Double, HookPreDelete>> getHooksPreDelete();
+
+    /**
      * Add a hook that runs post-delete.
      *
      * @param priority The priority. Lower priority hooks run first. This is a
@@ -171,6 +208,13 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
      * @param hook The hook
      */
     public void registerHookPostDelete(double priority, HookPostDelete hook);
+
+    /**
+     * get the PostDelete hooks.
+     *
+     * @return the PostDelete hooks.
+     */
+    public Set<SortingWrapper<Double, HookPostDelete>> getHooksPostDelete();
 
     public default Condition joinSelf(StaMainTable t2) {
         return joinSelf(this, t2);

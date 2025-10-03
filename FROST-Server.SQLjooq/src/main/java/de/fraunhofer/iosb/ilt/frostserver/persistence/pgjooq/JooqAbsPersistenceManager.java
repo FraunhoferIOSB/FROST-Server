@@ -69,10 +69,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUti
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.HookValidator;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -474,7 +476,27 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         if (!entityFactories.entityExists(this, target, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
         }
+
+        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        sourceEntity.addNavigationEntity(np, target);
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : table.getHooksPreUpdate()) {
+            try {
+                hookWrapper.getObject().preUpdateInDatabase(this, sourceEntity, sourceEntity.getPrimaryKeyValues(), EditFeatures.NONE);
+            } catch (IncompleteEntityException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
         relation.link(this, sourceEntity, target, np);
+    }
+
+    @Override
+    public void setRelation(PathElementEntity source, NavigationPropertyEntity np, Entity target) throws NoSuchEntityException {
+
+    }
+
+    @Override
+    public void setRelation(PathElementEntity source, NavigationPropertyEntitySet np, List<Entity> target) throws NoSuchEntityException {
+
     }
 
     @Override
@@ -493,10 +515,28 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
         }
+        StaMainTable<?> tableSource = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : tableSource.getHooksPreUpdate()) {
+            try {
+                hookWrapper.getObject().preUpdateInDatabase(this, sourceEntity, sourceEntity.getPrimaryKeyValues(), EditFeatures.NONE);
+            } catch (IncompleteEntityException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
+
         final Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getPkValues());
         if (!entityFactories.entityExists(this, targetEntity, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPkValues() + ")");
         }
+        StaMainTable<?> tableTarget = getTableCollection().getTableForType(targetEntity.getEntityType());
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : tableTarget.getHooksPreUpdate()) {
+            try {
+                hookWrapper.getObject().preUpdateInDatabase(this, targetEntity, targetEntity.getPrimaryKeyValues(), EditFeatures.NONE);
+            } catch (IncompleteEntityException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
+
         relation.unLink(this, sourceEntity, targetEntity, np);
     }
 

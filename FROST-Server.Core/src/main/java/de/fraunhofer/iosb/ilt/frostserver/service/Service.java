@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -483,7 +484,6 @@ public class Service implements AutoCloseable {
         // {"@id": "ObservedProperties(2)"}
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementEntitySet mainSet) {
-            EntityType type = mainSet.getEntityType();
             try {
                 EntityReference entityReference = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReference.class);
                 Entity targetEntity = entityReference.resolve(modelRegistry, request.getUserPrincipal().isAdmin());
@@ -611,7 +611,13 @@ public class Service implements AutoCloseable {
         PathElementEntity mainElement;
         Entity entity;
         try {
-            mainElement = parsePathForPutPatch(pm, request);
+            ResourcePath path = parsePathForPutPatch(pm, request);
+            PathElement me = path.getMainElement();
+            if (me instanceof PathElementEntity mee) {
+                mainElement = mee;
+            } else {
+                throw new IllegalArgumentException("PATCH only allowed on Entities.");
+            }
             JsonReader entityParser = request.getJsonReader();
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
@@ -648,7 +654,13 @@ public class Service implements AutoCloseable {
         PathElementEntity mainElement;
         JsonPatch jsonPatch;
         try {
-            mainElement = parsePathForPutPatch(pm, request);
+            ResourcePath path = parsePathForPutPatch(pm, request);
+            PathElement me = path.getMainElement();
+            if (me instanceof PathElementEntity mee) {
+                mainElement = mee;
+            } else {
+                throw new IllegalArgumentException("PATCH only allowed on Entities.");
+            }
             jsonPatch = SimpleJsonMapper.getSimpleObjectMapper().readValue(request.getContentReader(), JsonPatch.class);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
@@ -677,7 +689,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private PathElementEntity parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
+    private ResourcePath parsePathForPutPatch(PersistenceManager pm, ServiceRequest request) throws NoSuchEntityException {
         ResourcePath path;
         try {
             path = PathParser.parsePath(
@@ -694,17 +706,17 @@ public class Service implements AutoCloseable {
             throw new NoSuchEntityException("No entity found for path.");
         }
 
-        if (!(path.getMainElement() instanceof PathElementEntity) || path.getMainElement() != path.getLastElement()) {
-            throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
+        final PathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PathElementEntity pee) {
+            if (pee != path.getLastElement() && !path.isRef()) {
+                throw new IllegalArgumentException("PATCH & PUT only allowed on Entities or navigation references.");
+            }
+            if (!path.isRef() && !pee.primaryKeyFullySet()) {
+                throw new IllegalArgumentException("Main element of PATCH & PUT must have a full primary key.");
+            }
+            return path;
         }
-        PathElementEntity mainElement = (PathElementEntity) path.getMainElement();
-        if (!mainElement.primaryKeyFullySet()) {
-            throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
-        }
-        if (request.getUrlQuery() != null && !request.getUrlQuery().isEmpty()) {
-            throw new IllegalArgumentException("No query options allowed on PATCH & PUT.");
-        }
-        return mainElement;
+        throw new IllegalArgumentException("PATCH & PUT only allowed on Entities.");
     }
 
     private ServiceResponse executePut(ServiceRequest request, ServiceResponse response) {
@@ -722,7 +734,7 @@ public class Service implements AutoCloseable {
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
-        } catch (IncompleteEntityException | IOException | RuntimeException e) {
+        } catch (IOException | RuntimeException e) {
             LOGGER.trace("Failed to handle request", e);
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
@@ -731,35 +743,102 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
+    private ServiceResponse handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException {
         // TODO: Replace all references in a set,
         //   PUT Datastream(1)/ObservedProperties/$ref
         //     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
         // or the one reference for non-sets:
         //   PUT Datastream(1)/Thing/$ref
         //     {"@id": "Things(2)"}
+        try {
+            ResourcePath path = parsePathForPutPatch(pm, request);
+            if (path.isRef()) {
+                return handlePutRef(pm, request, path, response);
+            } else {
+                return handlePutEntity(pm, request, path, response);
+            }
+
+        } catch (IllegalArgumentException exc) {
+            LOGGER.trace("Path not valid.", exc);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
+        } catch (NoSuchEntityException exc) {
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, exc.getMessage());
+        }
+    }
+
+    private ServiceResponse handlePutRef(PersistenceManager pm, ServiceRequest request, ResourcePath path, ServiceResponse response) {
+        PathElement mainElement = path.getMainElement();
+        if (mainElement instanceof PathElementEntitySet mainSet) {
+            return handlePutRefSet(pm, request, path, mainSet, response);
+        }
+        if (mainElement instanceof PathElementEntity mainEntity) {
+            return handlePutRefEntity(pm, request, path, mainEntity, response);
+        }
+        return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "PUT to ref only allowed on Entity or EntitySet");
+    }
+
+    private ServiceResponse handlePutRefSet(PersistenceManager pm, ServiceRequest request, ResourcePath path, PathElementEntitySet mainSet, ServiceResponse response) {
+        //   PUT Datastream(1)/ObservedProperties/$ref
+        //     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
+        return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
+    }
+
+    private ServiceResponse handlePutRefEntity(PersistenceManager pm, ServiceRequest request, ResourcePath path, PathElementEntity mainEntity, ServiceResponse response) {
+        try {
+            //   PUT Datastream(1)/Thing/$ref
+            //     {"@id": "Things(2)"}
+            EntityReference entityReference = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReference.class);
+            Entity targetEntity = entityReference.resolve(modelRegistry, request.getUserPrincipal().isAdmin());
+            if (targetEntity.getEntityType() != mainEntity.getEntityType()) {
+                throw new IllegalArgumentException("Can not use a " + targetEntity.getEntityType() + " as a " + mainEntity.getEntityType() + " Set");
+            }
+            PathElement parent = mainEntity.getParent();
+            if (parent == null) {
+                throw new IllegalArgumentException("Entity does not have a parent entity!");
+            }
+            if (parent instanceof PathElementEntity parentEntity) {
+                if (!parentEntity.primaryKeyFullySet()) {
+                    throw new IllegalArgumentException("Can not resolve target set.");
+                }
+                NavigationPropertyEntity navProp = mainEntity.getNavigationProperty();
+                pm.setRelation(parentEntity, navProp, targetEntity);
+            }
+
+            response.setCode(HttpURLConnection.HTTP_NO_CONTENT);
+            return response;
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("Failed to parse body as entity reference");
+        } catch (NoSuchEntityException ex) {
+            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
+        }
+    }
+
+    private ServiceResponse handlePutEntity(PersistenceManager pm, ServiceRequest request, ResourcePath path, ServiceResponse response) {
         PathElementEntity mainElement;
         Entity entity;
-        try {
-            mainElement = parsePathForPutPatch(pm, request);
 
-            JsonReader entityParser = request.getJsonReader();
+        PathElement me = path.getMainElement();
+        if (me instanceof PathElementEntity mee) {
+            mainElement = mee;
+        } else {
+            throw new IllegalArgumentException("PATCH only allowed on Entities.");
+        }
+
+        JsonReader entityParser = request.getJsonReader();
+        try {
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
+        } catch (IOException exc) {
+            LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
+
+        }
+
+        try {
             entity.setEntityPropertiesSet(true, true);
             entity.validateUpdate();
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
-        } catch (IllegalArgumentException exc) {
-            LOGGER.trace("Path not valid.", exc);
-            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
-        } catch (JsonParseException | IncompleteEntityException exc) {
-            LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
-            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
-        } catch (NoSuchEntityException exc) {
-            return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, exc.getMessage());
-        }
 
-        try {
             if (pm.update(mainElement, entity, request.getUpdateMode())) {
                 maybeCommitAndClose();
                 return successResponse(response, HttpURLConnection.HTTP_OK, "Updated.");
@@ -770,7 +849,7 @@ public class Service implements AutoCloseable {
         } catch (DuplicateIdException exc) {
             pm.rollbackAndClose();
             return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
-        } catch (NoSuchEntityException e) {
+        } catch (NoSuchEntityException | IncompleteEntityException e) {
             pm.rollbackAndClose();
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }

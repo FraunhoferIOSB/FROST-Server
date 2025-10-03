@@ -354,6 +354,14 @@ class MqttManagerTest {
         }
 
         @Override
+        public void setRelation(PathElementEntity source, NavigationPropertyMain.NavigationPropertyEntity np, Entity target) throws NoSuchEntityException {
+        }
+
+        @Override
+        public void setRelation(PathElementEntity source, NavigationPropertyMain.NavigationPropertyEntitySet np, List<Entity> targets) throws NoSuchEntityException {
+        }
+
+        @Override
         public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) {
         }
 

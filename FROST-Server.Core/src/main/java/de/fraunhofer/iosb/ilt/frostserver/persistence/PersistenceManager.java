@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -99,6 +100,30 @@ public interface PersistenceManager extends AutoCloseable {
      * exist.
      */
     public void addRelation(PathElementEntity source, NavigationPropertyEntitySet np, Entity target) throws NoSuchEntityException;
+
+    /**
+     * Set a target for the given (entity) navigation property. If there is an
+     * existing target, it is removed.
+     *
+     * @param source The entity that holds the relation to an entity.
+     * @param np The navigation property of the relation.
+     * @param target The Entity to set as a target for the relation.
+     * @throws NoSuchEntityException If the source or target entity does not
+     * exist.
+     */
+    public void setRelation(PathElementEntity source, NavigationPropertyEntity np, Entity target) throws NoSuchEntityException;
+
+    /**
+     * Set a list of targets for the given (set) navigation property. If there
+     * are existing targets, they are removed.
+     *
+     * @param source The entity that holds the relation to an entity.
+     * @param np The navigation property of the relation.
+     * @param targets The List of Entities to set as a target for the relation.
+     * @throws NoSuchEntityException If the source or any target entity does not
+     * exist.
+     */
+    public void setRelation(PathElementEntity source, NavigationPropertyEntitySet np, List<Entity> targets) throws NoSuchEntityException;
 
     /**
      * Delete the relation specified by the given NavigationProperty, between
