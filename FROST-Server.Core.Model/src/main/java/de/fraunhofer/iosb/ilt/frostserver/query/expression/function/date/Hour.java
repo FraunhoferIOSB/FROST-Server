@@ -22,6 +22,7 @@ import static net.time4j.tz.ZonalOffset.UTC;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
@@ -52,6 +53,8 @@ public class Hour extends Function<Hour> {
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, TimeConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, TimeConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class, StringConstant.class));
     }
 
     @Override

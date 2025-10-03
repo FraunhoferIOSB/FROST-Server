@@ -99,6 +99,32 @@ public abstract class DateTimeTests extends AbstractTestClass {
     private static final TimeInterval I2015_2018 = TimeInterval.create(T2015.toInstant(), T2018.toInstant());
     private static final TimeInterval I2017_2_2018 = TimeInterval.create(T2017_2.toInstant(), T2018.toInstant());
 
+    private static final ZonedDateTime T2020_00 = ZonedDateTime.parse("2020-01-01T00:00:00.000Z");
+    private static final ZonedDateTime T2020_01 = ZonedDateTime.parse("2020-01-01T01:00:00.000Z");
+    private static final ZonedDateTime T2020_02 = ZonedDateTime.parse("2020-01-01T02:00:00.000Z");
+    private static final ZonedDateTime T2020_03 = ZonedDateTime.parse("2020-01-01T03:00:00.000Z");
+    private static final ZonedDateTime T2020_04 = ZonedDateTime.parse("2020-01-01T04:00:00.000Z");
+    private static final ZonedDateTime T2020_05 = ZonedDateTime.parse("2020-01-01T05:00:00.000Z");
+    private static final ZonedDateTime T2020_06 = ZonedDateTime.parse("2020-01-01T06:00:00.000Z");
+    private static final ZonedDateTime T2020_07 = ZonedDateTime.parse("2020-01-01T07:00:00.000Z");
+    private static final ZonedDateTime T2020_08 = ZonedDateTime.parse("2020-01-01T08:00:00.000Z");
+    private static final ZonedDateTime T2020_09 = ZonedDateTime.parse("2020-01-01T09:00:00.000Z");
+    private static final ZonedDateTime T2020_10 = ZonedDateTime.parse("2020-01-01T10:00:00.000Z");
+    private static final ZonedDateTime T2020_11 = ZonedDateTime.parse("2020-01-01T11:00:00.000Z");
+    private static final ZonedDateTime T2020_12 = ZonedDateTime.parse("2020-01-01T12:00:00.000Z");
+    private static final ZonedDateTime T2020_13 = ZonedDateTime.parse("2020-01-01T13:00:00.000Z");
+    private static final ZonedDateTime T2020_14 = ZonedDateTime.parse("2020-01-01T14:00:00.000Z");
+    private static final ZonedDateTime T2020_15 = ZonedDateTime.parse("2020-01-01T15:00:00.000Z");
+    private static final ZonedDateTime T2020_16 = ZonedDateTime.parse("2020-01-01T16:00:00.000Z");
+    private static final ZonedDateTime T2020_17 = ZonedDateTime.parse("2020-01-01T17:00:00.000Z");
+    private static final ZonedDateTime T2020_18 = ZonedDateTime.parse("2020-01-01T18:00:00.000Z");
+    private static final ZonedDateTime T2020_19 = ZonedDateTime.parse("2020-01-01T19:00:00.000Z");
+    private static final ZonedDateTime T2020_20 = ZonedDateTime.parse("2020-01-01T20:00:00.000Z");
+    private static final ZonedDateTime T2020_21 = ZonedDateTime.parse("2020-01-01T21:00:00.000Z");
+    private static final ZonedDateTime T2020_22 = ZonedDateTime.parse("2020-01-01T22:00:00.000Z");
+    private static final ZonedDateTime T2020_23 = ZonedDateTime.parse("2020-01-01T23:00:00.000Z");
+    private static final ZonedDateTime T2020_24 = ZonedDateTime.parse("2020-01-02T00:00:00.000Z");
+
     public DateTimeTests(ServerVersion version) {
         super(version);
     }
@@ -143,34 +169,35 @@ public abstract class DateTimeTests extends AbstractTestClass {
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        createObservation(0, datastream, T600, T600, null); // 0
-        createObservation(1, datastream, T659, T659, null); // 1
-        createObservation(2, datastream, T700, T700, null); // 2
-        createObservation(3, datastream, T701, T701, null); // 3
-        createObservation(4, datastream, T759, T759, null); // 4
-        createObservation(5, datastream, T800, T800, null); // 5
-        createObservation(6, datastream, T801, T801, null); // 6
-        createObservation(7, datastream, T900, T900, null); // 7
+        int r = 0;
+        createObservation(r++, datastream, T600, T600, null); // 0
+        createObservation(r++, datastream, T659, T659, null); // 1
+        createObservation(r++, datastream, T700, T700, null); // 2
+        createObservation(r++, datastream, T701, T701, null); // 3
+        createObservation(r++, datastream, T759, T759, null); // 4
+        createObservation(r++, datastream, T800, T800, null); // 5
+        createObservation(r++, datastream, T801, T801, null); // 6
+        createObservation(r++, datastream, T900, T900, null); // 7
 
-        createObservation(8, datastream, I600_659, null, I600_659); // 8
-        createObservation(9, datastream, I600_700, null, I600_700); // 9
-        createObservation(10, datastream, I600_701, null, I600_701); // 10
-        createObservation(11, datastream, I700_800, null, I700_800); // 11
-        createObservation(12, datastream, I701_759, null, I701_759); // 12
-        createObservation(13, datastream, I759_900, null, I759_900); // 13
-        createObservation(14, datastream, I800_900, null, I800_900); // 14
-        createObservation(15, datastream, I801_900, null, I801_900); // 15
+        createObservation(r++, datastream, I600_659, null, I600_659); // 8
+        createObservation(r++, datastream, I600_700, null, I600_700); // 9
+        createObservation(r++, datastream, I600_701, null, I600_701); // 10
+        createObservation(r++, datastream, I700_800, null, I700_800); // 11
+        createObservation(r++, datastream, I701_759, null, I701_759); // 12
+        createObservation(r++, datastream, I759_900, null, I759_900); // 13
+        createObservation(r++, datastream, I800_900, null, I800_900); // 14
+        createObservation(r++, datastream, I801_900, null, I801_900); // 15
 
-        createObservation(16, datastream, I659_801, null, I659_801); // 16
-        createObservation(17, datastream, I700_759, null, I700_759); // 17
-        createObservation(18, datastream, I700_801, null, I700_801); // 18
-        createObservation(19, datastream, I659_800, null, I659_800); // 19
-        createObservation(20, datastream, I701_800, null, I701_800); // 20
+        createObservation(r++, datastream, I659_801, null, I659_801); // 16
+        createObservation(r++, datastream, I700_759, null, I700_759); // 17
+        createObservation(r++, datastream, I700_801, null, I700_801); // 18
+        createObservation(r++, datastream, I659_800, null, I659_800); // 19
+        createObservation(r++, datastream, I701_800, null, I701_800); // 20
 
-        createObservation(21, datastream, T2015, T2015, null); // 21
-        createObservation(22, datastream, T2017, T2017, null); // 22
-        createObservation(23, datastream, I2015, T2015, I2015); // 23
-        createObservation(24, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
+        createObservation(r++, datastream, T2015, T2015, null); // 21
+        createObservation(r++, datastream, T2017, T2017, null); // 22
+        createObservation(r++, datastream, I2015, T2015, I2015); // 23
+        createObservation(r++, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
 
         // A second Datastream, with no observations.
         Entity datastream2 = sMdl.newDatastream("Datastream 2", "The second temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
@@ -179,6 +206,41 @@ public abstract class DateTimeTests extends AbstractTestClass {
         datastream2.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
         sSrvc.create(datastream2);
         DATASTREAMS.add(datastream2);
+
+        // A third Datastream, with a days worth of observations.
+        Entity datastream3 = sMdl.newDatastream("Datastream 3", "The third temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream3.setProperty(sMdl.npDatastreamThing, thing);
+        datastream3.setProperty(sMdl.npDatastreamSensor, sensor);
+        datastream3.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        sSrvc.create(datastream3);
+        DATASTREAMS.add(datastream3);
+
+        createObservation(r++, datastream3, T2020_00, T2020_00, null); // 25
+        createObservation(r++, datastream3, T2020_01, T2020_01, null); // 26
+        createObservation(r++, datastream3, T2020_02, T2020_02, null); // 27
+        createObservation(r++, datastream3, T2020_03, T2020_03, null); // 28
+        createObservation(r++, datastream3, T2020_04, T2020_04, null); // 29
+        createObservation(r++, datastream3, T2020_05, T2020_05, null); // 30
+        createObservation(r++, datastream3, T2020_06, T2020_06, null); // 31
+        createObservation(r++, datastream3, T2020_07, T2020_07, null); // 32
+        createObservation(r++, datastream3, T2020_08, T2020_08, null); // 33
+        createObservation(r++, datastream3, T2020_09, T2020_09, null); // 34
+        createObservation(r++, datastream3, T2020_10, T2020_10, null); // 35
+        createObservation(r++, datastream3, T2020_11, T2020_11, null); // 36
+        createObservation(r++, datastream3, T2020_12, T2020_12, null); // 37
+        createObservation(r++, datastream3, T2020_13, T2020_13, null); // 38
+        createObservation(r++, datastream3, T2020_14, T2020_14, null); // 39
+        createObservation(r++, datastream3, T2020_15, T2020_15, null); // 40
+        createObservation(r++, datastream3, T2020_16, T2020_16, null); // 41
+        createObservation(r++, datastream3, T2020_17, T2020_17, null); // 42
+        createObservation(r++, datastream3, T2020_18, T2020_18, null); // 43
+        createObservation(r++, datastream3, T2020_19, T2020_19, null); // 44
+        createObservation(r++, datastream3, T2020_20, T2020_20, null); // 45
+        createObservation(r++, datastream3, T2020_21, T2020_21, null); // 46
+        createObservation(r++, datastream3, T2020_22, T2020_22, null); // 47
+        createObservation(r++, datastream3, T2020_23, T2020_23, null); // 48
+        createObservation(r++, datastream3, T2020_24, T2020_24, null); // 49
+
     }
 
     private static void createObservation(double result, Entity ds, TimeInterval pt, ZonedDateTime rt, TimeInterval vt) throws ServiceFailureException {
@@ -240,7 +302,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
             List<Entity> rtOpT78,
             List<Entity> vtOpT78,
             List<Entity> ptOpT78) {
-        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
         testFilterResults(doa, String.format(tpl, "resultTime", T700), rtOpT7);
         testFilterResults(doa, String.format(tpl, "validTime", T700), vtOpT7);
         testFilterResults(doa, String.format(tpl, "phenomenonTime", T700), ptOpT7);
@@ -257,7 +319,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
             List<Entity> rtOpT78,
             List<Entity> vtOpT78,
             List<Entity> ptOpT78) {
-        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
         testFilterResults(doa, String.format(tpl, T700, "resultTime"), rtOpT7);
         testFilterResults(doa, String.format(tpl, T700, "validTime"), vtOpT7);
         testFilterResults(doa, String.format(tpl, T700, "phenomenonTime"), ptOpT7);
@@ -345,18 +407,18 @@ public abstract class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2));
     }
 
     @Test
@@ -417,18 +479,18 @@ public abstract class DateTimeTests extends AbstractTestClass {
 
         String tpl = "{} " + op + " %s";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2));
     }
 
     @Test
@@ -525,18 +587,18 @@ public abstract class DateTimeTests extends AbstractTestClass {
 
         tpl = "after({}, %s)";
         testDsTpl(tpl,
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS, 0),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS),
-                getFromList(DATASTREAMS));
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 0, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2),
+                getFromList(DATASTREAMS, 2));
     }
 
     @Test
@@ -722,7 +784,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test13Year() throws ServiceFailureException {
         LOGGER.info("  test13Year");
-        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
         testFilterResults(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
         testFilterResults(doa, String.format("year(validTime) eq 2015"), getFromList(OBSERVATIONS, 23));
         testFilterResults(doa, String.format("year(phenomenonTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
@@ -731,7 +793,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Test
     void test14Durations() throws ServiceFailureException {
         LOGGER.info("  test14Durations");
-        Dao doa = sSrvc.dao(sMdl.etObservation);
+        Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
         // Durations
         testFilterResults(doa, String.format("resultTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 6, 7, 22, 24));
         testFilterResults(doa, String.format("validTime add duration'PT1H' gt %s", T900), getFromList(OBSERVATIONS, 15, 24));
@@ -766,8 +828,37 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test19PhenomenonTimeAfterDelete() throws ServiceFailureException {
-        LOGGER.info("  test19PhenomenonTimeAfterDelete");
+    void test20DateWithTimezone() throws ServiceFailureException {
+        LOGGER.info("  test20DateWithTimezone");
+        Dao doa = DATASTREAMS.get(2).dao(sMdl.npDatastreamObservations);
+        testFilterResults(doa, String.format("date(resultTime, 'Europe/berlin') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47));
+        testFilterResults(doa, String.format("date(phenomenonTime, 'Europe/Berlin') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47));
+
+        testFilterResults(doa, String.format("date(resultTime, 'UTC') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48));
+        testFilterResults(doa, String.format("date(phenomenonTime, 'UTC') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48));
+
+        testFilterResults(doa, String.format("date(resultTime, 'PST') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, String.format("date(phenomenonTime, 'PST') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+
+        testFilterResults(doa, String.format("date(resultTime, '-08:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, String.format("date(resultTime, '-08') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, String.format("date(phenomenonTime, '-8') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+
+        testFilterResults(doa, String.format("date(resultTime, '-11:00:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, String.format("date(resultTime, '-11:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, String.format("date(resultTime, '-11') eq 2020-01-01"), getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+
+        testFilterResults(doa, String.format("date(resultTime, '+11:00:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, String.format("date(resultTime, '11:00:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, String.format("date(resultTime, '+11:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, String.format("date(resultTime, '11:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, String.format("date(resultTime, '+11') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, String.format("date(resultTime, '11') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+    }
+
+    @Test
+    void test99PhenomenonTimeAfterDelete() throws ServiceFailureException {
+        LOGGER.info("  test99PhenomenonTimeAfterDelete");
         EntityUtils.deleteAll(sSrvc.dao(sMdl.etObservation));
         Entity ds1 = sSrvc.dao(sMdl.etDatastream).find(DATASTREAMS.get(0).getPrimaryKeyValues());
         assertNull(ds1.getProperty(EP_PHENOMENONTIME), "phenomenonTime should be null");

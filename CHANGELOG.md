@@ -3,6 +3,7 @@
 ## Version 2.7.0-SNAPSHOT
 
 **New Features**
+* Added optional timezone parameter to datetime functions. These functions only make sense if one can specify the timezone to operate in.
 * Made query functions pluggable using the interface PluginFunction.
 * Enabled compression in Tomcat.
 

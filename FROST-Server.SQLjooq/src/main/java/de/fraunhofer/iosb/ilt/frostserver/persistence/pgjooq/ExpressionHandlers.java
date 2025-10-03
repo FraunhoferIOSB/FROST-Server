@@ -118,6 +118,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Fin
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Meets;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Overlaps;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Starts;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -676,25 +677,54 @@ public class ExpressionHandlers {
     public static class ImpTime {
 
         public static FieldWrapper handle(Date node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, timeExpression.getDateTime()));
+            List<Expression<?>> params = node.getParameters();
+            Expression<?> p1 = params.get(0);
+            FieldWrapper e1 = h.handle(p1);
+            FieldWrapper e2 = null;
+            if (params.size() > 1) {
+                Expression<?> p2 = params.get(1);
+                e2 = h.handle(p2);
             }
-            Field<java.sql.Date> fieldAsDate = input.getFieldAsType(java.sql.Date.class, true);
+            if (e1 instanceof TimeFieldWrapper timeExpression) {
+                if (e2 != null) {
+                    final Field<String> zone = e2.getFieldAsType(String.class, true);
+                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, zonedTime));
+                } else {
+                    return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, timeExpression.getDateTime()));
+                }
+            }
+            Field<java.sql.Date> fieldAsDate = e1.getFieldAsType(java.sql.Date.class, true);
             if (fieldAsDate != null) {
                 return new SimpleFieldWrapper(fieldAsDate);
             }
-            throw new IllegalArgumentException("Date can only be used on times, not on " + input.getClass().getName());
+            throw new IllegalArgumentException("Date can only be used on times, not on " + e1.getClass().getName());
+        }
+
+        public static FieldWrapper datePartExtract(DatePart part, Function<?> node, JooqExpHlpr h) {
+            final List<Expression<?>> params = node.getParameters();
+            Expression<?> p1 = params.get(0);
+            FieldWrapper e1 = h.handle(p1);
+            FieldWrapper e2 = null;
+            if (params.size() > 1) {
+                Expression<?> p2 = params.get(1);
+                e2 = h.handle(p2);
+            }
+            if (e1 instanceof TimeFieldWrapper timeExpression) {
+                if (e2 != null) {
+                    final Field<String> zone = e2.getFieldAsType(String.class, true);
+                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    return new SimpleFieldWrapper(DSL.extract(zonedTime, part));
+                } else {
+                    return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), part));
+                }
+            }
+            throw new IllegalArgumentException(node.getName() + " can only be used on times, not on " + e1.getClass().getName());
+
         }
 
         public static FieldWrapper handle(Day node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.DAY));
-            }
-            throw new IllegalArgumentException("Day can only be used on times, not on " + input.getClass().getName());
+            return datePartExtract(DatePart.DAY, node, h);
         }
 
         public static FieldWrapper handle(FractionalSeconds node, JooqExpHlpr h) {
@@ -707,30 +737,15 @@ public class ExpressionHandlers {
         }
 
         public static FieldWrapper handle(Hour node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.HOUR));
-            }
-            throw new IllegalArgumentException("Hour can only be used on times, not on " + input.getClass().getName());
+            return datePartExtract(DatePart.HOUR, node, h);
         }
 
         public static FieldWrapper handle(Minute node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MINUTE));
-            }
-            throw new IllegalArgumentException("Minute can only be used on times, not on " + input.getClass().getName());
+            return datePartExtract(DatePart.MINUTE, node, h);
         }
 
         public static FieldWrapper handle(Month node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.MONTH));
-            }
-            throw new IllegalArgumentException("Month can only be used on times, not on " + input.getClass().getName());
+            return datePartExtract(DatePart.MONTH, node, h);
         }
 
         public static FieldWrapper handle(Now node, JooqExpHlpr h) {
@@ -738,39 +753,53 @@ public class ExpressionHandlers {
         }
 
         public static FieldWrapper handle(Second node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.SECOND));
-            }
-            throw new IllegalArgumentException("Second can only be used on times, not on " + input.getClass().getName());
+            return datePartExtract(DatePart.SECOND, node, h);
         }
 
         public static FieldWrapper handle(Time node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
+            final List<Expression<?>> params = node.getParameters();
+            Expression<?> p1 = params.get(0);
+            FieldWrapper e1 = h.handle(p1);
+            FieldWrapper e2 = null;
+            if (params.size() > 1) {
+                Expression<?> p2 = params.get(1);
+                e2 = h.handle(p2);
             }
-            throw new IllegalArgumentException("Time can only be used on times, not on " + input.getClass().getName());
+            if (e1 instanceof TimeFieldWrapper timeExpression) {
+                if (e2 != null) {
+                    final Field<String> zone = e2.getFieldAsType(String.class, true);
+                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    return new SimpleFieldWrapper(zonedTime.cast(SQLDataType.TIME));
+                } else {
+                    return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
+                }
+            }
+            throw new IllegalArgumentException("Time can only be used on times, not on " + e1.getClass().getName());
         }
 
         public static FieldWrapper handle(TotalOffsetMinutes node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
+            final List<Expression<?>> params = node.getParameters();
+            Expression<?> p1 = params.get(0);
+            FieldWrapper e1 = h.handle(p1);
+            FieldWrapper e2 = null;
+            if (params.size() > 1) {
+                Expression<?> p2 = params.get(1);
+                e2 = h.handle(p2);
             }
-            throw new IllegalArgumentException("TotalOffsetMinutes can only be used on times, not on " + input.getClass().getName());
+            if (e1 instanceof TimeFieldWrapper timeExpression) {
+                if (e2 != null) {
+                    final Field<String> zone = e2.getFieldAsType(String.class, true);
+                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    return new SimpleFieldWrapper(DSL.extract(zonedTime, DatePart.TIMEZONE).div(60));
+                } else {
+                    return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));
+                }
+            }
+            throw new IllegalArgumentException("TotalOffsetMinutes can only be used on times, not on " + e1.getClass().getName());
         }
 
         public static FieldWrapper handle(Year node, JooqExpHlpr h) {
-            Expression<?> param = node.getParameters().get(0);
-            FieldWrapper input = h.handle(param);
-            if (input instanceof TimeFieldWrapper timeExpression) {
-                return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.YEAR));
-            }
-            throw new IllegalArgumentException("Year can only be used on times, not on " + input.getClass().getName());
+            return datePartExtract(DatePart.YEAR, node, h);
         }
 
     }
@@ -974,15 +1003,15 @@ public class ExpressionHandlers {
         }
 
         public static FieldWrapper handle(Substring node, JooqExpHlpr h) {
-            List<Expression<?>> params = node.getParameters();
-            Expression<?> p1 = node.getParameters().get(0);
-            Expression<?> p2 = node.getParameters().get(1);
+            final List<Expression<?>> params = node.getParameters();
+            Expression<?> p1 = params.get(0);
+            Expression<?> p2 = params.get(1);
             FieldWrapper e1 = h.handle(p1);
             FieldWrapper e2 = h.handle(p2);
             Field<String> s1 = e1.getFieldAsType(String.class, true);
             Field<Integer> n2 = e2.getFieldAsType(Integer.class, true);
             if (params.size() > 2) {
-                Expression<?> p3 = node.getParameters().get(2);
+                Expression<?> p3 = params.get(2);
                 FieldWrapper e3 = h.handle(p3);
                 Field<Integer> n3 = e3.getFieldAsType(Integer.class, true);
                 return new SimpleFieldWrapper(DSL.substring(s1, n2.add(1), n3));

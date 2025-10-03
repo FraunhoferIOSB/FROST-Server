@@ -21,6 +21,7 @@ import static net.time4j.tz.ZonalOffset.UTC;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
@@ -46,6 +47,7 @@ public class Time extends Function<Time> {
     @Override
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(TimeConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(TimeConstant.class, DateTimeConstant.class, StringConstant.class));
     }
 
     @Override

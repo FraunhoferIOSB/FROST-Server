@@ -315,9 +315,11 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
             return result;
         }
 
-        LOGGER.warn("Could not match types for {} and {}", p1, p2);
         result[0] = p1.getDefaultField();
         result[1] = p2.getDefaultField();
+        if (!result[0].getDataType().equals(result[1].getDataType())) {
+            LOGGER.warn("Could not match types for {} and {}", p1, p2);
+        }
         return result;
     }
 

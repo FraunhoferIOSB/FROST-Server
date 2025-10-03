@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.date;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DoubleConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DurationConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
@@ -40,6 +41,7 @@ public class TotalOffsetMinutes extends Function<TotalOffsetMinutes> {
     @Override
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DurationConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(DoubleConstant.class, DurationConstant.class, StringConstant.class));
     }
 
     @Override

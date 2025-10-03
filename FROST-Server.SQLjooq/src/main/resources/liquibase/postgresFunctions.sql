@@ -21,7 +21,6 @@
 -- ---------------------------------------
 CREATE OR REPLACE FUNCTION safe_cast_to_numeric(v_input jsonb)
 RETURNS NUMERIC AS $$
-DECLARE v_num_value NUMERIC DEFAULT NULL;
 BEGIN
     IF jsonb_typeof(v_input) = 'number' THEN
         RETURN (v_input#>>'{}')::numeric;
@@ -38,12 +37,33 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 -- ---------------------------------------
 CREATE OR REPLACE FUNCTION safe_cast_to_boolean(v_input jsonb)
 RETURNS BOOLEAN AS $$
-DECLARE v_bool_value BOOLEAN DEFAULT NULL;
 BEGIN
     IF jsonb_typeof(v_input) = 'boolean' THEN
         RETURN (v_input#>>'{}')::boolean;
     ELSE
         RETURN NULL;
+    END IF;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+
+-- ---------------------------------------
+-- Calls the timezone function, after checking of the zoneid is an offset.
+-- If the zoneid is an offset, the offset is reversed.
+-- ---------------------------------------
+CREATE OR REPLACE FUNCTION timezone_with_iso_offsets(zoneid text, tvalue timestamptz)
+RETURNS TIMESTAMP AS $$
+BEGIN
+    IF zoneid ~ '^([+-])?[0-9]{1,2}(:[0-9][0-9](:[0-9][0-9])?)?$' THEN
+        IF starts_with(zoneid, '-') THEN
+            RETURN timezone(substring(zoneid from 2), tvalue);
+        ELSIF starts_with(zoneid, '+') THEN
+            RETURN timezone('-' || substring(zoneid from 2), tvalue);
+        ELSE
+            RETURN timezone('-' || zoneid, tvalue);
+        END IF;
+    ELSE
+        RETURN timezone(zoneid, tvalue);
     END IF;
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;

@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.DateTimeConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
 
@@ -52,6 +53,8 @@ public class Day extends Function<Day> {
     protected void initAllowedTypeBindings() {
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class));
         addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateConstant.class, StringConstant.class));
+        addAllowedTypeBinding(new FunctionTypeBinding(IntegerConstant.class, DateTimeConstant.class, StringConstant.class));
     }
 
     @Override
