@@ -101,23 +101,23 @@
         <version.jakarta-servlet>6.1.0</version.jakarta-servlet>
         <version.jakartaee-web-api>11.0.0</version.jakartaee-web-api>
         <version.jetty>12.1.1</version.jetty>
-        <version.jooq>3.20.7</version.jooq>
+        <version.jooq>3.20.8</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>5.13.4</version.junit>
-        <version.junit-platform-suite>1.13.4</version.junit-platform-suite>
+        <version.junit>6.0.0</version.junit>
+        <version.junit-platform-suite>6.0.0</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
-        <version.liquibase>4.33.0</version.liquibase>
-        <version.logback>1.5.18</version.logback>
+        <version.liquibase>5.0.1</version.liquibase>
+        <version.logback>1.5.19</version.logback>
         <version.mariadb>3.5.6</version.mariadb>
 
         <version.maven.plugin.assembly>3.7.1</version.maven.plugin.assembly>
         <version.maven.plugin.build-helper>3.6.1</version.maven.plugin.build-helper>
         <version.maven.plugin.central-publishing>0.9.0</version.maven.plugin.central-publishing>
         <version.maven.plugin.compiler>3.14.1</version.maven.plugin.compiler>
-        <version.maven.plugin.dependency>3.8.1</version.maven.plugin.dependency>
+        <version.maven.plugin.dependency>3.9.0</version.maven.plugin.dependency>
         <version.maven.plugin.dependency-check>12.1.6</version.maven.plugin.dependency-check>
         <version.maven.plugin.download>1.13.0</version.maven.plugin.download>
-        <version.maven.plugin.exec>3.5.1</version.maven.plugin.exec>
+        <version.maven.plugin.exec>3.6.1</version.maven.plugin.exec>
         <version.maven.plugin.git-commit-id>9.0.2</version.maven.plugin.git-commit-id>
         <version.maven.plugin.gpg>3.2.8</version.maven.plugin.gpg>
         <version.maven.plugin.jacoco>0.8.13</version.maven.plugin.jacoco>
@@ -139,7 +139,7 @@
         <version.prometheus>1.4.1</version.prometheus>
         <version.slf4j-api>2.0.17</version.slf4j-api>
         <version.testcontainers>1.21.3</version.testcontainers>
-        <version.testcontainers-keycloak>3.8.0</version.testcontainers-keycloak>
+        <version.testcontainers-keycloak>3.9.0</version.testcontainers-keycloak>
         <version.time4j>5.9.4</version.time4j>
     </properties>
 
