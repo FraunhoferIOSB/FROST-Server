@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
@@ -76,6 +77,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_THING, VALUE_ID_TYPE_LONG);
         SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VALUE_ID_TYPE_LONG);
     }
+    private static SensorThingsV11Sensing sMdl;
 
     public CustomLinksTests(ServerVersion version) {
         super(version, SERVER_PROPERTIES);
@@ -84,23 +86,18 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        LOGGER.info("Cleaning up after version {}.", version.urlPart);
-        cleanup();
     }
 
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+        LOGGER.info("Cleaning up after version {}.", version.urlPart);
         cleanup();
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         FEATURESOFINTEREST.clear();
         LOCATIONS.clear();

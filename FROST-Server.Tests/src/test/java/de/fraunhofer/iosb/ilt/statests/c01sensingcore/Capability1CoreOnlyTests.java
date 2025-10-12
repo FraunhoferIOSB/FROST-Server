@@ -85,7 +85,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
     }
 
     /**

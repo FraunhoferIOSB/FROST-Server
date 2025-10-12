@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -53,14 +54,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Some odd tests.
- *
- * @author Hylke van der Schaaf
  */
 public abstract class FilterTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
@@ -69,6 +65,7 @@ public abstract class FilterTests extends AbstractTestClass {
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
 
     public FilterTests(ServerVersion version) {
         super(version);
@@ -77,12 +74,8 @@ public abstract class FilterTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -92,7 +85,7 @@ public abstract class FilterTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
@@ -229,7 +222,7 @@ public abstract class FilterTests extends AbstractTestClass {
     /**
      * Test indirect/deep filter, across entity relations.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testIndirectFilter() throws ServiceFailureException {
@@ -243,7 +236,7 @@ public abstract class FilterTests extends AbstractTestClass {
     /**
      * Test a back-and-forth indirect filter.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testDeepIndirection() throws ServiceFailureException {
@@ -257,7 +250,7 @@ public abstract class FilterTests extends AbstractTestClass {
     /**
      * Test substring function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testSubString() throws ServiceFailureException {
@@ -273,7 +266,7 @@ public abstract class FilterTests extends AbstractTestClass {
     /**
      * Test equals null.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testEqualsNull() throws ServiceFailureException {
@@ -287,7 +280,7 @@ public abstract class FilterTests extends AbstractTestClass {
     /**
      * Test not equals null.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testNotEqualsNull() throws ServiceFailureException {
@@ -347,7 +340,7 @@ public abstract class FilterTests extends AbstractTestClass {
     /**
      * Test indirect/deep filter, across entity relations.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testAnyFilter() throws ServiceFailureException {

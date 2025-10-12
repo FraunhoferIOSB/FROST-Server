@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -44,14 +45,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests for the geospatial functions.
- *
- * @author Hylke van der Schaaf
  */
 public abstract class GeoTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(GeoTests.class);
 
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
@@ -61,6 +57,7 @@ public abstract class GeoTests extends AbstractTestClass {
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> THINGS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
 
     public GeoTests(ServerVersion version) {
         super(version);
@@ -69,12 +66,8 @@ public abstract class GeoTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -84,7 +77,7 @@ public abstract class GeoTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         FEATURESOFINTEREST.clear();
         LOCATIONS.clear();
@@ -314,7 +307,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the geo.distance filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testGeoDistance() throws ServiceFailureException {
@@ -329,7 +322,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the geo.intersects filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testGeoIntersects() throws ServiceFailureException {
@@ -348,7 +341,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the geo.length filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testGeoLength() throws ServiceFailureException {
@@ -370,7 +363,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_contains filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStContains() throws ServiceFailureException {
@@ -389,7 +382,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_crosses filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStCrosses() throws ServiceFailureException {
@@ -401,7 +394,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_disjoint filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStDisjoint() throws ServiceFailureException {
@@ -417,7 +410,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_equals filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStEquals() throws ServiceFailureException {
@@ -429,7 +422,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_intersects filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStIntersects() throws ServiceFailureException {
@@ -444,7 +437,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_overlaps filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStOverlaps() throws ServiceFailureException {
@@ -460,7 +453,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_relate filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStRelate() throws ServiceFailureException {
@@ -476,7 +469,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_touches filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStTouches() throws ServiceFailureException {
@@ -488,7 +481,7 @@ public abstract class GeoTests extends AbstractTestClass {
     /**
      * Test the st_within filter function.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void testStWithin() throws ServiceFailureException {

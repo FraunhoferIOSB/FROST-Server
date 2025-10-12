@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
@@ -63,15 +64,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests for the getting and filtering JSON properties.
- *
- * @author Hylke van der Schaaf
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class JsonPropertiesTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonPropertiesTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
@@ -80,6 +76,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
 
     public JsonPropertiesTests(ServerVersion version) {
         super(version);
@@ -88,6 +85,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         try {
             createEntities();
         } catch (StatusCodeException ex) {
@@ -97,11 +95,6 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         }
     }
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
-    }
-
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
@@ -109,7 +102,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

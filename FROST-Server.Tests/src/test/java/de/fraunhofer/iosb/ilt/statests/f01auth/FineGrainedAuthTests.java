@@ -84,8 +84,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests for access rights checking with Basic Authentication.
- *
- * @author Hylke van der Schaaf
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class FineGrainedAuthTests extends AbstractTestClass {
@@ -94,9 +92,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     private final int H401 = HTTP_CODE_401_UNAUTHORIZED;
     private final int H403 = HTTP_CODE_403_FORBIDDEN;
     private final int H404 = HTTP_CODE_404_NOT_FOUND;
-    /**
-     * The logger for this class.
-     */
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FineGrainedAuthTests.class);
 
     private static String modelUrl(String name) {
@@ -324,10 +320,10 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 "A Sensor made by " + user + " using MQTT",
                 "encodingType", "metadata");
         StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Sensor");
-        String topic = version.urlPart + '/' + sMdl.etSensor.mainSet;
+        String topic = version.urlPart + '/' + mdlSensing.etSensor.mainSet;
 
         List<MqttCreateTester> testers = new ArrayList<>();
-        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, sMdl.etSensor, true)
+        testers.add(new MqttCreateTester(mqttHelperAdmin, ehAdmin, ADMIN, creator, filterCreator, topic, mdlSensing.etSensor, true)
                 .setReadRetries(100));
 
         for (var tester : testers) {
@@ -523,15 +519,15 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
         StringCreator filterCreator = (user) -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Thing");
-        String topic = version.urlPart + '/' + sMdl.etThing.mainSet;
+        String topic = version.urlPart + '/' + mdlSensing.etThing.mainSet;
 
         List<MqttCreateTester> testers = new ArrayList<>();
-        testers.add(new MqttCreateTester(mqttHelperRead, ehAdmin, READ, creator, filterCreator, topic, sMdl.etThing, false));
-        testers.add(new MqttCreateTester(mqttHelperWrite, ehAdmin, WRITE, creator, filterCreator, topic, sMdl.etThing, true));
-        testers.add(new MqttCreateTester(mqttHelperAdminProject1, ehAdmin, ADMIN_P1, creator, filterCreator, topic, sMdl.etThing, true));
-        testers.add(new MqttCreateTester(mqttHelperAdminProject2, ehAdmin, ADMIN_P2, creator, filterCreator, topic, sMdl.etThing, false));
-        testers.add(new MqttCreateTester(mqttHelperObsCreaterProject1, ehAdmin, OBS_CREATE_P1, creator, filterCreator, topic, sMdl.etThing, false));
-        testers.add(new MqttCreateTester(mqttHelperObsCreaterProject2, ehAdmin, OBS_CREATE_P2, creator, filterCreator, topic, sMdl.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperRead, ehAdmin, READ, creator, filterCreator, topic, mdlSensing.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperWrite, ehAdmin, WRITE, creator, filterCreator, topic, mdlSensing.etThing, true));
+        testers.add(new MqttCreateTester(mqttHelperAdminProject1, ehAdmin, ADMIN_P1, creator, filterCreator, topic, mdlSensing.etThing, true));
+        testers.add(new MqttCreateTester(mqttHelperAdminProject2, ehAdmin, ADMIN_P2, creator, filterCreator, topic, mdlSensing.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperObsCreaterProject1, ehAdmin, OBS_CREATE_P1, creator, filterCreator, topic, mdlSensing.etThing, false));
+        testers.add(new MqttCreateTester(mqttHelperObsCreaterProject2, ehAdmin, OBS_CREATE_P2, creator, filterCreator, topic, mdlSensing.etThing, false));
 
         for (var tester : testers) {
             tester.start();

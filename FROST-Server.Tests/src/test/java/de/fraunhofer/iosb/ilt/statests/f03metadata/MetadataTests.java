@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
@@ -58,7 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Tests for the $resultMetadata parameter.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class MetadataTests extends AbstractTestClass {
@@ -72,6 +73,7 @@ public abstract class MetadataTests extends AbstractTestClass {
     private static final List<Entity> O_PROPS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> THINGS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
 
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
@@ -86,23 +88,18 @@ public abstract class MetadataTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        LOGGER.info("Cleaning up after version {}.", version.urlPart);
-        cleanup();
     }
 
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+        LOGGER.info("Cleaning up after version {}.", version.urlPart);
         cleanup();
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         FEATURES.clear();
         LOCATIONS.clear();

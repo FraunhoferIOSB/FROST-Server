@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -45,19 +46,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests Observation result.
- *
- * @author Hylke van der Schaaf
  */
 public abstract class ResultTypesTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultTypesTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
 
     public ResultTypesTests(ServerVersion version) {
         super(version);
@@ -66,16 +63,12 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
     }
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
-    }
-
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         DATASTREAMS.clear();
         DATASTREAMS.clear();
@@ -111,7 +104,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if Boolean result values are stored and retrieved correctly.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testBooleanResult() throws ServiceFailureException {
@@ -137,7 +130,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if String result values are stored and retrieved correctly.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testStringResult() throws ServiceFailureException {
@@ -156,7 +149,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if Numeric result values are stored and retrieved correctly.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testNumericResult() throws ServiceFailureException {
@@ -182,7 +175,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if Object result values are stored and retrieved correctly.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testObjectResult() throws ServiceFailureException {
@@ -204,7 +197,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if Array result values are stored and retrieved correctly.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testArrayResult() throws ServiceFailureException {
@@ -226,7 +219,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if NULL result values are stored and retrieved correctly.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testNullResult() throws ServiceFailureException {
@@ -257,7 +250,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if resultQuality can have arbitrary json.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testResultQualityObject() throws ServiceFailureException, IOException {
@@ -284,7 +277,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     /**
      * Tests if resultQuality can have arbitrary json.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testResultQualityArray() throws ServiceFailureException, IOException {

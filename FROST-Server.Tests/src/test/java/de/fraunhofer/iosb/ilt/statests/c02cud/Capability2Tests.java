@@ -57,9 +57,6 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability2Tests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability2Tests.class);
 
     private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
@@ -131,16 +128,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
         ID_TYPES.clear();
     }
 
-    @Override
-    protected void tearDownVersion() {
-        deleteEverything();
-        ID_TYPES.clear();
-    }
-
     @AfterAll
     public static void tearDown() {
         LOGGER.info("Tearing down.");
         deleteEverything();
+        ID_TYPES.clear();
     }
 
     /**
@@ -1131,7 +1123,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
         }
     }
 
-    //TODO: Add invalid PATCH test for other entities when it is implemented in the service
+    //TODO: Add invalid PATCH test for other entities when it is implemented in the sSrvc
     /**
      * This method is testing invalid partial update or PATCH. The PATCH request
      * is invalid if the body contains related entities as inline content.

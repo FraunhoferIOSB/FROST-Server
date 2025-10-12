@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
@@ -52,15 +53,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Abstract class for authorisation tests.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class AbstractAuthTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuthTests.class);
 
     private static final String ANON_SHOULD_NOT_BE_ABLE_TO_READ = "anon should NOT be able to read.";
@@ -88,6 +85,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     private static MqttHelper2 mqttHelperWrite;
     private static MqttHelper2 mqttHelperRead;
     private static MqttHelper2 mqttHelperAnon;
+    protected static SensorThingsV11Sensing sMdl;
 
     public AbstractAuthTests(ServerVersion serverVersion, Map<String, String> properties, boolean anonymousReadAllowed) {
         super(serverVersion, properties);
@@ -97,6 +95,9 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
 
     @Override
     protected void setUpVersion() {
+        if (sMdl == null) {
+            sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
+        }
         serviceAdmin = getServiceAdmin();
         serviceWrite = getServiceWrite();
         serviceRead = getServiceRead();
@@ -156,15 +157,11 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
      */
     public abstract SensorThingsService getServiceAnonymous();
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
-    }
-
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
+        sMdl = null;
     }
 
     private static void cleanup() throws ServiceFailureException {

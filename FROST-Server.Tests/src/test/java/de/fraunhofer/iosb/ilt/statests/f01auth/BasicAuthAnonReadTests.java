@@ -30,14 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Tests for access rights checking with Basic Authentication with anonymous
  * read.
- *
- * @author Hylke van der Schaaf
  */
 public abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthAnonReadTests.class);
 
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();

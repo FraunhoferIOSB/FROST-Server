@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationProperty;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
@@ -67,6 +68,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
 
     private static EntityHelper2 eh2;
     private static MqttHelper2 mqttHelper;
+    private static SensorThingsV11Sensing sMdl;
 
     public MqttCoreTests11() {
         super(ServerVersion.v_1_1);
@@ -75,6 +77,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         eh2 = new EntityHelper2(sSrvc);
         mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         entityTypesForCreate = Arrays.asList(
@@ -86,11 +89,6 @@ public class MqttCoreTests11 extends AbstractTestClass {
                 sMdl.etDatastream,
                 sMdl.etObservation,
                 sMdl.etHistoricalLocation);
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     /**
@@ -106,7 +104,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     }
 
     public static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         eh2.clearCaches();
         eh2 = null;
         mqttHelper = null;
@@ -114,7 +112,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     }
 
     private void deleteCreatedEntities() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         eh2.clearCaches();
     }
 

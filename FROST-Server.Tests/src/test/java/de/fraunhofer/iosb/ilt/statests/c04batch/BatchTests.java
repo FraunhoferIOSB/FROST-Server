@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -65,6 +66,7 @@ public abstract class BatchTests extends AbstractTestClass {
     private final ObjectMapper mapper;
 
     private static EntityHelper2 eh2;
+    private static SensorThingsV11Sensing sMdl;
 
     public BatchTests(ServerVersion version) {
         super(version);
@@ -74,17 +76,13 @@ public abstract class BatchTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         eh2 = new EntityHelper2(sSrvc);
         try {
             createEntities();
         } catch (ServiceFailureException | URISyntaxException ex) {
             LOGGER.error("Failed to set up.", ex);
         }
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -94,7 +92,7 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         OBSERVED_PROPS.clear();
     }
@@ -464,7 +462,7 @@ public abstract class BatchTests extends AbstractTestClass {
             BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
             assertEquals(expected, actual, "Response not as expected.");
 
-            Entity updatedThing1 = service.service.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
+            Entity updatedThing1 = sSrvc.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
             assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
             assertEquals("Changes", updatedThing1.getProperty(EP_PROPERTIES).get("new"));
         } catch (JsonProcessingException ex) {

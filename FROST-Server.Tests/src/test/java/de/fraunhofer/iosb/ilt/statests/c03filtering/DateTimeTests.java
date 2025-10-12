@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
@@ -50,15 +51,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests date and time functions.
- *
- * @author Hylke van der Schaaf
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class DateTimeTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(DateTimeTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
@@ -124,6 +120,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     private static final ZonedDateTime T2020_22 = ZonedDateTime.parse("2020-01-01T22:00:00.000Z");
     private static final ZonedDateTime T2020_23 = ZonedDateTime.parse("2020-01-01T23:00:00.000Z");
     private static final ZonedDateTime T2020_24 = ZonedDateTime.parse("2020-01-02T00:00:00.000Z");
+    private static SensorThingsV11Sensing sMdl;
 
     public DateTimeTests(ServerVersion version) {
         super(version);
@@ -132,12 +129,8 @@ public abstract class DateTimeTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -147,7 +140,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();

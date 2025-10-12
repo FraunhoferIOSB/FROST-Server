@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
@@ -51,15 +53,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests date and time functions.
- *
- * @author Hylke van der Schaaf
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class MdDateTimeTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(MdDateTimeTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
@@ -99,6 +96,8 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     private static final TimeInterval I2015_2017_2 = TimeInterval.create(T2015.toInstant(), T2017_2.toInstant());
     private static final TimeInterval I2015_2018 = TimeInterval.create(T2015.toInstant(), T2018.toInstant());
     private static final TimeInterval I2017_2_2018 = TimeInterval.create(T2017_2.toInstant(), T2018.toInstant());
+    private static SensorThingsV11Sensing sMdl;
+    private static SensorThingsV11MultiDatastream mMdl;
 
     public MdDateTimeTests(ServerVersion version) {
         super(version);
@@ -107,12 +106,9 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
+        mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -122,7 +118,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         MULTI_DATASTREAMS.clear();
         OBSERVATIONS.clear();

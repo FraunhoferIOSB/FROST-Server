@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
@@ -47,13 +48,11 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability7Tests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability7Tests.class);
 
     private static MqttHelper2 mqttHelper;
     private static EntityHelper2 entityHelper;
+    private static SensorThingsV11Sensing sMdl;
 
     public Capability7Tests(ServerVersion version) {
         super(version);
@@ -62,23 +61,17 @@ public abstract class Capability7Tests extends AbstractTestClass {
     @Override
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
 
         long mqttTimeout = serverSettings.getMqttTimeOutMs();
         entityHelper = new EntityHelper2(sSrvc);
         mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), mqttTimeout);
     }
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
-        entityHelper = null;
-        mqttHelper = null;
-    }
-
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         entityHelper = null;
         mqttHelper = null;
     }

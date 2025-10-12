@@ -62,9 +62,6 @@ import org.slf4j.LoggerFactory;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability3Tests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability3Tests.class);
 
     private enum Compare {
@@ -104,12 +101,6 @@ public abstract class Capability3Tests extends AbstractTestClass {
         createEntities();
     }
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
-        ENTITYCOUNTS.clear();
-    }
-
     /**
      * This method is run after all the tests of this class is run and clean the
      * database.
@@ -120,7 +111,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         ENTITYCOUNTS.clear();
     }
 

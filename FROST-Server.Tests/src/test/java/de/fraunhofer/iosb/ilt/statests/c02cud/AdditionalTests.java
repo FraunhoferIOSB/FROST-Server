@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -50,20 +51,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests additional details not part of the official tests.
- *
- * @author Hylke van der Schaaf
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class AdditionalTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(AdditionalTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
 
     public AdditionalTests(ServerVersion version) {
         super(version);
@@ -72,11 +69,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
     }
 
     @AfterAll
@@ -86,7 +79,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
@@ -96,12 +89,12 @@ public abstract class AdditionalTests extends AbstractTestClass {
      * Check the creation of a FoI on Observation creation, for Things that have
      * multiple Locations, only one of which is a geoJson location.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void test01MultipleLocations() throws ServiceFailureException {
         LOGGER.info("  test01MultipleLocations");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
 
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
 
@@ -159,12 +152,12 @@ public abstract class AdditionalTests extends AbstractTestClass {
      * Location of the Thing, if the new HistoricalLocation has a time that is
      * not later than all others of the same Thing.
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void test03HistoricalLocationThing() throws ServiceFailureException {
         LOGGER.info("  test03HistoricalLocationThing");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
 
         // Create a thing
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
@@ -218,12 +211,12 @@ public abstract class AdditionalTests extends AbstractTestClass {
      * Tests requests on paths like Things(x)/Datastreams(y)/Observations, where
      * Datastream(y) exists, but is not part of the, also existing, Things(x).
      *
-     * @throws ServiceFailureException If the service doesn't respond.
+     * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
     void test04PostInvalidPath() throws ServiceFailureException {
         LOGGER.info("  test04PostInvalidPath");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         // Create two things
 
         Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
@@ -343,7 +336,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     @Test
     void test05RecreateAutomaticFoi() throws ServiceFailureException {
         LOGGER.info("  test05RecreateAutomaticFoi");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         DATASTREAMS.clear();
         // Create two things
 

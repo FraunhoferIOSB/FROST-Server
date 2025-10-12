@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -63,6 +64,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
 
     private static EntityHelper2 eh;
     private static MqttHelper2 mqttHelper;
+    private static SensorThingsV11Sensing sMdl;
 
     public MqttExtraTests11() {
         super(ServerVersion.v_1_1);
@@ -71,6 +73,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws URISyntaxException, ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         eh = new EntityHelper2(sSrvc);
         mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         try {
@@ -81,18 +84,10 @@ public class MqttExtraTests11 extends AbstractTestClass {
         }
     }
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
-        eh.clearCaches();
-        eh = null;
-        mqttHelper = null;
-    }
-
     @AfterAll
     public static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         eh.clearCaches();
         eh = null;
         mqttHelper = null;

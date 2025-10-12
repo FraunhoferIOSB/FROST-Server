@@ -41,14 +41,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Abstract class for all tests.
  */
 public abstract class AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTestClass.class);
 
     /**
@@ -62,11 +58,7 @@ public abstract class AbstractTestClass {
     /**
      * A FROST-Client instance that can be used to access the server.
      */
-    protected static StaService service;
     protected static SensorThingsService sSrvc;
-    protected static SensorThingsV11Sensing sMdl;
-    protected static SensorThingsV11MultiDatastream mMdl;
-    protected static SensorThingsV11Tasking tMdl;
 
     private static final Map<String, String> defaultProperties = new TreeMap<>();
 
@@ -91,7 +83,7 @@ public abstract class AbstractTestClass {
             LOGGER.trace("Init for version {} on {}.", serverVersion.urlPart, getClass());
             if (!serverVersion.equals(version)) {
                 if (version != null) {
-                    tearDownVersion();
+                    LOGGER.warn("Previous implementation did not clean up!");
                 }
                 version = serverVersion;
                 LOGGER.info("Setting up for version {}.\n\n", version.urlPart);
@@ -100,10 +92,6 @@ public abstract class AbstractTestClass {
                 try {
                     sSrvc = null;
                     sSrvc = createService();
-                    sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
-                    mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
-                    tMdl = sSrvc.getModel(SensorThingsV11Tasking.class);
-                    service = new StaService(sSrvc, sMdl, tMdl, mMdl);
                 } catch (MalformedURLException ex) {
                     LOGGER.error("Failed to create URL", ex);
                 }
@@ -122,15 +110,11 @@ public abstract class AbstractTestClass {
 
     protected abstract void setUpVersion() throws ServiceFailureException, URISyntaxException;
 
-    protected void tearDownVersion() throws ServiceFailureException {
-        // Empty by design.
-    }
-
     @AfterAll
     public static final void cleanupAbstractClass() {
         version = null;
         serverSettings = null;
-        service = null;
+        sSrvc = null;
     }
 
     /**
@@ -154,10 +138,10 @@ public abstract class AbstractTestClass {
     /**
      * A FROST-Client instance that can be used to access the server.
      *
-     * @return the service
+     * @return the sSrvc
      */
-    public static StaService getService() {
-        return service;
+    public static SensorThingsService getService() {
+        return sSrvc;
     }
 
 }

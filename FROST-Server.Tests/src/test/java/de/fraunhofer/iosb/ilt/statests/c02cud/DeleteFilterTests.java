@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
@@ -48,14 +49,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests additional details not part of the official tests.
- *
- * @author Hylke van der Schaaf
  */
 public abstract class DeleteFilterTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteFilterTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
@@ -88,6 +84,8 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     private static final TimeInterval I701_800 = TimeInterval.create(T701.toInstant(), T800.toInstant());
     private static final TimeInterval I2017 = TimeInterval.create(T2017.toInstant(), T2017.plus(1, ChronoUnit.HOURS).toInstant());
 
+    private static SensorThingsV11Sensing sMdl;
+
     public DeleteFilterTests(ServerVersion version) {
         super(version);
     }
@@ -95,12 +93,8 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -215,7 +209,7 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
      * Tests if filtered deletes are working, when filtering by resultTime,
      * validTime or phenomenonTime.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
     void testDeleteByTime() throws ServiceFailureException {
@@ -231,7 +225,7 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();

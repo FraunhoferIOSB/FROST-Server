@@ -43,8 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * Helper for authorisation tests.
  */
 public class AuthTestHelper {
 

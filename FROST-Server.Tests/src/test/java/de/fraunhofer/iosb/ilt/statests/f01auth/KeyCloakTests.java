@@ -45,14 +45,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Tests for access rights checking with KeyCloak Authentication.
- *
- * @author Hylke van der Schaaf
  */
 public abstract class KeyCloakTests extends AbstractAuthTests {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyCloakTests.class);
 
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();

@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -49,15 +51,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Some odd tests.
- *
- * @author Hylke van der Schaaf
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiDatastreamObsPropTests.class);
 
     private static final List<Entity> THINGS = new ArrayList<>();
@@ -67,6 +64,8 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> MULTIDATASTREAMS = new ArrayList<>();
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
+    private static SensorThingsV11Sensing sMdl;
+    private static SensorThingsV11MultiDatastream mMdl;
 
     public MultiDatastreamObsPropTests(ServerVersion version) {
         super(version);
@@ -82,15 +81,12 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
+        mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
         assumeTrue(
                 serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ),
                 "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.");
         createEntities();
-    }
-
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
     }
 
     @AfterAll
@@ -100,7 +96,7 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     }
 
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();

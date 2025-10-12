@@ -30,6 +30,7 @@ import com.github.fge.jsonpatch.MoveOperation;
 import com.github.fge.jsonpatch.ReplaceOperation;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
+import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -62,6 +63,8 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     private static final List<Entity> OPROPS = new ArrayList<>();
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
 
+    private static SensorThingsV11Sensing sMdl;
+
     public JsonPatchTests(ServerVersion version) {
         super(version);
     }
@@ -69,17 +72,13 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-        EntityUtils.deleteAll(service);
+        sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
+        EntityUtils.deleteAll(sSrvc);
         createEntities();
     }
 
-    @Override
-    protected void tearDownVersion() throws ServiceFailureException {
-        cleanup();
-    }
-
     private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(service);
+        EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
@@ -153,7 +152,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     /**
      * Tests if JSON-Patch is working on Things.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      * @throws JsonPointerException if the patch is invalid.
      * @throws IOException if the patch is invalid.
      */
@@ -210,7 +209,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     /**
      * Tests if JSON-Patch is working on Datastreams.
      *
-     * @throws ServiceFailureException if the service connection fails.
+     * @throws ServiceFailureException if the sSrvc connection fails.
      * @throws JsonPointerException if the patch is invalid.
      * @throws IOException if the patch is invalid.
      */
