@@ -19,12 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 
+import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
+import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -42,12 +45,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * Hook to update Thing-Location relations when the a new HistoricalLocation is
+ * added to a Thing.
  */
 class HookPostInsertHistLoc implements HookPostInsert {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HookPostInsertHistLoc.class.getName());
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "HistoricalLocations Table")
+    @EditorString.EdOptsString(dflt = TableImpHistLocations.NAME_TABLE)
+    private String nameTblHistLoc = TableImpHistLocations.NAME_TABLE;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "Thing-ID Field in HistoricalLocations Table")
+    @EditorString.EdOptsString(dflt = "THING_ID")
+    private String nameFldHistLocThingId = TableImpHistLocations.NAME_COL_THINGID;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "Time Field in HistoricalLocations Table")
+    @EditorString.EdOptsString(dflt = "TIME")
+    private String nameFldHistLocTime = TableImpHistLocations.NAME_COL_TIME;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "Things-Locations LinkTable")
+    @EditorString.EdOptsString(dflt = TableImpThingsLocations.NAME_TABLE)
+    private String nameTblThingsLocs = TableImpThingsLocations.NAME_TABLE;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "Thing-ID Field in Things-Locations Table")
+    @EditorString.EdOptsString(dflt = TableImpThingsLocations.NAME_COL_TL_THINGID)
+    private String nameFldThingsLocsThingId = TableImpThingsLocations.NAME_COL_TL_THINGID;
+
+    @ConfigurableField(editor = EditorString.class,
+            label = "Location-ID Field in Things-Locations Table")
+    @EditorString.EdOptsString(dflt = TableImpThingsLocations.NAME_COL_TL_LOCATIONID)
+    private String nameFldThingsLocsLocId = TableImpThingsLocations.NAME_COL_TL_LOCATIONID;
+
+    private StaTable<?> thl;
+    private TableField thlThingId;
+    private TableField thlTime;
+    private StaTable<?> ttl;
+    private TableField ttlThingId;
+    private TableField ttlLocId;
 
     @Override
     public boolean postInsertIntoDatabase(JooqPersistenceManager pm, Entity histLoc, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException {
@@ -60,7 +100,14 @@ class HookPostInsertHistLoc implements HookPostInsert {
         Entity thing = histLoc.getProperty(npThing);
         Object thingId = thing.getPrimaryKeyValues().get(0);
         DSLContext dslContext = pm.getDslContext();
-        TableImpHistLocations thl = tc.getTableForClass(TableImpHistLocations.class);
+        if (ttlLocId == null) {
+            thl = tc.getTableForName(nameTblHistLoc);
+            thlThingId = (TableField) thl.field(nameFldHistLocThingId);
+            thlTime = (TableField) thl.field(nameFldHistLocTime);
+            ttl = tc.getTableForName(nameTblThingsLocs);
+            ttlThingId = (TableField) ttl.field(nameFldThingsLocsThingId);
+            ttlLocId = (TableField) ttl.field(nameFldThingsLocsLocId);
+        }
         final TimeInstant hlTime = histLoc.getProperty(epTime);
         Moment newTime = hlTime.getDateTime();
         // https://github.com/opengeospatial/sensorthings/issues/30
@@ -69,17 +116,16 @@ class HookPostInsertHistLoc implements HookPostInsert {
         Record lastHistLocation = pm.timeFetchOne(
                 dslContext.select(Collections.emptyList())
                         .from(thl)
-                        .where(((TableField) thl.getThingId()).eq(thingId)
-                                .and(thl.time.gt(newTime)))
-                        .orderBy(thl.time.desc())
+                        .where(thlThingId.eq(thingId)
+                                .and(thlTime.gt(newTime)))
+                        .orderBy(thlTime.desc())
                         .limit(1),
                 histLoc.getEntityType().entityName);
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.
-            TableImpThingsLocations qtl = tc.getTableForClass(TableImpThingsLocations.class);
             long count = pm.timeExecute(
-                    dslContext.delete(qtl).where(((TableField) qtl.getThingId()).eq(thingId)),
+                    dslContext.delete(ttl).where(ttlThingId.eq(thingId)),
                     LINK_TABLE);
             LOGGER.debug(EntityFactories.UNLINKED_L_FROM_T, count, thingId);
             // Link new locations to Thing.
@@ -89,12 +135,36 @@ class HookPostInsertHistLoc implements HookPostInsert {
                 }
                 Object locationId = l.getPrimaryKeyValues().get(0);
                 pm.timeExecute(
-                        dslContext.insertInto(qtl).set((TableField) qtl.getThingId(), thingId).set(qtl.getLocationId(), locationId),
+                        dslContext.insertInto(ttl).set(ttlThingId, thingId).set(ttlLocId, locationId),
                         LINK_TABLE);
                 LOGGER.debug(EntityFactories.LINKED_L_TO_T, locationId, thingId);
             }
         }
         return true;
+    }
+
+    public void setNameTblHistLoc(String nameTblHistLoc) {
+        this.nameTblHistLoc = nameTblHistLoc;
+    }
+
+    public void setNameFldHistLocThingId(String nameFldHistLocThingId) {
+        this.nameFldHistLocThingId = nameFldHistLocThingId;
+    }
+
+    public void setNameFldHistLocTime(String nameFldHistLocTime) {
+        this.nameFldHistLocTime = nameFldHistLocTime;
+    }
+
+    public void setNameTblThingsLocs(String nameTblThingsLocs) {
+        this.nameTblThingsLocs = nameTblThingsLocs;
+    }
+
+    public void setNameFldThingsLocsThingId(String nameFldThingsLocsThingId) {
+        this.nameFldThingsLocsThingId = nameFldThingsLocsThingId;
+    }
+
+    public void setNameFldThingsLocsLocId(String nameFldThingsLocsLocId) {
+        this.nameFldThingsLocsLocId = nameFldThingsLocsLocId;
     }
 
 }

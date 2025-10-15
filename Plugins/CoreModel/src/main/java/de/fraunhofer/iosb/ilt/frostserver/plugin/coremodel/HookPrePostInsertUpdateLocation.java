@@ -196,28 +196,28 @@ public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostI
         }
     }
 
-    public String getTtlName() {
-        return ttlName;
+    public void setTtlName(String ttlName) {
+        this.ttlName = ttlName;
     }
 
-    public String getTtlThingIdName() {
-        return ttlThingIdName;
+    public void setTtlThingIdName(String ttlThingIdName) {
+        this.ttlThingIdName = ttlThingIdName;
     }
 
-    public String getTtlLocationIdName() {
-        return ttlLocationIdName;
+    public void setTtlLocationIdName(String ttlLocationIdName) {
+        this.ttlLocationIdName = ttlLocationIdName;
     }
 
-    public String getTlhlName() {
-        return tlhlName;
+    public void setTlhlName(String tlhlName) {
+        this.tlhlName = tlhlName;
     }
 
-    public String getTlhlHistLocationIdName() {
-        return tlhlHistLocationIdName;
+    public void setTlhlHistLocationIdName(String tlhlHistLocationIdName) {
+        this.tlhlHistLocationIdName = tlhlHistLocationIdName;
     }
 
-    public String getThlTimeName() {
-        return thlTimeName;
+    public void setThlTimeName(String thlTimeName) {
+        this.thlTimeName = thlTimeName;
     }
 
 }
