@@ -486,12 +486,32 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                 throw new IllegalArgumentException(ex);
             }
         }
-        relation.link(this, sourceEntity, target, np);
+        relation.link(this, sourceEntity, target);
     }
 
     @Override
     public void setRelation(PathElementEntity source, NavigationPropertyEntity np, Entity target) throws NoSuchEntityException {
+        final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+        final StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
+        final Relation<?> relation = sourceTable.findRelation(np.getName());
+        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getPkValues());
+        if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
+            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
+        }
+        if (!entityFactories.entityExists(this, target, userIsAdmin)) {
+            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
+        }
 
+        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        sourceEntity.setProperty(np, target);
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : table.getHooksPreUpdate()) {
+            try {
+                hookWrapper.getObject().preUpdateInDatabase(this, sourceEntity, sourceEntity.getPrimaryKeyValues(), EditFeatures.NONE);
+            } catch (IncompleteEntityException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
+        relation.link(this, sourceEntity, target);
     }
 
     @Override
@@ -537,7 +557,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             }
         }
 
-        relation.unLink(this, sourceEntity, targetEntity, np);
+        relation.unLink(this, sourceEntity, targetEntity);
     }
 
     @Override

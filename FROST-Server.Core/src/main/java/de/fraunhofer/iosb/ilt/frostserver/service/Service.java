@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
@@ -466,6 +467,7 @@ public class Service implements AutoCloseable {
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (IllegalArgumentException e) {
+            LOGGER.debug(EXCEPTION, e);
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Incorrect request: " + e.getMessage());
         } catch (RuntimeException e) {
@@ -760,6 +762,7 @@ public class Service implements AutoCloseable {
 
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
+            LOGGER.debug(EXCEPTION, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
         } catch (NoSuchEntityException exc) {
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, exc.getMessage());
@@ -805,6 +808,7 @@ public class Service implements AutoCloseable {
             }
 
             response.setCode(HttpURLConnection.HTTP_NO_CONTENT);
+            maybeCommitAndClose();
             return response;
         } catch (IOException ex) {
             throw new IllegalArgumentException("Failed to parse body as entity reference");
@@ -1003,17 +1007,37 @@ public class Service implements AutoCloseable {
 
     private static record LinkData(
             PathElementEntity sourceEntity,
-            NavigationPropertyEntitySet navigationProperty,
+            NavigationPropertyEntitySet npSet,
+            NavigationPropertyEntity npEntity,
             PathElementEntity targetEntity,
             String message) {
 
-        public static LinkData ok(PathElementEntity sourceEntity, NavigationPropertyEntitySet navigationProperty, PathElementEntity targetEntity) {
-            return new LinkData(sourceEntity, navigationProperty, targetEntity, null);
+        NavigationPropertyMain getNp() {
+            if (npSet != null) {
+                return npSet;
+            } else {
+                return npEntity;
+            }
+        }
+
+        public boolean isEntity() {
+            return npEntity != null;
+        }
+
+        public static LinkData ok(PathElementEntity sourceEntity, NavigationPropertyMain np, PathElementEntity targetEntity) {
+            if (np instanceof NavigationPropertyEntitySet nps) {
+                return new LinkData(sourceEntity, nps, null, targetEntity, null);
+            }
+            if (np instanceof NavigationPropertyEntity npe) {
+                return new LinkData(sourceEntity, null, npe, targetEntity, null);
+            }
+            return new LinkData(null, null, null, null, "Unknown type of NavigationProperty");
         }
 
         public static LinkData error(String message) {
-            return new LinkData(null, null, null, message);
+            return new LinkData(null, null, null, null, message);
         }
+
     }
 
     private ServiceResponse executeDeleteRef(ServiceRequest request, ServiceResponse response, ResourcePath path) {
@@ -1037,21 +1061,42 @@ public class Service implements AutoCloseable {
         if (lastElement instanceof PathElementEntitySet containingSet) {
             // Option 1
             linkData = parseForRefWithId(request, path, containingSet);
-        } else if ((lastElement instanceof PathElementEntity peEntity)) {
+        } else if ((lastElement instanceof PathElementEntity lastEntity)) {
             // Option 2 or 3
-            linkData = parseForRefInPath(path, peEntity);
+            final int lastIdx = pathElements.size() - 1;
+            PathElement precedingElement = pathElements.get(lastIdx - 1);
+            if (precedingElement instanceof PathElementEntitySet containingSet) {
+                NavigationPropertyEntitySet navigationProperty = containingSet.getNavigationProperty();
+                PathElementEntity sourceEntity = containingSet.getParent();
+                linkData = LinkData.ok(sourceEntity, navigationProperty, lastEntity);
+            } else if (precedingElement instanceof PathElementEntity parentEntity) {
+                NavigationPropertyEntity navigationProperty = lastEntity.getNavigationProperty();
+                Entity target = getPm().get(path, null, Entity.class);
+                if (target == null) {
+                    // No target, so nothing to delete.
+                    return successResponse(response, HttpURLConnection.HTTP_NO_CONTENT, "");
+                }
+                lastEntity.setPkValues(target.getPrimaryKeyValues());
+                linkData = LinkData.ok(parentEntity, navigationProperty, lastEntity);
+            } else {
+                return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Not a valid DELETE-Reference action.");
+            }
+
         } else {
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Not a valid DELETE-Reference action.");
         }
         if (linkData.message != null) {
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, linkData.message);
         }
-        if (!linkData.navigationProperty.getEntityType().equals(linkData.targetEntity.getEntityType())) {
-            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Target Entity does not match NavigationProperty type: " + linkData.targetEntity.getEntityType().entityName + " != " + linkData.navigationProperty.getEntityType().entityName);
+        if (!linkData.getNp().getEntityType().equals(linkData.targetEntity.getEntityType())) {
+            return errorResponse(
+                    response,
+                    HttpURLConnection.HTTP_BAD_REQUEST,
+                    "Target Entity does not match NavigationProperty type: " + linkData.targetEntity.getEntityType().entityName + " != " + linkData.npSet.getEntityType().entityName);
         }
 
         try {
-            pm.deleteRelation(linkData.sourceEntity, linkData.navigationProperty, linkData.targetEntity);
+            pm.deleteRelation(linkData.sourceEntity, linkData.getNp(), linkData.targetEntity);
             maybeCommitAndClose();
             return successResponse(response, HttpURLConnection.HTTP_NO_CONTENT, "");
         } catch (IncompleteEntityException ex) {
@@ -1062,6 +1107,15 @@ public class Service implements AutoCloseable {
         }
     }
 
+    /**
+     * Parses
+     * http://host/service/Categories(1)/Products/$ref?$id=../../Products(0)
+     *
+     * @param request the request
+     * @param path the path
+     * @param containingSet the set (Products in the example)
+     * @return the LinkData
+     */
     private LinkData parseForRefWithId(ServiceRequest request, ResourcePath path, PathElementEntitySet containingSet) {
         PathElementEntity sourceEntity;
         NavigationPropertyEntitySet navigationProperty;
@@ -1114,25 +1168,6 @@ public class Service implements AutoCloseable {
         }
 
         return LinkData.ok(sourceEntity, navigationProperty, targetEntity);
-    }
-
-    private LinkData parseForRefInPath(ResourcePath path, PathElementEntity lastElement) {
-        PathElementEntity sourceEntity;
-        NavigationPropertyEntitySet navigationProperty;
-        final List<PathElement> pathElements = path.getPathElements();
-        final int lastIdx = pathElements.size() - 1;
-        PathElement precedingElement = pathElements.get(lastIdx - 1);
-        if (precedingElement instanceof PathElementEntitySet peEntitySet) {
-            PathElementEntitySet containingSet = peEntitySet;
-            navigationProperty = containingSet.getNavigationProperty();
-            sourceEntity = containingSet.getParent();
-        } else {
-            return LinkData.error("Not a valid DELETE-Reference action.");
-        }
-        if (!sourceEntity.primaryKeyFullySet() || !lastElement.primaryKeyFullySet()) {
-            return LinkData.error("Could not find Id for source or target entity.");
-        }
-        return LinkData.ok(sourceEntity, navigationProperty, lastElement);
     }
 
     public static ServiceResponse successResponse(ServiceResponse response, Version.CannedResponse cr) {

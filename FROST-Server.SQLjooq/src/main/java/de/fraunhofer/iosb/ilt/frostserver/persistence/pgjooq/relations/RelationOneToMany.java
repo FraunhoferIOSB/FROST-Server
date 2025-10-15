@@ -58,6 +58,12 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     private final String name;
 
     /**
+     * The table that is the source side of the relation. This side holds the
+     * TARGET_ID field.
+     */
+    private final S source;
+
+    /**
      * The field on the source side that defines the relation.
      */
     private FieldAccessor<S> sourceFieldAccessor;
@@ -88,6 +94,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
             LOGGER.error("NULL source");
         }
         this.navProp = navProp;
+        this.source = source;
         this.target = target;
         this.name = navProp.getName();
         this.distinctRequired = distinctRequired;
@@ -132,15 +139,12 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets) {
+        throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
-        if (!distinctRequired) {
-            throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
-        }
+    public void link(JooqPersistenceManager pm, Entity source, Entity target) {
         link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
     }
 
@@ -154,14 +158,20 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
      * @param targetId The target id of the link.
      */
     protected void link(JooqPersistenceManager pm, Object sourceId, Object targetId) {
-        if (!distinctRequired) {
-            throw new IllegalStateException("Trying to update a one-to-many relation from the wrong side.");
+        int count;
+        if (distinctRequired) {
+            count = pm.timeExecute(
+                    pm.getDslContext().update(target)
+                            .set(targetFieldAccessor.getField(target), sourceId)
+                            .where(target.getPkFields().get(0).eq(targetId)),
+                    LINK_TABLE);
+        } else {
+            count = pm.timeExecute(
+                    pm.getDslContext().update(source)
+                            .set(sourceFieldAccessor.getField(source), targetId)
+                            .where(source.getPkFields().get(0).eq(sourceId)),
+                    LINK_TABLE);
         }
-        int count = pm.timeExecute(
-                pm.getDslContext().update(target)
-                        .set(targetFieldAccessor.getField(target), sourceId)
-                        .where(target.getPkFields().get(0).eq(targetId)),
-                LINK_TABLE);
 
         if (count != 1) {
             LOGGER.error("Executing query did not result in an update!");
@@ -169,8 +179,28 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target) {
+        unLink(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
+    }
+
+    protected void unLink(JooqPersistenceManager pm, Object sourceId, Object targetId) {
+        int count;
+        if (distinctRequired) {
+            count = pm.timeExecute(
+                    pm.getDslContext().update(target)
+                            .setNull(targetFieldAccessor.getField(target))
+                            .where(target.getPkFields().get(0).eq(targetId)),
+                    LINK_TABLE);
+        } else {
+            count = pm.timeExecute(
+                    pm.getDslContext().update(source)
+                            .setNull(sourceFieldAccessor.getField(source))
+                            .where(source.getPkFields().get(0).eq(sourceId)),
+                    LINK_TABLE);
+        }
+        if (count != 1) {
+            LOGGER.error("Executing query did not result in an update!");
+        }
     }
 
     /**

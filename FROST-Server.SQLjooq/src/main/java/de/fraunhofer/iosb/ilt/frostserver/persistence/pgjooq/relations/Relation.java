@@ -23,7 +23,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 
 /**
  * The interface for table-to-table relations.
@@ -69,9 +68,8 @@ public interface Relation<S extends StaMainTable<S>> {
      * @param pm The persistence manager to use for accessing the database.
      * @param source The source entity of the link.
      * @param target The target entity of the link.
-     * @param navProp The navigation property of the relation.
      */
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
+    public void link(JooqPersistenceManager pm, Entity source, Entity target);
 
     /**
      * Make the links between the given source and targets, removing links that
@@ -83,9 +81,8 @@ public interface Relation<S extends StaMainTable<S>> {
      * @param pm The persistence manager to use for accessing the database.
      * @param source The source entity of the link.
      * @param targets The target entity of the link.
-     * @param navProp The navigation property of the relation.
      */
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp);
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets);
 
-    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp);
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target);
 }

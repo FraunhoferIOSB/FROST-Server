@@ -72,6 +72,9 @@ public interface PersistenceManager extends AutoCloseable {
 
     public default <T> T get(ResourcePath path, Query query, Class<T> clazz) {
         Object result = get(path, query);
+        if (result == null) {
+            return null;
+        }
         if (!clazz.isAssignableFrom(result.getClass())) {
             throw new IllegalArgumentException("The resourcepath does not result in an instance of class " + clazz.getName());
         }

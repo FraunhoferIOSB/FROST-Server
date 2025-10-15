@@ -243,13 +243,13 @@ public class UrlHelper {
 
     public static Entity parseSelfLink(String selfLink, ModelRegistry mr, boolean isAdmin) {
         int idxType = selfLink.lastIndexOf('/');
-        String lastPart = idxType >= 0 ? selfLink.substring(idxType) : selfLink;
+        String lastPart = idxType >= 0 ? selfLink.substring(idxType + 1) : selfLink;
         int idxPk = lastPart.indexOf('(');
         if (idxPk < 0) {
             throw new IllegalArgumentException("SelfLink must contain a primary key in brackets.");
         }
         String entityTypeName = lastPart.substring(0, idxPk);
-        String pk = lastPart.substring(idxPk, lastPart.length() - 1);
+        String pk = lastPart.substring(idxPk + 1, lastPart.length() - 1);
         EntityType entityType = mr.getEntityTypeForName(entityTypeName, isAdmin);
         PkValue pkValue = entityType.getPrimaryKey().parsePrimaryKey(pk);
         return new DefaultEntity(entityType, pkValue);

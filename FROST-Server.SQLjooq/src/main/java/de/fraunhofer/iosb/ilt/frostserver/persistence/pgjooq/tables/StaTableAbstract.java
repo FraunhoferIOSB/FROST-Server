@@ -423,14 +423,14 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         if (updateMode.removeMissing) {
-            relation.link(pm, entity, linkedSet, navProp);
+            relation.link(pm, entity, linkedSet);
         } else {
             for (Entity child : linkedSet) {
                 EntityFactories ef = pm.getEntityFactories();
                 if (!ef.entityExists(pm, child, false)) {
                     throw new NoSuchEntityException("Can not link " + child.getEntityType() + " with no id.");
                 }
-                relation.link(pm, entity, child, navProp);
+                relation.link(pm, entity, child);
             }
         }
     }

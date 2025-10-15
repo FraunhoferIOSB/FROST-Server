@@ -456,7 +456,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
     private String getEntities(EntityType entityType) {
         String urlString = serverSettings.getServiceUrl(version);
         if (entityType != null) {
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+            urlString = ServiceUrlHelper.buildURLString(urlString, entityType, null, null, null);
         }
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;

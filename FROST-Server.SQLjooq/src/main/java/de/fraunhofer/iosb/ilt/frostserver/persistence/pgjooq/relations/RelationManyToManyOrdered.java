@@ -115,7 +115,7 @@ public class RelationManyToManyOrdered<S extends StaMainTable<S>, L extends StaT
     }
 
     @Override
-    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target) {
         final var linkTable = getLinkTable();
         final var sourceLinkField = getSourceLinkFieldAcc().getField(linkTable);
         final var targetLinkField = getTargetLinkFieldAcc().getField(linkTable);

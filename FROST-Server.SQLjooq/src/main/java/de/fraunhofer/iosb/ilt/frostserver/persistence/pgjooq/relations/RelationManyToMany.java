@@ -191,7 +191,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets, NavigationPropertyMain navProp) {
+    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets) {
         final PkValue primaryKeyValues = source.getPrimaryKeyValues();
 
         final Object sourceId = primaryKeyValues.get(0);
@@ -207,7 +207,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+    public void link(JooqPersistenceManager pm, Entity source, Entity target) {
         link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
     }
 
@@ -229,7 +229,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void unLink(JooqPersistenceManager pm, Entity source, Entity target, NavigationPropertyMain navProp) {
+    public void unLink(JooqPersistenceManager pm, Entity source, Entity target) {
         final Object sourceId = source.getPrimaryKeyValues().get(0);
         final Object targetId = target.getPrimaryKeyValues().get(0);
         final Condition sourceCondition = sourceLinkFieldAcc.getField(linkTable).eq(sourceId);
