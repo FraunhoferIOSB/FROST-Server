@@ -100,6 +100,7 @@ import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.v2cud.ReferenceTests;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
@@ -195,6 +196,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     FineGrainedAuthTestsKeycloakAnon11.class,
     ProjectAuthTestsBasic11.class,
     ProjectAuthTestsBasicAnon11.class,
+    TestSuite.SuiteFinaliser.class,
+    ReferenceTests.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite
@@ -522,7 +525,6 @@ public class TestSuite {
             }
         }
         keycloak.stop();
-        mqttBus.stop();
     }
 
     public int findRandomPort() {
