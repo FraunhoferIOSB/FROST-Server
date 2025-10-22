@@ -3,6 +3,7 @@
 ## Version 2.6.2-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Improved performance of table loading.
 * Fixed primary key not always being selected in joins.
 
 
