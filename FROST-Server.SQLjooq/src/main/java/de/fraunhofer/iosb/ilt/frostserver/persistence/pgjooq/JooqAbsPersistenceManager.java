@@ -95,6 +95,7 @@ import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,7 +164,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     private String connectionName;
     private String schemaPriority;
 
-    private final Map<Name, Table<?>> tableCache = new HashMap<>();
+    private final Map<Name, List<Table<?>>> tableCache = new HashMap<>();
 
     /**
      * Tracker for the amount of data fetched form the DB by this PM.
@@ -212,6 +213,8 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                     loadMapping();
                     validateMappings();
                     tableCollection.initSecurity(this);
+                    LOGGER.info("Clearing table cache.");
+                    tableCache.clear();
                 }
                 initialised = true;
             }
@@ -801,12 +804,28 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     @Override
     public Table<?> getDbTable(Name tableName) {
-        return tableCache.computeIfAbsent(tableName, t -> readDbTableFromDb(tableName));
+        return readDbTableFromDb(tableName);
     }
 
     public Table<?> readDbTableFromDb(Name tableName) {
-        final Meta meta = getDslContext().meta();
-        final List<Table<?>> tables = meta.getTables(tableName);
+        if (tableCache.isEmpty()) {
+            LOGGER.info("Filling table cache...");
+            final Meta meta = getDslContext().meta();
+            final List<Table<?>> tables = meta.getTables();
+            for (Table<?> table : tables) {
+                final Name name = table.getUnqualifiedName();
+                LOGGER.debug("  Found {}", name);
+                List<Table<?>> list = tableCache.computeIfAbsent(name, (t) -> new ArrayList<>());
+                list.add(table);
+            }
+            LOGGER.info("Filling table cache Done.");
+        }
+        List<Table<?>> tables = tableCache.get(tableName);
+        if (tables == null) {
+            LOGGER.info("Table not found in cache, retrying...");
+            final Meta meta = getDslContext().meta();
+            tables = meta.getTables(tableName);
+        }
         if (tables.isEmpty()) {
             LOGGER.error("Table {} not found. Please initialise the database!", tableName);
             throw new IllegalArgumentException("Table " + tableName + " not found.");
@@ -826,6 +845,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                     tableName, tables.size(), schemaPriority, PREFIX_PERSISTENCE, TAG_DB_SCHEMA_PRIORITY);
             throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
         }
+        LOGGER.info("Returning Table {}", tableName);
         return tables.get(0);
     }
 
