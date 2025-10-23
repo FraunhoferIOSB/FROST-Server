@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
@@ -82,7 +81,7 @@ public interface Relation<S extends StaMainTable<S>> {
      * @param source The source entity of the link.
      * @param targets The target entity of the link.
      */
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets);
+    public void link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets);
 
     public void unLink(JooqPersistenceManager pm, Entity source, Entity target);
 }

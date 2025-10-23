@@ -17,6 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests.v2cud;
 
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DEFINITION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jackson.jsonpointer.JsonPointerException;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
@@ -25,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
 import de.fraunhofer.iosb.ilt.frostclient.models.swecommon.util.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
@@ -33,30 +39,36 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Tests for GET/POST/PUT/PATCH on $ref urls. Works on the V2 data model.
  */
-public class ReferenceTests extends AbstractTestClass {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+public class ReferenceTests11 extends AbstractTestClass {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceTests11.class);
 
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> FEATURES = new ArrayList<>();
+    private static final List<Entity> FEATURE_TYPES = new ArrayList<>();
     private static final List<Entity> LOCATIONS = new ArrayList<>();
     private static final List<Entity> OPROPS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
@@ -73,7 +85,7 @@ public class ReferenceTests extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.coreModelV2.enable", "true");
     }
 
-    public ReferenceTests() {
+    public ReferenceTests11() {
         super(ServerVersion.v_1_1, SERVER_PROPERTIES);
     }
 
@@ -173,24 +185,45 @@ public class ReferenceTests extends AbstractTestClass {
             FEATURES.add(feature);
         }
         {
-            Entity feature = sMdl.newFeature("Feature 2", "The second Features", new Point(9.0, 51.0));
+            Entity feature = sMdl.newFeature("Feature 2", "The second Features", new Point(9.0, 50.0));
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
+        {
+            Entity feature = sMdl.newFeature("Feature 3", "The third Features", new Point(9.0, 51.0));
+            sSrvc.create(feature);
+            FEATURES.add(feature);
+        }
+        {
+            Entity featureType = newFeatureType("Feature Type 1", "The first Feature Type");
+            sSrvc.create(featureType);
+            FEATURE_TYPES.add(featureType);
+        }
+        {
+            Entity featureType = newFeatureType("Feature Type 2", "The second Feature Type");
+            sSrvc.create(featureType);
+            FEATURE_TYPES.add(featureType);
+        }
+        {
+            Entity featureType = newFeatureType("Feature Type 3", "The third Feature Type");
+            sSrvc.create(featureType);
+            FEATURE_TYPES.add(featureType);
+        }
+
     }
 
     /**
      * Tests if we can PUT on Datastream(x)/UltimateFeatureOfInterest/$ref.
      */
     @Test
-    void editRefEntity01() throws ServiceFailureException, JsonPointerException, IOException {
-        LOGGER.info("  editRefEntity01");
+    void test01_editRefEntity() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  test01_editRefEntity");
         final Entity ds0 = DATASTREAMS.get(0);
         linkAndTestEntityRef(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(0), true);
         linkAndTestEntityRef(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(1), false);
 
         String selfLinkSrc = ds0.getSelfLink();
-        String refLink = selfLinkSrc += "/" + sMdl.npDatastreamUltimateFoi.getName() + "/$ref";
+        String refLink = selfLinkSrc + "/" + sMdl.npDatastreamUltimateFoi.getName() + "/$ref";
         {
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
@@ -221,6 +254,97 @@ public class ReferenceTests extends AbstractTestClass {
                 .getProperty(np)
                 .getPrimaryKeyValues();
         Assertions.assertEquals(target.getPrimaryKeyValues(), pkFeature);
+    }
+
+    /**
+     * Tests if we can PUT on Feature(x)/FeaturesTypes/$ref.
+     */
+    @Test
+    void test02_editRefEntitySet() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  test02_editRefEntitySet");
+        final Entity f0 = FEATURES.get(0);
+        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 0));
+        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 1, 2));
+        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 1));
+
+        String selfLinkSrc = f0.getSelfLink();
+        String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "(" + Utils.quoteForUrl(FEATURE_TYPES.get(1).getPrimaryKeyValues().get(0)) + ")" + "/$ref";
+        {
+            HttpResponse response = HTTPMethods.doDelete(refLink);
+            Assertions.assertEquals(204, response.code);
+            EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", Collections.emptyList());
+        }
+        {
+            // Doing it again should give a reference-not-found
+            HttpResponse response = HTTPMethods.doDelete(refLink);
+            Assertions.assertEquals(404, response.code);
+        }
+    }
+
+    @Test
+    void test03_editRefEntitySet() throws ServiceFailureException, JsonPointerException, IOException {
+        LOGGER.info("  test03_editRefEntitySet");
+        final Entity f0 = FEATURES.get(0);
+        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 0, 1, 2));
+
+        String selfLinkSrc = f0.getSelfLink();
+        {
+            String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "/$ref?$id=../../" + FEATURE_TYPES.get(1).getSelfLink(false);
+            HttpResponse response = HTTPMethods.doDelete(refLink);
+            Assertions.assertEquals(204, response.code);
+            EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 0, 2));
+        }
+        {
+            String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "/$ref?$id=" + FEATURE_TYPES.get(0).getSelfLink(true);
+            LOGGER.info("  DELETE to {}", refLink);
+            HttpResponse response = HTTPMethods.doDelete(refLink);
+            Assertions.assertEquals(204, response.code);
+            EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 2));
+        }
+    }
+
+    private void linkAndTestEntitySetRefs(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) throws ServiceFailureException, JsonProcessingException {
+        String selfLinkSrc = source.getSelfLink();
+        String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
+
+        List<Map<String, Object>> selfLinkList = new ArrayList<>();
+        for (var target : targets) {
+            selfLinkList.add(
+                    CollectionsHelper.propertiesBuilder()
+                            .addItem("@id", target.getSelfLink(abs))
+                            .buildMap());
+        }
+
+        String body = SimpleJsonMapper.getSimpleObjectMapper()
+                .writeValueAsString(
+                        CollectionsHelper.propertiesBuilder()
+                                .addItem("value", selfLinkList)
+                                .buildMap());
+        HttpResponse response = HTTPMethods.doPut(refLink, body);
+        Assertions.assertEquals(204, response.code);
+
+        EntityUtils.testFilterResults(source.dao(np), "", targets);
+    }
+
+    //To remove once added to FROST-Client-Dynamic
+    public static Entity newFeatureType() {
+        return new Entity(sMdl.etFeatureType);
+    }
+
+    public static Entity newFeatureType(Object id) {
+        return new Entity(sMdl.etFeatureType)
+                .setPrimaryKeyValues(PkValue.of(id));
+    }
+
+    public static Entity newFeatureType(String name, String description) {
+        return newFeatureType()
+                .setProperty(EP_NAME, name)
+                .setProperty(EP_DESCRIPTION, description);
+    }
+
+    public static Entity newFeatureType(String name, String description, String definition) {
+        return newFeatureType(name, description)
+                .setProperty(EP_DEFINITION, definition);
     }
 
 }

@@ -353,6 +353,9 @@ public class HTTPMethods {
     public static HttpResponse doDelete(String urlString) {
         HttpResponse result;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            LOGGER.debug("Deleting: {}", urlString);
+            countDelete++;
+
             URI uri = new URI(urlString);
             HttpDelete request = new HttpDelete(uri);
             try (CloseableHttpResponse response = httpClient.execute(request)) {

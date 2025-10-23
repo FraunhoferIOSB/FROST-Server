@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
@@ -191,7 +190,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets) {
+    public void link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets) {
         final PkValue primaryKeyValues = source.getPrimaryKeyValues();
 
         final Object sourceId = primaryKeyValues.get(0);

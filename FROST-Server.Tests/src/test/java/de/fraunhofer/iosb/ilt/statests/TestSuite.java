@@ -100,7 +100,7 @@ import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import de.fraunhofer.iosb.ilt.statests.v2cud.ReferenceTests;
+import de.fraunhofer.iosb.ilt.statests.v2cud.ReferenceTests11;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
@@ -197,7 +197,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     ProjectAuthTestsBasic11.class,
     ProjectAuthTestsBasicAnon11.class,
     TestSuite.SuiteFinaliser.class,
-    ReferenceTests.class,
+    ReferenceTests11.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite

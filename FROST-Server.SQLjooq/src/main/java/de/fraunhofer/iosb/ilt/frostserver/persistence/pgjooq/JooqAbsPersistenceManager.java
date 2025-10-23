@@ -515,8 +515,31 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     }
 
     @Override
-    public void setRelation(PathElementEntity source, NavigationPropertyEntitySet np, List<Entity> target) throws NoSuchEntityException {
-
+    public void setRelation(PathElementEntity source, NavigationPropertyEntitySet np, List<Entity> targets) throws NoSuchEntityException {
+        final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
+        final StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
+        final Relation<?> relation = sourceTable.findRelation(np.getName());
+        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getPkValues());
+        if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
+            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
+        }
+        for (var target : targets) {
+            if (!entityFactories.entityExists(this, target, userIsAdmin)) {
+                throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
+            }
+        }
+        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        for (var target : targets) {
+            sourceEntity.addNavigationEntity(np, target);
+        }
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : table.getHooksPreUpdate()) {
+            try {
+                hookWrapper.getObject().preUpdateInDatabase(this, sourceEntity, sourceEntity.getPrimaryKeyValues(), EditFeatures.NONE);
+            } catch (IncompleteEntityException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
+        relation.link(this, sourceEntity, targets);
     }
 
     @Override
@@ -888,7 +911,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     public Table<?> readDbTableFromDb(Name tableName) {
         if (tableCache.isEmpty()) {
-            LOGGER.info("Filling table cache...");
+            LOGGER.debug("Filling table cache...");
             final Meta meta = getDslContext().meta();
             final List<Table<?>> tables = meta.getTables();
             for (Table<?> table : tables) {
@@ -897,7 +920,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                 List<Table<?>> list = tableCache.computeIfAbsent(name, (t) -> new ArrayList<>());
                 list.add(table);
             }
-            LOGGER.info("Filling table cache Done.");
+            LOGGER.debug("Filling table cache Done.");
         }
         List<Table<?>> tables = tableCache.get(tableName);
         if (tables == null) {
@@ -924,7 +947,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                     tableName, tables.size(), schemaPriority, PREFIX_PERSISTENCE, TAG_DB_SCHEMA_PRIORITY);
             throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
         }
-        LOGGER.info("Returning Table {}", tableName);
+        LOGGER.debug("Returning Table {}", tableName);
         return tables.get(0);
     }
 

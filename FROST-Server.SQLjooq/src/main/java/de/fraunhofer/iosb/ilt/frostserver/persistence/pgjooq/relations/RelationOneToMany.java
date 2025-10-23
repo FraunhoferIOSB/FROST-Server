@@ -21,14 +21,15 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersiste
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Field;
@@ -139,8 +140,28 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, EntitySet targets) {
-        throw new UnsupportedOperationException("Not supported.");
+    public void link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets) {
+        if (distinctRequired) {
+            Object sourceId = source.getPrimaryKeyValues().get(0);
+            List<Object> targetIds = new ArrayList<>();
+            targets.forEach(t -> targetIds.add(t.getPrimaryKeyValues().get(0)));
+            pm.timeExecute(
+                    pm.getDslContext().update(target)
+                            .setNull(targetFieldAccessor.getField(target))
+                            .where(
+                                    targetFieldAccessor.getField(target).eq(sourceId)
+                                            .and(target.getPkFields().get(0).notIn(targets))),
+                    LINK_TABLE);
+            for (var targetId : targetIds) {
+                pm.timeExecute(
+                        pm.getDslContext().update(target)
+                                .set(targetFieldAccessor.getField(target), sourceId)
+                                .where(target.getPkFields().get(0).eq(targetId)),
+                        LINK_TABLE);
+            }
+        } else {
+            throw new IllegalArgumentException("Can not set multiple targets on relation with cardinality of one.");
+        }
     }
 
     @Override
