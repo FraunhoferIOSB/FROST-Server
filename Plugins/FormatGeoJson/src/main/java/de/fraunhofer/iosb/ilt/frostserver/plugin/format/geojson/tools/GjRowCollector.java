@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Feature;
+import org.geojson.GeoJsonObject;
 
 /**
  * Collects all elements for a single feature in a feature collection.
@@ -86,7 +87,12 @@ public class GjRowCollector {
         }
         if (isGeom) {
             if (feature.getGeometry() == null && value instanceof TreeNode tn) {
-                feature.setGeometry(GeoHelper.parseGeoJson(tn));
+                final GeoJsonObject geoJsonObject = GeoHelper.parseGeoJson(tn);
+                if (geoJsonObject instanceof Feature gjf) {
+                    feature.setGeometry(gjf.getGeometry());
+                } else {
+                    feature.setGeometry(geoJsonObject);
+                }
             }
             return;
         }
