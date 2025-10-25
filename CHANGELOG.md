@@ -3,6 +3,7 @@
 ## Version 2.6.2-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed inconsistent model state when database is not ready at startup.
 * Improved performance of table loading.
 * Fixed primary key not always being selected in joins.
 

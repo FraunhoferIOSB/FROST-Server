@@ -204,14 +204,17 @@ public abstract class JooqAbstractPersistenceManager extends AbstractPersistence
         if (initialised) {
             return;
         }
-        synchronized (tableCollection) {
+        final TableCollection tc = this.tableCollection;
+        synchronized (tc) {
             if (!initialised) {
-                if (tableCollection.init(this)) {
+                tc.init(this);
+                if (!tc.isPmInitialised()) {
                     loadMapping();
                     validateMappings();
-                    tableCollection.initSecurity(this);
+                    tc.initSecurity(this);
                     LOGGER.info("Clearing table cache.");
                     tableCache.clear();
+                    tc.setPmInitialised(true);
                 }
                 initialised = true;
             }
