@@ -52,7 +52,8 @@ public class TableCollection {
     private static final Logger LOGGER = LoggerFactory.getLogger(TableCollection.class);
 
     private ModelRegistry modelRegistry;
-    private boolean initialised = false;
+    private boolean selfInitialised = false;
+    private boolean pmInitialised = false;
 
     /**
      * The model definition, stored here as long as the PersistenceManager has
@@ -108,12 +109,12 @@ public class TableCollection {
      * changes.
      */
     public boolean init(JooqPersistenceManager ppm) {
-        if (initialised) {
+        if (selfInitialised) {
             return false;
         }
         synchronized (this) {
-            if (!initialised) {
-                initialised = true;
+            if (!selfInitialised) {
+                selfInitialised = true;
                 final EntityFactories entityFactories = ppm.getEntityFactories();
                 for (StaMainTable<?> table : getAllTables()) {
                     LOGGER.info("  Table: {}.", table.getName());
@@ -131,6 +132,14 @@ public class TableCollection {
             initSecurityWrapper(table);
             initSecurityValidators(table, ppm);
         }
+    }
+
+    public boolean isPmInitialised() {
+        return pmInitialised;
+    }
+
+    public void setPmInitialised(boolean pmInitialised) {
+        this.pmInitialised = pmInitialised;
     }
 
     /**

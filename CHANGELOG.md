@@ -9,6 +9,7 @@
 * Enabled compression in Tomcat.
 
 **Internal changes & Bugfixes**
+* Fixed inconsistent model state when database is not ready at startup.
 * Fixed exception when auto-detecting base url and no path header is set.
 * Fixed incorrect nullable default in XML-CSDL.
 * Fixed #2210: issue with Projects Plugin when using String FeatureOfInterest ids.
