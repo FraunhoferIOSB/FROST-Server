@@ -21,18 +21,28 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.E
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
+import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
+import org.geojson.Feature;
 import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
@@ -228,8 +238,10 @@ public abstract class GeoTests extends AbstractTestClass {
 
     private static void createLocation3() throws ServiceFailureException {
         // Locations 3
-        Point gjo = new Point(8, 54);
-        Entity location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/vnd.geo+json", gjo);
+        Point point = new Point(8, 54);
+        Feature gjo = new Feature();
+        gjo.setGeometry(point);
+        Entity location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/geo+json", gjo);
         location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(2));
         sSrvc.create(location);
         LOCATIONS.add(location);
@@ -511,4 +523,19 @@ public abstract class GeoTests extends AbstractTestClass {
                 getFromList(DATASTREAMS, 0));
     }
 
+    /**
+     * Test GeoJSON result format.
+     */
+    @Test
+    void testGeoJsonFormat() throws JsonProcessingException, IOException {
+        LOGGER.info("  testGeoJsonFormat");
+        String geoJsonExpected = IOUtils.resourceToString("geoJsonResult.json", StandardCharsets.UTF_8, getClass().getClassLoader());
+        JsonNode expected = SimpleJsonMapper.getSimpleObjectMapper().readTree(geoJsonExpected);
+
+        String url = sSrvc.getBaseUrl() + sMdl.etLocation.mainSet + "?$orderby=id&$format=GeoJSON";
+        HttpResponse response = HTTPMethods.doGet(url);
+        JsonNode received = SimpleJsonMapper.getSimpleObjectMapper().readTree(response.response);
+
+        Utils.jsonEquals(expected, received);
+    }
 }
