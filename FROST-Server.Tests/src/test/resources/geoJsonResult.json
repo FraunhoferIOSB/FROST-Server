@@ -1,0 +1,100 @@
+{
+    "type": "FeatureCollection",
+    "features": [{
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2e8ed194-b198-11f0-a67c-63170af7411e",
+                "name": "Location 1.0",
+                "description": "First Location of Thing 1.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [8.0, 51.0]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2e97da82-b198-11f0-a67c-3b6c64639d70",
+                "name": "Location 1.1",
+                "description": "Second Entity of Thing 1.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [8.0, 52.0]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2e9b7a52-b198-11f0-a67c-a7b07afe6f73",
+                "name": "Location 2",
+                "description": "Location of Thing 2.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [8.0, 53.0]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2e9f7666-b198-11f0-a67c-8bf3ffbf5ee9",
+                "name": "Location 3",
+                "description": "Location of Thing 3.",
+                "encodingType": "application/geo+json"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [8.0, 54.0]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2ea447d6-b198-11f0-a67c-bf645a86068d",
+                "name": "Location 4",
+                "description": "Location of Thing 4.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[8.0, 53.0], [7.0, 52.0], [7.0, 53.0], [8.0, 53.0]]]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2ea838aa-b198-11f0-a67c-37cc73c8349b",
+                "name": "Location 5",
+                "description": "A line.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[5.0, 52.0], [5.0, 53.0]]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2ea96e78-b198-11f0-a67c-e3cc1b476f6d",
+                "name": "Location 6",
+                "description": "A longer line.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[5.0, 52.0], [6.0, 53.0]]
+            }
+        }, {
+            "type": "Feature",
+            "properties": {
+                "@iot.id": "2eaa8e98-b198-11f0-a67c-3bbf7e4561ec",
+                "name": "Location 7",
+                "description": "The longest line.",
+                "encodingType": "application/vnd.geo+json"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[4.0, 52.0], [8.0, 52.0]]
+            }
+        }]
+}
