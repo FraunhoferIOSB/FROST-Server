@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.6.2-SNAPSHOT
+## Version 2.6.2
 
 **Internal changes & Bugfixes**
 * Fixed #2247: GeoJSON format incorrect when location or feature is a full Feature.
