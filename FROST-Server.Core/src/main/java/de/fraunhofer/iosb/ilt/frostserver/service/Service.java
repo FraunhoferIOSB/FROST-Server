@@ -503,6 +503,7 @@ public class Service implements AutoCloseable {
                     }
                     NavigationPropertyEntitySet navProp = mainSet.getNavigationProperty();
                     pm.addRelation(parentEntity, navProp, targetEntity);
+                    maybeCommitAndClose();
                 }
 
             } catch (IOException ex) {

@@ -219,8 +219,8 @@ public class ReferenceTests11 extends AbstractTestClass {
     void test01_editRefEntity() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  test01_editRefEntity");
         final Entity ds0 = DATASTREAMS.get(0);
-        linkAndTestEntityRef(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(0), true);
-        linkAndTestEntityRef(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(1), false);
+        putEntityRefAndTest(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(0), true);
+        putEntityRefAndTest(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(1), false);
 
         String selfLinkSrc = ds0.getSelfLink();
         String refLink = selfLinkSrc + "/" + sMdl.npDatastreamUltimateFoi.getName() + "/$ref";
@@ -238,7 +238,7 @@ public class ReferenceTests11 extends AbstractTestClass {
         }
     }
 
-    private void linkAndTestEntityRef(Entity source, NavigationPropertyEntity np, Entity target, boolean abs) throws ServiceFailureException, JsonProcessingException {
+    private void putEntityRefAndTest(Entity source, NavigationPropertyEntity np, Entity target, boolean abs) throws ServiceFailureException, JsonProcessingException {
         String selfLinkSrc = source.getSelfLink();
         String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
         String selfLinkTrgt = target.getSelfLink(abs);
@@ -263,9 +263,9 @@ public class ReferenceTests11 extends AbstractTestClass {
     void test02_editRefEntitySet() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  test02_editRefEntitySet");
         final Entity f0 = FEATURES.get(0);
-        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 0));
-        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 1, 2));
-        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 1));
+        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 0));
+        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 1, 2));
+        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 1));
 
         String selfLinkSrc = f0.getSelfLink();
         String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "(" + Utils.quoteForUrl(FEATURE_TYPES.get(1).getPrimaryKeyValues().get(0)) + ")" + "/$ref";
@@ -285,7 +285,7 @@ public class ReferenceTests11 extends AbstractTestClass {
     void test03_editRefEntitySet() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  test03_editRefEntitySet");
         final Entity f0 = FEATURES.get(0);
-        linkAndTestEntitySetRefs(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 0, 1, 2));
+        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 0, 1, 2));
 
         String selfLinkSrc = f0.getSelfLink();
         {
@@ -296,14 +296,19 @@ public class ReferenceTests11 extends AbstractTestClass {
         }
         {
             String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "/$ref?$id=" + FEATURE_TYPES.get(0).getSelfLink(true);
-            LOGGER.info("  DELETE to {}", refLink);
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
             EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 2));
         }
+        // Adding the ony that is already there is a no-op (204 no content)
+        postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, false, FEATURE_TYPES.get(2), getFromList(FEATURE_TYPES, 2));
+        // Adding a new one.
+        postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, false, FEATURE_TYPES.get(1), getFromList(FEATURE_TYPES, 1, 2));
+        // Adding a new one.
+        postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, true, FEATURE_TYPES.get(0), getFromList(FEATURE_TYPES, 0, 1, 2));
     }
 
-    private void linkAndTestEntitySetRefs(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) throws ServiceFailureException, JsonProcessingException {
+    private void putEntitySetRefsAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) throws ServiceFailureException, JsonProcessingException {
         String selfLinkSrc = source.getSelfLink();
         String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
 
@@ -324,6 +329,21 @@ public class ReferenceTests11 extends AbstractTestClass {
         Assertions.assertEquals(204, response.code);
 
         EntityUtils.testFilterResults(source.dao(np), "", targets);
+    }
+
+    private void postEntitySetRefAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, Entity target, List<Entity> expected) throws ServiceFailureException, JsonProcessingException {
+        String selfLinkSrc = source.getSelfLink();
+        String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
+
+        Map<String, Object> data = CollectionsHelper.propertiesBuilder()
+                .addItem("@id", target.getSelfLink(abs))
+                .buildMap();
+        String body = SimpleJsonMapper.getSimpleObjectMapper()
+                .writeValueAsString(data);
+        HttpResponse response = HTTPMethods.doPost(refLink, body);
+        Assertions.assertEquals(204, response.code);
+
+        EntityUtils.testFilterResults(source.dao(np), "", expected);
     }
 
     //To remove once added to FROST-Client-Dynamic
