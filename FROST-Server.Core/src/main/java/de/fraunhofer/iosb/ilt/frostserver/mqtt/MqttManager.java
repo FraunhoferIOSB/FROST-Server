@@ -241,7 +241,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             service.execute(serviceRequest, serviceResponse);
             ServiceRequest.removeLocalRequest();
             if (!serviceResponse.isSuccessful()) {
-                LOGGER.error("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
+                LOGGER.info("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
                         topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
             }
         }

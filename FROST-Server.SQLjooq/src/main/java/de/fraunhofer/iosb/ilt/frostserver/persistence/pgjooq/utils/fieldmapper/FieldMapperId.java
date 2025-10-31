@@ -68,7 +68,7 @@ public class FieldMapperId extends FieldMapperAbstractEp {
             return;
         }
         DataType<?> dataType = dbField.getDataType();
-        LOGGER.info("  Registering {} -> {}.{}", staTableDynamic.getName(), dbTable.getName(), field);
+        LOGGER.debug("  Registering {} -> {}.{}", staTableDynamic.getName(), dbTable.getName(), field);
         staTableDynamic.registerField(field, dataType);
     }
 

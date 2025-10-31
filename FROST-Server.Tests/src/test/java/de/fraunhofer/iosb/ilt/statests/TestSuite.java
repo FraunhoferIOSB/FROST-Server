@@ -644,9 +644,6 @@ public class TestSuite {
             JsonNode conformanceArray = serverSettingsObject.get("conformance");
             for (JsonNode reqItem : conformanceArray) {
                 Set<Requirement> allMatching = Requirement.getAllMatching(reqItem.textValue());
-                if (allMatching.isEmpty()) {
-                    LOGGER.info("Server implements unknown requirement: {}", reqItem);
-                }
                 serverSettings.addImplementedRequirements(version, allMatching);
             }
             if (hasActuation && !serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {

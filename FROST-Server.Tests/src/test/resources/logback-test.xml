@@ -12,23 +12,24 @@
         </encoder>
     </appender>
 
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.auth.keycloak" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.auth" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.http" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.AuthWrapper" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionManager" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionSet" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="OFF"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator" level="WARN"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence" level="wARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.plugin" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.service.PluginManager" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.service.Service" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings.Settings" level="WARN"/>
-    <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.messagebus" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.model" level="WARN"/>
     
     <logger name="de.fraunhofer.iosb.ilt.frostclient.SensorThingsService" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostclient.utils.Utils" level="WARN"/>
-    <logger name="de.fraunhofer.iosb.ilt.settings.Settings" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.settings" level="WARN"/>
 
     <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener" level="INFO"/>
@@ -38,7 +39,8 @@
 
     <logger name="de.fraunhofer.iosb.ilt.frostclient.query.Query" level="INFO"/>
 
-    <logger name="io.moquette" level="INFO"/>
+    <logger name="io.moquette" level="WARN"/>
+    <logger name="io.moquette.broker.Authorizator" level="ERROR"/>
     <logger name="io.moquette.broker.PostOffice" level="WARN"/>
     <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN"/>
     <logger name="io.moquette.broker.NewNettyAcceptor" level="WARN"/>
@@ -47,8 +49,9 @@
     <logger name="liquibase" level="WARN"/>
     <logger name="liquibase.analytics.logLevel" level="TRACE"/>
 
+    <logger name="org.eclipse.jetty" level="WARN"/>
     <logger name="org.jooq" level="WARN"/>
-    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.testcontainers" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

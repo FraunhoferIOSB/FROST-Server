@@ -769,9 +769,9 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
                 final String tableName = entityTypeDef.getTable();
                 if (!StringHelper.isNullOrEmpty(tableName)) {
-                    LOGGER.info("  Table: {}.", tableName);
+                    LOGGER.debug("  Table: {}.", tableName);
                     getDbTable(tableName);
-                    StaMainTable mainTable = getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
+                    getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
                 }
             }
         }
@@ -961,7 +961,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             if (primaryKey.size() > 1) {
                 throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
             }
-            LOGGER.info("  Registering StaTable {} ({})", tableName, entityType);
+            LOGGER.debug("  Registering StaTable {} ({})", tableName, entityType);
             final DataType<?> pkDataType = getDataTypeFor(primaryKey.getKeyProperty(0).getType().getName());
             StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, pkDataType);
             tableCollection.registerTable(entityType, newTable);

@@ -65,7 +65,7 @@ public class AuthTestHelper {
     }
 
     public void getDatabaseStatus(String user, SensorThingsService service, int... expectedResponse) throws IOException {
-        LOGGER.info("  Database Status User {}", user);
+        LOGGER.debug("  Database Status User {}", user);
         getDatabaseStatus(service, serverSettings.getServiceRootUrl() + "/DatabaseStatus", expectedResponse);
     }
 

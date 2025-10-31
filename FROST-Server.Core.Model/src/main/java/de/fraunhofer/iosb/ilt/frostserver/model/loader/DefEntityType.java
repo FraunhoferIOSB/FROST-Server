@@ -278,7 +278,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
                 return property;
             }
         }
-        LOGGER.warn("No primary key defined for {}", getName());
+        LOGGER.info("No primary key defined for {}", getName());
         return null;
     }
 

@@ -31,6 +31,8 @@ import java.util.Objects;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
+import liquibase.UpdateSummaryEnum;
+import liquibase.UpdateSummaryOutputEnum;
 import liquibase.changelog.ChangeSetStatus;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -94,6 +96,8 @@ public class LiquibaseHelper {
         System.setProperty("liquibase.analytics.logLevel", "FINE");
         System.setProperty("liquibase.analytics.enabled", "false");
         try (Liquibase liquibase = new Liquibase(liquibaseChangelogFilename, resourceAccessor, database)) {
+            liquibase.setShowSummary(UpdateSummaryEnum.SUMMARY);
+            liquibase.setShowSummaryOutput(UpdateSummaryOutputEnum.LOG);
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
@@ -139,6 +143,8 @@ public class LiquibaseHelper {
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
+            liquibase.setShowSummary(UpdateSummaryEnum.SUMMARY);
+            liquibase.setShowSummaryOutput(UpdateSummaryOutputEnum.LOG);
             liquibase.update(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
             out.append("Update Completed: " + changeSetName + ".");
         } catch (LiquibaseException ex) {

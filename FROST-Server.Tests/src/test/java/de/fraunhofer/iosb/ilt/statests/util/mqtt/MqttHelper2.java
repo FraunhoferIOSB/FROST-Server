@@ -734,7 +734,7 @@ public class MqttHelper2 {
             if (thread == null) {
                 return;
             }
-            LOGGER.info("Joining {}", name);
+            LOGGER.trace("Joining {}", name);
             try {
                 thread.join(timeout);
             } catch (InterruptedException ex) {

@@ -53,7 +53,7 @@ public abstract class FieldMapperAbstract implements FieldMapper, AnnotatedConfi
             throw new IllegalArgumentException("Could not find field " + fieldName + " on table " + dbTable.getName());
         }
         DataType<?> dataType = dbField.getDataType();
-        LOGGER.info("  Registering {} -> {}.{} ({})", staTable.getName(), dbTable.getName(), fieldName, dataType);
+        LOGGER.debug("  Registering {} -> {}.{} ({})", staTable.getName(), dbTable.getName(), fieldName, dataType);
         return staTable.registerField(fieldName, dataType, binding);
     }
 

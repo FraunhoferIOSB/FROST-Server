@@ -54,6 +54,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstan
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeConstant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.TimeObjectConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Add;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.arithmetic.Divide;
@@ -296,6 +297,11 @@ public class ExpressionHandlers {
             return new StaTimeIntervalWrapper(
                     value.getStartAsMoment(),
                     value.getEndAsMoment());
+        }
+
+        public static FieldWrapper handle(TimeObjectConstant node) {
+            LOGGER.error("TimeObjects should never appear in expressions!");
+            throw new IllegalArgumentException("TimeObjects should never appear in expressions!");
         }
 
         public static FieldWrapper handle(IntegerConstant node) {

@@ -332,12 +332,12 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         for (var tester : testers) {
             tester.join(20_000);
             if (tester.hasCreatedEntity()) {
-                LOGGER.info("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
+                LOGGER.debug("Found Entity for {}: {}", tester.name, tester.getCreatedEntity());
                 SENSORS.add(tester.getCreatedEntity());
             }
         }
         for (var tester : testers) {
-            LOGGER.info("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
+            LOGGER.debug("  User {}, {}, Message {}", tester.name, tester.isSuccess(), tester.getMessage());
             assertTrue(tester.isSuccess(), tester.getMessage());
         }
     }
