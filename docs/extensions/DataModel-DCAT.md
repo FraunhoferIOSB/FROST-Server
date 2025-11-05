@@ -18,7 +18,77 @@ A SensorThings API server, like the FROST-Server, is designed to provide datastr
 The image below shows the core STA data model in blue, with the DCAT extension in yellow.
 
 TODO: create image
-![Data Model](../images/Datamodel-SensorThingsApi-Projects.drawio.png)
+```mermaid
+classDiagram
+    direction LR
+
+    class DataService {
+      id: Id
+      title: string
+      endpointURL: string
+    }
+
+    class Dataset {
+      id: Id
+      title: string
+      description: string
+      keywords: string
+      temporalResolution: string
+      spatialResolution: double
+    }
+
+    class Distribution {
+      id: Id
+      accessURL: string
+      title: string
+      description: string
+      format: string
+      availability: string
+    }
+
+    class License {
+      id: Id
+      definition: string
+    }
+
+    class Standard {
+      id: Id
+      definition: string
+      title: string
+    }
+
+    class Agent {
+      id: Id
+      name: string
+      email: string
+      telephone: string
+      countryName: string
+      postalCode: string
+      locality: string
+      streetAddress: string
+    }
+
+    class Datastream {
+      id: Id
+    }
+
+    %% Beziehungen
+    DataService "*" --> "1" Agent : Publisher
+    DataService "*" -- "*" Standard : ConformsTo
+    DataService "*" --> "1" License : License
+    DataService "*" -- "*" Dataset : Datasets
+
+    Dataset "*" --> "1" Agent : Publisher
+    Dataset "*" -- "*" Agent : Creators
+    Dataset "*" -- "*" Standard : ConformsTo
+    Dataset "*" -- "*" Agent : ContactPoint
+    Dataset "*" -- "*" Datastream : Datastreams
+
+    Distribution "*" -- "*" DataService : AccessServices
+    Distribution "*" --> "1" License : License
+    Distribution "*" -- "*" Standard : ConformsTo
+    Distribution "*" --> "1" Dataset : Dataset
+```
 
 
 ## Example Data
