@@ -15,9 +15,8 @@ A SensorThings API server, like the FROST-Server, is designed to provide datastr
 
 ## Data Model
 
-The image below shows the core STA data model in blue, with the DCAT extension in yellow.
+The image below shows the data elements added by the DCAT Data Model. The __Dataset__ class is linked to the __Datastream__ class from the core STA data model.
 
-TODO: create image
 ```mermaid
 classDiagram
     direction LR
