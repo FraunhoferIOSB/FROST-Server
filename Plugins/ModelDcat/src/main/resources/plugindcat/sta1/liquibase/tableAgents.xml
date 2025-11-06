@@ -55,10 +55,11 @@
     <changeSet author="generated" id="2025-06-10-agent-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <not>
-                <columnExists columnName="name" tableName="agent" />
+                <columnExists columnName="definition" tableName="agent" />
             </not>
         </preConditions>
         <addColumn tableName="agent">
+            <column name="definition" type="TEXT"/>
             <column name="name" type="TEXT"/>
             <column name="email" type="TEXT"/>
             <column name="telephone" type="TEXT"/>
