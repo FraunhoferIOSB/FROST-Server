@@ -25,7 +25,6 @@ import static net.time4j.format.expert.IsoDateStyle.EXTENDED_CALENDAR_DATE;
 import static net.time4j.format.expert.IsoDecimalStyle.DOT;
 import static net.time4j.tz.ZonalOffset.UTC;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -160,13 +159,7 @@ public class StringHelper {
     }
 
     public static String urlEncode(String input) {
-        try {
-            return URLEncoder.encode(input, UTF8.name());
-        } catch (UnsupportedEncodingException exc) {
-            // Should never happen, UTF-8 is build in.
-            LOGGER.error(UTF8_NOT_SUPPORTED);
-            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
-        }
+        return URLEncoder.encode(input, UTF8);
     }
 
     /**
@@ -176,13 +169,7 @@ public class StringHelper {
      * @return The decoded input.
      */
     public static String urlDecode(String input) {
-        try {
-            return URLDecoder.decode(input, UTF8.name());
-        } catch (UnsupportedEncodingException exc) {
-            // Should never happen, UTF-8 is build in.
-            LOGGER.error(UTF8_NOT_SUPPORTED);
-            throw new IllegalStateException(UTF8_NOT_SUPPORTED, exc);
-        }
+        return URLDecoder.decode(input, UTF8);
     }
 
     /**
