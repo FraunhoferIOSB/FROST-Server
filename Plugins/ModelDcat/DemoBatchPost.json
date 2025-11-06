@@ -15,7 +15,26 @@
             "method": "post",
             "url": "Agents",
             "body": {
+                "definition": "https://www.iosb.fraunhofer.de",
                 "name": "Fraunhofer IOSB"
+            }
+        },
+
+        {
+            "id": "license_CC_BY_SA",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Licenses?$select=id&$filter=title eq 'CC Attribution-ShareAlike 4.0'"
+        },
+        {
+            "id": "license_CC_BY_SA",
+            "if": "not $license_CC_BY_SA",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Licenses",
+            "body": {
+                "definition": "https://creativecommons.org/licenses/by-sa/4.0/",
+                "title": "CC Attribution-ShareAlike 4.0"
             }
         },
 
@@ -52,6 +71,9 @@
             "body": {
                 "title": "Air Quality Service",
                 "endpointURL": "https://airquality-frost.k8s.ilt-dmz.iosb.fraunhofer.de/v1.1/",
+                "License": {
+                    "id": "$license_CC_BY_SA"
+                },
                 "ConformsTo": [
                     {
                         "id": "$standard_sta"
@@ -111,6 +133,9 @@
                 "format": "application/json",
                 "Dataset": {
                     "id": "$dset_airquality"
+                },
+                "License": {
+                    "id": "$license_CC_BY_SA"
                 },
                 "AccessServices": [
                     {

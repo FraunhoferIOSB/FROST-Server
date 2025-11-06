@@ -169,23 +169,30 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         final EntityType etAgent;
         final EntityType etDataService;
         final EntityType etDataset;
+        final EntityType etDatastream;
         final EntityType etDistribution;
         final EntityType etStandard;
+        final EntityType etLicense;
 
         final NavigationPropertyEntity npDtstPublisher;
         final NavigationPropertyEntitySet npDtstContactPoint;
         final NavigationPropertyEntitySet npDtstConformsTo;
         final NavigationPropertyEntitySet npDtstCreators;
+        final NavigationPropertyEntitySet npDtstDatastreams;
         final NavigationPropertyEntitySet npDtstDataServices;
         final NavigationPropertyEntitySet npDtstDistributions;
 
         final NavigationPropertyEntitySet npDbtnAccessServices;
         final NavigationPropertyEntitySet npDbtnConformsTo;
+        final NavigationPropertyEntity npDbtnLicense;
 
         final NavigationPropertyEntity npDatSrvPublisher;
         final NavigationPropertyEntity npDatSrvLicense;
         final NavigationPropertyEntitySet npDatSrvConformsTo;
 
+        final NavigationPropertyEntity npDtstrmObservedProperty;
+
+        final EntityPropertyMain<String> epAgentDefinition;
         final EntityPropertyMain<String> epAgentName;
         final EntityPropertyMain<String> epAgentEmail;
         final EntityPropertyMain<String> epAgentTelephone;
@@ -207,7 +214,10 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         final EntityPropertyMain<String> epDbtnAvailability;
 
         final EntityPropertyMain<String> epStdrdDefinition;
+        final EntityPropertyMain<String> epStdrdTitle;
+
         final EntityPropertyMain<String> epLicenseDefinition;
+        final EntityPropertyMain<String> epLicenseTitle;
 
         final EntityPropertyMain<String> epDatSrvTitle;
         final EntityPropertyMain<String> epDatSrvEndpointURL;
@@ -218,7 +228,10 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             etDataset = mr.getEntityTypeForName("Dataset", true);
             etDistribution = mr.getEntityTypeForName("Distribution", true);
             etStandard = mr.getEntityTypeForName("Standard", true);
+            etLicense = mr.getEntityTypeForName("License", true);
+            etDatastream = mr.getEntityTypeForName("Datastream", true);
 
+            epAgentDefinition = etAgent.getEntityProperty("definition");
             epAgentName = etAgent.getEntityProperty("name");
             epAgentEmail = etAgent.getEntityProperty("email");
             epAgentTelephone = etAgent.getEntityProperty("telephone");
@@ -232,6 +245,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             npDtstConformsTo = etDataset.getNavigationPropertyEntitySet("ConformsTo");
             npDtstCreators = etDataset.getNavigationPropertyEntitySet("Creators");
             npDtstDataServices = etDataset.getNavigationPropertyEntitySet("DataServices");
+            npDtstDatastreams = etDataset.getNavigationPropertyEntitySet("Datastreams");
             npDtstDistributions = etDataset.getNavigationPropertyEntitySet("Distributions");
             epDtstTitle = etDataset.getEntityProperty("title");
             epDtstDescription = etDataset.getEntityProperty("description");
@@ -241,6 +255,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
 
             npDbtnAccessServices = etDistribution.getNavigationPropertyEntitySet("AccessServices");
             npDbtnConformsTo = etDistribution.getNavigationPropertyEntitySet("ConformsTo");
+            npDbtnLicense = etDistribution.getNavigationPropertyEntity("License");
             epDbtnAccessURL = etDistribution.getEntityProperty("accessURL");
             epDbtnTitle = etDistribution.getEntityProperty("title");
             epDbtnDescription = etDistribution.getEntityProperty("description");
@@ -248,7 +263,10 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             epDbtnAvailability = etDistribution.getEntityProperty("availability");
 
             epStdrdDefinition = etStandard.getEntityProperty("definition");
-            epLicenseDefinition = etDataService.getEntityProperty("definition");
+            epStdrdTitle = etStandard.getEntityProperty("title");
+
+            epLicenseDefinition = etLicense.getEntityProperty("definition");
+            epLicenseTitle = etLicense.getEntityProperty("title");
 
             npDatSrvConformsTo = etDataService.getNavigationPropertyEntitySet("ConformsTo");
             npDatSrvLicense = etDataService.getNavigationPropertyEntity("License");
@@ -256,6 +274,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             epDatSrvTitle = etDataService.getEntityProperty("title");
             epDatSrvEndpointURL = etDataService.getEntityProperty("endpointURL");
 
+            npDtstrmObservedProperty = etDatastream.getNavigationPropertyEntity("ObservedProperty");
         }
 
     }
@@ -287,10 +306,11 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
 
     private static class Cache {
 
-        Map<Object, Resource> standards = new HashMap<>();
+        Map<PkValue, Resource> accessServices = new HashMap<>();
         Map<PkValue, Resource> agents = new HashMap<>();
         Map<PkValue, Resource> distributions = new HashMap<>();
-        Map<PkValue, Resource> accessServices = new HashMap<>();
+        Map<PkValue, Resource> licenses = new HashMap<>();
+        Map<PkValue, Resource> standards = new HashMap<>();
 
     }
 
@@ -321,6 +341,10 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                                                 .addExpand(new Expand(mdl.npDatSrvLicense))
                                                 .addExpand(new Expand(mdl.npDatSrvConformsTo))))
                                 .addExpand(new Expand(mdl.npDbtnConformsTo))))
+                .addExpand(new Expand(mdl.npDtstDatastreams)
+                        .setSubQuery(request.newQuery()
+                                .setPath(path)
+                                .addExpand(new Expand(mdl.npDtstrmObservedProperty))))
                 .validate();
         EntitySet datasets = pm.get(path, query, EntitySet.class);
 
@@ -390,7 +414,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                 def = standard.getSelfLink();
             }
             standardRs = model.createResource(def, DCTerms.Standard);
-            addLiteralIfNotNull(standardRs, DCTerms.title, standard, mdl.epDtstTitle);
+            addLiteralIfNotNull(standardRs, DCTerms.title, standard, mdl.epStdrdTitle);
             cache.standards.put(standardPk, standardRs);
             return standardRs;
         }
@@ -417,9 +441,10 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                 final Resource accServiceRs = getOrCreateAccessService(cache, model, accService);
                 distRs.addProperty(DCAT.accessService, accServiceRs);
             }
-            Entity license = distribution.getProperty(mdl.npDtstPublisher);
+            Entity license = distribution.getProperty(mdl.npDbtnLicense);
             if (license != null) {
-                distRs.addProperty(DCTerms.license, license.getProperty(mdl.epLicenseDefinition));
+                Resource licenseRs = getOrCreateLicense(cache, model, license);
+                distRs.addProperty(DCTerms.license, licenseRs);
             }
 
             cache.distributions.put(distPk, distRs);
@@ -449,7 +474,8 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
 
             Entity license = accService.getProperty(mdl.npDatSrvLicense);
             if (license != null) {
-                accServiceRs.addProperty(DCTerms.license, license.getProperty(mdl.epLicenseDefinition));
+                Resource licenseRs = getOrCreateLicense(cache, model, license);
+                accServiceRs.addProperty(DCTerms.license, licenseRs);
             }
 
             cache.accessServices.put(agentPk, accServiceRs);
@@ -462,7 +488,10 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         if (cache.agents.containsKey(agentPk)) {
             return cache.agents.get(agentPk);
         } else {
-            String def = agent.getSelfLink();
+            String def = agent.getProperty(mdl.epAgentDefinition);
+            if (StringHelper.isNullOrEmpty(def)) {
+                def = agent.getSelfLink();
+            }
             Resource agentRs = model.createResource(def, DCTerms.Agent);
             addLiteralIfNotNull(agentRs, FOAF.NAME, agent, mdl.epAgentName);
             addLiteralIfNotNull(agentRs, VCARD.hasCountryName, agent, mdl.epAgentCountryName);
@@ -474,6 +503,22 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             addLiteralIfNotNull(agentRs, VCARD.hasTelephone, agent, mdl.epAgentTelephone);
             cache.agents.put(agentPk, agentRs);
             return agentRs;
+        }
+    }
+
+    private Resource getOrCreateLicense(Cache cache, Model model, Entity license) {
+        final PkValue licensePk = license.getPrimaryKeyValues();
+        if (cache.licenses.containsKey(licensePk)) {
+            return cache.licenses.get(licensePk);
+        } else {
+            String def = license.getProperty(mdl.epLicenseDefinition);
+            if (StringHelper.isNullOrEmpty(def)) {
+                def = license.getSelfLink();
+            }
+            Resource licenseRs = model.createResource(def, DCTerms.license);
+            addLiteralIfNotNull(licenseRs, DCTerms.title, license, mdl.epLicenseTitle);
+            cache.licenses.put(licensePk, licenseRs);
+            return licenseRs;
         }
     }
 
