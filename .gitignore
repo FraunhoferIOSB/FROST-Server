@@ -25,3 +25,4 @@ Tools/ModelExtractor/examples
 *.tgz
 .vscode/
 .lck
+*.bkp
