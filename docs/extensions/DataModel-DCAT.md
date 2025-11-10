@@ -36,4 +36,4 @@ The conformance class this extension registers in the SensorThings (v1.1 and up)
 
 
 ## Acknowledgment
-This work was funded by the Ministry of Economic Affairs, Labour and Tourism Baden‑Württemberg within the framework of the AI Alliance Baden‑Württemberg (KI‑Allianz BW).
+This work was funded by the Ministry of Economic Affairs, Labour and Tourism Baden‑Württemberg within the framework of the AI Alliance Baden‑Württemberg (KI‑Allianz BW, project "Datenplattform").
