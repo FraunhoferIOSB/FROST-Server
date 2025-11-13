@@ -15,80 +15,9 @@ A SensorThings API server, like the FROST-Server, is designed to provide datastr
 
 ## Data Model
 
-The image below shows the data elements added by the DCAT Data Model. The __Dataset__ class is linked to the __Datastream__ class from the core STA data model.
+The image below shows the data elements added by the DCAT Data Model. The extension classed are schon in red and the STA classes are shown in green. The connection between the DCAT extension and the STA core datamodel is realized by linking  __DCAT:Dataset__ class the __STA:Datastream__ class from the core STA data model.
 
-```mermaid
-classDiagram
-    direction LR
-
-    class DataService {
-      id: Id
-      title: string
-      endpointURL: string
-    }
-
-    class Dataset {
-      id: Id
-      title: string
-      description: string
-      keywords: string
-      temporalResolution: string
-      spatialResolution: double
-    }
-
-    class Distribution {
-      id: Id
-      accessURL: string
-      title: string
-      description: string
-      format: string
-      availability: string
-    }
-
-    class License {
-      id: Id
-      definition: string
-    }
-
-    class Standard {
-      id: Id
-      definition: string
-      title: string
-    }
-
-    class Agent {
-      id: Id
-      name: string
-      email: string
-      telephone: string
-      countryName: string
-      postalCode: string
-      locality: string
-      streetAddress: string
-    }
-
-    class Datastream {
-      id: Id
-    }
-
-    %% Beziehungen
-    DataService "*" --> "1" Agent : Publisher
-    DataService "*" -- "*" Standard : ConformsTo
-    DataService "*" --> "1" License : License
-    DataService "*" -- "*" Dataset : Datasets
-
-    Dataset "*" --> "1" Agent : Publisher
-    Dataset "*" -- "*" Agent : Creators
-    Dataset "*" -- "*" Standard : ConformsTo
-    Dataset "*" -- "*" Agent : ContactPoint
-    Dataset "*" -- "*" Datastream : Datastreams
-
-    Distribution "*" -- "*" DataService : AccessServices
-    Distribution "*" --> "1" License : License
-    Distribution "*" -- "*" Standard : ConformsTo
-    Distribution "*" --> "1" Dataset : Dataset
-```
-
+![DCAT Data Model Extension](../images/Extension-DCAT.drawio.png)
 
 ## Example Data
 
