@@ -17,11 +17,26 @@ A SensorThings API server, like the FROST-Server, is designed to provide datastr
 
 The image below shows the data elements added by the DCAT Data Model. The extension classed are schon in red and the STA classes are shown in green. The connection between the DCAT extension and the STA core datamodel is realized by linking  __DCAT:Dataset__ class the __STA:Datastream__ class from the core STA data model.
 
+
 ![DCAT Data Model Extension](../images/Extension-DCAT.drawio.png)
 
-## Example Data
+## Installation and Usage 
 
-TODO: Illustrative example, like the DAKIMO datastream.
+### Installation
+
+TODO: explain installation, like how to enable the DCAT extension within the FROST-Server configuration.
+
+### DCAT-Export
+
+TODO: explain how the data export will be used, like
+
+    https://kia-frost-exporter.k8s.ilt-dmz.iosb.fraunhofer.de/dcat
+
+### Frontend
+
+The DCAT extension data can be maintained by the standard API functions. A simple frontend is also available for interactive editing. The image below shows the first version of the web-based editor.
+
+![DCAT Frontend Editor](../images/DCAT-Frontend.png)
 
 
 ## Conformance Class
