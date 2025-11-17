@@ -24,7 +24,9 @@ The image below shows the data elements added by the DCAT Data Model. The extens
 
 ### Installation
 
-TODO: explain installation, like how to enable the DCAT extension within the FROST-Server configuration.
+The DCAT data model extension must be enabled in the FROST-Server configuration. See https://fraunhoferiosb.github.io/FROST-Server/settings/plugins.html for details.
+
+TODO: Add enable token documenation into settings file.
 
 ### DCAT-Export
 
