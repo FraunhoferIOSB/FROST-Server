@@ -138,8 +138,8 @@
         <version.postgres>42.7.8</version.postgres>
         <version.prometheus>1.4.2</version.prometheus>
         <version.slf4j-api>2.0.17</version.slf4j-api>
-        <version.testcontainers>1.21.3</version.testcontainers>
-        <version.testcontainers-keycloak>3.9.0</version.testcontainers-keycloak>
+        <version.testcontainers>2.0.1</version.testcontainers>
+        <version.testcontainers-keycloak>4.0.0</version.testcontainers-keycloak>
         <version.time4j>5.9.4</version.time4j>
     </properties>
 
@@ -371,13 +371,10 @@
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>junit-jupiter</artifactId>
+                <artifactId>testcontainers-bom</artifactId>
                 <version>${version.testcontainers}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${version.testcontainers}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
