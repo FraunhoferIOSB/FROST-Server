@@ -85,7 +85,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        mvn -B verify sonar:sonar -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
+        mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
         echo "Exporting Variables"
         export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
