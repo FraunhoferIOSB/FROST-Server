@@ -24,7 +24,6 @@ This chart bootstraps a [FROST-Server](https://github.com/FraunhoferIOSB/FROST-S
 
 - Have a [Kubernetes](https://kubernetes.io/) 1.4+ cluster. If you do not already have a cluster, you can:
     - Create one by using [Minikube](https://kubernetes.io/docs/getting-started-guides/minikube)
-    - Or use [Katacoda](https://www.katacoda.com/courses/kubernetes/playground)
     - Or use [Play with Kubernetes](http://labs.play-with-k8s.com/)
 - Have the `kubectl` command-line tool correctly configured to communicate with your Kubernetes cluster
 - Have the [`helm`](https://helm.sh/) command-line tool [correctly initialized with your Kubernetes cluster](https://docs.helm.sh/using_helm/#quickstart-guide)
