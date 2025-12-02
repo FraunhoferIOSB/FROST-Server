@@ -29,6 +29,7 @@ public class Constants {
     public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     public static final String CONTENT_TYPE_APPLICATION_JSONPATCH = "application/json-patch+json";
     public static final String CONTENT_TYPE_APPLICATION_XML = "application/xml";
+    public static final String CONTENT_TYPE_APPLICATION_RDF_XML = "application/rdf+xml";
     public static final String CONTENT_TYPE_JSON = "json";
     public static final String CONTENT_TYPE_TEXT_HTML = "text/html";
     public static final String CONTENT_TYPE_TEXT_PLAIN = "text/plain";

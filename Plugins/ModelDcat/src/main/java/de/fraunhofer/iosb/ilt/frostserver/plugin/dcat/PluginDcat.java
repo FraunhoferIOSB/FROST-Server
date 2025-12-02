@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.dcat;
 
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_XML;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_RDF_XML;
 import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.GET;
 import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.HEAD;
 
@@ -398,7 +398,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                 datasetRs.addProperty(DCAT.distribution, distributionRs);
             }
         }
-        response.setContentType(CONTENT_TYPE_APPLICATION_XML);
+        response.setContentType(CONTENT_TYPE_APPLICATION_RDF_XML);
         model.write(response.getWriter(), "RDF/XML-ABBREV", null);
         return response;
     }
