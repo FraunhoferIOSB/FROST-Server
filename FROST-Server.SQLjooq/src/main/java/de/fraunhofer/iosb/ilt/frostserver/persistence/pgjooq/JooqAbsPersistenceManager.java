@@ -247,6 +247,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         return connectionProvider;
     }
 
+    @Override
     public <R extends Record> ResultQuery<R> setTimeout(ResultQuery<R> query) {
         if (persistenceSettings.isTimeoutQueries()) {
             query.queryTimeout(persistenceSettings.getQueryTimeout());

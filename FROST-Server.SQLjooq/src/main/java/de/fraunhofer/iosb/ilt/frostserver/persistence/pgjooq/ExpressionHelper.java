@@ -202,8 +202,7 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
 
     private void handleCustomLink(final EntityPropertyCustomLink epcl, JsonFieldFactory.JsonFieldWrapper jsonFactory, String name, PathState state) {
         JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper = jsonFactory.addToPath(name + SpecialNames.AT_IOT_ID).materialise();
-        Field<Number> sourceIdField = sourceIdFieldWrapper.getFieldAsType(Number.class, true);
-        state.pathTableRef = queryEntityType(epcl, state.pathTableRef, sourceIdField);
+        state.pathTableRef = queryEntityType(epcl, state.pathTableRef, sourceIdFieldWrapper);
         state.finalExpression = null;
     }
 
@@ -279,10 +278,10 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
      *
      * @param epcl the custom link.
      * @param sourceRef The source table ref.
-     * @param sourceIdField The source ID field.
+     * @param sourceIdFieldWrapper The source ID FieldWrapper.
      * @return A new table ref with the target entity type table joined.
      */
-    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, Field sourceIdField) {
+    public TableRef queryEntityType(EntityPropertyCustomLink epcl, TableRef sourceRef, JsonFieldFactory.JsonFieldWrapper sourceIdFieldWrapper) {
         final EntityType targetEntityType = epcl.getEntityType();
         final StaMainTable<?> target = queryBuilder.getTableCollection().getTablesByType().get(targetEntityType);
         final StaMainTable<?> targetAliased = target.asSecure(queryState.getNextAlias(), queryBuilder.getPersistenceManager());
@@ -290,7 +289,8 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         if (targetField.size() > 1) {
             throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
         }
-        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetField.get(0).eq(sourceIdField)));
+        Field<Object> targetConverted = sourceIdFieldWrapper.otherToJson(targetField.get(0));
+        queryState.setSqlFrom(queryState.getSqlFrom().leftJoin(targetAliased).on(targetConverted.eq(sourceIdFieldWrapper.getJsonExpression())));
         TableRef newRef = new TableRef(targetAliased);
         sourceRef.addJoin(epcl, newRef);
         return newRef;

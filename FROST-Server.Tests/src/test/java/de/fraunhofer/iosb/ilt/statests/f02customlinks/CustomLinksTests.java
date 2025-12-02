@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROP
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_EXTENSION;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_PLUGINS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LONG;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -52,8 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * Tests custom entity links.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class CustomLinksTests extends AbstractTestClass {
@@ -75,7 +75,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         SERVER_PROPERTIES.put(PREFIX_EXTENSION + CoreSettings.TAG_CUSTOM_LINKS_ENABLE, "true");
         SERVER_PROPERTIES.put(PREFIX_EXTENSION + CoreSettings.TAG_CUSTOM_LINKS_RECURSE_DEPTH, "1");
         SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_THING, VALUE_ID_TYPE_LONG);
-        SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VALUE_ID_TYPE_LONG);
+        SERVER_PROPERTIES.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VALUE_ID_TYPE_UUID);
     }
     private static SensorThingsV11Sensing sMdl;
 
@@ -135,7 +135,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
         properties = CollectionsHelper.propertiesBuilder()
                 .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
-                .addItem("alternate.Location@iot.id", -1)
+                .addItem("alternate.Location@iot.id", "000000000")
                 .build();
         thing3.setProperty(EP_PROPERTIES, properties);
         thing3.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(2));
@@ -249,6 +249,12 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         String expected = LOCATIONS.get(0).getProperty(EP_NAME);
         Map<String, Object> alternateLocation = (Map<String, Object>) things.get(0).getProperty(EP_PROPERTIES).get("alternate.Location");
         assertEquals(expected, alternateLocation.get("name"), "Expanded custom Location does not have correct name.");
+    }
+
+    @Test
+    void testCustomLinksFilter1() throws ServiceFailureException {
+        LOGGER.info("  testCustomLinksFilter1");
+        EntityUtils.testFilterResults(sSrvc.dao(sMdl.etThing), "properties/alternate.Location/name eq 'Location 1.0'", Utils.getFromList(THINGS, 0, 1));
     }
 
 }
