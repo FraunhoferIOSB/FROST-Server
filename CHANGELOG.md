@@ -8,6 +8,7 @@
 ## Version 2.6.2
 
 **Internal changes & Bugfixes**
+* Fixed #2263: Custom Entity Linking Fails with UUID primary keys.
 * Fixed #2247: GeoJSON format incorrect when location or feature is a full Feature.
 * Fixed inconsistent model state when database is not ready at startup.
 * Improved performance of table loading.
