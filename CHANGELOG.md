@@ -3,6 +3,7 @@
 ## Version 2.6.3-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed #2263: Custom Entity Linking Fails with UUID primary keys.
 
 
 ## Version 2.6.2
