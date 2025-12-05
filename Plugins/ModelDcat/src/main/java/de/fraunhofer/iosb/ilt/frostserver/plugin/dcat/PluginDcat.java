@@ -30,12 +30,22 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTable;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.ConstantFactory;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -49,11 +59,19 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import net.time4j.Moment;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.geosparql.implementation.GeometryWrapper;
+import org.apache.jena.geosparql.implementation.datatype.WKTDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -61,6 +79,10 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.impl.PropertyImpl;
 import org.apache.jena.vocabulary.DCAT;
 import org.apache.jena.vocabulary.DCTerms;
+import org.jooq.DSLContext;
+import org.jooq.Record3;
+import org.jooq.TableField;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,6 +195,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         final EntityType etDistribution;
         final EntityType etStandard;
         final EntityType etLicense;
+        final EntityType etObservedProperty;
 
         final NavigationPropertyEntity npDtstPublisher;
         final NavigationPropertyEntitySet npDtstContactPoint;
@@ -191,6 +214,9 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         final NavigationPropertyEntitySet npDatSrvConformsTo;
 
         final NavigationPropertyEntity npDtstrmObservedProperty;
+        final NavigationPropertyEntitySet npDtstrmDatasets;
+        final NavigationPropertyEntitySet npObspropDatastreams;
+        final EntityPropertyMain<String> epObspropName;
 
         final EntityPropertyMain<String> epAgentDefinition;
         final EntityPropertyMain<String> epAgentName;
@@ -222,7 +248,15 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         final EntityPropertyMain<String> epDatSrvTitle;
         final EntityPropertyMain<String> epDatSrvEndpointURL;
 
-        public Mdl(ModelRegistry mr) {
+        final String colNameDsId;
+        final String colNameDsPhenEnd;
+        final String colNameDsPhenStart;
+        final String colNameDsObservedArea;
+        final String tblNameDsDtst;
+        final String colNameDsDtstDatasetId;
+        final String colNameDsDtstDatastreamId;
+
+        public Mdl(ModelRegistry mr, PluginManager pm) {
             etAgent = mr.getEntityTypeForName("Agent", true);
             etDataService = mr.getEntityTypeForName("DataService", true);
             etDataset = mr.getEntityTypeForName("Dataset", true);
@@ -230,6 +264,7 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             etStandard = mr.getEntityTypeForName("Standard", true);
             etLicense = mr.getEntityTypeForName("License", true);
             etDatastream = mr.getEntityTypeForName("Datastream", true);
+            etObservedProperty = mr.getEntityTypeForName("ObservedProperty", true);
 
             epAgentDefinition = etAgent.getEntityProperty("definition");
             epAgentName = etAgent.getEntityProperty("name");
@@ -275,8 +310,30 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
             epDatSrvEndpointURL = etDataService.getEntityProperty("endpointURL");
 
             npDtstrmObservedProperty = etDatastream.getNavigationPropertyEntity("ObservedProperty");
-        }
+            npObspropDatastreams = etObservedProperty.getNavigationPropertyEntitySet("Datastreams");
+            epObspropName = etObservedProperty.getEntityProperty("name");
+            npDtstrmDatasets = etDatastream.getNavigationPropertyEntitySet("Datasets");
 
+            if (pm.isPluginEnabled(PluginCoreModel.class)) {
+                colNameDsPhenEnd = "PHENOMENON_TIME_END";
+                colNameDsPhenStart = "PHENOMENON_TIME_START";
+                colNameDsObservedArea = "OBSERVED_AREA";
+                colNameDsId = "ID";
+            } else if (pm.isPluginEnabled(PluginCoreModelV2.class)) {
+                colNameDsPhenEnd = "phenomenon_time_end";
+                colNameDsPhenStart = "phenomenon_time_start";
+                colNameDsObservedArea = "observed_area";
+                colNameDsId = "id";
+            } else {
+                colNameDsPhenEnd = "UNKNOWN";
+                colNameDsPhenStart = "UNKNOWN";
+                colNameDsObservedArea = "UNKNOWN";
+                colNameDsId = "UNKNOWN";
+            }
+            tblNameDsDtst = "dataset_datastream";
+            colNameDsDtstDatasetId = "dataset_id";
+            colNameDsDtstDatastreamId = "datastream_id";
+        }
     }
 
     private static class DCATAP {
@@ -304,6 +361,12 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         public static final Property hasCountryName = new PropertyImpl(NS, "hasCountryName");
     }
 
+    private static class LOCN {
+
+        public static final String NS = "http://www.w3.org/ns/locn#";
+        public static final Property geometry = new PropertyImpl(NS, "geometry");
+    }
+
     private static class Cache {
 
         Map<PkValue, Resource> accessServices = new HashMap<>();
@@ -317,10 +380,13 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
         PersistenceManager pm = mainService.getPm();
-        // http://localhost:8080/FROST-Server/v1.1/Datasets?$expand=Creators,Publisher,Distributions($expand=AccessServices,ConformsTo),DataServices,ConformsTo
+        JooqPersistenceManager jpm = null;
+        if (pm instanceof JooqPersistenceManager jpml) {
+            jpm = jpml;
+        }
 
         if (mdl == null) {
-            mdl = new Mdl(request.getCoreSettings().getModelRegistry());
+            mdl = new Mdl(request.getCoreSettings().getModelRegistry(), request.getCoreSettings().getPluginManager());
         }
 
         ResourcePath path = request.newPath("/Datasets");
@@ -353,10 +419,11 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
         Model model = ModelFactory.createDefaultModel();
 
         model.setNsPrefix("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        model.setNsPrefix("dct", "http://purl.org/dc/terms/");
-        model.setNsPrefix("dcat", "http://www.w3.org/ns/dcat#");
+        model.setNsPrefix("dct", DCTerms.NS);
+        model.setNsPrefix("dcat", DCAT.NS);
         model.setNsPrefix("foaf", FOAF.NS);
         model.setNsPrefix("vcard", VCARD.NS);
+        model.setNsPrefix("locn", LOCN.NS);
 
         for (Entity dataset : datasets) {
             Resource datasetRs = model.createResource(dataset.getSelfLink(), DCAT.Dataset);
@@ -370,6 +437,19 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                 for (String keyword : split) {
                     datasetRs.addLiteral(DCAT.keyword, keyword);
                 }
+            }
+
+            ResourcePath obsPropsPath = request.newPath("/ObservedProperties");
+            final Object dataSetId = dataset.getPrimaryKeyValues().get(0);
+            Query obsPropsQuery = request.newQuery()
+                    .setPath(obsPropsPath)
+                    .setFilter(new Equal(
+                            new Path(mdl.npObspropDatastreams.getName(), mdl.npDtstrmDatasets.getName(), "id"),
+                            ConstantFactory.of(dataSetId)))
+                    .validate();
+            EntitySet obsProps = pm.get(obsPropsPath, obsPropsQuery, EntitySet.class);
+            for (Entity obsProp : obsProps) {
+                datasetRs.addLiteral(DCAT.keyword, obsProp.getProperty(mdl.epObspropName));
             }
 
             for (Entity standard : dataset.getProperty(mdl.npDtstConformsTo)) {
@@ -397,6 +477,51 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                 final Resource distributionRs = getOrCreateDistribution(cache, model, distribution);
                 datasetRs.addProperty(DCAT.distribution, distributionRs);
             }
+
+            if (jpm != null) {
+                DSLContext dslContext = jpm.getDslContext();
+                TableCollection tc = jpm.getTableCollection();
+                StaMainTable<?> tDs = tc.getTableForType(mdl.etDatastream);
+                StaTable tDsDtst = tc.getTableForName(mdl.tblNameDsDtst);
+                final TableField fieldDsId = (TableField) tDs.field(mdl.colNameDsId);
+                final TableField fieldDsDtstDatastreamId = (TableField) tDsDtst.field(mdl.colNameDsDtstDatastreamId);
+                final TableField fieldDsDtstDatasetId = (TableField) tDsDtst.field(mdl.colNameDsDtstDatasetId);
+                Record3<Moment, Moment, Object> result = dslContext
+                        .select(
+                                DSL.min(tDs.field(mdl.colNameDsPhenStart, MomentBinding.dataType())),
+                                DSL.max(tDs.field(mdl.colNameDsPhenEnd, MomentBinding.dataType())),
+                                DSL.field("ST_AsText(ST_ConvexHull(ST_Collect(?)))", DSL.name(mdl.colNameDsObservedArea)))
+                        .from(tDs)
+                        .innerJoin(tDsDtst)
+                        .on(fieldDsId.equal(fieldDsDtstDatastreamId))
+                        .where(fieldDsDtstDatasetId.eq(dataSetId))
+                        .fetchOne();
+                if (result != null) {
+                    Moment start = result.component1();
+                    Moment end = result.component2();
+                    String area = (String) result.component3();
+                    LOGGER.info("{} {} {}", start, end, area);
+                    if (start != null && end != null) {
+                        Resource periodOfTime = model.createResource(DCTerms.PeriodOfTime);
+                        GregorianCalendar startCal = GregorianCalendar.from(ZonedDateTime.ofInstant(start.toTemporalAccessor(), ZoneId.systemDefault()));
+                        GregorianCalendar endCal = GregorianCalendar.from(ZonedDateTime.ofInstant(end.toTemporalAccessor(), ZoneId.systemDefault()));
+                        periodOfTime.addLiteral(DCAT.startDate, new XSDDateTime(startCal));
+                        periodOfTime.addLiteral(DCAT.endDate, new XSDDateTime(endCal));
+                        datasetRs.addProperty(DCTerms.temporal, periodOfTime);
+                    }
+                    if (!StringHelper.isNullOrEmpty(area)) {
+                        try {
+                            Resource location = model.createResource(DCTerms.Location);
+                            GeometryWrapper gepSparql = WKTDatatype.INSTANCE.parse(area);
+                            location.addProperty(LOCN.geometry, gepSparql.asLiteral());
+                            datasetRs.addProperty(DCTerms.spatial, location);
+                        } catch (DatatypeFormatException ex) {
+                            LOGGER.info("Failed to generate Location: {}", ex.getMessage());
+                        }
+                    }
+                }
+            }
+
         }
         response.setContentType(CONTENT_TYPE_APPLICATION_RDF_XML);
         model.write(response.getWriter(), "RDF/XML-ABBREV", null);
