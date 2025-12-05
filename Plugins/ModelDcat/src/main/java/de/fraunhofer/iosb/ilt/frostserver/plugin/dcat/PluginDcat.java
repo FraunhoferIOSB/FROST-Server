@@ -486,16 +486,28 @@ public class PluginDcat implements PluginModel, PluginService, ConfigDefaults {
                 final TableField fieldDsId = (TableField) tDs.field(mdl.colNameDsId);
                 final TableField fieldDsDtstDatastreamId = (TableField) tDsDtst.field(mdl.colNameDsDtstDatastreamId);
                 final TableField fieldDsDtstDatasetId = (TableField) tDsDtst.field(mdl.colNameDsDtstDatasetId);
-                Record3<Moment, Moment, Object> result = dslContext
-                        .select(
-                                DSL.min(tDs.field(mdl.colNameDsPhenStart, MomentBinding.dataType())),
-                                DSL.max(tDs.field(mdl.colNameDsPhenEnd, MomentBinding.dataType())),
-                                DSL.field("ST_AsText(ST_ConvexHull(ST_Collect(?)))", DSL.name(mdl.colNameDsObservedArea)))
-                        .from(tDs)
-                        .innerJoin(tDsDtst)
-                        .on(fieldDsId.equal(fieldDsDtstDatastreamId))
-                        .where(fieldDsDtstDatasetId.eq(dataSetId))
-                        .fetchOne();
+                Record3<Moment, Moment, Object> result;
+                if (dataset.getProperty(mdl.npDtstDatastreams).isEmpty()) {
+                    result = dslContext
+                            .select(
+                                    DSL.min(tDs.field(mdl.colNameDsPhenStart, MomentBinding.dataType())),
+                                    DSL.max(tDs.field(mdl.colNameDsPhenEnd, MomentBinding.dataType())),
+                                    DSL.field("ST_AsText(ST_ConvexHull(ST_Collect(?)))", DSL.name(mdl.colNameDsObservedArea)))
+                            .from(tDs)
+                            .fetchOne();
+                } else {
+                    result = dslContext
+                            .select(
+                                    DSL.min(tDs.field(mdl.colNameDsPhenStart, MomentBinding.dataType())),
+                                    DSL.max(tDs.field(mdl.colNameDsPhenEnd, MomentBinding.dataType())),
+                                    DSL.field("ST_AsText(ST_ConvexHull(ST_Collect(?)))", DSL.name(mdl.colNameDsObservedArea)))
+                            .from(tDs)
+                            .innerJoin(tDsDtst)
+                            .on(fieldDsId.equal(fieldDsDtstDatastreamId))
+                            .where(fieldDsDtstDatasetId.eq(dataSetId))
+                            .fetchOne();
+                }
+
                 if (result != null) {
                     Moment start = result.component1();
                     Moment end = result.component2();
