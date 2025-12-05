@@ -45,6 +45,10 @@ public class Path implements Variable<Path> {
         this.elements = new ArrayList<>();
     }
 
+    public Path(String... elements) {
+        this(new PropertyPlaceholder(elements));
+    }
+
     public Path(PropertyPlaceholder rawElements) {
         this.rawElements = rawElements;
         this.elements = new ArrayList<>();

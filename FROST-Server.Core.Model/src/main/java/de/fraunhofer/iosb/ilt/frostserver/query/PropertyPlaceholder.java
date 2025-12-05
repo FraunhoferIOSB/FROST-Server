@@ -22,8 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
- * @author hylke
+ * A placeholder for a deep path.
  */
 public class PropertyPlaceholder {
 
@@ -34,6 +33,13 @@ public class PropertyPlaceholder {
         this.name = name;
     }
 
+    public PropertyPlaceholder(String... names) {
+        this.name = names[0];
+        for (int i = 1; i < names.length; i++) {
+            addToSubPath(names[i]);
+        }
+    }
+
     public String getName() {
         return name;
     }
@@ -42,7 +48,7 @@ public class PropertyPlaceholder {
         return !(subPath == null || subPath.isEmpty());
     }
 
-    public PropertyPlaceholder addToSubPath(String name) {
+    public final PropertyPlaceholder addToSubPath(String name) {
         if (subPath == null) {
             subPath = new ArrayList<>();
         }
