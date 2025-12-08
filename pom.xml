@@ -87,7 +87,7 @@
         <version.commons-csv>1.14.1</version.commons-csv>
         <version.commons-io>2.21.0</version.commons-io>
         <version.commons-lang3>3.20.0</version.commons-lang3>
-        <version.commons-text>1.14.0</version.commons-text>
+        <version.commons-text>1.15.0</version.commons-text>
         <version.configurable>0.37</version.configurable>
         <version.congocc>2.0.0-RC5</version.congocc>
         <version.dbcp2>2.13.0</version.dbcp2>
@@ -100,8 +100,8 @@
         <version.jacksonGeojson>1.14</version.jacksonGeojson>
         <version.jakarta-servlet>6.1.0</version.jakarta-servlet>
         <version.jakartaee-web-api>11.0.0</version.jakartaee-web-api>
-        <version.jetty>12.1.4</version.jetty>
-        <version.jooq>3.20.9</version.jooq>
+        <version.jetty>12.1.5</version.jetty>
+        <version.jooq>3.20.10</version.jooq>
         <version.json-patch>1.13</version.json-patch>
         <version.junit>6.0.1</version.junit>
         <version.junit-platform-suite>6.0.1</version.junit-platform-suite>
@@ -123,7 +123,7 @@
         <version.maven.plugin.jacoco>0.8.14</version.maven.plugin.jacoco>
         <version.maven.plugin.jar>3.5.0</version.maven.plugin.jar>
         <version.maven.plugin.javadoc>3.12.0</version.maven.plugin.javadoc>
-        <version.maven.plugin.release>3.2.0</version.maven.plugin.release>
+        <version.maven.plugin.release>3.3.0</version.maven.plugin.release>
         <version.maven.plugin.shade>3.6.1</version.maven.plugin.shade>
         <version.maven.plugin.source>3.4.0</version.maven.plugin.source>
         <version.maven.plugin.spotless>3.1.0</version.maven.plugin.spotless>
