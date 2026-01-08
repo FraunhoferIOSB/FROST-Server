@@ -58,6 +58,8 @@ public class LiquibaseTemplates {
     public static final String VAR_NAME_COLUMN_TYPE_2 = "COLUMN_TYPE_2";
     public static final String VAR_NAME_ENTITY_NAME = "ENTITY_NAME";
     public static final String VAR_NAME_TABLE_NAME = "TABLE_NAME";
+    public static final String VAR_NAME_TABLE_NAME_1 = "TABLE_NAME_1";
+    public static final String VAR_NAME_TABLE_NAME_2 = "TABLE_NAME_2";
     public static final String VAR_NAME_TABLE_NAME_OTHER = "TABLE_NAME_OTHER";
     public static final String VAR_NAME_TESTCOLUMN_NAME = "TEST_COLUMN_NAME";
 
@@ -77,6 +79,8 @@ public class LiquibaseTemplates {
     private static final String S_NAME_COLUMN_TYPE_2 = "§{" + VAR_NAME_COLUMN_TYPE_2 + '}';
     private static final String S_NAME_ENTITY_NAME = "§{" + VAR_NAME_ENTITY_NAME + '}';
     private static final String S_NAME_TABLE_NAME = "§{" + VAR_NAME_TABLE_NAME + '}';
+    private static final String S_NAME_TABLE_NAME_1 = "§{" + VAR_NAME_TABLE_NAME_1 + '}';
+    private static final String S_NAME_TABLE_NAME_2 = "§{" + VAR_NAME_TABLE_NAME_2 + '}';
     private static final String S_NAME_TABLE_NAME_OTHER = "§{" + VAR_NAME_TABLE_NAME_OTHER + '}';
     private static final String S_NAME_TESTCOLUMN_NAME = "§{" + VAR_NAME_TESTCOLUMN_NAME + '}';
 
@@ -153,7 +157,7 @@ public class LiquibaseTemplates {
                         TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(date)
                                 .setAuthor(author)
                                 .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
-                                .addChangsetLinkTable(linkTable, linkTableOurField, ourType, linkTableOtherField, otherType);
+                                .addChangsetLinkTable(linkTable, tableName, linkTableOurField, ourType, otherTable, linkTableOtherField, otherType);
                         clBuilders.add(clLinkTable);
                         clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
                         clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
@@ -237,6 +241,9 @@ public class LiquibaseTemplates {
         }
 
         public void addFile(String fileName) {
+            if (files.contains(fileName)) {
+                return;
+            }
             files.add(fileName);
         }
 
@@ -357,12 +364,12 @@ public class LiquibaseTemplates {
             return addChangeset(createChangsetIndex(author, date, tableName, columnName));
         }
 
-        public TableChangelogBuilder addChangsetLinkTable(String columnName1, String columnType1, String columnName2, String columnType2) {
-            return addChangsetLinkTable(tableName, columnName1, columnType1, columnName2, columnType2);
+        public TableChangelogBuilder addChangsetLinkTable(String tableName1, String columnName1, String columnType1, String tableName2, String columnName2, String columnType2) {
+            return addChangsetLinkTable(tableName, tableName1, columnName1, columnType1, tableName2, columnName2, columnType2);
         }
 
-        public TableChangelogBuilder addChangsetLinkTable(String tableName, String columnName1, String columnType1, String columnName2, String columnType2) {
-            return addChangeset(createChangsetLinkTable(author, date, tableName, columnName1, columnType1, columnName2, columnType2));
+        public TableChangelogBuilder addChangsetLinkTable(String tableName, String tableName1, String columnName1, String columnType1, String tableName2, String columnName2, String columnType2) {
+            return addChangeset(createChangsetLinkTable(author, date, tableName, tableName1, columnName1, columnType1, tableName2, columnName2, columnType2));
         }
 
         public TableChangelogBuilder addChangsetForeignKey(String columnName, String otherTableName, String otherColumnName) {
@@ -575,13 +582,15 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_INDEX, searchList, replacementList);
     }
 
-    public static String createChangsetLinkTable(String author, String date, String tableName, String columnName1, String columnType1, String columnName2, String columnType2) {
+    public static String createChangsetLinkTable(String author, String date, String tableName, String tableName1, String columnName1, String columnType1, String tableName2, String columnName2, String columnType2) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
             S_NAME_TABLE_NAME,
+            S_NAME_TABLE_NAME_1,
             S_NAME_COLUMN_NAME_1,
             S_NAME_COLUMN_TYPE_1,
+            S_NAME_TABLE_NAME_2,
             S_NAME_COLUMN_NAME_2,
             S_NAME_COLUMN_TYPE_2
         };
@@ -589,8 +598,10 @@ public class LiquibaseTemplates {
             author,
             date,
             tableName,
+            tableName1,
             columnName1,
             columnType1,
+            tableName2,
             columnName2,
             columnType2
         };
@@ -692,7 +703,8 @@ public class LiquibaseTemplates {
 
     public static final String BLOCK_CHANGESET_NORMAL_COLUMNS = """
                 <changeSet author="§{CHANGELOG_AUTHOR}" id="§{CHANGELOG_DATE}-§{TABLE_NAME}-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-                    <preConditions onFail="MARK_RAN">
+                    <preConditions onFail="CONTINUE">
+                        <tableExists tableName="§{TABLE_NAME}" />
                         <not>
                             <columnExists columnName="§{TEST_COLUMN_NAME}" tableName="§{TABLE_NAME}" />
                         </not>
@@ -715,7 +727,8 @@ public class LiquibaseTemplates {
 
     public static final String BLOCK_CHANGESET_INDEX = """
                 <changeSet author="§{CHANGELOG_AUTHOR}" id="§{CHANGELOG_DATE}-§{TABLE_NAME}-idx-§{COLUMN_NAME}" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-                    <preConditions onFail="MARK_RAN">
+                    <preConditions onFail="CONTINUE">
+                        <tableExists tableName="§{TABLE_NAME}" />
                         <not>
                             <indexExists tableName="§{TABLE_NAME}" indexName="§{TABLE_NAME}_§{COLUMN_NAME}" />
                         </not>
@@ -728,10 +741,14 @@ public class LiquibaseTemplates {
 
     public static final String BLOCK_CHANGESET_LINKTABLE = """
                 <changeSet author="§{CHANGELOG_AUTHOR}" id="§{CHANGELOG_DATE}-§{TABLE_NAME}" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-                    <preConditions onFail="MARK_RAN">
+                    <preConditions onFail="CONTINUE">
+                        <tableExists tableName="§{TABLE_NAME_1}" />
+                        <tableExists tableName="§{TABLE_NAME_2}" />
                         <not>
                             <tableExists tableName="§{TABLE_NAME}" />
                         </not>
+                        <changeLogPropertyDefined property="§{COLUMN_TYPE_1}" />
+                        <changeLogPropertyDefined property="§{COLUMN_TYPE_2}" />
                     </preConditions>
                     <createTable tableName="§{TABLE_NAME}">
                         <column name="§{COLUMN_NAME_1}" type="§{COLUMN_TYPE_1}">
@@ -753,10 +770,12 @@ public class LiquibaseTemplates {
 
     public static final String BLOCK_CHANGESET_FKEY = """
                 <changeSet author="§{CHANGELOG_AUTHOR}" id="§{CHANGELOG_DATE}-fk_§{TABLE_NAME}_§{COLUMN_NAME}" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-                    <preConditions onFail="MARK_RAN">
+                    <preConditions onFail="CONTINUE">
                         <not>
                             <foreignKeyConstraintExists foreignKeyName="fk_§{TABLE_NAME}_§{COLUMN_NAME}" foreignKeyTableName="§{TABLE_NAME}" />
                         </not>
+                        <tableExists tableName="§{TABLE_NAME}" />
+                        <tableExists tableName="§{TABLE_NAME_OTHER}" />
                     </preConditions>
                     <addForeignKeyConstraint
                         constraintName="fk_§{TABLE_NAME}_§{COLUMN_NAME}"
