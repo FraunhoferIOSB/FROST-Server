@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.7.0-SNAPSHOT
+## Version 2.7.0
 
 **New Features**
 * Sensor and Actuator metadata can now be JSON, and queried as such.
