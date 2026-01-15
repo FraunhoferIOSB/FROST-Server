@@ -31,12 +31,15 @@ import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * The base class for dynamically generated tables.
  */
 public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaTableDynamic.class.getName());
 
     private final Name tableName;
     private final transient EntityType entityType;
@@ -67,6 +70,11 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
 
     @Override
     public final int registerField(Name name, DataType type, Binding binding) {
+        int oldFieldId = super.indexOf(name);
+        if (oldFieldId >= 0) {
+            LOGGER.warn("Double registration of field {}.{}", tableName, name);
+            return oldFieldId;
+        }
         int fieldId = super.registerField(name, type, binding);
         PrimaryKey primaryKey = entityType.getPrimaryKey();
         for (int idx = 0; idx < primaryKey.size(); idx++) {
