@@ -5,6 +5,7 @@
 **New Features**
 
 **Internal changes & Bugfixes**
+* Fixed #2304: Nextlinks with `not` causing exception.
 
 
 ## Version 2.7.0

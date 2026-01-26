@@ -275,6 +275,8 @@ public abstract class FilterTests extends AbstractTestClass {
 
         testFilterResults(doa, "properties/field eq null", getFromList(THINGS, 0, 3));
         testFilterResults(doa, "Datastreams/id eq null", getFromList(THINGS, 3));
+        testFilterResults(doa, "not properties/field ne null", getFromList(THINGS, 0, 3));
+        testFilterResults(doa, "not Datastreams/id ne null", getFromList(THINGS, 3));
     }
 
     /**
@@ -289,6 +291,8 @@ public abstract class FilterTests extends AbstractTestClass {
 
         testFilterResults(doa, "properties/field ne null", getFromList(THINGS, 1, 2));
         testFilterResults(doa, "Datastreams/id ne null", getFromList(THINGS, 0, 1, 2));
+        testFilterResults(doa, "not properties/field eq null", getFromList(THINGS, 1, 2));
+        testFilterResults(doa, "not Datastreams/id eq null", getFromList(THINGS, 0, 1, 2));
     }
 
     /**
@@ -347,6 +351,7 @@ public abstract class FilterTests extends AbstractTestClass {
         LOGGER.info("  testAnyFilter");
         Dao doa = sSrvc.dao(sMdl.etThing);
         testFilterResults(doa, "Locations/any(l:l/name eq 'Location 2')", getFromList(THINGS, 1));
+        testFilterResults(doa, "not Locations/any(l:l/name ne 'Location 2')", getFromList(THINGS, 1));
         testFilterResults(doa, "HistoricalLocations/any(hl : hl/Locations/any(l : startswith(l/name, 'Location 1')))", getFromList(THINGS, 0));
         testFilterResults(doa, "HistoricalLocations/any(hl : hl/Locations/any(l : l/properties/field eq properties/field))", getFromList(THINGS, 1, 2));
         testFilterResults(doa, "Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 0') and Datastreams/any(d:d/ObservedProperty/name eq 'ObservedProperty 1')", getFromList(THINGS, 0, 1));
