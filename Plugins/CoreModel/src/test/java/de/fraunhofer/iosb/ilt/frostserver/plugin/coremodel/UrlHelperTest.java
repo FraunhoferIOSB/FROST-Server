@@ -166,7 +166,9 @@ class UrlHelperTest {
             "/Observations?$filter=validTime gt 2016-01-02T01:01:01.123Z",
             "/Observations?$filter=validTime gt 2016-01-02T01:01:01,123Z",
             "/Observations?$filter=length(result) le 2",
+            "/Observations?$filter=not length(result) le 2",
             "/Things?$filter=name eq 'it''s a quote'",
+            "/Things?$filter=not name eq 'it''s a quote'",
             "/Things?$filter=name eq 'it''''s two quotes'",
             "/Things?$filter=Datastreams/Observations/FeatureOfInterest/id eq 'FOI_1' and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z and date(Datastreams/Observations/resultTime) le date(2010-07-01T00:00:00Z)",
             "/Datastreams?$expand=Observations($filter=result eq 1;$expand=FeatureOfInterest;$select=@iot.id;$orderby=id;$skip=5;$top=10;$count=true),ObservedProperty",
@@ -181,6 +183,8 @@ class UrlHelperTest {
             "/Locations?$filter=st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
             "/Locations?$filter=st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)",
             "/Locations?$filter=st_within(geography'POINT(7.5 52.75)', location)",
+            "/Locations?$filter=not st_within(geography'POINT(7.5 52.75)', location)",
+            "/Locations?$filter=not Things/any(t:true)",
             "/Observations?$filter=validTime gt 2016-01-02T01:01:01.000Z/2016-01-03T23:59:59.999Z sub duration'P1D'"
         };
         for (String base : bases) {
