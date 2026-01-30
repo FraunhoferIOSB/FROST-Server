@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.7.2-SNAPSHOT
+
+**Internal changes & Bugfixes**
+
+
 ## Version 2.7.1
 
 **Internal changes & Bugfixes**
