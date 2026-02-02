@@ -137,6 +137,8 @@ public class CoreSettings implements ConfigDefaults {
     public static final String TAG_AUTH_ROLE_DELETE = "role.delete";
     @DefaultValue(PrincipalExtended.ROLE_ADMIN)
     public static final String TAG_AUTH_ROLE_ADMIN = "role.admin";
+    @DefaultValueBoolean(false)
+    public static final String TAG_AUTH_MQTT_FINE_GRAINED_AUTH = "mqtt.fineGrainedAuth";
 
     // Experimental settings
     @DefaultValueBoolean(false)

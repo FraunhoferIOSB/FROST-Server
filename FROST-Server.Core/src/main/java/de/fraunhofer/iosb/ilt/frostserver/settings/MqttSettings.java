@@ -71,8 +71,6 @@ public class MqttSettings implements ConfigDefaults {
     public static final String TAG_MQTT_ALLOW_EXPAND = "allowExpand";
     @DefaultValueBoolean(false)
     public static final String TAG_MQTT_ALLOW_FILTER = "allowFilter";
-    @DefaultValueBoolean(false)
-    public static final String TAG_MQTT_FINE_GRAINED_AUTH = "fineGrainedAuth";
 
     /**
      * Constraints

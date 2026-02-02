@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
-import static de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings.TAG_MQTT_FINE_GRAINED_AUTH;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_MQTT_FINE_GRAINED_AUTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
@@ -82,7 +81,7 @@ public class SubscriptionFactory {
                 .setFunctionRegistry(settings.getFunctionRegistry())
                 .setQueryDefaults(settings.getQueryDefaults().setAlwaysOrder(false));
         this.userCaches = userCaches;
-        fineGrainedAuth = settings.getMqttSettings().getCustomSettings().getBoolean(TAG_MQTT_FINE_GRAINED_AUTH, MqttSettings.class);
+        fineGrainedAuth = settings.getAuthSettings().getBoolean(TAG_AUTH_MQTT_FINE_GRAINED_AUTH, CoreSettings.class);
     }
 
     public Subscription get(String topic) {

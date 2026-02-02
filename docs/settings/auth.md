@@ -80,6 +80,10 @@ These are generic settings for authentication/authorisation.
   A regular expression that MQTT topics must match for users that do not have global admin or read rights.
   The topic matched starts with the first slash after the version number and ends before the `?` of the query (if present).
   Suggested value: `^/[a-zA-Z0-9_-]+\((('[^']+')|([0-9]+))\)/[a-zA-Z0-9_-]+$`.
+* **auth.mqtt.fineGrainedAuth:** Since 2.8.0, Default: `false`  
+  Apply fine-grained authorisation rules to MQTT subscriptions. Enabling this applies the authorisation rules loaded from `plugins.modelLoader.securityFiles`
+  to each MQTT message before it is sent to each user. This comes with a performance penalty, but allows the safe use of `expand` and `filter` in MQTT topics
+  when fineGrainedAuth is enabled.
 
 
 ### Settings for the auth provider class `BasicAuthProvider`

@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings.TAG_MQTT_FINE_GRAINED_AUTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEvent;
@@ -276,7 +275,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
         Settings authSettings = settings.getAuthSettings();
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, "");
         if (!StringHelper.isNullOrEmpty(authProviderClassName)) {
-            fineGrainedAuth = settings.getMqttSettings().getCustomSettings().getBoolean(TAG_MQTT_FINE_GRAINED_AUTH, MqttSettings.class);
+            fineGrainedAuth = authSettings.getBoolean(CoreSettings.TAG_AUTH_MQTT_FINE_GRAINED_AUTH, CoreSettings.class);
             return new AuthWrapper(settings, authProviderClassName, frostClientId);
         }
         return null;

@@ -163,7 +163,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         properties.put("plugins.modelLoader.idType.User", "STRING");
         properties.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
         properties.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
-        properties.put("mqtt.fineGrainedAuth", "true");
+        properties.put("auth.mqtt.fineGrainedAuth", "true");
         properties.put("auth.mqtt.topicAllowList", "^(/Things)|(/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+)$");
     }
 
