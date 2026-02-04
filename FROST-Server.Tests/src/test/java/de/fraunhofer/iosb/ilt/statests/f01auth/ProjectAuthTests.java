@@ -894,30 +894,24 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         final TestSubscription test1SubAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Observations?$expand=FeatureOfInterest($select=id)")
                 .setName(ADMIN + "-1")
-                .addExpectedEntity(obsFuture0)
                 .addExpectedJson(obsFuture0Json1)
-                .addExpectedEntity(obsFuture1)
                 .addExpectedJson(obsFuture1Json1)
-                .addExpectedEntity(obsFuture2)
                 .addExpectedJson(obsFuture2Json1)
                 .setExpectedMessageCount(3)
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test0SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic0)
                 .setName(ADMIN + "-2")
-                .addExpectedEntity(obsFuture0)
                 .addExpectedJson(obsFuture0Json1)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic1)
                 .setName(ADMIN + "-3")
-                .addExpectedEntity(obsFuture1)
                 .addExpectedJson(obsFuture1Json1)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic2)
                 .setName(ADMIN + "-4")
-                .addExpectedEntity(obsFuture2)
                 .addExpectedJson(obsFuture2Json1)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
@@ -936,13 +930,11 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         final TestSubscription test0SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic0)
                 .setName(ADMIN_P1 + "-2")
-                .addExpectedEntity(obsFuture0)
                 .addExpectedJson(obsFuture0Json1)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic1)
                 .setName(ADMIN_P1 + "-3")
-                .addExpectedEntity(obsFuture1)
                 .addExpectedJson(obsFuture1Json1)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
@@ -963,7 +955,6 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
 
         final TestSubscription test0SubDsAdminP2 = new TestSubscription(mqttHelperAdminProject2, dsTopic0)
                 .setName(ADMIN_P2 + "-2")
-                .addExpectedEntity(obsFuture0)
                 .addExpectedJson(obsFuture0Json2)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
@@ -973,7 +964,6 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdminP2 = new TestSubscription(mqttHelperAdminProject2, dsTopic2)
                 .setName(ADMIN_P2 + "-4")
-                .addExpectedEntity(obsFuture2)
                 .addExpectedJson(obsFuture2Json1)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
@@ -991,7 +981,6 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         if (anonymousReadAllowed) {
             test0SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic0)
                     .setName(ANONYMOUS + "-1")
-                    .addExpectedEntity(obsFuture0)
                     .addExpectedJson(obsFuture0Json2)
                     .setExpectedMessageCount(1)
                     .createReceivedListener(mdlSensing.etObservation);

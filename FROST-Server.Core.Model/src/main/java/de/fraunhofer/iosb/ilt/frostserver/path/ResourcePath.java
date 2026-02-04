@@ -307,7 +307,12 @@ public class ResourcePath {
                 && Objects.equals(this.identifiedElement, other.identifiedElement);
     }
 
-    public String getFullUrl() {
+    /**
+     * Get the URL part after the version number, with a leading slash.
+     *
+     * @return The path part of a URL.
+     */
+    public String getUrl() {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (PathElement rpe : pathElements) {
@@ -334,7 +339,7 @@ public class ResourcePath {
 
     @Override
     public String toString() {
-        return getFullUrl();
+        return getUrl();
     }
 
 }

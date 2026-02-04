@@ -37,10 +37,9 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
- * @author jab
+ * The internal representation of an Expand item.
  */
-public class Expand {
+public class Expand implements Comparable<Expand> {
 
     private List<String> rawPath;
     private NavigationProperty validatedPath;
@@ -179,6 +178,13 @@ public class Expand {
         }
     }
 
+    public void normalise() {
+        if (subQuery == null) {
+            return;
+        }
+        subQuery.normalise();
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(validatedPath, subQuery);
@@ -214,6 +220,11 @@ public class Expand {
             sb.append(')');
         }
         return sb.toString();
+    }
+
+    @Override
+    public int compareTo(Expand o) {
+        return validatedPath.compareTo(o.validatedPath);
     }
 
 }

@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Represents the Query the user executed.
@@ -72,7 +73,7 @@ public class Query {
     private Optional<Integer> skip;
     private Optional<Boolean> count;
     private final List<PropertyPlaceholder> rawSelect;
-    private final Set<Property> select;
+    private Set<Property> select;
     private boolean selectDistinct = false;
     private Expression filter;
     private Expression skipFilter;
@@ -215,6 +216,18 @@ public class Query {
             pkOrder = true;
         }
         return this;
+    }
+
+    /**
+     * Normalizes the query, returning the "standard" form, with selects ordery
+     * alphabetically.
+     */
+    public void normalise() {
+        select = new TreeSet<>(select);
+        Collections.sort(expand);
+        for (Expand item : expand) {
+            item.normalise();
+        }
     }
 
     public ServiceContext getContext() {
@@ -585,7 +598,20 @@ public class Query {
         return toString(false);
     }
 
+    private static interface Encoder {
+
+        public String encode(String data);
+    }
+
     public String toString(boolean inExpand) {
+        return toString(inExpand, StringHelper::urlEncode);
+    }
+
+    public String toUnencodedString(boolean inExpand) {
+        return toString(inExpand, data -> data);
+    }
+
+    public String toString(boolean inExpand, Encoder encoder) {
         char separator = inExpand ? ';' : '&';
 
         StringBuilder sb = new StringBuilder();
@@ -594,15 +620,15 @@ public class Query {
 
         addSkipToUrl(sb, separator);
 
-        addSelectToUrl(sb, separator, inExpand);
+        addSelectToUrl(sb, separator, inExpand, encoder);
 
-        addFilterToUrl(sb, separator, inExpand);
+        addFilterToUrl(sb, separator, inExpand, encoder);
 
-        addFormatToUrl(sb, separator);
+        addFormatToUrl(sb, separator, encoder);
 
-        addExpandToUrl(sb, separator, inExpand);
+        addExpandToUrl(sb, separator, inExpand, encoder);
 
-        addOrderbyToUrl(sb, separator, inExpand);
+        addOrderbyToUrl(sb, separator, inExpand, encoder);
 
         addCountToUrl(sb, separator);
 
@@ -618,9 +644,9 @@ public class Query {
         }
     }
 
-    private void addFormatToUrl(StringBuilder sb, char separator) {
+    private void addFormatToUrl(StringBuilder sb, char separator, Encoder encoder) {
         if (format != null) {
-            sb.append(separator).append("$resultFormat=").append(StringHelper.urlEncode(format));
+            sb.append(separator).append("$resultFormat=").append(encoder.encode(format));
         }
     }
 
@@ -636,7 +662,7 @@ public class Query {
         }
     }
 
-    private void addOrderbyToUrl(StringBuilder sb, char separator, boolean inExpand) {
+    private void addOrderbyToUrl(StringBuilder sb, char separator, boolean inExpand, Encoder encoder) {
         if (!orderBy.isEmpty()) {
             sb.append(separator).append("$orderby=");
             boolean firstDone = false;
@@ -648,14 +674,14 @@ public class Query {
                 }
                 String orderUrl = ob.toString();
                 if (!inExpand) {
-                    orderUrl = StringHelper.urlEncode(orderUrl);
+                    orderUrl = encoder.encode(orderUrl);
                 }
                 sb.append(orderUrl);
             }
         }
     }
 
-    private void addExpandToUrl(StringBuilder sb, char separator, boolean inExpand) {
+    private void addExpandToUrl(StringBuilder sb, char separator, boolean inExpand, Encoder encoder) {
         if (!expand.isEmpty()) {
             sb.append(separator).append("$expand=");
             boolean firstDone = false;
@@ -667,26 +693,26 @@ public class Query {
                 }
                 String expandUrl = e.toString();
                 if (!inExpand) {
-                    expandUrl = StringHelper.urlEncode(expandUrl);
+                    expandUrl = encoder.encode(expandUrl);
                 }
                 sb.append(expandUrl);
             }
         }
     }
 
-    private void addFilterToUrl(StringBuilder sb, char separator, boolean inExpand) {
+    private void addFilterToUrl(StringBuilder sb, char separator, boolean inExpand, Encoder encoder) {
         if (filter != null) {
             sb.append(separator).append("$filter=");
             String filterUrl = filter.toUrl();
             if (inExpand) {
                 sb.append(filterUrl);
             } else {
-                sb.append(StringHelper.urlEncode(filterUrl));
+                sb.append(encoder.encode(filterUrl));
             }
         }
     }
 
-    private void addSelectToUrl(StringBuilder sb, char separator, boolean inExpand) {
+    private void addSelectToUrl(StringBuilder sb, char separator, boolean inExpand, Encoder encoder) {
         if (!select.isEmpty()) {
             sb.append(separator).append("$select=");
             if (isSelectDistinct()) {
@@ -702,7 +728,7 @@ public class Query {
                 if (inExpand) {
                     sb.append(property.getName());
                 } else {
-                    sb.append(StringHelper.urlEncode(property.getName()));
+                    sb.append(encoder.encode(property.getName()));
                 }
             }
         }

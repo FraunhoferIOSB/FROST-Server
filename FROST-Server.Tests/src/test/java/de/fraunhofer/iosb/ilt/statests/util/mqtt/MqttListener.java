@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
@@ -136,8 +135,8 @@ public class MqttListener implements Callable<JsonNode> {
             MqttManager.addTestSubscriptionListener(new SubscriptionListener() {
                 @Override
                 public void onSubscribe(SubscriptionEvent subscription) {
-                    final String subbedTopic = subscription.getTopic();
-                    if (clientId.equals(subscription.getClientId()) && subbedTopic.endsWith(topic)) {
+                    final String subbedTopic = subscription.getTopicClient();
+                    if (clientId.equals(subscription.getClientId()) && topic.equals(subbedTopic)) {
                         LOGGER.debug("  s: {} Subscribed to {}", clientId, subscription);
                         connectBarrier.countDown();
                     }
@@ -145,7 +144,7 @@ public class MqttListener implements Callable<JsonNode> {
 
                 @Override
                 public void onUnsubscribe(SubscriptionEvent subscription) {
-                    if (clientId.equals(subscription.getClientId()) && topic.equals(subscription.getTopic())) {
+                    if (clientId.equals(subscription.getClientId()) && topic.equals(subscription.getTopicClient())) {
                         LOGGER.debug("  s: {} Unsubscribe from {}", clientId, subscription);
                     }
                 }
@@ -230,7 +229,7 @@ public class MqttListener implements Callable<JsonNode> {
                     LOGGER.debug("  c: {} connect failed.", name);
                 }
             } catch (InterruptedException ex) {
-                LOGGER.error("Exception:", ex);
+                LOGGER.error("Connect Exception:", ex);
             }
         } catch (MqttException | IllegalArgumentException ex) {
             LOGGER.info("Exception for {} during connect:", name, ex.getMessage());
@@ -244,9 +243,9 @@ public class MqttListener implements Callable<JsonNode> {
         try {
             barrier.await();
         } catch (InterruptedException ex) {
-            LOGGER.error("{} waiting for MQTT events on {} timed out: Barrier={}.", name, topic, barrier.getCount());
+            LOGGER.error("{} waiting for {} MQTT events on {} timed out.", name, barrier.getCount(), topic);
             LOGGER.debug("Exception:", ex);
-            fail(name + " waiting for MQTT events on " + topic + " timed out: " + ex.getMessage());
+            notifyError(name + " waiting for MQTT events on " + topic + " timed out.");
         } finally {
             if (mqttClient != null) {
                 LOGGER.trace("        {} Closing client: unsubscribing...", name);

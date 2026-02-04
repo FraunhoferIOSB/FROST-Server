@@ -19,13 +19,21 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEventListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
+import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
+import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
+import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
@@ -108,10 +116,16 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
 
+    /**
+     * TODO: Make this configurable in Moquette, and fix it there!
+     */
+    public String responseTopicBase = "/reqresp/response/";
+
     private Server mqttBroker;
     protected List<SubscriptionListener> subscriptionListeners = new CopyOnWriteArrayList<>();
     protected List<RequestEventListener> entityCreateListeners = new CopyOnWriteArrayList<>();
     private CoreSettings settings;
+    private ServiceContext contextNormalise;
     private boolean fineGrainedAuth = false;
     private final AtomicLong keyGenerator = new AtomicLong();
     private final Map<String, Set<String>> clientSubscriptions = new HashMap<>();
@@ -160,6 +174,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
     }
 
     public void publish(String topic, String message, int qos, MqttProperties properties) {
+        LOGGER.debug("Publishing to {}", topic);
         if (mqttBroker != null) {
             final ByteBuf payload = ByteBufUtil.writeUtf8(UnpooledByteBufAllocator.DEFAULT, message);
             MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(qos), false, 0);
@@ -229,9 +244,8 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
         if (authWrapper != null) {
             config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, allowAnonRead);
         }
-        if (fineGrainedAuth) {
-            mqttBroker.setTopicRewriter(this);
-        }
+        mqttBroker.setTopicRewriter(this);
+
         // Ensure the immediate_flush property has a default of true.
         config.intProp(IConfig.BUFFER_FLUSH_MS_PROPERTY_NAME, 0);
         config.boolProp(IConfig.ENABLE_TELEMETRY_NAME, false);
@@ -294,15 +308,17 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             throw new IllegalArgumentException("MqttSettings must be non-null");
         }
         this.settings = settings;
+        contextNormalise = new ServiceContext()
+                .setFunctionRegistry(settings.getFunctionRegistry())
+                .setModelRegistry(settings.getModelRegistry())
+                .setMqttContext(true)
+                .setQueryDefaults(settings.getQueryDefaults()
+                        .copy()
+                        .setAlwaysOrder(false));
         authWrapper = createAuthWrapper();
     }
 
-    @Override
-    public Topic rewriteTopic(Subscription subscription) {
-        String clientId = subscription.getClientId();
-        final Topic topicFilterClient = subscription.getTopicFilterClient();
-        final String topicClient = topicFilterClient.toString();
-
+    private String normaliseTopic(String topicClient) {
         final int idx = topicClient.indexOf('?');
         String pathString = idx >= 0
                 ? topicClient.substring(0, idx)
@@ -310,8 +326,41 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
         String queryString = idx >= 0
                 ? topicClient.substring(idx + 1)
                 : "";
-        // TODO: Normalise query.
         String topicInternal = StringUtils.removeStart(topicClient, '/');
+        Version version;
+        try {
+            version = MqttManager.getVersionFromTopic(settings, topicInternal);
+        } catch (UnknownVersionException ex) {
+            // Not a STA topic.
+            LOGGER.debug("\nNormalised {}\n        to {}", topicClient, topicInternal);
+            return topicInternal;
+        }
+        final String pathNonVersion = pathString.substring(version.urlPart.length());
+        final ResourcePath path = PathParser.parsePath(contextNormalise, version, pathNonVersion);
+        final Query query = QueryParser.parseQuery(queryString, contextNormalise, path)
+                .validate(null, path.getMainElementType());
+        query.normalise();
+        final String nQueryString = query.toUnencodedString(false);
+        if (StringHelper.isNullOrEmpty(nQueryString)) {
+            topicInternal = version.urlPart + '/' + path.getUrl();
+        } else {
+            topicInternal = version.urlPart + '/' + path.getUrl() + "?" + nQueryString;
+        }
+        LOGGER.debug("Normalised {}\n        to {}", topicClient, topicInternal);
+        return topicInternal;
+    }
+
+    @Override
+    public Topic rewriteTopic(Subscription subscription) {
+        String clientId = subscription.getClientId();
+        final Topic topicFilterClient = subscription.getTopicFilterClient();
+        final String topicClient = topicFilterClient.toString();
+        if (topicClient.startsWith(responseTopicBase)) {
+            // Response topics must not be rewritten or normalised.
+            return topicFilterClient;
+        }
+
+        String topicInternal = normaliseTopic(topicClient);
 
         if (fineGrainedAuth) {
             PrincipalExtended userPrincipal = authWrapper.getUserPrincipal(clientId);
@@ -330,7 +379,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
     @Override
     public Topic rewriteTopicInverse(Topic clientTopic, Topic publishedTopic) {
         LOGGER.debug("Inverse Topic rewrite request from {} for {}", clientTopic, publishedTopic);
-        throw new UnsupportedOperationException("Not supported yet.");
+        return publishedTopic;
     }
 
     private class AbstractInterceptHandlerImpl extends AbstractInterceptHandler {
@@ -399,7 +448,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             clientSubscriptions
                     .getOrDefault(clientId, Collections.emptySet())
                     .stream()
-                    .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(clientId, subscribedTopic)));
+                    .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(clientId, subscribedTopic, null)));
             clientSubscriptions.remove(clientId);
         }
 
@@ -409,14 +458,15 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             if (clientId.equalsIgnoreCase(frostClientId)) {
                 return;
             }
-            final String topicFilter = msg.getTopicFilterInternal();
-            LOGGER.debug("      Client {} subscribed to {}", clientId, topicFilter);
+            final String topicFilterClient = msg.getTopicFilterClient();
+            final String topicFilterIntrnl = msg.getTopicFilterInternal();
+            LOGGER.debug("      Client {} subscribed to {}", clientId, topicFilterIntrnl);
             if (clientSubscriptions
                     .computeIfAbsent(clientId, t -> ConcurrentHashMap.newKeySet())
-                    .add(topicFilter)) {
-                fireSubscribe(new SubscriptionEvent(clientId, topicFilter));
+                    .add(topicFilterIntrnl)) {
+                fireSubscribe(new SubscriptionEvent(clientId, topicFilterIntrnl, topicFilterClient));
             } else {
-                LOGGER.warn("Client {} subscribed to {} twice!", clientId, topicFilter);
+                LOGGER.warn("Client {} subscribed to {} twice!", clientId, topicFilterIntrnl);
             }
         }
 
@@ -426,12 +476,13 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             if (frostClientId.equals(clientId)) {
                 return;
             }
-            final String topicFilter = msg.getTopicFilterInternal();
-            LOGGER.debug("      Client {} unsubscribed from {}", clientId, topicFilter);
+            final String topicFilterIntrnl = msg.getTopicFilterInternal();
+            final String topicFilterClient = msg.getTopicFilterClient();
+            LOGGER.debug("      Client {} unsubscribed from {}", clientId, topicFilterIntrnl);
             boolean removed = clientSubscriptions.getOrDefault(clientId, Collections.emptySet())
-                    .remove(topicFilter);
+                    .remove(topicFilterIntrnl);
             if (removed) {
-                fireUnsubscribe(new SubscriptionEvent(clientId, topicFilter));
+                fireUnsubscribe(new SubscriptionEvent(clientId, topicFilterIntrnl, topicFilterClient));
             }
         }
 

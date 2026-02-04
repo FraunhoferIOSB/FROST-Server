@@ -199,6 +199,22 @@ class UrlHelperTest {
                 "Houses?$orderby=name desc,value&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
     }
 
+    @Test
+    void testNormaliseQuery() {
+        String pathAndQuery1 = "Houses?$select=name,value&$expand=Rooms($select=name,time;$orderby=time)";
+        String pathAndQuery2 = "Houses?$expand=Rooms($select=time,name;$orderby=time)&$select=value,name";
+
+        String normal1 = normalise(pathAndQuery1);
+        String normal2 = normalise(pathAndQuery2);
+        assertEquals(normal1, normal2);
+    }
+
+    private String normalise(String pathAndQuery) {
+        Query query = PathParser.parsePathAndQuery(Version.INTERNAL, pathAndQuery, context);
+        query.normalise();
+        return query.getPath().toString() + "?" + query.toString(false);
+    }
+
     private static void testNextLink(CoreSettings settings, Entity last, Entity next, String baseUrl, String expectedNextUrl) {
         Query queryBase = null;
         Query queryExpected = null;

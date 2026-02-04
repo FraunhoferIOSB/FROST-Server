@@ -262,6 +262,11 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                     LOGGER.debug("Request with unknown or no request type; {}", StringHelper.cleanForLogging(rawType));
                     return;
                 }
+                final String responseTopic = e.getResponseTopic();
+                if (StringHelper.isNullOrEmpty(responseTopic)) {
+                    LOGGER.debug("Request without response topic: {}", url);
+                    return;
+                }
 
                 final ServiceRequest serviceRequest = new ServiceRequest()
                         .setContext(new ServiceContext()
@@ -282,13 +287,13 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                 } finally {
                     ServiceRequest.removeLocalRequest();
                 }
-                final String responseTopic = e.getResponseTopic();
-                if (!StringHelper.isNullOrEmpty(responseTopic)) {
-                    Map<String, String> responseProps = new HashMap<>();
-                    responseProps.put("status", Integer.toString(serviceResponse.getCode()));
-                    server.publish(responseTopic, serviceResponse.getFormattedResult(), 2, serviceResponse.getContentType(), responseProps, e.getCorrelationData());
-                }
-                if (!serviceResponse.isSuccessful()) {
+                Map<String, String> responseProps = new HashMap<>();
+                responseProps.put("status", Integer.toString(serviceResponse.getCode()));
+                server.publish(responseTopic, serviceResponse.getFormattedResult(), 2, serviceResponse.getContentType(), responseProps, e.getCorrelationData());
+                if (serviceResponse.isSuccessful()) {
+                    LOGGER.debug("executed request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
+                            topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
+                } else {
                     LOGGER.info("Failed to execute request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
                             topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
                 }
@@ -338,7 +343,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
 
     @Override
     public void onSubscribe(SubscriptionEvent e) {
-        Subscription subscription = subscriptionFactory.get(e.getTopic());
+        Subscription subscription = subscriptionFactory.get(e.getTopicIntrnl());
         if (subscription == null) {
             LOGGER.debug("Ignoring subscription to {}", e);
             // Not a valid topic.
@@ -353,7 +358,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
 
     @Override
     public void onUnsubscribe(SubscriptionEvent e) {
-        Subscription subscription = subscriptionFactory.get(e.getTopic());
+        Subscription subscription = subscriptionFactory.get(e.getTopicIntrnl());
         if (subscription == null) {
             // Not a valid topic.
             return;

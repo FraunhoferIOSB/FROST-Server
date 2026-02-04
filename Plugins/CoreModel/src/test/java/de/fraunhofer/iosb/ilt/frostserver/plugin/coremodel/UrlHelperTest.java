@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -34,8 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * Tests the generation of nextLinks.
  */
 class UrlHelperTest {
 
@@ -49,6 +49,7 @@ class UrlHelperTest {
 
     private static CoreSettings coreSettings;
     private static ServiceContext context;
+    private static ServiceContext contextNoOrder;
     private static PluginCoreModel pluginCoreModel;
 
     private static CoreSettings coreSettingsString;
@@ -65,6 +66,10 @@ class UrlHelperTest {
                 .setModelRegistry(coreSettings.getModelRegistry())
                 .setFunctionRegistry(coreSettings.getFunctionRegistry())
                 .setQueryDefaults(coreSettings.getQueryDefaults());
+        contextNoOrder = context.copy()
+                .setQueryDefaults(coreSettings.getQueryDefaults()
+                        .copy()
+                        .setAlwaysOrder(false));
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
@@ -235,6 +240,34 @@ class UrlHelperTest {
             String expected = "Datastreams('a String id')/Sensor";
             assertEquals(expected, gotten);
         }
+    }
+
+    @Test
+    void testNormaliseQuery() {
+        assertEquals("Observations?$select=phenomenonTime,result",
+                normalise("Observations?$select=result,phenomenonTime"));
+        testNormaliseEqual(
+                "Things?$select=name,id&$expand=Datastreams($select=name,id;$orderby=name;$expand=Observations($select=phenomenonTime,result))",
+                "Things?$select=id,name&$expand=Datastreams($orderby=name;$select=id,name;$expand=Observations($select=result,phenomenonTime))");
+        testNormaliseEqual(
+                "Observations?$select=result,phenomenonTime&$expand=FeatureOfInterest($select=name,feature)",
+                "Observations?$select=phenomenonTime,result&$expand=FeatureOfInterest($select=feature,name)");
+        testNormaliseEqual(
+                "Things?$select=name,id&$expand=Datastreams($select=name,description;$orderby=name)",
+                "Things?$expand=Datastreams($orderby=name;$select=description,name)&$select=id,name");
+        testNormaliseEqual(
+                "Things?$select=name,id&$expand=Locations,Datastreams($select=name,description;$orderby=name)",
+                "Things?$expand=Datastreams($orderby=name;$select=description,name),Locations&$select=id,name");
+    }
+
+    private void testNormaliseEqual(String url1, String url2) {
+        assertEquals(normalise(url1), normalise(url2));
+    }
+
+    private String normalise(String pathAndQuery) {
+        Query query = PathParser.parsePathAndQuery(Version.INTERNAL, pathAndQuery, contextNoOrder);
+        query.normalise();
+        return query.getPath().getUrl() + "?" + query.toString(false);
     }
 
     private static void testNextLink(ServiceContext context, String url) {

@@ -23,37 +23,33 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 public class SubscriptionEvent {
 
     private String clientId;
-    private String topic;
+    private String topicIntrnl;
+    private String topicClient;
 
     public SubscriptionEvent() {
     }
 
-    public SubscriptionEvent(String clientId, String topic) {
+    public SubscriptionEvent(String clientId, String topicIntrnl, String topicClient) {
         this.clientId = clientId;
-        this.topic = topic;
+        this.topicIntrnl = topicIntrnl;
+        this.topicClient = topicClient;
     }
 
     public String getClientId() {
         return clientId;
     }
 
-    public SubscriptionEvent setClientId(String clientId) {
-        this.clientId = clientId;
-        return this;
+    public String getTopicIntrnl() {
+        return topicIntrnl;
     }
 
-    public String getTopic() {
-        return topic;
-    }
-
-    public SubscriptionEvent setTopic(String topic) {
-        this.topic = topic;
-        return this;
+    public String getTopicClient() {
+        return topicClient;
     }
 
     @Override
     public String toString() {
-        return getTopic();
+        return getTopicClient() + " -> " + getTopicIntrnl();
     }
 
 }
