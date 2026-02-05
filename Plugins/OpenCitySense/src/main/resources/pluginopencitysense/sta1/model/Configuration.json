@@ -1,0 +1,128 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Configuration",
+      "plural": "Configurations",
+      "adminOnly": false,
+      "table": "configurations",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "id",
+          "aliases": [
+            "@iot.id"
+          ],
+          "type": "Id",
+          "nullable": false,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+              "field": "id"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "createTime",
+          "type": "TM_Instant",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
+              "field": "create_time"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "appliedTime",
+          "type": "TM_Instant",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant",
+              "field": "applied_time"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "deviceStatus",
+          "type": "Edm.String",
+          "required": true,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "device_status"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "configStatus",
+          "type": "Edm.String",
+          "required": true,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "config_status"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "config",
+          "type": "Object",
+          "required": true,
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
+              "field": "config",
+              "isMap": true
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "Thing",
+          "entitySet": false,
+          "entityType": "Thing",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Configurations",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "thing_id",
+              "otherTable": "THINGS",
+              "otherField": "ID"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "validators": {
+        "createValidators": [
+          {
+            "name": "defaultValue",
+            "validator": {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.model.core.TimeDefaultValidator",
+              "propertyName": "createTime"
+            }
+          }
+        ],
+        "updateValidators": []
+      },
+      "annotations": []
+    }
+  ]
+}

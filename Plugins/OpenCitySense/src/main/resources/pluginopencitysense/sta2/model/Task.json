@@ -1,0 +1,28 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Task",
+      "plural": "Tasks",
+      "adminOnly": false,
+      "table": "TASKS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "runLog",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "run_log"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}

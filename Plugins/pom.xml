@@ -27,6 +27,7 @@
         <module>MultiDatastream</module>
         <module>OData</module>
         <module>OpenApi</module>
+        <module>OpenCitySense</module>
         <module>Projects</module>
     </modules>
 

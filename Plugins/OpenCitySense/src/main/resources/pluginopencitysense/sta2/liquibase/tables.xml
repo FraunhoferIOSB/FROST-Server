@@ -1,0 +1,46 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <property name="id-Configuration" value="LONG" />
+    <property name="idType-Configuration" value="BIGINT" />
+    <property name="id-Decoder" value="LONG" />
+    <property name="idType-Decoder" value="BIGINT" />
+    <property name="id-DeviceModel" value="LONG" />
+    <property name="idType-DeviceModel" value="BIGINT" />
+    <property name="id-DeviceSecret" value="LONG" />
+    <property name="idType-DeviceSecret" value="BIGINT" />
+    <property name="id-Thing" value="LONG" />
+    <property name="idType-Thing" value="BIGINT" />
+
+    <include relativeToChangelogFile="true" file="tableConfigurations.xml" />
+    <include relativeToChangelogFile="true" file="tableDecoders.xml" />
+    <include relativeToChangelogFile="true" file="tableDeviceModels.xml" />
+    <include relativeToChangelogFile="true" file="tableThingDeviceModel.xml" />
+    <include relativeToChangelogFile="true" file="tableSensorDeviceModel.xml" />
+    <include relativeToChangelogFile="true" file="tableDeviceSecrets.xml" />
+    <include relativeToChangelogFile="true" file="tableThings.xml" />
+    <include relativeToChangelogFile="true" file="tableTasks.xml" />
+    <include relativeToChangelogFile="true" file="foreignKeys.xml" />
+
+</databaseChangeLog>
+

@@ -1,0 +1,51 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Task",
+      "plural": "Tasks",
+      "adminOnly": false,
+      "table": "TASKS",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "runTime",
+          "type": "TM_Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
+              "fieldStart": "runtime_start",
+              "fieldEnd": "runtime_end"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "status",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "status"
+            }
+          ],
+          "annotations": []
+        },
+        {
+          "name": "runLog",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "run_log"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}
