@@ -17,25 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for java.util.Date.
- *
- * @author jab
  */
-public class DateSerialiser extends JsonSerializer<Date> {
+public class DateSerialiser extends ValueSerializer<Date> {
 
     private final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
-    public void serialize(Date value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(Date value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeString(format.format(value));
     }
 

@@ -21,8 +21,6 @@ import static net.time4j.tz.OffsetSign.BEHIND_UTC;
 import static net.time4j.tz.ZonalOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -47,12 +45,10 @@ import net.time4j.tz.ZonalOffset;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-/**
- *
- * @author jab
- * @author scf
- */
 class EntityFormatterTest {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EntityFormatterTest.class.getName());
@@ -835,7 +831,7 @@ class EntityFormatterTest {
             JsonNode json1 = mapper.readTree(string1);
             JsonNode json2 = mapper.readTree(string2);
             return json1.equals(json2);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed", ex);
         }
         return false;

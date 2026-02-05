@@ -18,16 +18,14 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
@@ -35,12 +33,15 @@ import java.io.Writer;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import net.time4j.Moment;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.datatype.jsonp.JSONPModule;
 
 /**
  * Enables serialization of entities as JSON.
- *
- * @author jab
- * @author scf
  */
 public class JsonWriter {
 
@@ -60,13 +61,6 @@ public class JsonWriter {
     }
 
     private static ObjectMapper createObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        mapper.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
-
-        MixinUtils.addMixins(mapper);
-
         SimpleModule module = new SimpleModule();
         module.addSerializer(Entity.class, new EntitySerializer());
         module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
@@ -77,8 +71,25 @@ public class JsonWriter {
         module.addSerializer(EntityType.class, new EntityTypeSerialiser());
         module.addSerializer(Property.class, new EntityPropertySerialiser());
         module.addSerializer(Date.class, new DateSerialiser());
-        mapper.registerModule(module);
+
+        ObjectMapper mapper = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+                .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
+                .addModule(module)
+                .addModule(new JSONPModule())
+                .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)
+                .build();
+
         return mapper;
+    }
+
+    public static void addModule(JacksonModule module) {
+        objectMapperInstance = getObjectMapper()
+                .rebuild()
+                .addModule(module)
+                .build();
     }
 
     private JsonWriter() {

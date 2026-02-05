@@ -20,37 +20,35 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayResult;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  *
- * @author jab
  */
-public class DataArrayResultSerializer extends JsonSerializer<DataArrayResult> {
+public class DataArrayResultSerializer extends ValueSerializer<DataArrayResult> {
 
     @Override
-    public void serialize(DataArrayResult value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(DataArrayResult value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeStartObject();
         long count = value.getCount();
         if (count >= 0) {
-            gen.writeNumberField(AT_IOT_COUNT, count);
+            gen.writeNumberProperty(AT_IOT_COUNT, count);
         }
         String nextLink = value.getNextLink();
         if (nextLink != null) {
-            gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
+            gen.writeStringProperty(AT_IOT_NEXT_LINK, nextLink);
         }
 
-        gen.writeFieldName("value");
-        gen.writeObject(value.getValue());
+        gen.writePOJOProperty("value", value.getValue());
         gen.writeEndObject();
     }
 
     @Override
-    public boolean isEmpty(SerializerProvider provider, DataArrayResult value) {
+    public boolean isEmpty(SerializationContext ctx, DataArrayResult value) {
         return (value == null || value.getValue() == null || value.getValue().isEmpty());
     }
 

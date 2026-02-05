@@ -17,18 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.DeserializationContext;
 
 /**
- *
- * @author jab
+ * Definition for FROST custom deserializers.
  */
 public interface CustomDeserializer {
 
     public Object deserialize(TreeNode json) throws IOException;
 
-    public Object deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException;
+    public Object deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException;
 }

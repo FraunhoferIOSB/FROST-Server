@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.modeleditor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.configurable.ConfigEditor;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
@@ -53,6 +52,7 @@ import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 public class FXMLController implements Initializable {
 
@@ -124,7 +124,7 @@ public class FXMLController implements Initializable {
                 String data = cfe.saveConfigToCurrentFile(indentText);
                 DefModel value = JsonWriter.getObjectMapper().readValue(data, DefModel.class);
                 models.add(value);
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 LOGGER.error("Failed to parse.", ex);
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to save.", ex);

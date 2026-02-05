@@ -17,13 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -31,18 +24,25 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.DeserializationContextExt;
 
 /**
  *
  * @author scf
  */
-public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>> {
+public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataArrayDeserializer.class.getName());
     private static final TypeReference<List<List<Object>>> LIST_LIST_OBJECT = new TypeReference<List<List<Object>>>() {
@@ -59,26 +59,24 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
         etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
     }
 
-    public static List<DataArrayValue> deserialize(String value, JsonReader reader, CoreSettings settings) throws IOException {
+    public static List<DataArrayValue> deserialize(String value, JsonReader reader, CoreSettings settings) throws JacksonException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
-            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
-            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            DeserializationContextExt dsc = mapper._deserializationContext();
             return new DataArrayDeserializer(settings).deserialize(parser, dsc);
         }
     }
 
-    public static List<DataArrayValue> deserialize(Reader value, JsonReader reader, CoreSettings settings) throws IOException {
+    public static List<DataArrayValue> deserialize(Reader value, JsonReader reader, CoreSettings settings) throws JacksonException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
-            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
-            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            DeserializationContextExt dsc = mapper._deserializationContext();
             return new DataArrayDeserializer(settings).deserialize(parser, dsc);
         }
     }
 
     @Override
-    public List<DataArrayValue> deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    public List<DataArrayValue> deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
         List<DataArrayValue> result = new ArrayList<>();
         JsonToken currentToken = parser.nextToken();
         expect(JsonToken.START_ARRAY, currentToken);
@@ -90,11 +88,11 @@ public class DataArrayDeserializer extends JsonDeserializer<List<DataArrayValue>
         return result;
     }
 
-    private DataArrayValue deserializeDataArrayValue(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    private DataArrayValue deserializeDataArrayValue(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
         DataArrayValue result = new DataArrayValue();
         JsonToken currentToken = parser.nextToken();
-        while (currentToken == JsonToken.FIELD_NAME) {
-            String fieldName = parser.getCurrentName();
+        while (currentToken == JsonToken.PROPERTY_NAME) {
+            String fieldName = parser.currentName();
             switch (fieldName) {
                 case "Datastream":
                     parser.nextToken();

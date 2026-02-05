@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.Arrays;
@@ -27,10 +24,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.geojson.GeoJsonObject;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.DeserializationContext;
 
 /**
- *
- * @author jab
+ * Deserialiser for GeoJSON objects.
  */
 public class GeoJsonDeserializier implements CustomDeserializer {
 
@@ -40,12 +40,12 @@ public class GeoJsonDeserializier implements CustomDeserializer {
             APPLICATION_GEOJSON,
             "application/vnd.geo+json")));
 
-    public Object deserialize(String json) throws IOException {
+    public Object deserialize(String json) throws JacksonException {
         return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, GeoJsonObject.class);
     }
 
     @Override
-    public Object deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    public Object deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
         return parser.readValueAs(GeoJsonObject.class);
     }
 

@@ -20,13 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.MomentSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -51,6 +44,13 @@ import java.util.TreeSet;
 import java.util.UUID;
 import net.time4j.Moment;
 import org.apache.commons.lang3.StringUtils;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlWriteFeature;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
  * Generates an MxGraph from the data model.
@@ -116,11 +116,13 @@ public class MxGraphGenerator {
                 .setDiagram(diagram);
         SimpleModule module = new SimpleModule();
         module.addSerializer(Moment.class, new MomentSerializer());
-        ObjectMapper xmlMapper = new XmlMapper()
-                .configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true)
-                .registerModule(module)
+        ObjectMapper xmlMapper = XmlMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+                .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
+                .configure(XmlWriteFeature.WRITE_XML_DECLARATION, true)
+                .addModule(module)
                 .configure(SerializationFeature.INDENT_OUTPUT, true)
-                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                .build();
         xmlMapper.writeValue(writer, mxFile);
     }
 

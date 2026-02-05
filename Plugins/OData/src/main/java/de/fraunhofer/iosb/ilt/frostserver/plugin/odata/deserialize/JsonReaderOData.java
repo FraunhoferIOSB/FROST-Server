@@ -17,12 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.TimeInstantDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.TimeIntervalDeserializer;
@@ -31,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomDeserial
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityChangedMessageDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -41,17 +35,23 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.deser.DeserializationContextExt;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Allows parsing of STA entities from JSON. Fails on unknown properties in the
  * JSON input!
- *
- * @author jab
  */
 public class JsonReaderOData implements JsonReader {
 
@@ -107,12 +107,6 @@ public class JsonReaderOData implements JsonReader {
         for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomDeserializationManager.registerDeserializer(encodingType, geoJsonDeserializier);
         }
-        ObjectMapper mapper = new ObjectMapper()
-                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-
-        MixinUtils.addMixins(mapper);
-
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
         for (EntityType entityType : modelRegistry.getEntityTypes(isAdmin)) {
@@ -123,7 +117,12 @@ public class JsonReaderOData implements JsonReader {
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());
         module.addDeserializer(TimeValue.class, new TimeValueDeserializer());
 
-        mapper.registerModule(module);
+        ObjectMapper mapper = JsonMapper.builder()
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)
+                .build();
+
         return mapper;
     }
 
@@ -171,8 +170,7 @@ public class JsonReaderOData implements JsonReader {
     @Override
     public Entity parseEntity(EntityType entityType, String value) throws IOException {
         try (final JsonParser parser = mapper.createParser(value)) {
-            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
-            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            DeserializationContextExt dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
@@ -183,8 +181,7 @@ public class JsonReaderOData implements JsonReader {
     @Override
     public Entity parseEntity(EntityType entityType, Reader value) throws IOException {
         try (final JsonParser parser = mapper.createParser(value)) {
-            DefaultDeserializationContext dsc = (DefaultDeserializationContext) mapper.getDeserializationContext();
-            dsc = dsc.createInstance(mapper.getDeserializationConfig(), parser, mapper.getInjectableValues());
+            DeserializationContextExt dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {

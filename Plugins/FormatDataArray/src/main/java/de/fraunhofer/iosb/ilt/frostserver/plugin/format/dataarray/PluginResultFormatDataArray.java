@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -40,6 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  *
@@ -133,11 +133,10 @@ public class PluginResultFormatDataArray implements PluginResultFormat, PluginSe
         }
         modifiedEntityFormatter = true;
 
-        // TODO: this should be an officially registerd method.
         SimpleModule module = new SimpleModule();
         module.addSerializer(DataArrayValue.class, new DataArrayValueSerializer());
         module.addSerializer(DataArrayResult.class, new DataArrayResultSerializer());
-        JsonWriter.getObjectMapper().registerModule(module);
+        JsonWriter.addModule(module);
     }
 
 }

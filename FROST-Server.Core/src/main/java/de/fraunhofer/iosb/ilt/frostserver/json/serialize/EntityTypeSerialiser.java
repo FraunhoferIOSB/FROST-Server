@@ -17,21 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for TimeValue objects.
- *
- * @author jab
  */
-public class EntityTypeSerialiser extends JsonSerializer<EntityType> {
+public class EntityTypeSerialiser extends ValueSerializer<EntityType> {
 
     @Override
-    public void serialize(EntityType value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(EntityType value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeString(value.entityName);
     }
 

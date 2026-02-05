@@ -17,12 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
- *
- * @author hylke
+ * A Simple type extend a single primitive type.
  */
 public abstract class TypeSimple extends PropertyType {
 
@@ -37,7 +36,7 @@ public abstract class TypeSimple extends PropertyType {
         this(name, description, ParserUtils.getDefaultDeserializer(tr), parser);
     }
 
-    protected TypeSimple(String name, String description, JsonDeserializer deserializer, Parser parser) {
+    protected TypeSimple(String name, String description, ValueDeserializer deserializer, Parser parser) {
         super(name, description, deserializer, ParserUtils.getDefaultSerializer());
         if (this instanceof TypeSimplePrimitive typeSimplePrimitive) {
             this.underlyingType = typeSimplePrimitive;

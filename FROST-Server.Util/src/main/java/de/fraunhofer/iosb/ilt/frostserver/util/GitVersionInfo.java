@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -82,7 +82,7 @@ public class GitVersionInfo {
         Map<String, String> map;
         try {
             map = mapper.readValue(inputStream, TYPE_MAP_STRING_STRING);
-        } catch (IOException exc) {
+        } catch (JacksonException exc) {
             LOGGER.error("Failed to read git info file.", exc);
             map = new HashMap<>();
         }

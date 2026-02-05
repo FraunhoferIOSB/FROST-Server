@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.io.IOException;
 import java.io.Reader;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * The interface for json parsers.

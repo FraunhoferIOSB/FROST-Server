@@ -18,9 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.modelextractor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -90,6 +87,10 @@ import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class FXMLController implements Initializable {
 
@@ -174,9 +175,11 @@ public class FXMLController implements Initializable {
 
     private ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
-            objectMapper = new ObjectMapper()
-                    .setSerializationInclusion(JsonInclude.Include.NON_DEFAULT)
-                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+            objectMapper = JsonMapper.builder()
+                    .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_DEFAULT))
+                    .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_DEFAULT))
+                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                    .build();
         }
         return objectMapper;
     }
@@ -469,7 +472,7 @@ public class FXMLController implements Initializable {
                     .orElse(editorNull);
             configEditor.setConfig(json);
             return configEditor;
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error(FAILED_TO_GENERATE_JSON, ex);
             alertError(FAILED_TO_GENERATE_JSON, ex);
         }
@@ -610,7 +613,7 @@ public class FXMLController implements Initializable {
                 String stringData = getObjectMapper().writeValueAsString(composite);
                 JsonElement json = JsonParser.parseString(stringData);
                 saveToFile(json, currentFile);
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 LOGGER.error(FAILED_TO_GENERATE_JSON, ex);
                 alertError(FAILED_TO_GENERATE_JSON, ex);
             }

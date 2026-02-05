@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.commons.csv.CSVPrinter;
 import org.geojson.GeoJsonObject;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
  * Collects all elements for a single row in a CSV file.
@@ -34,8 +35,6 @@ import org.slf4j.LoggerFactory;
  * of the element. After this, for each row, each element is collected in order.
  * If one or more elements are skipped, the elements set to null. Finally, the
  * entire row is flushed to the CSVPrinter, and the collector is reset.
- *
- * @author scf
  */
 public class CsvRowCollector {
 
@@ -93,7 +92,7 @@ public class CsvRowCollector {
             try {
                 String json = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(value);
                 elements.set(idx, json);
-            } catch (IOException ex) {
+            } catch (JacksonException ex) {
                 LOGGER.warn("Could not transform collection to JSON.", ex);
                 elements.set(idx, value);
             }

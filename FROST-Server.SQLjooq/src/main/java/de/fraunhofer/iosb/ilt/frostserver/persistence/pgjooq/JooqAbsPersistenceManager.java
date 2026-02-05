@@ -25,9 +25,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_LO
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.VALUE_ID_TYPE_UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -92,6 +89,9 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonPatch;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.Principal;
@@ -123,6 +123,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Common implementation of the JOOQ Persistence managers.
@@ -430,12 +431,13 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         }
         original.setEntityPropertiesSet(false, false);
         original.setQuery(settings.getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
-        JsonNode originalNode = JsonWriter.getObjectMapper().valueToTree(original);
+        final ObjectMapper om = JsonWriter.getObjectMapper();
+        JsonObject originalNode = om.readValue(om.valueToTree(original), JsonObject.class);
         LOGGER.trace("Old {}", originalNode);
-        JsonNode newNode;
+        JsonObject newNode;
         try {
             newNode = patch.apply(originalNode);
-        } catch (JsonPatchException ex) {
+        } catch (JsonException ex) {
             throw new IllegalArgumentException("Failed to apply patch.", ex);
         }
         LOGGER.trace("New {}", newNode);

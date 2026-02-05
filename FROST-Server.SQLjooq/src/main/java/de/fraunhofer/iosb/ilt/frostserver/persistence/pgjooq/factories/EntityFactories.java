@@ -19,9 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.GeoJsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -40,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import net.time4j.Moment;
@@ -58,6 +54,9 @@ import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author scf
@@ -320,7 +319,7 @@ public class EntityFactories {
         String geoJson;
         try {
             geoJson = new GeoJsonSerializer().serialize(geoLocation);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to store.", ex);
             throw new IllegalArgumentException("encoding specifies geoJson, but location not parsable as such.");
         }
@@ -354,7 +353,7 @@ public class EntityFactories {
         }
         try {
             return getFormatter().writeValueAsString(object);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalStateException("Could not serialise object.", ex);
         }
     }

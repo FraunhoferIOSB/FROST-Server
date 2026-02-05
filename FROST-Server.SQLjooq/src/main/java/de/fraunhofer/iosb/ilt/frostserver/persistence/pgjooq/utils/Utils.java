@@ -20,9 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 import static java.time.ZoneOffset.UTC;
 import static net.time4j.TemporalType.INSTANT;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
@@ -44,10 +41,13 @@ import org.jooq.OrderField;
 import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
- *
- * @author scf
+ * Various utility methods.
  */
 public class Utils {
 
@@ -160,8 +160,8 @@ public class Utils {
 
         try {
             return SimpleJsonMapper.getSimpleObjectMapper().readTree(json);
-        } catch (IOException ex) {
-            return new TextNode(json);
+        } catch (JacksonException ex) {
+            return new StringNode(json);
         }
     }
 
@@ -172,7 +172,7 @@ public class Utils {
 
         try {
             return SimpleJsonMapper.getSimpleObjectMapper().readTree(json);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
     }
@@ -183,7 +183,7 @@ public class Utils {
         }
         try {
             return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, clazz);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
     }
@@ -194,7 +194,7 @@ public class Utils {
         }
         try {
             return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, typeReference);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }
     }

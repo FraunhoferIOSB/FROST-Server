@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.GeneratorContext;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec.OADoc;
@@ -32,12 +31,11 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.util.List;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
  * /api.
- *
- * @author scf
  */
 public class ServiceOpenApi {
 
@@ -69,7 +67,7 @@ public class ServiceOpenApi {
             response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
             response.getWriter().append(new FormatWriterGeneric(jsonString).getFormatted());
             return response;
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to encode OA Document.", ex);
             return Service.errorResponse(response, 500, "Failed to encode document");
         } catch (IOException ex) {

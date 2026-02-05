@@ -17,19 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for TimeObject objects.
  */
-public class TimeObjectSerializer extends JsonSerializer<TimeObject> {
+public class TimeObjectSerializer extends ValueSerializer<TimeObject> {
 
     @Override
-    public void serialize(TimeObject value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(TimeObject value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         if (value.isEmpty()) {
             gen.writeNull();
         } else {

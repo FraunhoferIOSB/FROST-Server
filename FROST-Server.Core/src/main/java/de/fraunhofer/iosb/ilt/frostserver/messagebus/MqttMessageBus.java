@@ -19,8 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BUS;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -66,6 +64,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A message bus implementation for out-of-JVM use. This uses an MQTT broker as
@@ -332,7 +332,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
                 connect();
             }
             client.publish(topicName, bytes, qosLevel, false);
-        } catch (MqttException | JsonProcessingException ex) {
+        } catch (MqttException | JacksonException ex) {
             LOGGER.error("Failed to publish message to bus.", ex);
         }
     }

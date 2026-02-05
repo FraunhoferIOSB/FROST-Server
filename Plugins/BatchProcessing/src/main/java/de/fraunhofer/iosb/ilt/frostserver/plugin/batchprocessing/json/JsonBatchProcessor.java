@@ -20,9 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -53,6 +50,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Streaming processor for JSON batch requests. JSON batch requests are much
@@ -99,7 +100,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             }
             JsonToken currentToken = parser.nextToken();
             while (currentToken != null) {
-                if (currentToken == JsonToken.FIELD_NAME) {
+                if (currentToken == JsonToken.PROPERTY_NAME) {
                     String fieldName = parser.currentName();
                     if ("requests".equalsIgnoreCase(fieldName)) {
                         currentToken = parser.nextToken();
@@ -125,7 +126,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         if (parser != null) {
             try {
                 parser.close();
-            } catch (IOException ex) {
+            } catch (RuntimeException ex) {
                 LOGGER.warn("Failed to close parser: {}", ex.getMessage());
                 LOGGER.debug("Failed to close parser.", ex);
             }
@@ -172,7 +173,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                     service.commitTransaction();
                 }
             }
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.info("Failed to parse json.", ex.getMessage());
             LOGGER.debug("Failed to parse json.", ex);
             service.rollbackTransaction();

@@ -20,46 +20,44 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NAVIGATION_LINK;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
- *
- * @author jab
+ * Serialiser for data array value objects.
  */
-public class DataArrayValueSerializer extends JsonSerializer<DataArrayValue> {
+public class DataArrayValueSerializer extends ValueSerializer<DataArrayValue> {
 
     private static final String DATAARRAY_IOT_COUNT = "dataArray" + AT_IOT_COUNT;
     private static final String MULTI_DATASTREAM_IOT_NAVIGATION_LINK = "MultiDatastream" + AT_IOT_NAVIGATION_LINK;
     private static final String DATASTREAM_IOT_NAVIGATION_LINK = "Datastream" + AT_IOT_NAVIGATION_LINK;
 
     @Override
-    public void serialize(DataArrayValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(DataArrayValue value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeStartObject();
         Entity datastream = value.getDatastream();
         if (datastream != null && datastream.getSelfLink() != null) {
-            gen.writeStringField(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getSelfLink());
+            gen.writeStringProperty(DATASTREAM_IOT_NAVIGATION_LINK, datastream.getSelfLink());
         }
         Entity multiDatastream = value.getMultiDatastream();
         if (multiDatastream != null && multiDatastream.getSelfLink() != null) {
-            gen.writeStringField(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getSelfLink());
+            gen.writeStringProperty(MULTI_DATASTREAM_IOT_NAVIGATION_LINK, multiDatastream.getSelfLink());
         }
-        gen.writeObjectField("components", value.getComponents());
+        gen.writePOJOProperty("components", value.getComponents());
         int count = value.getDataArray().size();
         if (count >= 0) {
-            gen.writeNumberField(DATAARRAY_IOT_COUNT, count);
+            gen.writeNumberProperty(DATAARRAY_IOT_COUNT, count);
         }
-        gen.writeFieldName("dataArray");
-        gen.writeObject(value.getDataArray());
+        gen.writePOJOProperty("dataArray", value.getDataArray());
         gen.writeEndObject();
     }
 
     @Override
-    public boolean isEmpty(SerializerProvider provider, DataArrayValue value) {
+    public boolean isEmpty(SerializationContext ctx, DataArrayValue value) {
         return (value == null || value.getDataArray().isEmpty());
     }
 

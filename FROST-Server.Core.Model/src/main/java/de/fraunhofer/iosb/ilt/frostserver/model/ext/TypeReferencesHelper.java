@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import java.lang.reflect.Field;
@@ -31,6 +30,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.geojson.GeoJsonObject;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.type.TypeReference;
 
 /**
  *

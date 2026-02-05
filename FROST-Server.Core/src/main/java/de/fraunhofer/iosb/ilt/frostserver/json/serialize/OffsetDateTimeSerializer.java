@@ -17,22 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for OffsetDateTime objects.
- *
- * @author scf
  */
-public class OffsetDateTimeSerializer extends JsonSerializer<OffsetDateTime> {
+public class OffsetDateTimeSerializer extends ValueSerializer<OffsetDateTime> {
 
     @Override
-    public void serialize(OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(OffsetDateTime value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeString(DateTimeFormatter.ISO_INSTANT.format(value));
     }
 

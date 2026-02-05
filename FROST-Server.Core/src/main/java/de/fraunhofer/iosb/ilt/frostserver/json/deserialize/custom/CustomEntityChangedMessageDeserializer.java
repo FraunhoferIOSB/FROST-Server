@@ -17,25 +17,24 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
- *
- * @author scf
+ * Deserialiser for entity changed messages.
  */
-public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<EntityChangedMessage> {
+public class CustomEntityChangedMessageDeserializer extends ValueDeserializer<EntityChangedMessage> {
 
     /**
      * The logger for this class.
@@ -51,13 +50,13 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
     }
 
     @Override
-    public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    public EntityChangedMessage deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
         EntityChangedMessage message = new EntityChangedMessage();
         JsonToken currentToken = parser.nextToken();
         EntityType type = null;
         Entity entity = null;
-        while (currentToken == JsonToken.FIELD_NAME) {
-            String fieldName = parser.getCurrentName();
+        while (currentToken == JsonToken.PROPERTY_NAME) {
+            String fieldName = parser.currentName();
             parser.nextToken();
             switch (fieldName) {
                 case "eventType":
@@ -93,7 +92,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         return message;
     }
 
-    private EntityType handleEntityType(JsonParser parser, Entity entity, EntityChangedMessage message) throws IOException {
+    private EntityType handleEntityType(JsonParser parser, Entity entity, EntityChangedMessage message) throws JacksonException {
         final String typeString = parser.getValueAsString();
         EntityType type = modelRegistry.getEntityTypeForName(typeString, true);
         if (type == null) {
@@ -107,10 +106,14 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         return type;
     }
 
-    private void handleEpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+    private void handleEpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, JacksonException {
         String fieldName;
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        if (parser.currentToken() == JsonToken.VALUE_NULL) {
+            // No Fields.
+            return;
         }
         JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.VALUE_STRING) {
@@ -120,10 +123,14 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         }
     }
 
-    private void handleNpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, IOException {
+    private void handleNpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, JacksonException {
         String fieldName;
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+        }
+        if (parser.currentToken() == JsonToken.VALUE_NULL) {
+            // No Fields.
+            return;
         }
         JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.VALUE_STRING) {
@@ -133,7 +140,7 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         }
     }
 
-    private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, EntityChangedMessage message) throws IOException, IllegalArgumentException {
+    private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, EntityChangedMessage message) throws JacksonException, IllegalArgumentException {
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
         }

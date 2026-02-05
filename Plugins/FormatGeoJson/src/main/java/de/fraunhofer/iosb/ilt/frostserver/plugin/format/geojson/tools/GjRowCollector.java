@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
-import com.fasterxml.jackson.core.TreeNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
+import tools.jackson.core.TreeNode;
 
 /**
  * Collects all elements for a single feature in a feature collection.

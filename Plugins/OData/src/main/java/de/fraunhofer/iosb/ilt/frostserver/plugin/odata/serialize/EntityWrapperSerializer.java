@@ -17,21 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySerializer;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.exc.StreamWriteException;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Handles serialization of wrapped Entity objects that add a context property.
- *
- * @author jab
- * @author scf
  */
-public class EntityWrapperSerializer extends JsonSerializer<EntityWrapper> {
+public class EntityWrapperSerializer extends ValueSerializer<EntityWrapper> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityWrapperSerializer.class.getName());
 
@@ -44,14 +43,14 @@ public class EntityWrapperSerializer extends JsonSerializer<EntityWrapper> {
     }
 
     @Override
-    public void serialize(EntityWrapper wrapper, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(EntityWrapper wrapper, JsonGenerator gen, SerializationContext serializers) throws JacksonException {
         gen.writeStartObject();
         try {
-            gen.writeStringField(contextField, wrapper.getContext());
+            gen.writeStringProperty(contextField, wrapper.getContext());
             innerSerialiser.writeContent(wrapper.getEntity(), gen);
         } catch (IOException | RuntimeException exc) {
             LOGGER.error("Failed to serialise entity.", exc);
-            throw new IOException("could not serialize Entity");
+            throw new StreamWriteException(gen, "could not serialize Entity");
         } finally {
             gen.writeEndObject();
         }

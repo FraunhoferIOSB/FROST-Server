@@ -19,12 +19,12 @@ package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.Objects;
+import tools.jackson.core.JacksonException;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.
@@ -164,7 +164,7 @@ public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
     public String toString() {
         try {
             return SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             return super.toString();
         }
     }

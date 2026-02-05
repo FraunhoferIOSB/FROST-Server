@@ -18,18 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,6 +29,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * A single request from a JSON Batch request.
@@ -142,24 +141,22 @@ public class JsonBatchRequestItem {
         return this;
     }
 
-    public static class BodyDeserializer extends JsonDeserializer<String> {
+    public static class BodyDeserializer extends ValueDeserializer<String> {
 
         @Override
-        public String deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            final ObjectMapper mapper = (ObjectMapper) jp.getCodec();
-            TreeNode tree = mapper.readTree(jp);
-            return mapper.writeValueAsString(tree);
+        public String deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
+            TreeNode tree = jp.readValueAsTree();
+            return SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(tree);
         }
     }
 
-    public static class HeadersDeserializer extends JsonDeserializer<Map<String, List<String>>> {
+    public static class HeadersDeserializer extends ValueDeserializer<Map<String, List<String>>> {
 
         @Override
-        public Map<String, List<String>> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            final ObjectMapper mapper = (ObjectMapper) jp.getCodec();
-            JsonNode tree = mapper.readTree(jp);
+        public Map<String, List<String>> deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
+            JsonNode tree = jp.readValueAsTree();
             Map<String, List<String>> result = new HashMap<>();
-            Iterator<Map.Entry<String, JsonNode>> fields = tree.fields();
+            Iterator<Map.Entry<String, JsonNode>> fields = tree.properties().iterator();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> entry = fields.next();
                 final String name = entry.getKey().toLowerCase();

@@ -17,22 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.io.IOException;
 import net.time4j.Moment;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for Time4J Moment objects.
- *
- * @author scf
  */
-public class MomentSerializer extends JsonSerializer<Moment> {
+public class MomentSerializer extends ValueSerializer<Moment> {
 
     @Override
-    public void serialize(Moment value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(Moment value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeString(StringHelper.FORMAT_MOMENT.print(value));
     }
 

@@ -20,44 +20,43 @@ package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
- *
- * @author jab
+ * Serialiser for results that are an entity set.
  */
-public class EntitySetResultSerializer extends JsonSerializer<EntitySetResult> {
+public class EntitySetResultSerializer extends ValueSerializer<EntitySetResult> {
 
     @Override
-    public void serialize(EntitySetResult value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(EntitySetResult value, JsonGenerator gen, SerializationContext serializers) throws JacksonException {
         gen.writeStartObject();
         long count = value.getValues().getCount();
         if (count >= 0) {
-            gen.writeNumberField(AT_IOT_COUNT, count);
+            gen.writeNumberProperty(AT_IOT_COUNT, count);
         }
 
-        gen.writeArrayFieldStart("value");
+        gen.writeArrayPropertyStart("value");
         for (Entity child : value.getValues()) {
-            gen.writeObject(child);
+            gen.writePOJO(child);
         }
         gen.writeEndArray();
 
         if (value.getQuery().getMetadata() != Metadata.OFF) {
             String nextLink = value.getValues().getNextLink();
             if (nextLink != null) {
-                gen.writeStringField(AT_IOT_NEXT_LINK, nextLink);
+                gen.writeStringProperty(AT_IOT_NEXT_LINK, nextLink);
             }
         }
     }
 
     @Override
-    public boolean isEmpty(SerializerProvider provider, EntitySetResult value) {
+    public boolean isEmpty(SerializationContext ctx, EntitySetResult value) {
         return (value == null || value.getValues() == null);
     }
 

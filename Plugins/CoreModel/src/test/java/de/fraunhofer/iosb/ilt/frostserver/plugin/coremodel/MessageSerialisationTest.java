@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
@@ -33,11 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
-/**
- *
- * @author jab
- */
 class MessageSerialisationTest {
 
     private static CoreSettings coreSettings;

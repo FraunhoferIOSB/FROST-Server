@@ -19,9 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.MapValue;
@@ -42,6 +39,9 @@ import java.util.Set;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  *
@@ -131,7 +131,7 @@ public class TypeComplex extends PropertyType {
         setMediaType(Constants.CONTENT_TYPE_APPLICATION_JSON);
     }
 
-    public TypeComplex(String name, String description, boolean openType, Instantiator instantiator, JsonDeserializer jd, JsonSerializer js) {
+    public TypeComplex(String name, String description, boolean openType, Instantiator instantiator, ValueDeserializer jd, ValueSerializer js) {
         super(name, description, jd, js);
         this.openType = openType;
         this.instantiator = instantiator;
@@ -166,8 +166,8 @@ public class TypeComplex extends PropertyType {
     }
 
     @Override
-    public JsonSerializer getSerializer() {
-        JsonSerializer serializer = super.getSerializer();
+    public ValueSerializer getSerializer() {
+        ValueSerializer serializer = super.getSerializer();
         if (serializer == null) {
             serializer = ParserUtils.getDefaultSerializer();
             setSerializer(serializer);
@@ -176,8 +176,8 @@ public class TypeComplex extends PropertyType {
     }
 
     @Override
-    public JsonDeserializer getDeserializer() {
-        JsonDeserializer deserializer = super.getDeserializer();
+    public ValueDeserializer getDeserializer() {
+        ValueDeserializer deserializer = super.getDeserializer();
         if (deserializer == null) {
             deserializer = ParserUtils.getComplexTypeDeserializer(this);
             setDeserializer(deserializer);

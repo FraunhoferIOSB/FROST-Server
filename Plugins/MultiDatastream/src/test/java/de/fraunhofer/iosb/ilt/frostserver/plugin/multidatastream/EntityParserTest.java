@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.TestHelp
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.node.TextNode;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -45,11 +44,8 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.node.StringNode;
 
-/**
- *
- * @author jab
- */
 class EntityParserTest {
 
     private static CoreSettings coreSettings;
@@ -313,7 +309,7 @@ class EntityParserTest {
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
                         .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
                         .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
-                        .setProperty(pluginCoreModel.epFeature, new TextNode("tarmac")))
+                        .setProperty(pluginCoreModel.epFeature, new StringNode("tarmac")))
                 .setProperty(
                         pluginCoreModel.npDatastreamObservation,
                         new DefaultEntity(pluginCoreModel.etDatastream)

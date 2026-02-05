@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import static net.time4j.tz.ZonalOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -46,11 +45,11 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for testing JSON de-/serialization.
- *
- * @author jab
  */
 public class TestHelper {
 
@@ -60,7 +59,8 @@ public class TestHelper {
 
     public static <T extends Number> JsonNode jsonPolygon(int dimensions, T... values) {
         Polygon poly = getPolygon(dimensions, values);
-        return SimpleJsonMapper.getSimpleObjectMapper().valueToTree(poly);
+        final ObjectMapper om = SimpleJsonMapper.getSimpleObjectMapper();
+        return om.readTree(om.writeValueAsString(poly));
     }
 
     public static <T extends Number> Polygon getPolygon(int dimensions, T... values) {
@@ -69,7 +69,8 @@ public class TestHelper {
 
     public static <T extends Number> JsonNode jsonPoint(T... values) {
         Point point = getPoint(values);
-        return SimpleJsonMapper.getSimpleObjectMapper().valueToTree(point);
+        final ObjectMapper om = SimpleJsonMapper.getSimpleObjectMapper();
+        return om.readTree(om.writeValueAsString(point));
     }
 
     public static <T extends Number> Point getPoint(T... values) {

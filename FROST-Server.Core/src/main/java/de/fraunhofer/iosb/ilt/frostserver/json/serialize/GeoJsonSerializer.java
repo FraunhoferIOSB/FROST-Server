@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom.CustomSerializer;
 import org.geojson.GeoJsonObject;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
- * @author jab
+ * Serialiser for GeoJSON values.
  */
 public class GeoJsonSerializer implements CustomSerializer {
 
@@ -37,7 +37,7 @@ public class GeoJsonSerializer implements CustomSerializer {
     }
 
     @Override
-    public String serialize(Object object) throws JsonProcessingException {
+    public String serialize(Object object) throws JacksonException {
         if (object == null || !GeoJsonObject.class.isAssignableFrom(object.getClass())) {
             return null;
         }

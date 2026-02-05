@@ -17,17 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
- *
- * @author jab
+ * Serialises entity set.
  */
-public class EntitySetResultOdataSerializer extends JsonSerializer<EntitySetResultOdata> {
+public class EntitySetResultOdataSerializer extends ValueSerializer<EntitySetResultOdata> {
 
     private final String contextField;
     private final String countField;
@@ -40,29 +39,29 @@ public class EntitySetResultOdataSerializer extends JsonSerializer<EntitySetResu
     }
 
     @Override
-    public void serialize(EntitySetResultOdata value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(EntitySetResultOdata value, JsonGenerator gen, SerializationContext serializers) throws JacksonException {
         gen.writeStartObject();
-        gen.writeStringField(contextField, value.getContext());
+        gen.writeStringProperty(contextField, value.getContext());
 
         long count = value.getValues().getCount();
         if (count >= 0) {
-            gen.writeNumberField(countField, count);
+            gen.writeNumberProperty(countField, count);
         }
 
-        gen.writeArrayFieldStart("value");
+        gen.writeArrayPropertyStart("value");
         for (Entity child : value.getValues()) {
-            gen.writeObject(child);
+            gen.writePOJO(child);
         }
         gen.writeEndArray();
 
         String nextLink = value.getValues().getNextLink();
         if (nextLink != null) {
-            gen.writeStringField(nextLinkField, nextLink);
+            gen.writeStringProperty(nextLinkField, nextLink);
         }
     }
 
     @Override
-    public boolean isEmpty(SerializerProvider provider, EntitySetResultOdata value) {
+    public boolean isEmpty(SerializationContext provider, EntitySetResultOdata value) {
         return (value == null || value.getValues() == null);
     }
 

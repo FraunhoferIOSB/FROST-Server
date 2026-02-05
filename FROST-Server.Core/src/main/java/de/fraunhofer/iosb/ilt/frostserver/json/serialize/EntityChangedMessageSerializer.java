@@ -17,35 +17,43 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import java.io.IOException;
+import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.util.Set;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Handles serialization of EntityChangedMessages. Ensures the entityType is
  * serialised before the entity, to make de-serialisation easier.
- *
- * @author hylke
  */
-public class EntityChangedMessageSerializer extends JsonSerializer<EntityChangedMessage> {
+public class EntityChangedMessageSerializer extends ValueSerializer<EntityChangedMessage> {
 
     @Override
-    public void serialize(EntityChangedMessage message, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(EntityChangedMessage message, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeStartObject();
         final EntityChangedMessage.Type eventType = message.getEventType();
         if (eventType != null) {
-            gen.writeStringField("eventType", eventType.name());
+            gen.writeStringProperty("eventType", eventType.name());
         }
         final EntityType entityType = message.getEntityType();
         if (entityType != null) {
-            gen.writeStringField("entityType", entityType.entityName);
+            gen.writeStringProperty("entityType", entityType.entityName);
         }
-        gen.writeObjectField("entity", message.getEntity());
-        gen.writeObjectField("epFields", message.getEpFields());
-        gen.writeObjectField("npFields", message.getNpFields());
+        gen.writePOJOProperty("entity", message.getEntity());
+        final Set<EntityPropertyMain> epFields = message.getEpFields();
+        if (!StringHelper.isNullOrEmpty(epFields)) {
+            gen.writePOJOProperty("epFields", epFields);
+        }
+        final Set<NavigationPropertyMain> npFields = message.getNpFields();
+        if (!StringHelper.isNullOrEmpty(npFields)) {
+            gen.writePOJOProperty("npFields", npFields);
+        }
         gen.writeEndObject();
     }
 }

@@ -20,37 +20,35 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.io.IOException;
 import net.time4j.Moment;
 import net.time4j.range.MomentInterval;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for TimeValue objects.
- *
- * @author jab
  */
-public class TimeValueSerializer extends JsonSerializer<TimeValue> {
+public class TimeValueSerializer extends ValueSerializer<TimeValue> {
 
     @Override
-    public void serialize(TimeValue value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(TimeValue value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         if (value.isEmpty()) {
             gen.writeNull();
         } else {
             gen.writeStartObject();
             if (value.isInstant()) {
-                gen.writeObjectField(NAME_INTERVAL_START, value.asISO8601());
+                gen.writePOJOProperty(NAME_INTERVAL_START, value.asISO8601());
             } else {
                 final MomentInterval interval = value.getInterval().getInterval();
                 final Moment start = interval.getStartAsMoment();
                 final Moment end = interval.getEndAsMoment();
-                gen.writeObjectField(NAME_INTERVAL_START, StringHelper.FORMAT_MOMENT.print(start));
+                gen.writePOJOProperty(NAME_INTERVAL_START, StringHelper.FORMAT_MOMENT.print(start));
                 if (!start.equals(end)) {
-                    gen.writeObjectField(NAME_INTERVAL_END, StringHelper.FORMAT_MOMENT.print(end));
+                    gen.writePOJOProperty(NAME_INTERVAL_END, StringHelper.FORMAT_MOMENT.print(end));
                 }
             }
             gen.writeEndObject();

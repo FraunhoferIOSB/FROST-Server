@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
  * The result of an individual batch request item.
@@ -62,7 +62,7 @@ public class JsonBatchResultItem {
     public JsonBatchResultItem setBodyNotFormatted(Object body) {
         try {
             this.body = JsonWriter.getObjectMapper().writeValueAsString(body);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to convert String into JSON. This should never happen.");
         }
         return this;

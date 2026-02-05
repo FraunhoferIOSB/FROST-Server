@@ -21,23 +21,21 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.FORMAT_MOMENT;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import java.io.IOException;
 import net.time4j.Moment;
 import net.time4j.range.MomentInterval;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for TimeValue objects.
- *
- * @author jab
  */
-public class TimeIntervalSerializer extends JsonSerializer<TimeInterval> {
+public class TimeIntervalSerializer extends ValueSerializer<TimeInterval> {
 
     @Override
-    public void serialize(TimeInterval value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(TimeInterval value, JsonGenerator gen, SerializationContext serializers) throws JacksonException {
         if (value.isEmpty()) {
             gen.writeNull();
         } else {
@@ -45,9 +43,9 @@ public class TimeIntervalSerializer extends JsonSerializer<TimeInterval> {
             final MomentInterval interval = value.getInterval();
             final Moment start = interval.getStartAsMoment();
             final Moment end = interval.getEndAsMoment();
-            gen.writeObjectField(NAME_INTERVAL_START, FORMAT_MOMENT.print(start));
+            gen.writePOJOProperty(NAME_INTERVAL_START, FORMAT_MOMENT.print(start));
             if (!start.equals(end)) {
-                gen.writeObjectField(NAME_INTERVAL_END, FORMAT_MOMENT.print(end));
+                gen.writePOJOProperty(NAME_INTERVAL_END, FORMAT_MOMENT.print(end));
             }
             gen.writeEndObject();
         }

@@ -49,7 +49,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
  *
@@ -251,7 +251,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         settings.getPluginManager().modifyServiceDocument(request, result);
         try {
             SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), result);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to generate index document", ex);
         }
 

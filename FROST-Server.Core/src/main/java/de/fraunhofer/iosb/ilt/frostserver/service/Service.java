@@ -27,9 +27,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.github.fge.jsonpatch.JsonPatch;
+import com.google.gson.JsonParseException;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
@@ -69,6 +67,7 @@ import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
+import jakarta.json.JsonPatch;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -82,6 +81,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
  * Executes SensorThings commands. Normally, each call of
@@ -506,7 +506,7 @@ public class Service implements AutoCloseable {
                     maybeCommitAndClose();
                 }
 
-            } catch (IOException ex) {
+            } catch (JacksonException ex) {
                 throw new IllegalArgumentException("Failed to parse body as entity reference");
             } catch (NoSuchEntityException ex) {
                 return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
@@ -629,7 +629,7 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
-        } catch (JsonParseException | JsonMappingException exc) {
+        } catch (JsonParseException | JacksonException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
         } catch (IncompleteEntityException | NoSuchEntityException exc) {
@@ -669,7 +669,7 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid.", exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
-        } catch (JsonParseException exc) {
+        } catch (JacksonException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
         } catch (NoSuchEntityException exc) {
@@ -779,15 +779,15 @@ public class Service implements AutoCloseable {
     private ServiceResponse handlePutRef(PersistenceManager pm, ServiceRequest request, ResourcePath path, ServiceResponse response) {
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementEntitySet mainSet) {
-            return handlePutRefSet(pm, request, path, mainSet, response);
+            return handlePutRefSet(pm, request, mainSet, response);
         }
         if (mainElement instanceof PathElementEntity mainEntity) {
-            return handlePutRefEntity(pm, request, path, mainEntity, response);
+            return handlePutRefEntity(pm, request, mainEntity, response);
         }
         return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "PUT to ref only allowed on Entity or EntitySet");
     }
 
-    private ServiceResponse handlePutRefSet(PersistenceManager pm, ServiceRequest request, ResourcePath path, PathElementEntitySet mainSet, ServiceResponse response) {
+    private ServiceResponse handlePutRefSet(PersistenceManager pm, ServiceRequest request, PathElementEntitySet mainSet, ServiceResponse response) {
         //   PUT Datastream(1)/ObservedProperties/$ref
         //     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
         try {
@@ -812,14 +812,14 @@ public class Service implements AutoCloseable {
                 return response;
             }
             throw new IllegalArgumentException("Can not resolve target set.");
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalArgumentException("Failed to parse body as entity reference");
         } catch (NoSuchEntityException ex) {
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);
         }
     }
 
-    private ServiceResponse handlePutRefEntity(PersistenceManager pm, ServiceRequest request, ResourcePath path, PathElementEntity mainEntity, ServiceResponse response) {
+    private ServiceResponse handlePutRefEntity(PersistenceManager pm, ServiceRequest request, PathElementEntity mainEntity, ServiceResponse response) {
         //   PUT Datastream(1)/Thing/$ref
         //     {"@id": "Things(2)"}
         try {
@@ -843,7 +843,7 @@ public class Service implements AutoCloseable {
             response.setCode(HttpURLConnection.HTTP_NO_CONTENT);
             maybeCommitAndClose();
             return response;
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalArgumentException("Failed to parse body as entity reference");
         } catch (NoSuchEntityException ex) {
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, NOTHING_FOUND_RESPONSE);

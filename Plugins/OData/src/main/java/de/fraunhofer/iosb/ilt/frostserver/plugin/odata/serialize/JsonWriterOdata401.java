@@ -18,10 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.MixinUtils;
+import de.fraunhofer.iosb.ilt.frostserver.json.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.DateSerialiser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityChangedMessageSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityPropertySerialiser;
@@ -34,11 +31,16 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 import net.time4j.Moment;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Enables serialization of entities as JSON.
@@ -73,26 +75,28 @@ public class JsonWriterOdata401 {
     }
 
     private static ObjectMapper createObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        mapper.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
+        SimpleModule module = new SimpleModule()
+                .addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_CONTEXT, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID))
+                .addSerializer(Entity.class, new EntitySerializer(true, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID))
+                .addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer())
+                .addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer(AT_CONTEXT, AT_COUNT, AT_NEXT_LINK))
+                .addSerializer(Moment.class, new MomentSerializer())
+                .addSerializer(TimeValue.class, new TimeValueSerializer())
+                .addSerializer(TimeInstant.class, new TimeInstantSerializer())
+                .addSerializer(TimeInterval.class, new TimeIntervalSerializer())
+                .addSerializer(EntityType.class, new EntityTypeSerialiser())
+                .addSerializer(Property.class, new EntityPropertySerialiser())
+                .addSerializer(Date.class, new DateSerialiser());
 
-        MixinUtils.addMixins(mapper);
+        ObjectMapper mapper = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+                .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
+                .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)
+                .addModule(module)
+                .build();
 
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(EntityWrapper.class, new EntityWrapperSerializer(AT_CONTEXT, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
-        module.addSerializer(Entity.class, new EntitySerializer(true, AT_COUNT, AT_NAVIGATION_LINK, AT_NEXT_LINK, AT_ID));
-        module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
-        module.addSerializer(EntitySetResultOdata.class, new EntitySetResultOdataSerializer(AT_CONTEXT, AT_COUNT, AT_NEXT_LINK));
-        module.addSerializer(Moment.class, new MomentSerializer());
-        module.addSerializer(TimeValue.class, new TimeValueSerializer());
-        module.addSerializer(TimeInstant.class, new TimeInstantSerializer());
-        module.addSerializer(TimeInterval.class, new TimeIntervalSerializer());
-        module.addSerializer(EntityType.class, new EntityTypeSerialiser());
-        module.addSerializer(Property.class, new EntityPropertySerialiser());
-        module.addSerializer(Date.class, new DateSerialiser());
-        mapper.registerModule(module);
         return mapper;
     }
 

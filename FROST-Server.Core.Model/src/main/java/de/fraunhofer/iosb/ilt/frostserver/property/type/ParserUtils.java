@@ -17,22 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 /**
  * Utility class for (de)serialising.
@@ -43,30 +41,30 @@ public class ParserUtils {
         // Utility class
     }
 
-    public static JsonSerializer<Object> getDefaultSerializer() {
-        return new JsonSerializer<Object>() {
+    public static ValueSerializer<Object> getDefaultSerializer() {
+        return new ValueSerializer<Object>() {
+
             @Override
-            public void serialize(Object t, JsonGenerator jg, SerializerProvider sp) throws IOException {
+            public void serialize(Object t, JsonGenerator jg, SerializationContext ctxt) {
                 jg.writePOJO(t);
             }
         };
     }
 
-    public static <T> JsonDeserializer<T> getDefaultDeserializer(TypeReference<T> tr) {
-        return new JsonDeserializer<T>() {
+    public static <T> ValueDeserializer<T> getDefaultDeserializer(TypeReference<T> tr) {
+        return new ValueDeserializer<T>() {
             @Override
-            public T deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JacksonException {
+            public T deserialize(JsonParser jp, DeserializationContext dc) throws JacksonException {
                 return jp.readValueAs(tr);
             }
         };
     }
 
-    public static JsonDeserializer<Object> getLocationDeserializer() {
-        return new JsonDeserializer<Object>() {
+    public static ValueDeserializer<Object> getLocationDeserializer() {
+        return new ValueDeserializer<Object>() {
             @Override
-            public Object deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
-                final TreeNode valueTree = jp.readValueAsTree();
-                return valueTree;
+            public Object deserialize(JsonParser jp, DeserializationContext dc) throws JacksonException {
+                return jp.readValueAsTree();
             }
         };
     }
@@ -75,11 +73,11 @@ public class ParserUtils {
      * @param type the type of the complex type.
      * @return The deserialiser.
      */
-    public static JsonDeserializer<ComplexValue> getComplexTypeDeserializer(TypeComplex type) {
+    public static ValueDeserializer<ComplexValue> getComplexTypeDeserializer(TypeComplex type) {
         return new ComplexTypeDeserializer(type);
     }
 
-    private static class ComplexTypeDeserializer extends JsonDeserializer<ComplexValue> {
+    private static class ComplexTypeDeserializer extends ValueDeserializer<ComplexValue> {
 
         private final TypeComplex type;
 
@@ -88,14 +86,14 @@ public class ParserUtils {
         }
 
         @Override
-        public ComplexValue deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        public ComplexValue deserialize(JsonParser parser, DeserializationContext ctxt) {
             ComplexValue result = type.instantiate();
             JsonToken currentToken = parser.currentToken();
             if (currentToken == JsonToken.VALUE_NULL) {
                 return null;
             }
             currentToken = parser.nextToken();
-            while (currentToken == JsonToken.FIELD_NAME) {
+            while (currentToken == JsonToken.PROPERTY_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextValue();
                 Property property = type.getProperty(fieldName);
@@ -115,7 +113,7 @@ public class ParserUtils {
             return result;
         }
 
-        private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Property property, ComplexValue result) throws IOException {
+        private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Property property, ComplexValue result) {
             if (property instanceof EntityPropertyMain epm) {
                 deserializeEntityProperty(parser, ctxt, epm, result);
             } else if (property instanceof NavigationProperty) {
@@ -123,8 +121,8 @@ public class ParserUtils {
             }
         }
 
-        private void deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, EntityPropertyMain property, ComplexValue result) throws IOException {
-            final JsonDeserializer deserializer = property.getType().getDeserializer();
+        private void deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, EntityPropertyMain property, ComplexValue result) {
+            final ValueDeserializer deserializer = property.getType().getDeserializer();
             if (deserializer == null) {
                 Object value = parser.readValueAs(Object.class);
                 result.setProperty(property, value);

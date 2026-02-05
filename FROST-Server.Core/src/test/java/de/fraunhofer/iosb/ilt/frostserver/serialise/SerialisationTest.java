@@ -19,8 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.serialise;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -37,11 +35,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
-/**
- *
- * @author hylke
- */
 class SerialisationTest {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(SerialisationTest.class.getName());
@@ -95,7 +92,7 @@ class SerialisationTest {
             JsonNode json1 = mapper.readTree(string1);
             JsonNode json2 = mapper.readTree(string2);
             return json1.equals(json2);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed", ex);
         }
         return false;

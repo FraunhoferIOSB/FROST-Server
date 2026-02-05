@@ -17,21 +17,19 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Serializer for TimeValue objects.
- *
- * @author jab
  */
-public class TimeInstantSerializer extends JsonSerializer<TimeInstant> {
+public class TimeInstantSerializer extends ValueSerializer<TimeInstant> {
 
     @Override
-    public void serialize(TimeInstant value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(TimeInstant value, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         if (value.isEmpty()) {
             gen.writeNull();
         } else {

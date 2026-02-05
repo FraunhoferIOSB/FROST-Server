@@ -22,9 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NA
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -44,16 +41,18 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.exc.StreamWriteException;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Handles serialization of Entity objects. If a field is of type Entity and
  * contains a non-empty navigationLink the field will be renamed with the suffix
  * '@iot.navigationLink' and will only contain the navigationLink as String.
- *
- * @author jab
- * @author scf
  */
-public class EntitySerializer extends JsonSerializer<Entity> {
+public class EntitySerializer extends ValueSerializer<Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitySerializer.class.getName());
 
@@ -77,20 +76,20 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             if (entity.getQuery().getMetadata() == Metadata.FULL) {
                 final String value = entity.getSelfLink();
                 if (value != null) {
-                    gen.writeStringField(selfLinkField, value);
+                    gen.writeStringProperty(selfLinkField, value);
                 }
             }
         });
     }
 
     @Override
-    public void serialize(Entity entity, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(Entity entity, JsonGenerator gen, SerializationContext ctx) throws JacksonException {
         gen.writeStartObject();
         try {
             writeContent(entity, gen);
         } catch (IOException | RuntimeException exc) {
             LOGGER.error("Failed to serialise entity.", exc);
-            throw new IOException("could not serialize Entity");
+            throw new StreamWriteException(gen, "could not serialize Entity", exc);
         } finally {
             gen.writeEndObject();
         }
@@ -132,7 +131,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
             if (navigationLink != null
                     && (np.isEntitySet() || entity.getProperty(np) != null)
                     && (!np.isAdminOnly() || query.getPrincipal().isAdmin())) {
-                gen.writeStringField(np.getName() + navLinkField, navigationLink);
+                gen.writeStringProperty(np.getName() + navLinkField, navigationLink);
             }
             if (metadata == Metadata.INTERNAL_COMPARE) {
                 writeExpand(null, entity, np, gen);
@@ -160,7 +159,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     // OData: find the first alias that does not start with an @
                     for (String alias : aliases) {
                         if (!alias.startsWith("@")) {
-                            gen.writeObjectField(alias, value);
+                            gen.writePOJOProperty(alias, value);
                             return;
                         }
                     }
@@ -168,14 +167,14 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                     // STA: Find the first alias that starts with an @
                     for (String alias : aliases) {
                         if (alias.startsWith("@")) {
-                            gen.writeObjectField(alias, value);
+                            gen.writePOJOProperty(alias, value);
                             return;
                         }
                     }
                 }
             }
             // Either no aliases, or no matching found.
-            gen.writeObjectField(name, value);
+            gen.writePOJOProperty(name, value);
         }
     }
 
@@ -200,7 +199,7 @@ public class EntitySerializer extends JsonSerializer<Entity> {
                 if (expandedEntity.getQuery() == null && exp != null) {
                     expandedEntity.setQuery(exp.getSubQuery());
                 }
-                gen.writeObjectField(np.getJsonName(), entityOrSet);
+                gen.writePOJOProperty(np.getJsonName(), entityOrSet);
             }
         }
     }
@@ -208,23 +207,23 @@ public class EntitySerializer extends JsonSerializer<Entity> {
     private void writeEntitySet(NavigationProperty np, EntitySet entitySet, JsonGenerator gen, Query query) throws IOException {
         String jsonName = np.getJsonName();
         if (entitySet == null) {
-            gen.writeArrayFieldStart(jsonName);
+            gen.writeArrayPropertyStart(jsonName);
             gen.writeEndArray();
             return;
         }
         long count = entitySet.getCount();
         if (count >= 0) {
-            gen.writeNumberField(jsonName + countField, count);
+            gen.writeNumberProperty(jsonName + countField, count);
         }
-        gen.writeArrayFieldStart(jsonName);
+        gen.writeArrayPropertyStart(jsonName);
         for (Object child : entitySet) {
-            gen.writeObject(child);
+            gen.writePOJO(child);
         }
         gen.writeEndArray();
         if (query.getMetadata() != Metadata.OFF) {
             String nextLink = entitySet.getNextLink();
             if (nextLink != null) {
-                gen.writeStringField(jsonName + nextLinkField, nextLink);
+                gen.writeStringProperty(jsonName + nextLinkField, nextLink);
             }
         }
     }

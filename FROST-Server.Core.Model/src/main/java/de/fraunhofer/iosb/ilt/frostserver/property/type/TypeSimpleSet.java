@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 /**
  *

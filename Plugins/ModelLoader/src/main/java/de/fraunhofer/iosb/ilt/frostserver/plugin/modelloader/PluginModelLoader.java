@@ -21,8 +21,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.PLUGIN_NAME;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
@@ -60,6 +58,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * A plugin that loads arbitrary models from files.
@@ -247,7 +247,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         if (!StringHelper.isNullOrEmpty(localMetadataStringData)) {
             try {
                 mergeJson(extraMetadata, objectMapper.readValue(localMetadataStringData, TYPE_REFERENCE_MAP));
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 LOGGER.error("Failed to parse extra metadata.", ex);
             }
             // Free global String data.

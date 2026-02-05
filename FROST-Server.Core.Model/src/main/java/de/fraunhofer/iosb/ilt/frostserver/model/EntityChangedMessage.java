@@ -38,8 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
- * @author scf
+ * The message to be sent over the message bus when an entity has changed.
  */
 public class EntityChangedMessage {
 

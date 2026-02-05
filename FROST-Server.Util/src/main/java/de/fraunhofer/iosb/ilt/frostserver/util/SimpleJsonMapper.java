@@ -18,8 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  *
@@ -40,9 +41,11 @@ public class SimpleJsonMapper {
      */
     public static ObjectMapper getSimpleObjectMapper() {
         if (simpleObjectMapper == null) {
-            simpleObjectMapper = new ObjectMapper()
-                    .setSerializationInclusion(JsonInclude.Include.ALWAYS)
-                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+            simpleObjectMapper = JsonMapper.builder()
+                    .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.ALWAYS))
+                    .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.ALWAYS))
+                    .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                    .build();
         }
         return simpleObjectMapper;
     }

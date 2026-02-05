@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.lang.reflect.Field;
@@ -28,10 +26,11 @@ import java.util.Map;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ValueDeserializer;
 
 /**
- *
- * @author hylke
+ * Primitive base types as defined in OData.
  */
 public class TypeSimplePrimitive extends TypeSimple {
 
@@ -152,7 +151,7 @@ public class TypeSimplePrimitive extends TypeSimple {
         super(name, description, typeReference, parser);
     }
 
-    private TypeSimplePrimitive(String name, String description, JsonDeserializer deserializer, Parser parser) {
+    private TypeSimplePrimitive(String name, String description, ValueDeserializer deserializer, Parser parser) {
         super(name, description, deserializer, parser);
     }
 

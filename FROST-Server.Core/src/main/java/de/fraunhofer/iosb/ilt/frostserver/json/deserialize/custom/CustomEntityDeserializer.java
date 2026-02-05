@@ -17,13 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -34,17 +27,23 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 /**
- *
- * @author scf
+ * Custom deserialiser for Entity.
  */
-public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
+public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityDeserializer.class.getName());
     private static final String BUT_FOUND = " but found: ";
@@ -75,9 +74,9 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
      * @param parser The parser to fetch tokens from.
      * @param ctxt The context to fetch settings from.
      * @return The deserialised Entity.
-     * @throws IOException If deserialisation fails.
+     * @throws JacksonException If deserialisation fails.
      */
-    public Entity deserializeFull(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    public Entity deserializeFull(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
         parser.nextToken();
         Entity result = deserialize(parser, ctxt);
         parser.nextToken();
@@ -85,19 +84,19 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
     }
 
     @Override
-    public Entity deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+    public Entity deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
         Entity target = new DefaultEntity(entityType);
 
         boolean failOnUnknown = ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
         JsonToken currentToken = parser.nextToken();
-        while (currentToken == JsonToken.FIELD_NAME) {
-            String fieldName = parser.getCurrentName();
+        while (currentToken == JsonToken.PROPERTY_NAME) {
+            String fieldName = parser.currentName();
             Property property = entityType.getProperty(fieldName);
             if (property == null) {
                 if (failOnUnknown) {
                     final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + entityType.getPropertySet();
-                    throw new UnrecognizedPropertyException(parser, message, parser.getCurrentLocation(), DefaultEntity.class, fieldName, null);
+                    throw new UnrecognizedPropertyException(parser, message, parser.currentLocation(), DefaultEntity.class, fieldName, null);
                 } else {
                     parser.nextValue();
                     parser.readValueAsTree();
@@ -111,7 +110,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         return target;
     }
 
-    private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Property property, Entity target) throws IOException {
+    private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Property property, Entity target) throws JacksonException {
         if (property instanceof EntityPropertyMain epm) {
             deserializeEntityProperty(parser, ctxt, epm, target);
         } else if (property instanceof NavigationPropertyEntity npe) {
@@ -121,7 +120,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         }
     }
 
-    private void deserializeNavigationProperty(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntitySet npes, Entity result) throws IOException {
+    private void deserializeNavigationProperty(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntitySet npes, Entity result) throws JacksonException {
         final EntityType setType = npes.getEntityType();
         EntitySet entitySet = new EntitySetImpl(npes);
         CustomEntityDeserializer setEntityDeser = getInstance(modelRegistry, setType);
@@ -142,7 +141,7 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         }
     }
 
-    private void deserializeNavigationProperty(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntity npe, Entity target) throws IOException {
+    private void deserializeNavigationProperty(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntity npe, Entity target) throws JacksonException {
         final EntityType targetEntityType = npe.getEntityType();
         JsonToken nextToken = parser.nextToken();
         if (nextToken != JsonToken.START_OBJECT) {
@@ -154,9 +153,9 @@ public class CustomEntityDeserializer extends JsonDeserializer<Entity> {
         npe.setOn(target, value);
     }
 
-    private void deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, EntityPropertyMain epm, Entity target) throws IOException {
+    private void deserializeEntityProperty(JsonParser parser, DeserializationContext ctxt, EntityPropertyMain epm, Entity target) throws JacksonException {
         parser.nextValue();
-        final JsonDeserializer deserializer = epm.getType().getDeserializer();
+        final ValueDeserializer deserializer = epm.getType().getDeserializer();
         if (deserializer == null) {
             LOGGER.error("Missing deserialiser for {}/{}", entityType, epm);
             return;

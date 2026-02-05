@@ -17,13 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.util.ArrayList;
 import java.util.List;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
 
 /**
  * Class for defining property types.
@@ -33,18 +33,18 @@ public class PropertyType implements Annotatable {
     private final String name;
     private final String description;
     private String mediaType = Constants.CONTENT_TYPE_TEXT_PLAIN;
-    private JsonDeserializer deserializer;
-    private JsonSerializer serializer;
+    private ValueDeserializer deserializer;
+    private ValueSerializer serializer;
     private final List<Annotation> annotations = new ArrayList<>();
 
-    public PropertyType(String name, String description, JsonDeserializer deserializer, JsonSerializer serializer) {
+    public PropertyType(String name, String description, ValueDeserializer deserializer, ValueSerializer serializer) {
         this.name = name;
         this.description = description;
         this.deserializer = deserializer;
         this.serializer = serializer;
     }
 
-    public PropertyType(String name, String description, JsonDeserializer deserializer) {
+    public PropertyType(String name, String description, ValueDeserializer deserializer) {
         this(name, description, deserializer, ParserUtils.getDefaultSerializer());
     }
 
@@ -56,11 +56,11 @@ public class PropertyType implements Annotatable {
         return description;
     }
 
-    public JsonDeserializer getDeserializer() {
+    public ValueDeserializer getDeserializer() {
         return deserializer;
     }
 
-    public PropertyType setDeserializer(JsonDeserializer deserializer) {
+    public PropertyType setDeserializer(ValueDeserializer deserializer) {
         this.deserializer = deserializer;
         return this;
     }
@@ -74,11 +74,11 @@ public class PropertyType implements Annotatable {
         return this;
     }
 
-    public JsonSerializer getSerializer() {
+    public ValueSerializer getSerializer() {
         return serializer;
     }
 
-    public PropertyType setSerializer(JsonSerializer serializer) {
+    public PropertyType setSerializer(ValueSerializer serializer) {
         this.serializer = serializer;
         return this;
     }

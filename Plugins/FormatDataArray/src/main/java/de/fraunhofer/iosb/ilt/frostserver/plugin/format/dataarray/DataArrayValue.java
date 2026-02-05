@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -29,10 +28,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import tools.jackson.core.type.TypeReference;
 
 /**
- *
- * @author scf
+ * Class for the DataArray value object.
  */
 @JsonIgnoreProperties("dataArray@iot.count")
 public class DataArrayValue {
