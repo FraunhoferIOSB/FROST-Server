@@ -1,0 +1,44 @@
+{
+  "conformance": [],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Sensor",
+      "plural": "Sensors",
+      "adminOnly": false,
+      "table": "SENSORS",
+      "orderByDflt": [],
+      "entityProperties": [],
+      "navigationProperties": [
+        {
+          "name": "ObservedProperties",
+          "entitySet": true,
+          "entityType": "ObservedProperty",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Sensors",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "ID",
+              "linkTable": "sensor_observed_property",
+              "linkOurField": "sensor_id",
+              "linkOtherField": "observed_property_id",
+              "otherTable": "OBS_PROPERTIES",
+              "otherField": "ID"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

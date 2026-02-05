@@ -1,0 +1,54 @@
+{
+  "conformance": ["https://gitlab.cc-asp.fraunhofer.de/iosb/tep/opencitysense/frost-plugin-opencitysense"],
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Thing",
+      "plural": "Things",
+      "adminOnly": false,
+      "table": "things",
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "type",
+          "description": "The type of the Thing",
+          "type": "Edm.String",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+              "field": "type"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [
+        {
+          "name": "ControllingConnector",
+          "entitySet": false,
+          "entityType": "Thing",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "ControlledDevices",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+              "field": "connector_id",
+              "otherTable": "things",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}
