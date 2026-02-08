@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 10s
+scrape_configs:
+ - job_name: prometheus
+   static_configs:
+    - targets: [ 'prometheus:9090' ]
+      labels:
+        component: 'prometheus'
+ - job_name: frost-server
+   static_configs:
+    - targets: [ 'frosthttp:9400' ]
+      labels:
+        app: 'frost-server'
+        component: 'http'
+    - targets: [ 'frostmqtt:9400' ]
+      labels:
+        app: 'frost-server'
+        component: 'mqtt'

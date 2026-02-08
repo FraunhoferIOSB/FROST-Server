@@ -1,9 +1,22 @@
 name: frost_server
 services:
-  web:
-    image: fraunhoferiosb/frost-server-http:latest
+  nginx:
+    image: nginx:1-alpine
     ports:
-      - 8080:8080
+      - "80:80"
+    volumes:
+      - "./nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+#      - "./htpasswd:/etc/nginx/htpasswd:ro"
+    depends_on:
+      database:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+
+  frosthttp:
+    image: fraunhoferiosb/frost-server-http:latest
+#    ports:
+#      - 8080:8080
     depends_on:
       database:
         condition: service_healthy
@@ -11,12 +24,13 @@ services:
         condition: service_started
     environment:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
-      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - serviceRootUrl=http://${external_ip}:80/FROST-Server
+      - mqtt_exposedEndpoints=ws://${external_ip}:80/mqtt
       - queueLoggingInterval=1000
       - plugins.multiDatastream.enable=true
       - http_cors_enable=true
       - http_cors_allowed_origins=*
-      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - bus_sendQueueSize=2000
       - bus_sendWorkerPoolSize=10
@@ -26,12 +40,13 @@ services:
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
       - persistence_autoUpdateDatabase=true
+      - metrics_useInternalHttpServer=true
 
-  mqtt:
+  frostmqtt:
     image: fraunhoferiosb/frost-server-mqtt:latest
     ports:
       - 1883:1883
-      - 9876:9876
+#      - 9876:9876
     depends_on:
       database:
         condition: service_healthy
@@ -39,10 +54,10 @@ services:
         condition: service_started
     environment:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
-      - serviceRootUrl=http://localhost:8080/FROST-Server
+      - serviceRootUrl=http://${external_ip}:8080/FROST-Server
       - queueLoggingInterval=1000
       - plugins.multiDatastream.enable=true
-      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10
       - mqtt_CreateMessageQueueSize=10000
@@ -53,6 +68,7 @@ services:
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
+      - metrics_useInternalHttpServer=true
 
   mosquitto:
     image: eclipse-mosquitto
@@ -73,6 +89,28 @@ services:
       timeout: 2s
       retries: 10
 
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+      - prometheus_volume:/prometheus
+    ports:
+      - 9090:9090
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana_volume:/var/lib/grafana
+#    ports:
+#      - "3000:3000"
+    environment:
+      - GF_SERVER_ROOT_URL=http://${external_ip}:80/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_PLUGINS_PREINSTALL=grafana-clock-panel
+      - GF_SECURITY_ADMIN_USER=grafana
+
 volumes:
-    postgis_volume:
+    postgis_volume: {}
+    grafana_volume: {}
+    prometheus_volume: {}
 
