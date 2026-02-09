@@ -27,8 +27,6 @@ import net.time4j.format.expert.MultiFormatParser;
 
 /**
  * Represents ISO8601 Instant.
- *
- * @author jab
  */
 public class TimeInstant implements TimeObject {
 
@@ -70,7 +68,6 @@ public class TimeInstant implements TimeObject {
     }
 
     public static TimeInstant parse(String value) {
-
         try {
             return new TimeInstant(ISO_FORMAT.parse(value));
         } catch (ParseException ex) {
@@ -80,6 +77,14 @@ public class TimeInstant implements TimeObject {
 
     public static TimeInstant create(Moment time) {
         return new TimeInstant(time);
+    }
+
+    public static Moment parseMoment(String value) {
+        try {
+            return ISO_FORMAT.parse(value);
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Failed to parse TimeInstant " + StringHelper.cleanForLogging(value), ex);
+        }
     }
 
     public Moment getDateTime() {

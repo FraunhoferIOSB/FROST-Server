@@ -25,8 +25,6 @@ import java.io.IOException;
 
 /**
  * Serializer for TimeObject objects.
- *
- * @author jab
  */
 public class TimeObjectSerializer extends JsonSerializer<TimeObject> {
 

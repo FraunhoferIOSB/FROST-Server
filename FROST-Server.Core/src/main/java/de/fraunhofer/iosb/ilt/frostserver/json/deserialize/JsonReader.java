@@ -25,8 +25,6 @@ import java.io.Reader;
 
 /**
  * The interface for json parsers.
- *
- * @author hylke
  */
 public interface JsonReader {
 

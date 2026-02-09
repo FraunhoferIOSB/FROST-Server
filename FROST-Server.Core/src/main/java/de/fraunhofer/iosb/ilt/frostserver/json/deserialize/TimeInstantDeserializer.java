@@ -25,8 +25,6 @@ import java.io.IOException;
 
 /**
  * Helper for deserialization of TimeInstant objects from JSON.
- *
- * @author jab
  */
 public class TimeInstantDeserializer extends StdDeserializer<TimeInstant> {
 

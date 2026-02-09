@@ -46,8 +46,6 @@ import java.util.Map;
 /**
  * Allows parsing of STA entities from JSON. Fails on unknown properties in the
  * JSON input!
- *
- * @author jab
  */
 public class JsonReaderDefault implements JsonReader {
 

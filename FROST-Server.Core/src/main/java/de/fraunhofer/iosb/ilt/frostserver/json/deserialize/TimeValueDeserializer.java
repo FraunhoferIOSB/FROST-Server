@@ -17,20 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
+
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import java.io.IOException;
+import net.time4j.Moment;
 
 /**
  * Helper for deserialization of TimeValue objects from JSON. May not work
  * properly in every case as deciding wether input is a TimeInstant or a
  * TimeInterval is based on exceptions while parsing
- *
- * @author jab
  */
 public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
 
@@ -40,6 +43,17 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
 
     @Override
     public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
+        JsonToken curToken = jp.currentToken();
+        if (curToken == JsonToken.VALUE_STRING) {
+            return parseStringValue(jp);
+        } else if (curToken == JsonToken.START_OBJECT) {
+            return parseObjectValue(jp);
+        } else {
+            throw new IllegalArgumentException("Could not parse TimeValue, found a " + curToken.name());
+        }
+    }
+
+    private TimeValue parseStringValue(JsonParser jp) throws IOException {
         String node = jp.getValueAsString();
         if (node == null) {
             return null;
@@ -49,6 +63,40 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         } catch (IllegalArgumentException e) {
             return new TimeValue(TimeInterval.parse(node));
         }
+    }
+
+    private TimeValue parseObjectValue(JsonParser jp) throws IOException {
+        Moment start = null;
+        Moment end = null;
+        JsonToken currentToken = jp.nextToken();
+        while (currentToken == JsonToken.FIELD_NAME) {
+            final String fieldName = jp.currentName();
+            final String valueAsString = jp.getValueAsString();
+            switch (fieldName) {
+                case NAME_INTERVAL_START:
+                    start = TimeInstant.parseMoment(valueAsString);
+                    break;
+
+                case NAME_INTERVAL_END:
+                    end = TimeInstant.parseMoment(valueAsString);
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Found field " + fieldName + " expected one of: start, end");
+            }
+            currentToken = jp.nextToken();
+        }
+
+        if (start == null && end == null) {
+            return null;
+        }
+        if (start != null && end == null) {
+            return TimeValue.create(start);
+        }
+        if (end != null && start == null) {
+            return TimeValue.create(end);
+        }
+        return TimeValue.create(start, end);
     }
 
 }
