@@ -5,6 +5,9 @@
 **New Features**
 
 **Internal changes & Bugfixes**
+* Improved model editor:
+  * Ensure main tables are generated before link tables.
+  * Check key types are known when generating link tables.
 * Allow both ISO Strings and Objects with start/end for time values and intervals.
 * Fixed #2304: Nextlinks with `not` causing exception.
 

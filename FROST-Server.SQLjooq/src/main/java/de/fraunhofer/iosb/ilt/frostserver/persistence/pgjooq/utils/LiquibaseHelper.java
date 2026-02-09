@@ -146,7 +146,7 @@ public class LiquibaseHelper {
             liquibase.setShowSummary(UpdateSummaryEnum.SUMMARY);
             liquibase.setShowSummaryOutput(UpdateSummaryOutputEnum.LOG);
             liquibase.update(new Contexts(), new LabelExpression(liquibaseChangelogFilename));
-            out.append("Update Completed: " + changeSetName + ".");
+            out.append("Update Completed: " + changeSetName + ".\n");
         } catch (LiquibaseException ex) {
             outputError(ex, out, "Failed to upgrade database: " + changeSetName + ".");
             throw new UpgradeFailedException(ex);

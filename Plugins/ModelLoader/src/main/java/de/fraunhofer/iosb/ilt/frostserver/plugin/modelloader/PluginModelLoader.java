@@ -384,6 +384,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
                 for (String file : liquibaseFiles) {
+                    liquibaseParams.put(CHANGE_SET_NAME, file);
                     liquibaseParams.put("searchPath", liquibasePath);
                     if (!jpm.doUpgrades(file, liquibaseParams, out)) {
                         return false;

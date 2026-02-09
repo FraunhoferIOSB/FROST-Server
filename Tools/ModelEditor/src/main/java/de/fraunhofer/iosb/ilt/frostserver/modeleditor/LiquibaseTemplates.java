@@ -57,6 +57,8 @@ public class LiquibaseTemplates {
     public static final String VAR_NAME_COLUMN_TYPE_1 = "COLUMN_TYPE_1";
     public static final String VAR_NAME_COLUMN_TYPE_2 = "COLUMN_TYPE_2";
     public static final String VAR_NAME_ENTITY_NAME = "ENTITY_NAME";
+    public static final String VAR_NAME_ENTITY_NAME_1 = "ENTITY_NAME_1";
+    public static final String VAR_NAME_ENTITY_NAME_2 = "ENTITY_NAME_2";
     public static final String VAR_NAME_TABLE_NAME = "TABLE_NAME";
     public static final String VAR_NAME_TABLE_NAME_1 = "TABLE_NAME_1";
     public static final String VAR_NAME_TABLE_NAME_2 = "TABLE_NAME_2";
@@ -78,6 +80,8 @@ public class LiquibaseTemplates {
     private static final String S_NAME_COLUMN_TYPE_1 = "§{" + VAR_NAME_COLUMN_TYPE_1 + '}';
     private static final String S_NAME_COLUMN_TYPE_2 = "§{" + VAR_NAME_COLUMN_TYPE_2 + '}';
     private static final String S_NAME_ENTITY_NAME = "§{" + VAR_NAME_ENTITY_NAME + '}';
+    private static final String S_NAME_ENTITY_NAME_1 = "§{" + VAR_NAME_ENTITY_NAME_1 + '}';
+    private static final String S_NAME_ENTITY_NAME_2 = "§{" + VAR_NAME_ENTITY_NAME_2 + '}';
     private static final String S_NAME_TABLE_NAME = "§{" + VAR_NAME_TABLE_NAME + '}';
     private static final String S_NAME_TABLE_NAME_1 = "§{" + VAR_NAME_TABLE_NAME_1 + '}';
     private static final String S_NAME_TABLE_NAME_2 = "§{" + VAR_NAME_TABLE_NAME_2 + '}';
@@ -98,7 +102,7 @@ public class LiquibaseTemplates {
         }
         if (!clForeignKeys.isEmpty()) {
             clBuilders.add(clForeignKeys);
-            clMain.addFile(clForeignKeys.getFileName());
+            clMain.addFileKeys(clForeignKeys.getFileName());
         }
         clBuilders.add(clMain);
         return clBuilders;
@@ -109,7 +113,7 @@ public class LiquibaseTemplates {
             final String etName = et.getName();
             final String tableName = et.getTable();
             final String fileName = "table" + et.getPlural() + ".xml";
-            clMain.addFile(fileName);
+            clMain.addFileMainTable(fileName);
             clMain.addPropertyIdType(etName);
             TableChangelogBuilder clEntityType = TableChangelogBuilder.start(date, tableName)
                     .setAuthor(author)
@@ -157,11 +161,11 @@ public class LiquibaseTemplates {
                         TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(date)
                                 .setAuthor(author)
                                 .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
-                                .addChangsetLinkTable(linkTable, tableName, linkTableOurField, ourType, otherTable, linkTableOtherField, otherType);
+                                .addChangsetLinkTable(linkTable, etName, tableName, linkTableOurField, ourType, otherEntityType, otherTable, linkTableOtherField, otherType);
                         clBuilders.add(clLinkTable);
                         clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
                         clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
-                        clMain.addFile(clLinkTable.getFileName());
+                        clMain.addFileLinkTable(clLinkTable.getFileName());
                     } else if (handler instanceof FieldMapperManyToManyOrdered fm) {
                         LOGGER.warn("Unknown Handler Type: {}", handler);
                     }
@@ -228,7 +232,9 @@ public class LiquibaseTemplates {
     public static class MainChangeLogBuilder implements ChangeLogBuilder {
 
         private String fileName = "tables.xml";
-        private final List<String> files = new ArrayList<>();
+        private final List<String> filesMainTables = new ArrayList<>();
+        private final List<String> filesLinkTables = new ArrayList<>();
+        private final List<String> filesKeys = new ArrayList<>();
         private final StringBuilder properties = new StringBuilder();
 
         public static MainChangeLogBuilder start() {
@@ -240,11 +246,25 @@ public class LiquibaseTemplates {
                     .setFileName(fileName);
         }
 
-        public void addFile(String fileName) {
-            if (files.contains(fileName)) {
+        public void addFileMainTable(String fileName) {
+            if (filesMainTables.contains(fileName)) {
                 return;
             }
-            files.add(fileName);
+            filesMainTables.add(fileName);
+        }
+
+        public void addFileLinkTable(String fileName) {
+            if (filesLinkTables.contains(fileName)) {
+                return;
+            }
+            filesLinkTables.add(fileName);
+        }
+
+        public void addFileKeys(String fileName) {
+            if (filesKeys.contains(fileName)) {
+                return;
+            }
+            filesKeys.add(fileName);
         }
 
         public void addPropertyIdType(String entityTypeName) {
@@ -255,7 +275,13 @@ public class LiquibaseTemplates {
         @Override
         public String build() {
             StringBuilder includes = new StringBuilder();
-            for (String file : files) {
+            for (String file : filesMainTables) {
+                includes.append("    <include relativeToChangelogFile=\"true\" file=\"").append(file).append("\" />\n");
+            }
+            for (String file : filesLinkTables) {
+                includes.append("    <include relativeToChangelogFile=\"true\" file=\"").append(file).append("\" />\n");
+            }
+            for (String file : filesKeys) {
                 includes.append("    <include relativeToChangelogFile=\"true\" file=\"").append(file).append("\" />\n");
             }
             String[] searchList = new String[]{
@@ -364,12 +390,18 @@ public class LiquibaseTemplates {
             return addChangeset(createChangsetIndex(author, date, tableName, columnName));
         }
 
-        public TableChangelogBuilder addChangsetLinkTable(String tableName1, String columnName1, String columnType1, String tableName2, String columnName2, String columnType2) {
-            return addChangsetLinkTable(tableName, tableName1, columnName1, columnType1, tableName2, columnName2, columnType2);
+        public TableChangelogBuilder addChangsetLinkTable(
+                String entityName1, String tableName1, String columnName1, String columnType1,
+                String entityName2, String tableName2, String columnName2, String columnType2) {
+            return addChangsetLinkTable(tableName, entityName1, tableName1, columnName1, columnType1, entityName2, tableName2, columnName2, columnType2);
         }
 
-        public TableChangelogBuilder addChangsetLinkTable(String tableName, String tableName1, String columnName1, String columnType1, String tableName2, String columnName2, String columnType2) {
-            return addChangeset(createChangsetLinkTable(author, date, tableName, tableName1, columnName1, columnType1, tableName2, columnName2, columnType2));
+        public TableChangelogBuilder addChangsetLinkTable(String tableName,
+                String entityName1, String tableName1, String columnName1, String columnType1,
+                String entityName2, String tableName2, String columnName2, String columnType2) {
+            return addChangeset(createChangsetLinkTable(author, date, tableName,
+                    entityName1, tableName1, columnName1, columnType1,
+                    entityName2, tableName2, columnName2, columnType2));
         }
 
         public TableChangelogBuilder addChangsetForeignKey(String columnName, String otherTableName, String otherColumnName) {
@@ -582,14 +614,18 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_INDEX, searchList, replacementList);
     }
 
-    public static String createChangsetLinkTable(String author, String date, String tableName, String tableName1, String columnName1, String columnType1, String tableName2, String columnName2, String columnType2) {
+    public static String createChangsetLinkTable(String author, String date, String tableName,
+            String entityName1, String tableName1, String columnName1, String columnType1,
+            String entityName2, String tableName2, String columnName2, String columnType2) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
             S_NAME_TABLE_NAME,
+            S_NAME_ENTITY_NAME_1,
             S_NAME_TABLE_NAME_1,
             S_NAME_COLUMN_NAME_1,
             S_NAME_COLUMN_TYPE_1,
+            S_NAME_ENTITY_NAME_2,
             S_NAME_TABLE_NAME_2,
             S_NAME_COLUMN_NAME_2,
             S_NAME_COLUMN_TYPE_2
@@ -598,9 +634,11 @@ public class LiquibaseTemplates {
             author,
             date,
             tableName,
+            entityName1,
             tableName1,
             columnName1,
             columnType1,
+            entityName2,
             tableName2,
             columnName2,
             columnType2
@@ -747,8 +785,8 @@ public class LiquibaseTemplates {
                         <not>
                             <tableExists tableName="§{TABLE_NAME}" />
                         </not>
-                        <changeLogPropertyDefined property="§{COLUMN_TYPE_1}" />
-                        <changeLogPropertyDefined property="§{COLUMN_TYPE_2}" />
+                        <changeLogPropertyDefined property="idType-§{ENTITY_NAME_1}" />
+                        <changeLogPropertyDefined property="idType-§{ENTITY_NAME_2}" />
                     </preConditions>
                     <createTable tableName="§{TABLE_NAME}">
                         <column name="§{COLUMN_NAME_1}" type="§{COLUMN_TYPE_1}">
