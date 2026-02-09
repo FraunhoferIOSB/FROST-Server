@@ -21,11 +21,13 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2025-05-05-fk_datastreams_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_sensor_id" foreignKeyTableName="datastreams" />
             </not>
+            <tableExists tableName="datastreams" />
+            <tableExists tableName="sensors" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_datastreams_sensor_id"
@@ -35,11 +37,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_datastreams_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_thing_id" foreignKeyTableName="datastreams" />
             </not>
+            <tableExists tableName="datastreams" />
+            <tableExists tableName="things" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_datastreams_thing_id"
@@ -49,25 +53,45 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_datastreams_ultimate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_features_ultimate_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_ultimate_feature_id" foreignKeyTableName="datastreams" />
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_features_ultimate_datastream_id" foreignKeyTableName="datastreams_features_ultimate" />
             </not>
+            <tableExists tableName="datastreams_features_ultimate" />
+            <tableExists tableName="datastreams" />
         </preConditions>
         <addForeignKeyConstraint
-            constraintName="fk_datastreams_ultimate_feature_id"
-            baseTableName="datastreams" baseColumnNames="ultimate_feature_id"
+            constraintName="fk_datastreams_features_ultimate_datastream_id"
+            baseTableName="datastreams_features_ultimate" baseColumnNames="datastream_id"
+            referencedTableName="datastreams" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_features_ultimate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_datastreams_features_ultimate_feature_id" foreignKeyTableName="datastreams_features_ultimate" />
+            </not>
+            <tableExists tableName="datastreams_features_ultimate" />
+            <tableExists tableName="features" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_datastreams_features_ultimate_feature_id"
+            baseTableName="datastreams_features_ultimate" baseColumnNames="feature_id"
             referencedTableName="features" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_datastreams_proximate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_proximate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_proximate_feature_id" foreignKeyTableName="datastreams" />
             </not>
+            <tableExists tableName="datastreams" />
+            <tableExists tableName="features" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_datastreams_proximate_feature_id"
@@ -77,11 +101,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_features_feature_types_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_features_feature_types_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_features_feature_types_feature_id" foreignKeyTableName="features_feature_types" />
             </not>
+            <tableExists tableName="features_feature_types" />
+            <tableExists tableName="features" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_features_feature_types_feature_id"
@@ -91,11 +117,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_features_feature_types_feature_type_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_features_feature_types_feature_type_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_features_feature_types_feature_type_id" foreignKeyTableName="features_feature_types" />
             </not>
+            <tableExists tableName="features_feature_types" />
+            <tableExists tableName="feature_types" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_features_feature_types_feature_type_id"
@@ -105,11 +133,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_hist_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_hist_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_hist_locations_thing_id" foreignKeyTableName="hist_locations" />
             </not>
+            <tableExists tableName="hist_locations" />
+            <tableExists tableName="things" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_hist_locations_thing_id"
@@ -119,11 +149,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_locations_hist_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_locations_hist_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_locations_hist_locations_location_id" foreignKeyTableName="locations_hist_locations" />
             </not>
+            <tableExists tableName="locations_hist_locations" />
+            <tableExists tableName="locations" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_locations_hist_locations_location_id"
@@ -133,11 +165,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_locations_hist_locations_hist_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_locations_hist_locations_hist_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_locations_hist_locations_hist_location_id" foreignKeyTableName="locations_hist_locations" />
             </not>
+            <tableExists tableName="locations_hist_locations" />
+            <tableExists tableName="hist_locations" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_locations_hist_locations_hist_location_id"
@@ -147,11 +181,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_observations_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_observations_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_observations_datastream_id" foreignKeyTableName="observations" />
             </not>
+            <tableExists tableName="observations" />
+            <tableExists tableName="datastreams" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_observations_datastream_id"
@@ -161,11 +197,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_observations_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_observations_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_observations_feature_id" foreignKeyTableName="observations" />
             </not>
+            <tableExists tableName="observations" />
+            <tableExists tableName="features" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_observations_feature_id"
@@ -175,11 +213,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_datastreams_observed_properties_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_observed_properties_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observed_properties_observed_property_id" foreignKeyTableName="datastreams_observed_properties" />
             </not>
+            <tableExists tableName="datastreams_observed_properties" />
+            <tableExists tableName="observed_properties" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_datastreams_observed_properties_observed_property_id"
@@ -189,11 +229,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_datastreams_observed_properties_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_datastreams_observed_properties_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observed_properties_datastream_id" foreignKeyTableName="datastreams_observed_properties" />
             </not>
+            <tableExists tableName="datastreams_observed_properties" />
+            <tableExists tableName="datastreams" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_datastreams_observed_properties_datastream_id"
@@ -203,11 +245,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_things_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_things_locations_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_things_locations_thing_id" foreignKeyTableName="things_locations" />
             </not>
+            <tableExists tableName="things_locations" />
+            <tableExists tableName="things" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_things_locations_thing_id"
@@ -217,11 +261,13 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_things_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-fk_things_locations_location_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_things_locations_location_id" foreignKeyTableName="things_locations" />
             </not>
+            <tableExists tableName="things_locations" />
+            <tableExists tableName="locations" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_things_locations_location_id"

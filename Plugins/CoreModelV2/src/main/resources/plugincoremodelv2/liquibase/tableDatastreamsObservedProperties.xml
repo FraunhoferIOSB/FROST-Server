@@ -21,11 +21,15 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2025-05-05-datastreams_observed_properties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-datastreams_observed_properties" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="observed_properties" />
+            <tableExists tableName="datastreams" />
             <not>
                 <tableExists tableName="datastreams_observed_properties" />
             </not>
+            <changeLogPropertyDefined property="idType-ObservedProperty" />
+            <changeLogPropertyDefined property="idType-Datastream" />
         </preConditions>
         <createTable tableName="datastreams_observed_properties">
             <column name="observed_property_id" type="${idType-ObservedProperty}">

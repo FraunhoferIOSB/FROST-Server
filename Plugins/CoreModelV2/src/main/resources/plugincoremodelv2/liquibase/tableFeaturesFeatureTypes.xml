@@ -21,11 +21,15 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2025-05-05-features_feature_types" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-features_feature_types" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="features" />
+            <tableExists tableName="feature_types" />
             <not>
                 <tableExists tableName="features_feature_types" />
             </not>
+            <changeLogPropertyDefined property="idType-Feature" />
+            <changeLogPropertyDefined property="idType-FeatureType" />
         </preConditions>
         <createTable tableName="features_feature_types">
             <column name="feature_id" type="${idType-Feature}">

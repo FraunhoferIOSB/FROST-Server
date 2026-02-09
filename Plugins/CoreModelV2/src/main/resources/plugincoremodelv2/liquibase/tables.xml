@@ -42,16 +42,17 @@
 
     <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
     <include relativeToChangelogFile="true" file="tableFeatures.xml" />
-    <include relativeToChangelogFile="true" file="tableFeaturesFeatureTypes.xml" />
     <include relativeToChangelogFile="true" file="tableFeatureTypes.xml" />
     <include relativeToChangelogFile="true" file="tableHistoricalLocations.xml" />
     <include relativeToChangelogFile="true" file="tableLocations.xml" />
-    <include relativeToChangelogFile="true" file="tableLocationsHistLocations.xml" />
     <include relativeToChangelogFile="true" file="tableObservations.xml" />
     <include relativeToChangelogFile="true" file="tableObservedProperties.xml" />
-    <include relativeToChangelogFile="true" file="tableDatastreamsObservedProperties.xml" />
     <include relativeToChangelogFile="true" file="tableSensors.xml" />
     <include relativeToChangelogFile="true" file="tableThings.xml" />
+    <include relativeToChangelogFile="true" file="tableDatastreamsFeaturesUltimate.xml" />
+    <include relativeToChangelogFile="true" file="tableFeaturesFeatureTypes.xml" />
+    <include relativeToChangelogFile="true" file="tableLocationsHistLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableDatastreamsObservedProperties.xml" />
     <include relativeToChangelogFile="true" file="tableThingsLocations.xml" />
     <include relativeToChangelogFile="true" file="foreignKeys.xml" />
 

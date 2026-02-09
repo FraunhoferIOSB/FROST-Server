@@ -31,7 +31,7 @@
                     "required": true,
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInterval",
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
                             "fieldStart": "phenomenon_time_start",
                             "fieldEnd": "phenomenon_time_end"
                         }

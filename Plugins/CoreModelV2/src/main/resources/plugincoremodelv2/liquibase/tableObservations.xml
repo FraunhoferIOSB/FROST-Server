@@ -21,7 +21,7 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2025-05-05-observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2026-02-06-observations-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <changeLogPropertyDefined property="id-Observation" value="LONG" />
             <not>
@@ -35,7 +35,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2026-02-06-observations-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="MARK_RAN">
             <or>
                 <changeLogPropertyDefined property="id-Observation" value="STRING" />
@@ -52,8 +52,9 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-observations-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="observations" />
             <not>
                 <columnExists columnName="phenomenon_time_start" tableName="observations" />
             </not>
@@ -77,8 +78,9 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-observations-idx-datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-observations-idx-datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="observations" />
             <not>
                 <indexExists tableName="observations" indexName="observations_datastream_id" />
             </not>
@@ -88,8 +90,9 @@
         </createIndex>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-observations-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2026-02-06-observations-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="observations" />
             <not>
                 <indexExists tableName="observations" indexName="observations_feature_id" />
             </not>

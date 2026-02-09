@@ -21,30 +21,30 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2026-02-06-things_locations" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2026-02-06-datastreams_features_ultimate" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="CONTINUE">
-            <tableExists tableName="things" />
-            <tableExists tableName="locations" />
+            <tableExists tableName="datastreams" />
+            <tableExists tableName="features" />
             <not>
-                <tableExists tableName="things_locations" />
+                <tableExists tableName="datastreams_features_ultimate" />
             </not>
-            <changeLogPropertyDefined property="idType-Thing" />
-            <changeLogPropertyDefined property="idType-Location" />
+            <changeLogPropertyDefined property="idType-Datastream" />
+            <changeLogPropertyDefined property="idType-Feature" />
         </preConditions>
-        <createTable tableName="things_locations">
-            <column name="thing_id" type="${idType-Thing}">
+        <createTable tableName="datastreams_features_ultimate">
+            <column name="datastream_id" type="${idType-Datastream}">
                 <constraints nullable="false"/>
             </column>
-            <column name="location_id" type="${idType-Location}">
+            <column name="feature_id" type="${idType-Feature}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="thing_id, location_id" constraintName="pk_things_locations" tableName="things_locations"/>
-        <createIndex tableName="things_locations" indexName="things_locations_thing_id">
-            <column name="thing_id" />
+        <addPrimaryKey columnNames="datastream_id, feature_id" constraintName="pk_datastreams_features_ultimate" tableName="datastreams_features_ultimate"/>
+        <createIndex tableName="datastreams_features_ultimate" indexName="datastreams_features_ultimate_datastream_id">
+            <column name="datastream_id" />
         </createIndex>
-        <createIndex tableName="things_locations" indexName="things_locations_location_id">
-            <column name="location_id" />
+        <createIndex tableName="datastreams_features_ultimate" indexName="datastreams_features_ultimate_feature_id">
+            <column name="feature_id" />
         </createIndex>
     </changeSet>
 

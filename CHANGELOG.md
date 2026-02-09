@@ -5,6 +5,7 @@
 **New Features**
 
 **Internal changes & Bugfixes**
+* Updated V2 model to latest spec version.
 * Improved model editor:
   * Ensure main tables are generated before link tables.
   * Check key types are known when generating link tables.

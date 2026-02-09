@@ -186,8 +186,8 @@
                     "annotations": []
                 },
                 {
-                    "name": "UltimateFeatureOfInterest",
-                    "entitySet": false,
+                    "name": "UltimateFeaturesOfInterest",
+                    "entitySet": true,
                     "entityType": "Feature",
                     "required": false,
                     "symmetrical": false,
@@ -201,8 +201,11 @@
                     },
                     "handlers": [
                         {
-                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-                            "field": "ultimate_feature_id",
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "datastreams_features_ultimate",
+                            "linkOurField": "datastream_id",
+                            "linkOtherField": "feature_id",
                             "otherTable": "features",
                             "otherField": "id"
                         }

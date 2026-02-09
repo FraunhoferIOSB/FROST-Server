@@ -219,16 +219,16 @@ public class ReferenceTests11 extends AbstractTestClass {
     void test01_editRefEntity() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  test01_editRefEntity");
         final Entity ds0 = DATASTREAMS.get(0);
-        putEntityRefAndTest(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(0), true);
-        putEntityRefAndTest(ds0, sMdl.npDatastreamUltimateFoi, FEATURES.get(1), false);
+        putEntityRefAndTest(ds0, sMdl.npDatastreamProximateFoi, FEATURES.get(0), true);
+        putEntityRefAndTest(ds0, sMdl.npDatastreamProximateFoi, FEATURES.get(1), false);
 
         String selfLinkSrc = ds0.getSelfLink();
-        String refLink = selfLinkSrc + "/" + sMdl.npDatastreamUltimateFoi.getName() + "/$ref";
+        String refLink = selfLinkSrc + "/" + sMdl.npDatastreamProximateFoi.getName() + "/$ref";
         {
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
             Entity target = ds0.withOnlyPk()
-                    .getProperty(sMdl.npDatastreamUltimateFoi);
+                    .getProperty(sMdl.npDatastreamProximateFoi);
             Assertions.assertNull(target);
         }
         {
