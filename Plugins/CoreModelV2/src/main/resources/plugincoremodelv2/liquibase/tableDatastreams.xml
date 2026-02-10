@@ -78,6 +78,7 @@
             <column name="result_time_start" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="result_time_end" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="observed_area" type="geometry(Geometry,4326)"/>
+            <column name="last_foi_id" type="${idType-Feature}" />
         </addColumn>
     </changeSet>
 

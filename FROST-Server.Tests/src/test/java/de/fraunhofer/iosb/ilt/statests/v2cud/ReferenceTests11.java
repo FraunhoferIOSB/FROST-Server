@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.statests.v2cud;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DEFINITION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,6 +34,8 @@ import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.swecommon.util.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -44,11 +48,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -71,6 +78,7 @@ public class ReferenceTests11 extends AbstractTestClass {
     private static final List<Entity> FEATURE_TYPES = new ArrayList<>();
     private static final List<Entity> LOCATIONS = new ArrayList<>();
     private static final List<Entity> OPROPS = new ArrayList<>();
+    private static final List<Entity> OBSERVATIONS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> THINGS = new ArrayList<>();
     private static SensorThingsV20Core sMdl;
@@ -209,7 +217,8 @@ public class ReferenceTests11 extends AbstractTestClass {
             sSrvc.create(featureType);
             FEATURE_TYPES.add(featureType);
         }
-
+        ZonedDateTime startTime = ZonedDateTime.parse("2016-01-01T01:00:00.000Z");
+        createObservationSet(sSrvc, DATASTREAMS.get(0), 0, startTime, null, 10, OBSERVATIONS);
     }
 
     /**
@@ -365,6 +374,32 @@ public class ReferenceTests11 extends AbstractTestClass {
     public static Entity newFeatureType(String name, String description, String definition) {
         return newFeatureType(name, description)
                 .setProperty(EP_DEFINITION, definition);
+    }
+
+    public static void createObservationSet(SensorThingsService srvc, Entity datastream, long resultStart, ZonedDateTime phenomenonTimeStart, TimeInterval validTimeStart, long count, List<Entity> registry) throws ServiceFailureException {
+        for (int i = 0; i < count; i++) {
+            ZonedDateTime phenTime = phenomenonTimeStart.plus(i, ChronoUnit.HOURS);
+            if (validTimeStart != null) {
+                TimeInterval validTime = TimeInterval.create(
+                        validTimeStart.getStart().plus(count, TimeUnit.HOURS),
+                        validTimeStart.getEnd().plus(count, TimeUnit.HOURS));
+                createObservation(srvc, datastream, resultStart + i, phenTime, validTime, registry);
+            } else {
+                createObservation(srvc, datastream, resultStart + i, phenTime, null, registry);
+            }
+        }
+    }
+
+    public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, TimeInterval validTime, List<Entity> registry) throws ServiceFailureException {
+        int idx = registry.size();
+        MapValue properties = new MapValue();
+        properties.put("idx", idx);
+        Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
+                .setProperty(EP_VALIDTIME, validTime)
+                .setProperty(EP_PROPERTIES, properties);
+        srvc.create(obs);
+        registry.add(obs);
+        return obs;
     }
 
 }

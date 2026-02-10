@@ -54,7 +54,7 @@ then
         end if;
     end if;
 
-    if ("DS_ROW"."last_foi_id" IS NULL OR "DS_ROW"."last_foi_id" != NEW."feature_id") then
+    if (NEW."feature_id" IS NOT NULL AND ("DS_ROW"."last_foi_id" IS NULL OR "DS_ROW"."last_foi_id" != NEW."feature_id")) then
         queryset := queryset || delimitr || '"last_foi_id" = $1."feature_id"';
         queryset := queryset || ',"observed_area" = ST_ConvexHull(ST_Collect("observed_area", (select "geom" from "features" where "id"=$1."feature_id")))';
         delimitr := ',';
