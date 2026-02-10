@@ -20,8 +20,6 @@ package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
@@ -42,6 +40,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Helper for connecting to MQTT and listening on topics.
@@ -147,7 +147,7 @@ public class MqttListener implements Callable<JsonNode> {
                                 final String payload = new String(mm.getPayload(), StandardCharsets.UTF_8);
                                 try {
                                     result = Utils.MAPPER.readTree(payload);
-                                } catch (JsonProcessingException ex) {
+                                } catch (JacksonException ex) {
                                     LOGGER.error("Failed to parse result", ex);
                                 }
                                 notifyMessage(payload);

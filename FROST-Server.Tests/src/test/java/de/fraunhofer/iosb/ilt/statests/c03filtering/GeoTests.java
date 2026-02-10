@@ -21,8 +21,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.E
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
@@ -52,6 +50,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tests for the geospatial functions.
@@ -520,7 +520,7 @@ public abstract class GeoTests extends AbstractTestClass {
      * Test GeoJSON result format.
      */
     @Test
-    void testGeoJsonFormat() throws JsonProcessingException, IOException {
+    void testGeoJsonFormat() throws JacksonException, IOException {
         LOGGER.info("  testGeoJsonFormat");
         String geoJsonExpected = IOUtils.resourceToString("geoJsonResult.json", StandardCharsets.UTF_8, getClass().getClassLoader());
         JsonNode expected = SimpleJsonMapper.getSimpleObjectMapper().readTree(geoJsonExpected);

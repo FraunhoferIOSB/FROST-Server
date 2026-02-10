@@ -242,6 +242,7 @@ public class ExpressionHandlers {
             fr.getExpression(Subtract.class).setHandler((Subtract exp, ExpressionHelper<FieldWrapper> h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(Time.class).setHandler((Time exp, ExpressionHelper<FieldWrapper> h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(TimeConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
+            fr.getExpression(TimeObjectConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
             fr.getExpression(ToLower.class).setHandler((ToLower exp, ExpressionHelper<FieldWrapper> h) -> ImpString.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(TotalOffsetMinutes.class).setHandler((TotalOffsetMinutes exp, ExpressionHelper<FieldWrapper> h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(ToUpper.class).setHandler((ToUpper exp, ExpressionHelper<FieldWrapper> h) -> ImpString.handle(exp, (JooqExpHlpr) h));

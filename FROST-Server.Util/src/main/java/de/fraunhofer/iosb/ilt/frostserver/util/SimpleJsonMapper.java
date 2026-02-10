@@ -20,11 +20,12 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.jsonp.JSONPModule;
 
 /**
- *
- * @author scf
+ * A simple JSON Mapper for non-STA use.
  */
 public class SimpleJsonMapper {
 
@@ -44,7 +45,10 @@ public class SimpleJsonMapper {
             simpleObjectMapper = JsonMapper.builder()
                     .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.ALWAYS))
                     .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.ALWAYS))
+                    .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
+                    .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                     .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                    .addModule(new JSONPModule())
                     .build();
         }
         return simpleObjectMapper;

@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.NotFoundException;
@@ -62,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Utility methods for comparing results and cleaning the service.
@@ -332,7 +332,7 @@ public class EntityUtils {
             Long top = expandQuery.getTop();
             String nextLinkProperty = "@iot.nextLink";
             if (response.has(nextLinkProperty)) {
-                nextLink = response.get(nextLinkProperty).textValue();
+                nextLink = response.get(nextLinkProperty).stringValue();
             }
             if (top != null && expectedCount != -1) {
                 int foundNumber = response.get("value").size();

@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.statests.c06dataarrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
@@ -36,7 +35,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -51,6 +49,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Some odd tests.
@@ -185,7 +185,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
         JsonNode json;
         try {
             json = Utils.MAPPER.readTree(response);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return;
@@ -198,11 +198,11 @@ public abstract class DataArrayTests extends AbstractTestClass {
         int i = 0;
         for (JsonNode resultLine : json) {
             i++;
-            if (!resultLine.isTextual()) {
+            if (!resultLine.isString()) {
                 fail("Server returned a non-text result line for request: " + urlString);
                 return;
             }
-            String textValue = resultLine.textValue();
+            String textValue = resultLine.stringValue();
             if (textValue.toLowerCase().startsWith("error") && i != 2) {
                 fail("Server returned an error for request: " + urlString);
             }
@@ -280,7 +280,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
         JsonNode json;
         try {
             json = Utils.MAPPER.readTree(response);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return;
@@ -293,11 +293,11 @@ public abstract class DataArrayTests extends AbstractTestClass {
         int i = 0;
         for (JsonNode resultLine : json) {
             i++;
-            if (!resultLine.isTextual()) {
+            if (!resultLine.isString()) {
                 fail("Server returned a non-text result line for request: " + urlString);
                 return;
             }
-            String textValue = resultLine.textValue();
+            String textValue = resultLine.stringValue();
             if (textValue.toLowerCase().startsWith("error") && i != 2) {
                 fail("Server returned an error for request: " + urlString);
             }
@@ -325,7 +325,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
         JsonNode json;
         try {
             json = Utils.MAPPER.readTree(response);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
             return;
@@ -359,11 +359,11 @@ public abstract class DataArrayTests extends AbstractTestClass {
             }
             Set<String> foundComponents = new HashSet<>();
             for (JsonNode component : components) {
-                if (!component.isTextual()) {
+                if (!component.isString()) {
                     fail("components field contains a non-string for request: " + urlString);
                     return;
                 }
-                String componentName = component.textValue();
+                String componentName = component.stringValue();
                 foundComponents.add(componentName);
                 if (!requestedProperties.contains(componentName)) {
                     if (componentName.equals("@iot.id") && requestedProperties.contains("id")) {

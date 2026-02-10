@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.util.model;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  *
@@ -47,7 +47,7 @@ public enum IdType {
             if (jn.isNumber()) {
                 return LONG;
             }
-            stringValue = jn.asText();
+            stringValue = jn.asString();
         }
         if (id instanceof Number) {
             return LONG;
@@ -58,7 +58,7 @@ public enum IdType {
         } catch (IllegalArgumentException ex) {
             // Not a uuid
         }
-        if (id instanceof String || id instanceof JsonNode jn && jn.isTextual()) {
+        if (id instanceof String || id instanceof JsonNode jn && jn.isString()) {
             return STRING;
         }
         throw new IllegalArgumentException("Can not detect id type from " + id);

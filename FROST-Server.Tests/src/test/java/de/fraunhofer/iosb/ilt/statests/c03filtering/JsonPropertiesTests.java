@@ -28,9 +28,6 @@ import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
@@ -50,7 +47,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -61,6 +57,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests for the getting and filtering JSON properties.
@@ -604,7 +604,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         JsonNode json;
         try {
             json = Utils.MAPPER.readTree(responseMap.response);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex.getMessage());
             return null;
         }
@@ -621,7 +621,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         for (int idx = 0; idx < size - 1; idx++) {
             String propertyName = propertyNames.get(idx);
             JsonNode value = container.get(propertyName);
-            if (value == null || !value.isContainerNode()) {
+            if (value == null || !value.isContainer()) {
                 fail("field '" + propertyName + "' is not a container node for request: " + urlForError);
                 return;
             }
@@ -632,12 +632,12 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
 
     private void testResponseProperty(JsonNode response, String propertyName, String expectedValue, String urlForError) {
         JsonNode value = response.get(propertyName);
-        if (value == null || !value.isTextual()) {
+        if (value == null || !value.isString()) {
             fail("field '" + propertyName + "' is not an string for request: " + urlForError);
             return;
         }
         String message = "field '" + propertyName + "' does not have the correct value for request: " + urlForError;
-        assertEquals(expectedValue, value.textValue(), message);
+        assertEquals(expectedValue, value.stringValue(), message);
     }
 
     private void testResponseProperty(JsonNode response, String propertyName, Boolean expectedValue, String urlForError) {
@@ -670,8 +670,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         assertEquals(expectedValue.length, value.size(), message);
 
         int i = 0;
-        for (Iterator<JsonNode> it = value.elements(); it.hasNext();) {
-            JsonNode element = it.next();
+        for (JsonNode element : value) {
             if (!element.isInt()) {
                 fail("array '" + propertyName + "' contains non-integer element '" + element.toString() + "' for request: " + urlForError);
             }

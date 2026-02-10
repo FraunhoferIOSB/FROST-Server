@@ -28,7 +28,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_TH
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_CLEANUP;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.waitMillis;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
@@ -55,6 +54,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test the standard MQTT functionality.

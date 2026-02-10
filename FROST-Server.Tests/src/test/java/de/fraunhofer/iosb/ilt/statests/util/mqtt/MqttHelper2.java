@@ -19,10 +19,6 @@ package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
@@ -41,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -56,6 +53,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A helper for using MQTT in tests.
@@ -257,13 +258,12 @@ public class MqttHelper2 {
         if (obj1.size() != obj2.size()) {
             return false;
         }
-        Iterator<String> iterator = obj1.fieldNames();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
+        for (Map.Entry<String, JsonNode> entry : obj1.properties()) {
+            String key = entry.getKey();
             if (!obj2.has(key)) {
                 return false;
             }
-            JsonNode val1 = obj1.get(key);
+            JsonNode val1 = entry.getValue();
             if (val1 == null) {
                 return obj2.get(key) == null;
             } else if (val1 instanceof ObjectNode) {
@@ -277,20 +277,20 @@ public class MqttHelper2 {
                     return false;
                 }
             } else if (key.toLowerCase().endsWith("time")) {
-                if (!checkTimeEquals(val1.textValue(), obj2.get(key).textValue())) {
+                if (!checkTimeEquals(val1.stringValue(), obj2.get(key).stringValue())) {
                     return false;
                 }
             } else if (topic != null && !topic.isEmpty() && key.endsWith("@iot.navigationLink")) {
                 String version = topic.substring(0, topic.indexOf("/"));
 
-                String selfLink1 = obj1.get("@iot.selfLink").textValue();
+                String selfLink1 = obj1.get("@iot.selfLink").stringValue();
                 URI baseUri1 = URI.create(selfLink1.substring(0, selfLink1.indexOf(version))).resolve(topic);
-                String navLink1 = obj1.get(key).textValue();
+                String navLink1 = obj1.get(key).stringValue();
                 String absoluteUri1 = baseUri1.resolve(navLink1).toString();
 
-                String selfLink2 = obj2.get("@iot.selfLink").textValue();
+                String selfLink2 = obj2.get("@iot.selfLink").stringValue();
                 URI baseUri2 = URI.create(selfLink2.substring(0, selfLink2.indexOf(version))).resolve(topic);
-                String navLink2 = obj2.get(key).textValue();
+                String navLink2 = obj2.get(key).stringValue();
                 String absoluteUri2 = baseUri2.resolve(navLink2).toString();
                 if (!absoluteUri1.equals(absoluteUri2)) {
                     return false;
@@ -762,7 +762,7 @@ public class MqttHelper2 {
                     success = false;
                     message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
                 }
-            } catch (JsonProcessingException | ServiceFailureException ex) {
+            } catch (JacksonException | ServiceFailureException ex) {
                 LOGGER.error("Failed to create JSON or fetch entity");
                 message = "Exception for " + name + " " + ex.getMessage();
             }

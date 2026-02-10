@@ -19,11 +19,6 @@ package de.fraunhofer.iosb.ilt.statests.util;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
@@ -33,18 +28,21 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import net.time4j.range.MomentInterval;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.datatype.jsonp.JSONPModule;
 
-/**
- *
- * @author jab
- */
 public class Utils {
 
     /**
@@ -52,7 +50,9 @@ public class Utils {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
-    public static final ObjectMapper MAPPER = new ObjectMapper();
+    public static final ObjectMapper MAPPER = JsonMapper.builder()
+            .addModule(new JSONPModule())
+            .build();
 
     private Utils() {
     }
@@ -74,9 +74,9 @@ public class Utils {
     public static String quoteForJson(Object value) {
         if (value instanceof JsonNode jn) {
             if (jn.isNumber()) {
-                return jn.asText();
+                return jn.asString();
             }
-            return "\"" + jn.asText() + "\"";
+            return "\"" + jn.asString() + "\"";
         }
         if (value instanceof Number) {
             return value.toString();
@@ -93,9 +93,9 @@ public class Utils {
     public static String quoteForUrl(Object value) {
         if (value instanceof JsonNode jn) {
             if (jn.isNumber()) {
-                return jn.asText();
+                return jn.asString();
             }
-            return "'" + StringHelper.escapeForStringConstant(jn.asText()) + "'";
+            return "'" + StringHelper.escapeForStringConstant(jn.asString()) + "'";
         }
         if (value instanceof Number) {
             return value.toString();
@@ -163,7 +163,7 @@ public class Utils {
             return jsonEquals(arr1, arr2, ignoreExtra);
         }
         if (!StringHelper.isNullOrEmpty(keyName) && keyName.toLowerCase().endsWith("time")) {
-            return checkTimeEquals(expected.textValue(), given.textValue());
+            return checkTimeEquals(expected.stringValue(), given.stringValue());
         }
         return expected.equals(given);
     }
@@ -181,13 +181,13 @@ public class Utils {
         if (expected.size() != given.size() && !ignoreExtra) {
             return false;
         }
-        Iterator iterator = expected.fieldNames();
-        while (iterator.hasNext()) {
-            String key = iterator.next().toString();
+
+        for (Map.Entry<String, JsonNode> entry : expected.properties()) {
+            String key = entry.getKey();
             if (!given.has(key)) {
                 return false;
             }
-            JsonNode val1 = expected.get(key);
+            JsonNode val1 = entry.getValue();
             if (val1 instanceof ObjectNode) {
                 if (!jsonEquals((ObjectNode) val1, (ObjectNode) given.get(key), ignoreExtra)) {
                     return false;

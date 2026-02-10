@@ -28,7 +28,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.TA
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
@@ -133,11 +132,9 @@ import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
-/**
- *
- * @author scf
- */
 @SelectClasses({
     Capability1CoreOnlyTests10.class,
     Capability1CoreOnlyTests11.class,
@@ -263,7 +260,7 @@ public class TestSuite {
             instance = new TestSuite();
             try {
                 setUpClass();
-            } catch (RuntimeException | IOException | InterruptedException ex) {
+            } catch (RuntimeException ex) {
                 LOGGER.error("Failed to initialise.", ex);
             }
         }
@@ -279,7 +276,7 @@ public class TestSuite {
     }
 
     @BeforeAll
-    public static void setUpClass() throws IOException, InterruptedException {
+    public static void setUpClass() {
         LOGGER.info("Starting Servers...");
     }
 
@@ -592,7 +589,7 @@ public class TestSuite {
         try {
             jsonResponse = Utils.MAPPER.readTree(response.response);
             entities = jsonResponse.get("value");
-        } catch (IOException | NullPointerException e) {
+        } catch (JacksonException | NullPointerException e) {
             LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
             fail("The service response for the root URI '" + rootUri + "' is not JSON.");
             return;
@@ -608,7 +605,7 @@ public class TestSuite {
                     fail("The name component of Service root URI response is not available.");
                     return;
                 }
-                name = entity.get("name").textValue();
+                name = entity.get("name").stringValue();
             } catch (NullPointerException e) {
                 LOGGER.error("The service response for the root URI '" + rootUri + "' is not JSON.", e);
                 fail("The service response for the root URI '" + rootUri + "' is not JSON.");
@@ -643,7 +640,7 @@ public class TestSuite {
             JsonNode serverSettingsObject = jsonResponse.get("serverSettings");
             JsonNode conformanceArray = serverSettingsObject.get("conformance");
             for (JsonNode reqItem : conformanceArray) {
-                Set<Requirement> allMatching = Requirement.getAllMatching(reqItem.textValue());
+                Set<Requirement> allMatching = Requirement.getAllMatching(reqItem.stringValue());
                 serverSettings.addImplementedRequirements(version, allMatching);
             }
             if (hasActuation && !serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {

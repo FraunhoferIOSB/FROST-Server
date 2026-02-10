@@ -41,6 +41,7 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.deser.DeserializationContextExt;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
@@ -115,6 +116,8 @@ public class JsonReaderDefault implements JsonReader {
         module.addDeserializer(TimeValue.class, new TimeValueDeserializer());
 
         ObjectMapper mapper = JsonMapper.builder()
+                .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
+                .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
                 .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)

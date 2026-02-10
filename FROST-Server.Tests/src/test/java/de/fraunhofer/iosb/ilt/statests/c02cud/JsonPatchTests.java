@@ -20,23 +20,20 @@ package de.fraunhofer.iosb.ilt.statests.c02cud;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.github.fge.jackson.jsonpointer.JsonPointer;
 import com.github.fge.jackson.jsonpointer.JsonPointerException;
-import com.github.fge.jsonpatch.AddOperation;
-import com.github.fge.jsonpatch.CopyOperation;
-import com.github.fge.jsonpatch.JsonPatchOperation;
-import com.github.fge.jsonpatch.MoveOperation;
-import com.github.fge.jsonpatch.ReplaceOperation;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import jakarta.json.Json;
+import jakarta.json.JsonPatch;
+import jakarta.json.JsonValue;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -101,7 +98,8 @@ public abstract class JsonPatchTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
         {
-            Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+            Entity thing = sMdl.newThing("Thing 1", "The first thing.")
+                    .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("key0", "zero").build());
             sSrvc.create(thing);
             THINGS.add(thing);
         }
@@ -160,21 +158,27 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
-        List<JsonPatchOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation(new JsonPointer("/properties"), Utils.MAPPER.readTree("{\"key1\": 1}")));
-        sSrvc.patch(thingOnlyId, operations);
+        JsonPatch patch = Json.createPatchBuilder()
+                .add("/properties/key1", 1)
+                .build();
+        sSrvc.patch(thingOnlyId, patch);
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
         assertEquals(1L, (Long) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
+        message = "properties/key0 was changed.";
+        assertEquals("zero", updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
 
-        operations.clear();
-        operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
-        operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
-        sSrvc.patch(thingOnlyId, operations);
+        patch = Json.createPatchBuilder()
+                .copy("/properties/keyCopy1", "/properties/key1")
+                .move("/properties/key2", "/properties/key1")
+                .build();
+        sSrvc.patch(thingOnlyId, patch);
         updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         final MapValue updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
+        message = "properties/key0 was changed.";
+        assertEquals("zero", updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
         message = "properties/keyCopy1 does not exist after copy.";
         assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
@@ -187,18 +191,20 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     void jsonPatchThingNoOpTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
-        List<JsonPatchOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation(new JsonPointer("/properties"), Utils.MAPPER.readTree("{\"key1\": 2}")));
-        sSrvc.patch(thingOnlyId, operations);
+        JsonPatch patch = Json.createPatchBuilder()
+                .add("/properties", Utils.MAPPER.readValue("{\"key1\": 2}", JsonValue.class))
+                .build();
+        sSrvc.patch(thingOnlyId, patch);
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
         assertEquals(2L, (Long) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
 
         // This patch should result in no change.
-        operations.clear();
-        operations.add(new ReplaceOperation(new JsonPointer("/properties/key1"), new IntNode(2)));
-        sSrvc.patch(thingOnlyId, operations);
+        patch = Json.createPatchBuilder()
+                .replace("/properties/key1", 2)
+                .build();
+        sSrvc.patch(thingOnlyId, patch);
         updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         final MapValue updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
@@ -217,18 +223,20 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
         LOGGER.info("  jsonPatchDatastreamTest");
         Entity dsOnlyId = DATASTREAMS.get(0).withOnlyPk();
-        List<JsonPatchOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation(new JsonPointer("/properties"), Utils.MAPPER.readTree("{\"key1\": 1}")));
-        sSrvc.patch(dsOnlyId, operations);
+        JsonPatch patch = Json.createPatchBuilder()
+                .add("/properties", Utils.MAPPER.readValue("{\"key1\": 1}", JsonValue.class))
+                .build();
+        sSrvc.patch(dsOnlyId, patch);
         Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
         assertEquals(1L, (Long) updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
 
-        operations.clear();
-        operations.add(new CopyOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/keyCopy1")));
-        operations.add(new MoveOperation(new JsonPointer("/properties/key1"), new JsonPointer("/properties/key2")));
-        sSrvc.patch(dsOnlyId, operations);
+        patch = Json.createPatchBuilder()
+                .copy("/properties/keyCopy1", "/properties/key1")
+                .move("/properties/key2", "/properties/key1")
+                .build();
+        sSrvc.patch(dsOnlyId, patch);
         updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 
         final MapValue updatedProperties = updatedDs.getProperty(EP_PROPERTIES);

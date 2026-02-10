@@ -22,8 +22,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import java.io.IOException;
 import net.time4j.Moment;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * Helper for deserialization of TimeInterval objects from JSON.
@@ -35,7 +39,7 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
     }
 
     @Override
-    public TimeInterval deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
+    public TimeInterval deserialize(JsonParser jp, DeserializationContext dc) throws JacksonException {
         JsonToken curToken = jp.currentToken();
         if (curToken == JsonToken.VALUE_STRING) {
             return parseStringValue(jp);
@@ -46,7 +50,7 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
         }
     }
 
-    private TimeInterval parseStringValue(JsonParser jp) throws IOException {
+    private TimeInterval parseStringValue(JsonParser jp) throws JacksonException {
         final String valueAsString = jp.getValueAsString();
         if (valueAsString == null) {
             return null;
@@ -54,11 +58,11 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
         return TimeInterval.parse(valueAsString);
     }
 
-    private TimeInterval parseObjectValue(JsonParser jp) throws IOException {
+    private TimeInterval parseObjectValue(JsonParser jp) throws JacksonException {
         Moment start = null;
         Moment end = null;
         JsonToken currentToken = jp.nextToken();
-        while (currentToken == JsonToken.FIELD_NAME) {
+        while (currentToken == JsonToken.PROPERTY_NAME) {
             final String fieldName = jp.currentName();
             final String valueAsString = jp.getValueAsString();
             switch (fieldName) {

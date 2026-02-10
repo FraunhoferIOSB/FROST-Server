@@ -46,7 +46,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper.propert
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
@@ -78,6 +77,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.geojson.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 public class EntityHelper2 {
 
@@ -633,7 +634,7 @@ public class EntityHelper2 {
             JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;

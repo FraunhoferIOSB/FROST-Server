@@ -20,19 +20,15 @@ package de.fraunhofer.iosb.ilt.statests.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.model.Expand;
 import de.fraunhofer.iosb.ilt.statests.util.model.PathElement;
 import de.fraunhofer.iosb.ilt.statests.util.model.Query;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
-/**
- *
- * @author Hylke van der Schaaf
- */
 public class Request extends Expand {
 
     /**
@@ -104,7 +100,7 @@ public class Request extends Expand {
         JsonNode jsonResponse = null;
         try {
             jsonResponse = Utils.MAPPER.readTree(responseMap.response);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to parse response for request: " + fetchUrl, ex);
             fail("Failed to parse response for request: " + fetchUrl);
         }

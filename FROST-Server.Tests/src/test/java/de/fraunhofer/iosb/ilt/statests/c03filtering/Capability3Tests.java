@@ -23,8 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -41,7 +39,6 @@ import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.Expand;
 import de.fraunhofer.iosb.ilt.statests.util.model.PathElement;
 import de.fraunhofer.iosb.ilt.statests.util.model.Query;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZonedDateTime;
@@ -55,6 +52,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.NullNode;
 
 /**
  * Includes various tests of "A.2 Filtering Extension" Conformance class.
@@ -372,7 +372,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
             message = "The query order of execution is not correct. The expected Observation result is 6. It is " + array.get(0).get("result").toString();
             assertEquals("6", array.get(0).get("result").toString(), message);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -478,7 +478,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 String msg = resultError + " The expected Observation result is " + expectedResult + ", but the given result is " + result;
                 assertEquals(expectedResult, result, msg);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -601,7 +601,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -709,21 +709,21 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing " + entityType + ":\n" + e.getMessage());
         }
 
     }
 
-    private int compareWithPrevious(int idx, JsonNode array, String property, Compare order, String message) throws IOException {
+    private int compareWithPrevious(int idx, JsonNode array, String property, Compare order, String message) throws JacksonException {
         JsonNode jObj1 = array.get(idx - 1);
         JsonNode jObj2 = array.get(idx);
         int result = compareObjects(property, jObj1, jObj2, order, message);
         return result;
     }
 
-    private int compareObjects(String property, JsonNode jObj1, JsonNode jObj2, Compare order, String message) throws IOException {
+    private int compareObjects(String property, JsonNode jObj1, JsonNode jObj2, Compare order, String message) throws JacksonException {
         int result;
         Object o1 = null;
         Object o2 = null;
@@ -1334,7 +1334,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
         JsonNode array = null;
         try {
             array = Utils.MAPPER.readTree(response).get("value");
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -1441,7 +1441,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing " + properties + ":\n" + e.getMessage());
         }
@@ -1538,7 +1538,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             response = responseMap.response;
             array = Utils.MAPPER.readTree(response).get("value");
             // We can not assume the Datastreams are returned in the order we expect.
-            if ("datastream 1".equals(array.get(0).get("name").asText())) {
+            if ("datastream 1".equals(array.get(0).get("name").asString())) {
                 datastreamId1 = array.get(0).get(ControlInformation.ID);
                 datastreamId2 = array.get(1).get(ControlInformation.ID);
             } else {
@@ -1641,7 +1641,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             response = responseMap.response;
             array = Utils.MAPPER.readTree(response).get("value");
             // We can not assume the Datastreams are returned in the order we expect.
-            if ("datastream 3".equals(array.get(0).get("name").asText())) {
+            if ("datastream 3".equals(array.get(0).get("name").asString())) {
                 datastreamId3 = array.get(0).get(ControlInformation.ID);
                 datastreamId4 = array.get(1).get(ControlInformation.ID);
             } else {
@@ -1822,7 +1822,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
             ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1, EntityType.OBSERVATION, 6);
             ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId2, EntityType.OBSERVATION, 6);
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }

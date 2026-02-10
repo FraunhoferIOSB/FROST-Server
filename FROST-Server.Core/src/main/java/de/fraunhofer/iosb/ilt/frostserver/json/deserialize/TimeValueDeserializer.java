@@ -20,15 +20,15 @@ package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import java.io.IOException;
 import net.time4j.Moment;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * Helper for deserialization of TimeValue objects from JSON. May not work
@@ -42,7 +42,7 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
     }
 
     @Override
-    public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws IOException {
+    public TimeValue deserialize(JsonParser jp, DeserializationContext dc) throws JacksonException {
         JsonToken curToken = jp.currentToken();
         if (curToken == JsonToken.VALUE_STRING) {
             return parseStringValue(jp);
@@ -53,7 +53,7 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         }
     }
 
-    private TimeValue parseStringValue(JsonParser jp) throws IOException {
+    private TimeValue parseStringValue(JsonParser jp) throws JacksonException {
         String node = jp.getValueAsString();
         if (node == null) {
             return null;
@@ -65,11 +65,11 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         }
     }
 
-    private TimeValue parseObjectValue(JsonParser jp) throws IOException {
+    private TimeValue parseObjectValue(JsonParser jp) throws JacksonException {
         Moment start = null;
         Moment end = null;
         JsonToken currentToken = jp.nextToken();
-        while (currentToken == JsonToken.FIELD_NAME) {
+        while (currentToken == JsonToken.PROPERTY_NAME) {
             final String fieldName = jp.currentName();
             currentToken = jp.nextToken();
             if (currentToken != JsonToken.VALUE_STRING) {

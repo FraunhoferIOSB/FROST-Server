@@ -90,6 +90,7 @@ import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 public class FXMLController implements Initializable {
@@ -178,6 +179,8 @@ public class FXMLController implements Initializable {
             objectMapper = JsonMapper.builder()
                     .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_DEFAULT))
                     .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_DEFAULT))
+                    .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
+                    .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                     .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
                     .build();
         }

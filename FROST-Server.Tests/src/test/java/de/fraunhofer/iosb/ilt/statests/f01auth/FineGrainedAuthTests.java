@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
@@ -81,6 +79,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tests for access rights checking with Basic Authentication.
@@ -514,7 +514,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_06d_ThingCreateForProject1Mqtt() throws JsonProcessingException {
+    void test_06d_ThingCreateForProject1Mqtt() throws JacksonException {
         LOGGER.info("  test_06d_ThingCreateForProject1Mqtt");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
@@ -743,7 +743,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
             JsonNode conformance = settings.get("conformance");
             Set<String> confItems = new HashSet<>();
             for (var item : conformance) {
-                confItems.add(item.textValue());
+                confItems.add(item.stringValue());
             }
             assertTrue(confItems.contains("testModel"), "Conformance should contain 'testModel'");
             assertTrue(confItems.contains("testModel1"), "Conformance should contain 'testModel1'");
@@ -756,7 +756,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         }
     }
 
-    private JsonNode getRootUrl() throws JsonProcessingException, ParseException, IOException {
+    private JsonNode getRootUrl() throws JacksonException, ParseException, IOException {
         String urlString = serverSettings.getServiceUrl(version);
         HTTPMethods.HttpResponse responseMap = HTTPMethods.doGet(serviceAdmin, urlString);
         assertEquals(200, responseMap.code, () -> "Error fetching root URI: " + urlString);

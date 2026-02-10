@@ -40,6 +40,7 @@ import java.util.Date;
 import net.time4j.Moment;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
 
@@ -99,6 +100,8 @@ public class JsonWriterOdata40 {
         ObjectMapper mapper = JsonMapper.builder()
                 .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
                 .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
+                .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
+                .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
                 .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)

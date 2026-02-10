@@ -162,11 +162,11 @@ public class JsonBatchRequestItem {
                 final String name = entry.getKey().toLowerCase();
                 final JsonNode value = entry.getValue();
                 if (value.isValueNode()) {
-                    result.put(name, Arrays.asList(value.asText()));
+                    result.put(name, Arrays.asList(value.asString()));
                 } else {
                     List<String> list = new ArrayList<>();
                     for (JsonNode v : value) {
-                        list.add(v.asText());
+                        list.add(v.asString());
                     }
                     result.put(name, list);
                 }

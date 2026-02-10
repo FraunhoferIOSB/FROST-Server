@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.statests.c07mqttcreate;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
@@ -32,9 +31,7 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -44,6 +41,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public abstract class Capability7Tests extends AbstractTestClass {
@@ -144,9 +143,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         String result = "";
         List<String> selects = new ArrayList<>();
         List<String> expands = new ArrayList<>();
-        Iterator iterator = expectedResult.fieldNames();
-        while (iterator.hasNext()) {
-            String key = iterator.next().toString();
+        for (String key : expectedResult.propertyNames()) {
             EntityType relationType = null;
             try {
                 relationType = EntityType.getForRelation(key);
@@ -188,7 +185,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
                     + "  \"Datastream\":{\"@iot.id\": " + Utils.quoteForJson(datastream.getPrimaryKeyValues().get(0)) + "},\n"
                     + "  \"FeatureOfInterest\": {\"@iot.id\": " + Utils.quoteForJson(featureOfInterest.getPrimaryKeyValues().get(0)) + "}  \n"
                     + "}");
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Exception:", ex);
             fail("error converting obsveration to JSON: " + ex.getMessage());
         }
@@ -240,7 +237,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
                     + "	}\n"
                     + "}\n"
                     + "");
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Exception:", ex);
             fail("error converting obsveration to JSON: " + ex.getMessage());
         }

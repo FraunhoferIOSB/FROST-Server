@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
@@ -37,7 +36,6 @@ import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.IdType;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +48,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Includes various tests of "A.3 Create Update Delete" Conformance class.
@@ -706,7 +706,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                     + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "      },\n");
+                    + "      }\n");
             OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             THING_IDS.add(thingId);
 
@@ -754,7 +754,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     + "        \"name\": \"Luminous Flux\",\n"
                     + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
                     + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "      },\n");
+                    + "      }\n");
             OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             //Check Observation
             deepInsertedObj = Utils.MAPPER.readTree("{\n"
@@ -800,7 +800,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             FOI_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
             OBSERVATION_IDS.add(obsId1);
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -918,7 +918,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = getEntity(EntityType.LOCATION, locationId);
             urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
             diffs = new HashMap<>();
-            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }}"));
+            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }"));
             updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
             checkPatch(EntityType.LOCATION, entity, updatedEntity, diffs);
 
@@ -987,7 +987,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
             checkPatch(EntityType.OBSERVATION, entity, updatedEntity, diffs);
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1026,7 +1026,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             diffs = new HashMap<>();
             diffs.put("name", "UPDATED NAME");
             diffs.put("description", "UPDATED DESCRIPTION");
-            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}"));
+            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }"));
             updatedEntity = updateEntity(EntityType.LOCATION, urlParameters, locationId);
             checkPut(EntityType.LOCATION, entity, updatedEntity, diffs);
 
@@ -1117,7 +1117,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             updatedEntity = updateEntity(EntityType.OBSERVATION, urlParameters, obsId1);
             checkPut(EntityType.OBSERVATION, entity, updatedEntity, diffs);
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1417,7 +1417,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
         try {
             response = HTTPMethods.doGet(urlString);
             return Utils.MAPPER.readTree(response.response);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             LOGGER.error("Failed input: {}", response);
             fail("An Exception occurred during testing: " + e.getMessage());
@@ -1450,7 +1450,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
 
             JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
             return null;
@@ -1537,7 +1537,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
             return null;
@@ -1565,7 +1565,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             JsonNode result = Utils.MAPPER.readTree(responseMap.response);
             return result;
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
             return null;
@@ -1674,7 +1674,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             message = "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing.";
             assertEquals(locationObj.get("location"), result.get("feature"), message);
             return id;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1710,7 +1710,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
             assertTrue(Utils.jsonEquals(relationObj, result, true, null), message);
             return result.get(ControlInformation.ID);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }
@@ -1744,7 +1744,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             assertEquals("null", observation.get("resultTime").toString(), message);
         } else {
             String message = "The resultTime of the Observation " + observation.get(ControlInformation.ID) + " should have been \"" + resultTimeValue + "\" but it is now \"" + observation.get("resultTime").toString() + "\".";
-            assertEquals(ZonedDateTime.parse(resultTimeValue), ZonedDateTime.parse(observation.get("resultTime").textValue()), message);
+            assertEquals(ZonedDateTime.parse(resultTimeValue), ZonedDateTime.parse(observation.get("resultTime").stringValue()), message);
         }
     }
 
@@ -1762,7 +1762,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 JsonNode array = result.get("value");
                 String message = entityType + " is found although it shouldn't.";
                 assertEquals(0, array.size(), message);
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
@@ -1783,7 +1783,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 JsonNode array = result.get("value");
                 String message = entityType + " is created although it shouldn't.";
                 assertTrue(array.size() > 0, message);
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
@@ -1839,7 +1839,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
                     Object id = array.get(i).get(ControlInformation.ID);
                     deleteEntity(entityType, id);
                 }
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 LOGGER.error("Exception: ", e);
                 fail("An Exception occurred during testing: " + e.getMessage());
             }
@@ -1949,7 +1949,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             response = responseMap.response;
             FOI_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
         }

@@ -24,8 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
@@ -42,7 +40,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -57,6 +54,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tests for the $resultMetadata parameter.
@@ -227,7 +226,7 @@ public abstract class MetadataTests extends AbstractTestClass {
         JsonNode thing = null;
         try {
             thing = Utils.MAPPER.readTree(result.response);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             Assertions.fail("Failed to parse " + metadata);
         }
         assertEquals(
@@ -237,7 +236,7 @@ public abstract class MetadataTests extends AbstractTestClass {
         if (hasNavigationLink) {
             assertEquals(
                     generateSelfLink(0),
-                    thing.get("properties").get("parent.Thing@iot.navigationLink").asText(),
+                    thing.get("properties").get("parent.Thing@iot.navigationLink").asString(),
                     metadata + " metadata navigationLink expected");
         }
     }
@@ -271,7 +270,7 @@ public abstract class MetadataTests extends AbstractTestClass {
         JsonNode response = null;
         try {
             response = Utils.MAPPER.readTree(result.response);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             Assertions.fail("Failed to parse " + metadata);
         }
         assertFalse(response.has("@iot.nextLink"), metadata + " metadata nextLink");
@@ -279,7 +278,7 @@ public abstract class MetadataTests extends AbstractTestClass {
 
         assertEquals(hasSelfLink, thing.has("@iot.selfLink"), metadata + " metadata selfLink");
         if (hasSelfLink) {
-            assertEquals(generateSelfLink(1), thing.get("@iot.selfLink").asText(), metadata + " metadata selfLink");
+            assertEquals(generateSelfLink(1), thing.get("@iot.selfLink").asString(), metadata + " metadata selfLink");
         }
         JsonNode properties = thing.get("properties");
         assertEquals(hasNavigationLink,
@@ -287,12 +286,12 @@ public abstract class MetadataTests extends AbstractTestClass {
                 metadata + " metadata navigationLink");
         if (hasNavigationLink) {
             assertEquals(generateSelfLink(0),
-                    properties.get("parent.Thing@iot.navigationLink").asText(),
+                    properties.get("parent.Thing@iot.navigationLink").asString(),
                     metadata + " metadata navigationLink");
         }
         JsonNode parent = thing.get("properties").get("parent.Thing");
         final String expected = THINGS.get(0).getProperty(EP_NAME);
-        final String actual = parent.get("name").asText();
+        final String actual = parent.get("name").asString();
         assertEquals(expected, actual, "parent.Thing should have expanded");
     }
 
@@ -376,7 +375,7 @@ public abstract class MetadataTests extends AbstractTestClass {
         JsonNode json;
         try {
             json = Utils.MAPPER.readTree(response);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Exception:", ex);
             fail("Server returned malformed JSON for request: " + urlString + " Exception: " + ex);
             return;
@@ -389,11 +388,11 @@ public abstract class MetadataTests extends AbstractTestClass {
         int i = 0;
         for (JsonNode resultLine : json) {
             i++;
-            if (!resultLine.isTextual()) {
+            if (!resultLine.isString()) {
                 fail("Server returned a non-text result line for request: " + urlString);
                 return;
             }
-            String textValue = resultLine.textValue();
+            String textValue = resultLine.stringValue();
             if (textValue.toLowerCase().startsWith("error") && i != 2) {
                 fail("Server returned an error for request: " + urlString);
             }

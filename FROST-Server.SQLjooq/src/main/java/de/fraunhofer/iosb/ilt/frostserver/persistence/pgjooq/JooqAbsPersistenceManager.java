@@ -432,7 +432,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         original.setEntityPropertiesSet(false, false);
         original.setQuery(settings.getModelRegistry().getMessageQueryGenerator().getQueryFor(entityType));
         final ObjectMapper om = JsonWriter.getObjectMapper();
-        JsonObject originalNode = om.readValue(om.valueToTree(original), JsonObject.class);
+        JsonObject originalNode = om.treeToValue(om.valueToTree(original), JsonObject.class);
         LOGGER.trace("Old {}", originalNode);
         JsonObject newNode;
         try {

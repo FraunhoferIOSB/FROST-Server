@@ -36,6 +36,7 @@ import net.time4j.Moment;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.datatype.jsonp.JSONPModule;
@@ -77,6 +78,8 @@ public class JsonWriter {
                 .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
+                .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
+                .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .addModule(module)
                 .addModule(new JSONPModule())
                 .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)

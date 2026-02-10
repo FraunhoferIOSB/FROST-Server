@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -34,7 +33,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +43,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Includes various tests of "A.1 Sensing Core" Conformance class.
@@ -153,7 +153,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 checkGetPropertyOfEntity(entityType, id, property);
                 checkGetPropertyValueOfEntity(entityType, id, property);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception handling " + entityType, e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -184,7 +184,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
             assertNotNull(entity.get(property.name), message);
             message = "The response for getting property " + property.name + " of a " + entityType + " returns more properties!";
             assertEquals(1, entity.size(), message);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -303,7 +303,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 entityTypes.remove(entityTypes.size() - 1);
             }
             ids.remove(ids.size() - 1);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Failed to parse response for " + urlString, e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -342,7 +342,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
                 assertEquals(1, obj.size(), message);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -366,7 +366,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
 
             response = responseMap.response;
             return response;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
             return null;
@@ -419,8 +419,8 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 if (!entity.has("name") || !entity.has("url")) {
                     fail("Service root URI component does not have proper JSON keys: name and value.");
                 }
-                String name = entity.get("name").textValue();
-                String nameUrl = entity.get("url").textValue();
+                String name = entity.get("name").stringValue();
+                String nameUrl = entity.get("url").stringValue();
                 addedLinks.put(name, true);
                 if ("MultiDatastreams".equals(name)) {
                     // TODO: MultiDatastreams are not in the entity list yet.
@@ -534,7 +534,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 JsonNode entity = entities.get(i);
                 checkEntityControlInformation(entity);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -553,7 +553,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
             assertNotNull(entity.get(ControlInformation.ID), message);
             message = "The entity does not have mandatory control information : " + ControlInformation.SELF_LINK;
             assertNotNull(entity.get(ControlInformation.SELF_LINK), message);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -577,7 +577,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 checkEntityProperties(entityType, entity);
             }
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -602,7 +602,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 assertNotNull(entity.get(property.name), message);
             }
 
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -626,7 +626,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 JsonNode entity = entities.get(i);
                 checkEntityRelations(entityType, entity);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }
@@ -647,7 +647,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
                 assertNotNull(entity.get(relation + ControlInformation.NAVIGATION_LINK), message);
             }
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception:", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }

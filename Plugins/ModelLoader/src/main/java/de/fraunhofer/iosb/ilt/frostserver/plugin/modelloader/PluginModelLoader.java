@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import java.io.File;
@@ -166,7 +167,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     }
 
     private <T> T loadfile(String fullPathString, Class<T> clazz) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = SimpleJsonMapper.getSimpleObjectMapper();
         File fullFile = new File(fullPathString);
         try {
             if (fullFile.exists()) {

@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
@@ -34,6 +33,8 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Creates entities for tests of "A.1 Sensing Core" Conformance class.
@@ -123,7 +124,7 @@ public class TestEntityCreator {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
             return entities.size();
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing!:\n" + e.getMessage());
         }

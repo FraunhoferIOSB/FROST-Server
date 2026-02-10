@@ -23,7 +23,6 @@ import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createDatastream;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createObservedProperty;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.createSensor;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
@@ -53,6 +52,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tests non-standard MQTT extensions.
