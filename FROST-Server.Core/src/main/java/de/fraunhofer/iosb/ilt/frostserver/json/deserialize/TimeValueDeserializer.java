@@ -71,6 +71,10 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         JsonToken currentToken = jp.nextToken();
         while (currentToken == JsonToken.FIELD_NAME) {
             final String fieldName = jp.currentName();
+            currentToken = jp.nextToken();
+            if (currentToken != JsonToken.VALUE_STRING) {
+                throw new IllegalArgumentException("Found " + currentToken + " for " + fieldName + " expected a string");
+            }
             final String valueAsString = jp.getValueAsString();
             switch (fieldName) {
                 case NAME_INTERVAL_START:
