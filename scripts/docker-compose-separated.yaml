@@ -13,7 +13,7 @@ services:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
-      - plugins.multiDatastream.enable=true
+      - plugins_multiDatastream_enable=false
       - http_cors_enable=true
       - http_cors_allowed_origins=*
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
@@ -41,7 +41,7 @@ services:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
-      - plugins.multiDatastream.enable=true
+      - plugins_multiDatastream_enable=false
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10

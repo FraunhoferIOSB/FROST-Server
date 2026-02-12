@@ -27,14 +27,17 @@ services:
       - serviceRootUrl=http://${external_ip}:80/FROST-Server
       - mqtt_exposedEndpoints=ws://${external_ip}:80/mqtt
       - queueLoggingInterval=1000
-      - plugins.multiDatastream.enable=true
+      - plugins_multiDatastream_enable=false
       - http_cors_enable=true
       - http_cors_allowed_origins=*
-      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
+      - http_cors_allowed_methods=GET,POST,HEAD,OPTIONS,DELETE,PATCH
+      - http_cors_support_credentials=false
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - bus_sendQueueSize=2000
       - bus_sendWorkerPoolSize=10
       - bus_maxInFlight=2000
+      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
@@ -56,14 +59,14 @@ services:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://${external_ip}:8080/FROST-Server
       - queueLoggingInterval=1000
-      - plugins.multiDatastream.enable=true
-      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
+      - plugins_multiDatastream_enable=false
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10
       - mqtt_CreateMessageQueueSize=10000
       - mqtt_SubscribeThreadPoolSize=20
       - mqtt_SubscribeMessageQueueSize=10000
-      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.sta.persistence.postgres.PostgresPersistenceManager
+      - persistence_persistenceManagerImplementationClass=de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager
       - persistence_db_driver=org.postgresql.Driver
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
