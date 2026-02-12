@@ -44,7 +44,7 @@ public class MqttSettings implements ConfigDefaults {
     /**
      * Tags
      */
-    @DefaultValue("de.fraunhofer.iosb.ilt.sensorthingsserver.mqtt.moquette.MoquetteMqttServer")
+    @DefaultValue("de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer")
     public static final String TAG_IMPLEMENTATION_CLASS = "mqttServerImplementationClass";
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLED = "Enabled";

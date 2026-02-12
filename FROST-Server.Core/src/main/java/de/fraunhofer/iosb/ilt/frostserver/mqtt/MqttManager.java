@@ -65,9 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author Michael Jacoby
- * @author scf
+ * Handles the matching of data changes to MQTT subscriptions.
  */
 public class MqttManager implements SubscriptionListener, MessageListener, EntityCreateListener {
 
