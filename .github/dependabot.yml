@@ -13,7 +13,8 @@ updates:
     ignore:
       - dependency-name: "org.openjfx:*"
         versions: ["[24,)"]
-
+      - dependency-name: "org.liquibase:*"
+  
   
   # Maintain dependencies for Maven in the v2.7.x branch
   - package-ecosystem: "maven"
@@ -28,7 +29,8 @@ updates:
     ignore:
       - dependency-name: "org.openjfx:*"
         versions: ["[24,)"]
-
+      - dependency-name: "org.liquibase:*"
+  
   
   # Maintain dependencies for Maven in the v2.6.x branch
   - package-ecosystem: "maven"
@@ -43,7 +45,8 @@ updates:
     ignore:
       - dependency-name: "org.openjfx:*"
         versions: ["[24,)"]
-
+      - dependency-name: "org.liquibase:*"
+  
   
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"

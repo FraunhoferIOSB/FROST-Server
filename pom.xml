@@ -106,7 +106,7 @@
         <version.junit>6.0.2</version.junit>
         <version.junit-platform-suite>6.0.2</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
-        <version.liquibase>5.0.1</version.liquibase>
+        <version.liquibase>5.0.0</version.liquibase>
         <version.logback>1.5.24</version.logback>
         <version.mariadb>3.5.7</version.mariadb>
 
