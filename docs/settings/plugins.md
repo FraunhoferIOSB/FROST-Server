@@ -156,6 +156,16 @@ When **auth.registerUserLocally** is used in the KeyCloak Auth Provider, the cla
   The query used to remove all old roles for a user, before inserting the current roles. Default value: `delete from \"USER_PROJECT_ROLE\" where \"USER_NAME\" = ?`
 
 
+### DCAT
+
+The [DCAT plugin](../extensions/DataModel-DCAT.md) extends the standard data model with several DCAT-AP classes.
+It also enables an endpoint for fetching a DCAT-AP compatible RDF/XML file for importing in catalogue systems.
+This plugin requires the CoreModel and ModelLoader plugins.
+
+* **plugins.dcat.enable:**  
+  Toggle indicating the DCAT plugin should be enabled. Default: `false`.
+
+
 
 ## Response Format Plugins
 

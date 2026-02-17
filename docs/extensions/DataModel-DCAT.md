@@ -18,13 +18,13 @@ A SensorThings API server, like the FROST-Server, is designed to provide datastr
 The image below shows the data elements added by the DCAT Data Model. The extension classed are schon in red and the STA classes are shown in green. The connection between the DCAT extension and the STA core datamodel is realized by linking  __DCAT:Dataset__ class the __STA:Datastream__ class from the core STA data model.
 
 
-![DCAT Data Model Extension](../images/Extension-DCAT.drawio.png)
+![DCAT Data Model Extension](../images/Datamodel-SensorThingsApi-DCAT.drawio.png)
 
 ## Installation and Usage 
 
 ### Installation
 
-The DCAT data model extension must be enabled in the FROST-Server configuration. See https://fraunhoferiosb.github.io/FROST-Server/settings/plugins.html for details.
+The DCAT data model extension must be enabled in the FROST-Server configuration. See ../settings/plugins.md for details.
 
 TODO: Add enable token documenation into settings file.
 
@@ -32,7 +32,7 @@ TODO: Add enable token documenation into settings file.
 
 TODO: explain how the data export will be used, like
 
-    https://kia-frost-exporter.k8s.ilt-dmz.iosb.fraunhofer.de/dcat
+    https://<yourserver.example.com>/FROST-Server/v1.1/$getDCAT
 
 ### Frontend
 
@@ -49,8 +49,9 @@ The DCAT-AP data model is compliant to the Specification 3.0:
 
 The conformance class this extension registers in the SensorThings (v1.1 and up) index document is:
 
-    https://fraunhoferiosb.github.io/FROST-Server/extensions/DataModel-Projects.html
+    https://fraunhoferiosb.github.io/FROST-Server/extensions/DataModel-DCAT.html
 
 
 ## Acknowledgment
 This work was funded by the Ministry of Economic Affairs, Labour and Tourism Baden‑Württemberg within the framework of the AI Alliance Baden‑Württemberg (KI‑Allianz BW, project "Datenplattform").
+
