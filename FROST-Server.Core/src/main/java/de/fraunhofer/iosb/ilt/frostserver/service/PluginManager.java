@@ -55,8 +55,8 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.PluginResultFormatCsv"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.PluginResultFormatDataArray"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
@@ -65,7 +65,8 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelsampling.PluginModelSampling"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelrelations.PluginModelRelations"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.projects.PluginProjects";
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.projects.PluginProjects"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.opencitysense.PluginOpenCitySense";
 
     /**
      * The plugins provided with FROST by default. When editing these, also

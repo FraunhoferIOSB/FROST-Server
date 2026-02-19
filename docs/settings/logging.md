@@ -24,31 +24,31 @@ environment variables that influence basic logging options.
   The path to log to. Defaults to `${catalina.base}/logs`  
 * **FROST_LOG_filename:** Since 2.2.0, 2.1.1, 2.0.7  
   The base filename to use for log files. Defaults to `FROST-Server`.
-* **FROST_LOG_maxtotalsize:** Since 2.2.0, 2.1.1, 2.0.7  
-  The maximum total size for all log files. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpTotalSizeCap). Default: `200MB`.
-* **FROST_LOG_maxfilesize:** Since 2.2.0, 2.1.1, 2.0.7  
-  The maximum individual log file size.  See the [logback docs](https://logback.qos.ch/manual/appenders.html#SizeAndTimeBasedRollingPolicy). Default: `50MB`.
-* **FROST_LOG_maxfilecount:** Since 2.2.0, 2.1.1, 2.0.7  
-  The maximum number of log file to keep. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpMaxHistory). Default: `5`.
-* **FROST_LL:** Since 2.0.0  
-  The "root" log level. Default: INFO
-* **FROST_LL_parser:** Since 2.0.0  
-  The log level for the `de.fraunhofer.iosb.ilt.frostserver.parser` package. Default: INFO
-* **FROST_LL_queries:** Since 2.0.0  
-  The log level for the `de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder` package. Default: INFO
-* **FROST_LL_requests:** Since 2.0.0  
-  The log level for the request decoder. When set to DEBUG each request with its headers will be logged. Default: INFO
-* **FROST_LL_service:** Since 2.0.0  
+* **FROST_LOG_maxtotalsize:** Since 2.2.0, 2.1.1, 2.0.7, Default: `200MB`  
+  The maximum total size for all log files. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpTotalSizeCap).
+* **FROST_LOG_maxfilesize:** Since 2.2.0, 2.1.1, 2.0.7, Default: `50MB`  
+  The maximum individual log file size.  See the [logback docs](https://logback.qos.ch/manual/appenders.html#SizeAndTimeBasedRollingPolicy).
+* **FROST_LOG_maxfilecount:** Since 2.2.0, 2.1.1, 2.0.7, Default: `5`  
+  The maximum number of log file to keep. See the [logback docs](https://logback.qos.ch/manual/appenders.html#tbrpMaxHistory).
+* **FROST_LL:** Since 2.0.0, Default: INFO  
+  The "root" log level.
+* **FROST_LL_parser:** Since 2.0.0, Default: INFO  
+  The log level for the `de.fraunhofer.iosb.ilt.frostserver.parser` package.
+* **FROST_LL_queries:** Since 2.0.0, Default: INFO  
+  The log level for the `de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder` package.
+* **FROST_LL_requests:** Since 2.0.0, Default: INFO  
+  The log level for the request decoder. When set to DEBUG each request with its headers will be logged.
+* **FROST_LL_service:** Since 2.0.0, Default: INFO  
   The log level for the `de.fraunhofer.iosb.ilt.frostserver.service` package.
-  When set to DEBUG, 4xx error details and 5xx stack traces will be logged. Default: INFO
-* **FROST_LL_settings:** Since 2.0.0  
-  The log level for the `de.fraunhofer.iosb.ilt.frostserver.settings` package. Default: INFO
-* **FROST_LL_io_moquette:** Since 2.0.0  
-  The log level for the `io.moquette` package. Default: WARN
-* **FROST_LL_liquibase:** Since 2.0.0  
-  The log level for the `liquibase` package. Default: INFO
-* **FROST_LL_org_jooq:** Since 2.0.0  
-  The log level for the `org.jooq` package. Default: INFO
+  When set to DEBUG, 4xx error details and 5xx stack traces will be logged.
+* **FROST_LL_settings:** Since 2.0.0, Default: INFO  
+  The log level for the `de.fraunhofer.iosb.ilt.frostserver.settings` package.
+* **FROST_LL_io_moquette:** Since 2.0.0, Default: WARN  
+  The log level for the `io.moquette` package.
+* **FROST_LL_liquibase:** Since 2.0.0, Default: INFO  
+  The log level for the `liquibase` package.
+* **FROST_LL_org_jooq:** Since 2.0.0, Default: INFO  
+  The log level for the `org.jooq` package.
 
 
 # Metrics
@@ -61,14 +61,14 @@ If both `useServlet` and `useInternalHttpServer` are false, then metrics gatheri
 
 ## Environment variables
 
-* **metrics.useServlet:** Since 2.6.0  
+* **metrics.useServlet:** Since 2.6.0, Default: `false`  
   For the HTTP and All-In-One components, use a servlet to expose the metrics.
-  This makes `/FROST-Server/metrics` available, next to the other end-points. Default: `false`.
-* **metrics.useInternalHttpServer:** Since 2.6.0  
+  This makes `/FROST-Server/metrics` available, next to the other end-points.
+* **metrics.useInternalHttpServer:** Since 2.6.0, Default: `false`  
   Use a separate HTTP service, on its own port, to expose the metrics.
-  This makes a `/metrics` URL available on a configurable port. Default: `false`.
-* **metrics.endpointPort:** Since 2.6.0  
-  The port to use for the separate HTTP service that exposes the metrics. Default: `9400`.
+  This makes a `/metrics` URL available on a configurable port.
+* **metrics.endpointPort:** Since 2.6.0, Default: `9400`  
+  The port to use for the separate HTTP service that exposes the metrics.
 
 ## Gathered metrics
 

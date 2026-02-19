@@ -56,30 +56,30 @@ These are generic settings for authentication/authorisation.
     An authentication provider that user basic authentication for HTTP, and stores user information in a database.
   * **`de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider`:**  
     An authentication provider that uses a keycloak server for authentication.
-* **auth.allowAnonymousRead:**  
+* **auth.allowAnonymousRead:** Default: `false`  
   If true, anonymous users are allowed to read (GET) data.
-* **auth.authenticateOnly:** since 2.2.0  
-  Let the auth module only handle authentication, not authorisation. If this is set the auth module attaches the user principal to each request, but no authoristion restrictions are applied. Use this when authorisation is handled by other components. default: false.
-* **auth.autoUpdateDatabase:**  
+* **auth.authenticateOnly:** since 2.2.0, Default: `false`  
+  Let the auth module only handle authentication, not authorisation. If this is set the auth module attaches the user principal to each request, but no authoristion restrictions are applied. Use this when authorisation is handled by other components.
+* **auth.autoUpdateDatabase:** Default: `false`  
   Automatically apply database updates.
-* **auth.role.read:**  
+* **auth.role.read:** Default: `read`  
   The role in the external authentication system that represents read (GET) access.
-* **auth.role.create:**  
+* **auth.role.create:** Default: `create`  
   The role in the external authentication system that represents create (POST) access.
-* **auth.role.update:**  
+* **auth.role.update:** Default: `update`  
   The role in the external authentication system that represents update (PUT/PATCH) access.
-* **auth.role.delete:**  
+* **auth.role.delete:** Default: `delete`  
   The role in the external authentication system that represents delete (DELETE) access.
-* **auth.role.admin:**  
+* **auth.role.admin:** Default: `admin`  
   The role in the external authentication system that represents admin (DatabaseStatus) access.
-* **auth.maxUsernameLength:** Since 2.4.0  
-  The maximum accepted length of usernames. Longer usernames are not checked and directly rejected. Default value: `128`
-* **auth.maxPasswordLength:** Since 2.4.0  
-  The maximum accepted length of passwords. Longer passwords are not checked and directly rejected. Default value: `128`
-* **auth.mqtt.topicAllowList:** Since 2.4.0  
+* **auth.maxUsernameLength:** Since 2.4.0, Default: `128`  
+  The maximum accepted length of usernames. Longer usernames are not checked and directly rejected.
+* **auth.maxPasswordLength:** Since 2.4.0, Default: `128`  
+  The maximum accepted length of passwords. Longer passwords are not checked and directly rejected.
+* **auth.mqtt.topicAllowList:** Since 2.4.0, Default: empty  
   A regular expression that MQTT topics must match for users that do not have global admin or read rights.
   The topic matched starts with the first slash after the version number and ends before the `?` of the query (if present).
-  Suggested value: `^/[a-zA-Z0-9_-]+\((('[^']+')|([0-9]+))\)/[a-zA-Z0-9_-]+$`. Default value: empty
+  Suggested value: `^/[a-zA-Z0-9_-]+\((('[^']+')|([0-9]+))\)/[a-zA-Z0-9_-]+$`.
 
 
 ### Settings for the auth provider class `BasicAuthProvider`
@@ -104,29 +104,29 @@ first try to authenticate, so do an authentication attempt to have tables create
 
 The BasicAuthProvider has the following specific settings:
 
-* **auth.realmName:**  
+* **auth.realmName:** Default: `FROST-Server`  
   The name of the realm that the browser displays when asking for username and password.
-* **auth.plainTextPassword:** since 2.1.0  
+* **auth.plainTextPassword:** since 2.1.0, Default: `true`  
   If true (the default), passwords are stored in plain text.
   Otherwise password can use any result of the [PostgreSQL crypt function](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7),
   for example with Blowfish variant 2a (recommended):
   `INSERT INTO "USERS" VALUES ('my_user', crypt('my_password', gen_salt('bf', 12)))`.
 * **auth.db.jndi.datasource:**  
   JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
-* **auth.db.driver:**  
+* **auth.db.driver:** Default: empty  
   The Database driver to use. For PostgreSQL this should be: `org.postgresql.Driver`
-* **auth.db.url:**  
+* **auth.db.url:** Default: empty  
   The database connection url. Example: `jdbc:postgresql://localhost:5432/sensorthings`
-* **auth.db.username:**  
+* **auth.db.username:** Default: empty  
   The username to use when connecting to the database.
-* **auth.db.password:**  
+* **auth.db.password:** Default: empty  
   The password to use when connecting to the database.
 * **auth.db.conn.max:**  
-  The maximum number of database connections to use.
+  The maximum number of database connections to use. The default is driver dependent.
 * **auth.db.conn.idle.max:**  
-  The maximum number of idle database connections to keep open.
+  The maximum number of idle database connections to keep open. The default is driver dependent.
 * **auth.db.conn.idle.min:**  
-  The minimum number of idle database connections to keep open.
+  The minimum number of idle database connections to keep open. The default is driver dependent.
 
 
 ### Settings for the auth provider class `KeycloakAuthProvider`
@@ -141,25 +141,25 @@ There are three ways to pass this configuration to FROST:
 When setting roles for a user, the roles need to be set explicitly for the FROST client.
 Realm roles do not automatically apply to FROST.
 
-* **auth.keycloakConfig:**  
+* **auth.keycloakConfig:** Default: empty  
   The json content of the keycloak json config file.
-* **auth.keycloakConfigFile:**  
+* **auth.keycloakConfigFile:** Default: empty  
   The path to the keycloak json config file.
-* **auth.keycloakConfigUrl:**  
+* **auth.keycloakConfigUrl:** Default: empty  
   The URL on the Keycloak server that can be used to download the Keycloak config file. Usually this url is in the form
         of: `https://keycloak.example.com/auth/realms/[realm]/clients-registrations/install/[client id]`
-* **auth.keycloakConfigSecret:**  
+* **auth.keycloakConfigSecret:** Default: empty  
   If the client has "access-type" set to "confidential" then a secret is required to download the configuration.
         This secret can be found in the configuration itself, in Keycloak.
-* **auth.registerUserLocally:** Since 2.3.0  
-  If a user succesfully logs in through KeyCloak, the user account is also registered in a local database. Default value: `false`
+* **auth.registerUserLocally:** Since 2.3.0, Default: `false`  
+  If a user succesfully logs in through KeyCloak, the user account is also registered in a local database.
 * **auth.userRoleDecoderClass:** Since 2.4.0  
   If registerUserLocally is true, the java class used to decode Users and Roles coming from KeyCloak, and add them to a local database.
         Default value: `de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoderDflt`
-* **auth.userCacheLifetime:** Since 2.4.0  
-  If registerUserLocally is true, decoded users and roles are cached for this long. Must be an [ISO 8601 Duration](https://en.wikipedia.org/wiki/ISO_8601#Durations). Default value: `PT5M`
-* **auth.userCacheCleanupInterval:** Since 2.4.0  
-  If registerUserLocally is true, the user cache is checked this often, to remove timed-out users. Must be an [ISO 8601 Duration](https://en.wikipedia.org/wiki/ISO_8601#Durations). Default value: `PT5S`
+* **auth.userCacheLifetime:** Since 2.4.0, Default: `PT5M`  
+  If registerUserLocally is true, decoded users and roles are cached for this long. Must be an [ISO 8601 Duration](https://en.wikipedia.org/wiki/ISO_8601#Durations).
+* **auth.userCacheCleanupInterval:** Since 2.4.0, Default: `PT5S`  
+  If registerUserLocally is true, the user cache is checked this often, to remove timed-out users. Must be an [ISO 8601 Duration](https://en.wikipedia.org/wiki/ISO_8601#Durations).
 
 
 ### Settings for the UserRoleDecoder class `UserRoleDecoderDflt`
@@ -169,7 +169,7 @@ It checks if the username exist in the `userTable.usernameColumn` and if not, do
 
 The Projects Plugin comes with its own UserRoleDecoder class.
 
-* **auth.userTable:** Since 2.3.0  
-  The table to register users in. Default value: `USERS`
-* **auth.usernameColumn:** Since 2.3.0  
-  The column for the user name. Default value: `USER_NAME`
+* **auth.userTable:** Since 2.3.0, Default: `USERS`  
+  The table to register users in.
+* **auth.usernameColumn:** Since 2.3.0, Default: `USER_NAME`  
+  The column for the user name.

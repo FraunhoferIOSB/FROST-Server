@@ -107,11 +107,6 @@ public class MqttSettings implements ConfigDefaults {
     private String host;
 
     /**
-     * The internal host name of the MQTT server.
-     */
-    private String internalHost;
-
-    /**
      * The port used to run the MQTT server.
      */
     private int port;
@@ -176,7 +171,6 @@ public class MqttSettings implements ConfigDefaults {
         allowMqttExpand = customSettings.getBoolean(TAG_MQTT_ALLOW_EXPAND, getClass());
         allowMqttFilter = customSettings.getBoolean(TAG_MQTT_ALLOW_FILTER, getClass());
         setHost(customSettings.get(TAG_HOST, getClass()));
-        setInternalHost(customSettings.get(TAG_HOST_INTERNAL, getClass()));
         setSubscribeMessageQueueSize(customSettings.getInt(TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, getClass()));
         setSubscribeThreadPoolSize(customSettings.getInt(TAG_SUBSCRIBE_THREAD_POOL_SIZE, getClass()));
         setCreateMessageQueueSize(customSettings.getInt(TAG_CREATE_MESSAGE_QUEUE_SIZE, getClass()));
@@ -259,15 +253,6 @@ public class MqttSettings implements ConfigDefaults {
         return host;
     }
 
-    /**
-     * The internal host name of the MQTT server.
-     *
-     * @return The internal host name of the MQTT server.
-     */
-    public String getInternalHost() {
-        return internalHost;
-    }
-
     public String getTopicPrefix(Version version) {
         return version.urlPart + "/";
     }
@@ -284,15 +269,6 @@ public class MqttSettings implements ConfigDefaults {
             throw new IllegalArgumentException(TAG_HOST + " must be non-empty");
         }
         this.host = host;
-    }
-
-    /**
-     * The internal host name of the MQTT server.
-     *
-     * @param internalHost The internal host name of the MQTT server.
-     */
-    public void setInternalHost(String internalHost) {
-        this.internalHost = internalHost;
     }
 
     public int getSubscribeMessageQueueSize() {
