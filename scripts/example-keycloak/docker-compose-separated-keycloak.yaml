@@ -1,0 +1,115 @@
+name: frost-keycloak
+services:
+  frost_http:
+    image: fraunhoferiosb/frost-server-http:latest
+    ports:
+      - 8080:8080
+    depends_on:
+      db_frost:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+      keycloak_web:
+        condition: service_healthy
+    environment:
+      # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
+      - serviceRootUrl=http://${external_ip}:8080/FROST-Server
+      - queueLoggingInterval=1000
+      - logSensitiveData=true #disable on production!
+      - plugins_multiDatastream_enable=false
+      - http_cors_enable=true
+      - http_cors_allowed_origins=*
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
+      - bus_mqttBroker=tcp://mosquitto:1883
+      - bus_sendQueueSize=2000
+      - bus_sendWorkerPoolSize=10
+      - bus_maxInFlight=2000
+      - persistence_db_driver=org.postgresql.Driver
+      - persistence_db_url=jdbc:postgresql://db_frost:5432/sensorthings
+      - persistence_db_username=sensorthings
+      - persistence_db_password=ChangeMe
+      - persistence_autoUpdateDatabase=true
+      - auth_provider=de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider
+      - auth_keycloakConfigUrl=http://${external_ip}:8180/realms/FROST-Test/clients-registrations/install/frost-server
+      - auth_keycloakConfigSecret=5aa9087d-817f-47b6-92a1-2b5f7caac967
+      - auth_allowAnonymousRead=false
+
+
+  keycloak_web:
+    image: quay.io/keycloak/keycloak:26.5
+    container_name: keycloak_web
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://db_keycloak:5432/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=password
+      - KC_HOSTNAME=${external_ip}
+      - KC_HOSTNAME_PORT=8180
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_LOG_LEVEL=info
+      - KC_METRICS_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev --import-realm
+    depends_on:
+      db_keycloak:
+        condition: service_healthy
+    ports:
+      - 8180:8080
+    volumes:
+      - "../../FROST-Server.Tests/src/test/resources/keycloak/FROST-Test.json:/opt/keycloak/data/import/FROST-Test.json:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "{ printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&0; grep 'HTTP/1.0 200'; } 0<>/dev/tcp/localhost/9000"]
+      start_interval: 1s
+      start_period: 30s
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+
+
+  mosquitto:
+    image: eclipse-mosquitto
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
+
+
+  db_frost:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      - POSTGRES_DB=sensorthings
+      - POSTGRES_USER=sensorthings
+      - POSTGRES_PASSWORD=ChangeMe
+    volumes:
+      - postgis_frost:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
+      start_interval: 1s
+      start_period: 60s
+      interval: 10s
+      timeout: 2s
+      retries: 10
+
+
+  db_keycloak:
+    image: postgis/postgis:16-3.4-alpine
+    volumes:
+      - postgis_keycloak:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d keycloak -U keycloak "]
+      start_interval: 1s
+      start_period: 60s
+      interval: 10s
+      timeout: 2s
+      retries: 5
+
+
+volumes:
+  postgis_keycloak: {}
+  postgis_frost: {}
+
