@@ -17,9 +17,10 @@ services:
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
       - logSensitiveData=true #disable on production!
-      - plugins.multiDatastream.enable=true
+      - plugins_multiDatastream_enable=false
       - http_cors_enable=true
       - http_cors_allowed_origins=*
+      - bus_busImplementationClass=de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - bus_sendQueueSize=2000
       - bus_sendWorkerPoolSize=10
@@ -51,7 +52,7 @@ services:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
       - serviceRootUrl=http://localhost:8080/FROST-Server
       - queueLoggingInterval=1000
-      - plugins.multiDatastream.enable=true
+      - plugins_multiDatastream_enable=false
       - bus_busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus
       - bus_mqttBroker=tcp://mosquitto:1883
       - mqtt_CreateThreadPoolSize=10
@@ -88,8 +89,10 @@ services:
       - postgis_volume:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
+      start_interval: 1s
+      start_period: 60s
       interval: 10s
-      timeout: 5s
+      timeout: 2s
       retries: 5
 
 
