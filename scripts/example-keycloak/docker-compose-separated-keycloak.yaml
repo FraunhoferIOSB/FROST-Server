@@ -3,7 +3,7 @@ services:
   frost_http:
     image: fraunhoferiosb/frost-server-http:latest
     ports:
-      - 8080:8080
+      - 8081:8080
     depends_on:
       db_frost:
         condition: service_healthy
@@ -13,7 +13,7 @@ services:
         condition: service_healthy
     environment:
       # For all settings see: https://fraunhoferiosb.github.io/FROST-Server/settings/settings.html
-      - serviceRootUrl=http://${external_ip}:8080/FROST-Server
+      - serviceRootUrl=http://${external_ip}:8081/FROST-Server
       - queueLoggingInterval=1000
       - logSensitiveData=true #disable on production!
       - plugins_multiDatastream_enable=false
@@ -83,6 +83,8 @@ services:
       - POSTGRES_PASSWORD=ChangeMe
     volumes:
       - postgis_frost:/var/lib/postgresql/data
+    ports:
+      - 6543:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
       start_interval: 1s

@@ -261,9 +261,6 @@ public class KeycloakFilter implements Filter {
         KeycloakAccount account = null;
         if (session != null) {
             account = (KeycloakAccount) session.getAttribute(KeycloakAccount.class.getName());
-            if (account == null) {
-                account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
-            }
         }
         if (account == null) {
             account = (KeycloakAccount) httpRequest.getAttribute(KeycloakAccount.class.getName());
