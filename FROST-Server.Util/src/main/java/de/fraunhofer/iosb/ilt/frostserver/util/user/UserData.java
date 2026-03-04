@@ -58,14 +58,7 @@ public class UserData {
      * @param maxPassLength the maximum length of the password to check for.
      */
     public UserData(String userName, int maxNameLength, String userPass, int maxPassLength) {
-        if (userName != null && userName.length() > maxNameLength) {
-            LOGGER.error("Username too long, aborting.");
-            throw new IllegalArgumentException("Username too long.");
-        }
-        if (userPass != null && userPass.length() > maxPassLength) {
-            LOGGER.error("Password too long, aborting.");
-            throw new IllegalArgumentException("Password too long.");
-        }
+        validate(userName, maxNameLength, userPass, maxPassLength);
         this.userName = userName;
         this.userPass = userPass;
     }
@@ -122,4 +115,14 @@ public class UserData {
         return hash;
     }
 
+    public static void validate(String userName, int maxNameLength, String userPass, int maxPassLength) {
+        if (userName != null && userName.length() > maxNameLength) {
+            LOGGER.error("Username too long, aborting.");
+            throw new IllegalArgumentException("Username too long.");
+        }
+        if (userPass != null && userPass.length() > maxPassLength) {
+            LOGGER.error("Password too long, aborting.");
+            throw new IllegalArgumentException("Password too long.");
+        }
+    }
 }

@@ -20,10 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.oidc;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.oidc.OidcSettings.TAG_REGISTER_USER_LOCALLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 
-import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
@@ -49,7 +47,6 @@ import com.nimbusds.openid.connect.sdk.OIDCClaimsRequest;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
-import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
@@ -70,12 +67,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
@@ -99,12 +92,13 @@ import org.slf4j.LoggerFactory;
 public class OidcFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OidcFilter.class);
+    private static final String HEADER_AUTHORIZATION = "Authorization";
+    private static final String HEADER_START_BEARER = "Bearer ";
     private static final String SESSION_KEY_STATE = "OidcFilter.state";
 
     private final Map<String, Utils.MethodRoleMapper> roleMappersByPath = new HashMap<>();
 
     private Map<Role, String> roleMappings;
-    private String roleAdmin;
     private boolean authenticateOnly;
     private boolean registerUserLocally;
     private DatabaseHandler databaseHandler;
@@ -115,7 +109,6 @@ public class OidcFilter implements Filter {
         CoreSettings coreSettings = getCoreSettings(filterConfig);
         Settings authSettings = coreSettings.getAuthSettings();
         roleMappings = AuthUtils.loadRoleMapping(authSettings);
-        roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, OidcSettings.class);
         if (registerUserLocally) {
@@ -195,9 +188,24 @@ public class OidcFilter implements Filter {
 
         PrincipalExtended pe = findUserAccount(httpRequest);
         if (pe == null) {
-            // some check for bearer token
+            // Check for bearer token
+            String authHeader = httpRequest.getHeader(HEADER_AUTHORIZATION);
+            if (authHeader != null && authHeader.startsWith(HEADER_START_BEARER)) {
+                String tokenString = authHeader.strip().substring(HEADER_START_BEARER.length());
+                pe = Utils.checkLogin(config, tokenString);
+                if (pe == null) {
+                    LOGGER.debug("Failed to extract token from header.");
+                    throwHttpError(httpResponse, 403, "Authentication failed");
+                    return;
+                } else {
+                    if (registerUserLocally) {
+                        databaseHandler.enureUserInUsertable(pe.getName(), pe.getRoles());
+                    }
+                    httpRequest.getSession(true).setAttribute(PrincipalExtended.class.getName(), pe);
+                    // TODO: Add some caching machanism so the full check is not done every time.
+                }
 
-            if (hasStateAndCode(httpRequest)) {
+            } else if (hasStateAndCode(httpRequest)) {
                 // We have a redirect back from the OIDC Server.
                 final HttpSession session = httpRequest.getSession(false);
                 if (session == null) {
@@ -237,9 +245,9 @@ public class OidcFilter implements Filter {
                     Secret clientSecret = new Secret(config.getClientSecret());
                     ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
                     // Make the token request
-                    tokenRequest = new TokenRequest(config.getTokenEndpointUri(), clientAuth, codeGrant, null);
+                    tokenRequest = new TokenRequest(config.getTokenEndpointUri(), clientAuth, codeGrant, new Scope("roles"));
                 } else {
-                    tokenRequest = new TokenRequest(config.getTokenEndpointUri(), clientID, codeGrant, null);
+                    tokenRequest = new TokenRequest(config.getTokenEndpointUri(), clientID, codeGrant, new Scope("roles"));
                 }
 
                 TokenResponse tokenResponse;
@@ -264,29 +272,20 @@ public class OidcFilter implements Filter {
                 // Get the ID and access token, the server may also return a refresh token
                 JWT idToken = successResponse.getOIDCTokens().getIDToken();
                 AccessToken accessToken = successResponse.getOIDCTokens().getAccessToken();
-                {
-                    if (idToken instanceof JWSObject jwso && jwso.getPayload() != null) {
-                        Map<String, Object> payload = jwso.getPayload().toJSONObject();
-
-                        final String userName = Objects.toString(CollectionsHelper.getFrom(payload, "sub"), null);
-                        // TODO: Make path configurable
-                        Object rolesObj = CollectionsHelper.getFrom(payload, "resource_access", config.getClientId(), "roles");
-                        final Set<String> roles = new HashSet<>();
-                        if (rolesObj instanceof Collection rolesCol) {
-                            roles.addAll(rolesCol);
-                        }
-                        pe = new PrincipalExtended(userName, roles.contains(roleAdmin), roles);
-                        if (registerUserLocally) {
-                            databaseHandler.enureUserInUsertable(userName, roles);
-                        }
+                pe = Utils.extractPrincipalFromToken(config, idToken);
+                if (pe == null) {
+                    LOGGER.debug("Failed to extract token from response.");
+                    throwHttpError(httpResponse, 403, "Authentication failed");
+                    return;
+                } else {
+                    if (registerUserLocally) {
+                        databaseHandler.enureUserInUsertable(pe.getName(), pe.getRoles());
                     }
-
                     httpRequest.getSession(true).setAttribute(PrincipalExtended.class.getName(), pe);
-                }
-                if (pe != null) {
                     httpResponse.sendRedirect(origUri.toString());
                     return;
                 }
+
             } else {
                 // No bearer token, no login-in-progress: redirect to OIDC Server
                 final HttpSession session = httpRequest.getSession(true);
@@ -304,7 +303,7 @@ public class OidcFilter implements Filter {
                                 new ClaimsSetRequest()
                                         .add("roles"));
                 // Compose the OpenID authentication request (for the code flow)
-                AuthenticationRequest authRequest = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid"), clientID, requestUri)
+                AuthenticationRequest authRequest = new AuthenticationRequest.Builder(new ResponseType("code"), new Scope("openid", "roles"), clientID, requestUri)
                         .endpointURI(config.getAuthEndpointUri())
                         .state(state)
                         .nonce(nonce)
@@ -323,12 +322,9 @@ public class OidcFilter implements Filter {
             LOGGER.debug("User has correct role.");
             chain.doFilter(new RequestWrapper(httpRequest, pe), response);
             return;
-        } else {
-            LOGGER.debug("User is not allowed.");
-            throwHttpError(403, httpResponse);
-            return;
         }
-
+        LOGGER.debug("User is not allowed.");
+        throwHttpError(403, httpResponse);
     }
 
     private boolean hasStateAndCode(HttpServletRequest httpRequest) {

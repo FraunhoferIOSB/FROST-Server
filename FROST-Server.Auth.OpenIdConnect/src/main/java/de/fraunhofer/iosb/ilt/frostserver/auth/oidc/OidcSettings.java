@@ -57,31 +57,10 @@ public class OidcSettings extends ConfigProvider<OidcSettings> {
 
     /**
      * An OpenID-Connect well-known URL. For example:
-     * http://192.168.178.46:8180/realms/FROST-Test/.well-known/openid-configuration
+     * http://192.168.178.46:8180/realms/[realm]/.well-known/openid-configuration
      */
     @DefaultValue("")
     public static final String TAG_OIDC_WELL_KNOWN_CONFIGURATION_URL = "oidc.wellKnownConfigUrl";
-
-    /**
-     * The OpenID Connect authorization endpoint. For example:
-     * http://192.168.178.46:8180/realms/FROST-Test/protocol/openid-connect/auth
-     */
-    @DefaultValue("")
-    public static final String TAG_OIDC_AUTHORIZATION_ENDPOINT_URL = "oidc.authorizationEndpoint";
-
-    /**
-     * The OpenID Connect token endpoint. For example:
-     * http://192.168.178.46:8180/realms/FROST-Test/protocol/openid-connect/token
-     */
-    @DefaultValue("")
-    public static final String TAG_OIDC_TOKEN_ENDPOINT_URL = "oidc.tokenEndpoint";
-
-    /**
-     * The OpenID Connect userinfo endpoint. For example:
-     * http://192.168.178.46:8180/realms/FROST-Test/protocol/openid-connect/userinfo
-     */
-    @DefaultValue("")
-    public static final String TAG_OIDC_USERINFO_ENDPOINT_URL = "oidc.userinfoEndpoint";
 
     @DefaultValue("")
     public static final String TAG_OIDC_CLIENT_ID = "oidc.clientId";
@@ -89,6 +68,15 @@ public class OidcSettings extends ConfigProvider<OidcSettings> {
     @DefaultValue("")
     @SensitiveValue
     public static final String TAG_OIDC_CLIENT_SECRET = "oidc.clientSecret";
+
+    @DefaultValue("resource_access/frost-server/roles,realm_access/roles")
+    public static final String TAG_OIDC_ROLES_PATHS = "oidc.rolesPaths";
+
+    @DefaultValue("")
+    public static final String TAG_OIDC_BEARER_TOKEN_AUDIENCE = "oidc.bearerTokenAudience";
+
+    @DefaultValue("sub")
+    public static final String TAG_OIDC_USERNAME_PATH = "oidc.usernamePath";
 
     @DefaultValueInt(10)
     public static final String TAG_MAX_CLIENTS_PER_USER = "maxClientsPerUser";

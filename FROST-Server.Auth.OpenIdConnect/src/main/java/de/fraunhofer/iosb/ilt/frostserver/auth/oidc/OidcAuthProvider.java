@@ -18,13 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.oidc;
 
 import static de.fraunhofer.iosb.ilt.frostserver.auth.oidc.OidcSettings.TAG_MAX_CLIENTS_PER_USER;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.oidc.OidcSettings.TAG_MAX_PASSWORD_LENGTH;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.oidc.OidcSettings.TAG_MAX_USERNAME_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.oidc.OidcSettings.TAG_REGISTER_USER_LOCALLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
-import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
-import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
@@ -36,15 +31,15 @@ import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.security.auth.Subject;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,22 +47,14 @@ public class OidcAuthProvider implements AuthProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OidcAuthProvider.class);
 
-    /**
-     * This is a "fake" filename, because Keycloak wants to have a filename to
-     * store configurations in a map.
-     */
-    private static final String FROST_SERVER_KEYCLOAKJSON = "FROST-Server-Keycloak.json";
-
     private static final int CUTOFF_HOURS = 24;
 
     private CoreSettings coreSettings;
-    private String roleAdmin;
     private int maxClientsPerUser;
     private boolean registerUserLocally;
     private boolean authenticateOnly;
     private DatabaseHandler databaseHandler;
-    private int maxPassLength = MAX_PASSWORD_LENGTH;
-    private int maxNameLength = MAX_USERNAME_LENGTH;
+    private OidcConfiguration config;
 
     private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
     private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
@@ -76,18 +63,12 @@ public class OidcAuthProvider implements AuthProvider {
      * The map of clients. We need those to determine the authorisation.
      */
     private static final Map<String, Client> CLIENTMAP = new ConcurrentHashMap<>();
-    private static final Map<String, Object> SHARED_STATE = new ConcurrentHashMap<>();
-    private static final Map<String, Object> OPTIONS = new HashMap<>();
 
     @Override
     public InitResult init(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
-        OPTIONS.put("keycloak-config-file", FROST_SERVER_KEYCLOAKJSON);
         final Settings authSettings = coreSettings.getAuthSettings();
-        roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, OidcSettings.class);
-        maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, OidcSettings.class);
-        maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, OidcSettings.class);
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, OidcSettings.class);
         authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         if (authenticateOnly) {
@@ -102,6 +83,7 @@ public class OidcAuthProvider implements AuthProvider {
             DatabaseHandler.init(coreSettings);
             databaseHandler = DatabaseHandler.getInstance(coreSettings);
         }
+        config = Utils.createConfiguration(coreSettings);
         return InitResult.INIT_OK;
     }
 
@@ -112,6 +94,36 @@ public class OidcAuthProvider implements AuthProvider {
 
     @Override
     public boolean isValidUser(String clientId, String username, String password) {
+        clientMapCleanup();
+        PrincipalExtended pe;
+        if (password.length() > 50) {
+            pe = Utils.checkLogin(config, password);
+            if (!Strings.CS.equals(username, pe.getName())) {
+                LOGGER.info("Username {} does not match sub {}", username, pe.getName());
+                return false;
+            }
+        } else {
+            pe = Utils.checkLogin(config, username, password);
+        }
+        if (pe == null) {
+            return false;
+        }
+        if (registerUserLocally) {
+            databaseHandler.enureUserInUsertable(pe.getName(), pe.getRoles());
+        }
+
+        final UserClientInfo userInfo = usernameToUserinfo.computeIfAbsent(pe.getName(), t -> new UserClientInfo());
+        userInfo.setUserPrincipal(pe);
+        String oldClientId = userInfo.addClientId(clientId, maxClientsPerUser);
+        if (oldClientId != null) {
+            clientidToUserinfo.remove(oldClientId);
+        }
+        clientidToUserinfo.put(clientId, userInfo);
+
+        Client client = new Client(new UserData(pe.getName(), null));
+        client.setLastSeen(Instant.now());
+        CLIENTMAP.put(clientId, client);
+
         return false;
     }
 
@@ -122,12 +134,17 @@ public class OidcAuthProvider implements AuthProvider {
             LOGGER.info("No user for {}", clientId);
             return false;
         }
+        final UserData userData = client.getUserData();
+        if (!Strings.CS.equals(userName, userData.getUserName())) {
+            LOGGER.warn("ClientId {} belongs to user {}, not user {}", clientId, userData.getUserName(), userName);
+            return false;
+        }
         client.setLastSeen(Instant.now());
-        if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
+        if (authenticateOnly && !roleName.equalsIgnoreCase(config.getRoleAdmin())) {
             LOGGER.trace("Only authenticating, not checking if User {} has role {}", userName, roleName);
             return true;
         }
-        boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
+        boolean hasRole = userData.getRoles().contains(roleName);
         LOGGER.trace("User {} has role {}: {}", userName, roleName, hasRole);
         return hasRole;
     }
@@ -177,12 +194,11 @@ public class OidcAuthProvider implements AuthProvider {
 
     private class Client {
 
-        public final String userName;
+        private final UserData userData;
         private Instant lastSeen;
-        private Subject subject;
 
-        public Client(String userName) {
-            this.userName = userName;
+        public Client(UserData userData) {
+            this.userData = userData;
         }
 
         /**
@@ -199,20 +215,9 @@ public class OidcAuthProvider implements AuthProvider {
             this.lastSeen = lastSeen;
         }
 
-        /**
-         * @return the subject
-         */
-        public Subject getSubject() {
-            return subject;
+        public UserData getUserData() {
+            return userData;
         }
-
-        /**
-         * @param subject the subject to set
-         */
-        public void setSubject(Subject subject) {
-            this.subject = subject;
-        }
-
     }
 
 }
