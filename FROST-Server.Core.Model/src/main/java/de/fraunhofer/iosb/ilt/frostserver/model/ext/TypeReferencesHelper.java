@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.geojson.GeoJsonObject;
@@ -74,6 +75,9 @@ public class TypeReferencesHelper {
         // Empty on purpose.
     };
     public static final TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP = new TypeReference<Map<String, Object>>() {
+        // Empty on purpose.
+    };
+    public static final TypeReference<TreeMap<String, Object>> TYPE_REFERENCE_MAP_SORTED = new TypeReference<TreeMap<String, Object>>() {
         // Empty on purpose.
     };
     public static final TypeReference<Number> TYPE_REFERENCE_NUMBER = new TypeReference<Number>() {

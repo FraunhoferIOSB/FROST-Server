@@ -121,7 +121,7 @@ class MessageSerialisationTest {
                 .setProperty(pluginCoreModel.epResult, 12345)
                 .setProperty(pluginCoreModel.epParameters, CollectionsHelper.propertiesBuilder()
                         .addProperty("param1", "value 1")
-                        .build())
+                        .buildTreeNode())
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(12L)));
         entity.setProperty(pluginCoreModel.epResultTime, null);
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));

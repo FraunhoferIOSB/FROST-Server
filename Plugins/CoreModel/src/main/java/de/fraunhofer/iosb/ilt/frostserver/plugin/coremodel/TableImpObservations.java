@@ -51,6 +51,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -466,13 +467,13 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         JsonValue properties = getFieldOrNull(tuple, ql.colProperties);
         String encoding = getFieldOrNull(tuple, ql.colEncodingType);
         String locString = getFieldOrNull(tuple, ql.colLocation);
-        Object locObject = Utils.jsonToTreeOrString(locString);
+        Object locObject = SimpleJsonMapper.jsonToTreeOrString(locString);
         Entity foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                 .setProperty(pluginCoreModel.epName, name)
                 .setProperty(pluginCoreModel.epDescription, description)
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
                 .setProperty(pluginCoreModel.epFeature, locObject)
-                .setProperty(ModelRegistry.EP_PROPERTIES, properties.getMapValue());
+                .setProperty(ModelRegistry.EP_PROPERTIES, properties.getTreeValue());
         if (fRestricted != null && epRestricted != null) {
             foi.setProperty(epRestricted, getFieldOrNull(tuple, fRestricted));
         }

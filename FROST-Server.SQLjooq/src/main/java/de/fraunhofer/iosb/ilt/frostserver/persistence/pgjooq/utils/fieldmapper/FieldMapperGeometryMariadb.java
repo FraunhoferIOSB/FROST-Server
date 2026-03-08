@@ -27,8 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -96,7 +96,7 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
                                         DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
                             }
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(property, Utils.jsonToTreeOrString(locationString));
+                            entity.setProperty(property, SimpleJsonMapper.jsonToTreeOrString(locationString));
                         },
                         (t, entity, insertFields) -> {
                             Object feature = entity.getProperty(property);

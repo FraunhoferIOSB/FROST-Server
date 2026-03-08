@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -254,7 +255,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
-                            List<String> observationTypes = fieldJsonValue.getValue(Utils.TYPE_LIST_STRING);
+                            List<String> observationTypes = fieldJsonValue.getValue(TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING);
                             dataSize.increase(fieldJsonValue.getStringLength());
                             entity.setProperty(pluginMultiDatastream.epMultiObservationDataTypes, observationTypes);
                         },
@@ -292,7 +293,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                         (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
-                            List<UnitOfMeasurement> units = fieldJsonValue.getValue(Utils.TYPE_LIST_UOM);
+                            List<UnitOfMeasurement> units = fieldJsonValue.getValue(TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM);
                             entity.setProperty(pluginMultiDatastream.getEpUnitOfMeasurements(), units);
                         },
                         (table, entity, insertFields) -> insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.getEpUnitOfMeasurements()))),

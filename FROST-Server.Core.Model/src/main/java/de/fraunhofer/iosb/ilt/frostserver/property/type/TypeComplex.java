@@ -44,8 +44,7 @@ import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.ValueSerializer;
 
 /**
- *
- * @author hylke
+ * The complex type definition.
  */
 public class TypeComplex extends PropertyType {
 
@@ -65,7 +64,7 @@ public class TypeComplex extends PropertyType {
     public static final EntityPropertyMain<TimeInstant> EP_VALUE_END_TIME = new EntityPropertyMain<TimeInstant>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET)
             .setNullable(true);
 
-    public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, TypeReferencesHelper.TYPE_REFERENCE_MAP);
+    public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, ParserUtils.getTreeNodeDeserializer(), ParserUtils.getTreeNodeSerializer());
 
     public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex(STA_TIMEINTERVAL_NAME, "An ISO time interval.", false, TimeInterval::new, TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
             .registerProperty(EP_START_TIME)

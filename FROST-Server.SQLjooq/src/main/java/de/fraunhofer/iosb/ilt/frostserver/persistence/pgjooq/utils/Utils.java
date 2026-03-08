@@ -24,16 +24,12 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeseria
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
-import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import net.time4j.Moment;
 import org.geolatte.common.dataformats.json.jackson.JsonMapper;
 import org.jooq.Field;
@@ -41,10 +37,7 @@ import org.jooq.OrderField;
 import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.StringNode;
 
 /**
  * Various utility methods.
@@ -53,31 +46,11 @@ public class Utils {
 
     public static final String INTERVAL_PARAM = "(?)::interval";
     public static final String TIMESTAMP_PARAM = "(?)::timestamp";
-    public static final TypeReference<Object> TYPE_OBJECT = new TypeReference<Object>() {
-        // Empty on purpose.
-    };
-
-    public static final TypeReference<List<String>> TYPE_LIST_STRING = new TypeReference<List<String>>() {
-        // Empty on purpose.
-    };
-
-    public static final TypeReference<List<UnitOfMeasurement>> TYPE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
-        // Empty on purpose.
-    };
-
-    public static final TypeReference<Map<String, Object>> TYPE_MAP_STRING_OBJECT = new TypeReference<Map<String, Object>>() {
-        // Empty on purpose.
-    };
-
-    public static final TypeReference<TreeMap<String, Object>> TYPE_SORTED_MAP_STRING_OBJECT = new TypeReference<TreeMap<String, Object>>() {
-        // Empty on purpose.
-    };
 
     /**
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
-    private static final String FAILED_JSON_PARSE = "Failed to parse stored json.";
     private static JsonMapper geoJsonMapper;
     private static final JsonValue NULL_JSON_VALUE = new JsonValue((JsonNode) null);
 
@@ -151,52 +124,6 @@ public class Utils {
             LOGGER.trace("Not geoJson.", ex);
         }
         return locationString;
-    }
-
-    public static JsonNode jsonToTreeOrString(String json) {
-        if (json == null) {
-            return null;
-        }
-
-        try {
-            return SimpleJsonMapper.getSimpleObjectMapper().readTree(json);
-        } catch (JacksonException ex) {
-            return new StringNode(json);
-        }
-    }
-
-    public static JsonNode jsonToTree(String json) {
-        if (json == null) {
-            return null;
-        }
-
-        try {
-            return SimpleJsonMapper.getSimpleObjectMapper().readTree(json);
-        } catch (JacksonException ex) {
-            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
-        }
-    }
-
-    public static <T> T jsonToObject(String json, Class<T> clazz) {
-        if (json == null) {
-            return null;
-        }
-        try {
-            return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, clazz);
-        } catch (JacksonException ex) {
-            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
-        }
-    }
-
-    public static <T> T jsonToObject(String json, TypeReference<T> typeReference) {
-        if (json == null) {
-            return null;
-        }
-        try {
-            return SimpleJsonMapper.getSimpleObjectMapper().readValue(json, typeReference);
-        } catch (JacksonException ex) {
-            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
-        }
     }
 
     /**

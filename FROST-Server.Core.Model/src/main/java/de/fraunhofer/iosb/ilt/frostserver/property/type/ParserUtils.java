@@ -25,6 +25,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
+import tools.jackson.core.TreeNode;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.SerializationContext;
@@ -36,6 +37,9 @@ import tools.jackson.databind.exc.UnrecognizedPropertyException;
  * Utility class for (de)serialising.
  */
 public class ParserUtils {
+
+    private static TreeNodeSerializer treeNodeSerializer;
+    private static TreeNodeDeserializer treeNodeDeserializer;
 
     private ParserUtils() {
         // Utility class
@@ -67,6 +71,36 @@ public class ParserUtils {
                 return jp.readValueAsTree();
             }
         };
+    }
+
+    public static TreeNodeSerializer getTreeNodeSerializer() {
+        if (treeNodeSerializer == null) {
+            treeNodeSerializer = new TreeNodeSerializer();
+        }
+        return treeNodeSerializer;
+    }
+
+    public static TreeNodeDeserializer getTreeNodeDeserializer() {
+        if (treeNodeDeserializer == null) {
+            treeNodeDeserializer = new TreeNodeDeserializer();
+        }
+        return treeNodeDeserializer;
+    }
+
+    public static class TreeNodeSerializer extends ValueSerializer<TreeNode> {
+
+        @Override
+        public void serialize(TreeNode value, JsonGenerator jg, SerializationContext sc) throws JacksonException {
+            jg.writeTree(value);
+        }
+    }
+
+    public static class TreeNodeDeserializer extends ValueDeserializer<TreeNode> {
+
+        @Override
+        public TreeNode deserialize(JsonParser jp, DeserializationContext dc) throws JacksonException {
+            return jp.readValueAsTree();
+        }
     }
 
     /**

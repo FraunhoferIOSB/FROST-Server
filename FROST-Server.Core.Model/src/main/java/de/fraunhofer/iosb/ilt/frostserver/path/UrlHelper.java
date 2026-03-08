@@ -53,6 +53,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.node.ValueNode;
 
 /**
  *
@@ -219,6 +220,16 @@ public class UrlHelper {
                 .append(quoteForUrl(entityType.getPrimaryKey(), pkValues))
                 .append(')')
                 .toString();
+    }
+
+    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, ValueNode id) {
+        if (id.isIntegralNumber()) {
+            return generateSelfLink(serviceRootUrl, version, entityType, id.asBigInteger());
+        }
+        if (id.isNumber()) {
+            return generateSelfLink(serviceRootUrl, version, entityType, id.asDecimal());
+        }
+        return generateSelfLink(serviceRootUrl, version, entityType, id.asString());
     }
 
     public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Object id) {

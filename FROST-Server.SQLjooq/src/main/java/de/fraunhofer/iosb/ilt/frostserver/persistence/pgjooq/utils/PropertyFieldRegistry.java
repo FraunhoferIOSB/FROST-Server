@@ -53,6 +53,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
+import tools.jackson.core.TreeNode;
 
 /**
  *
@@ -362,7 +363,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         addEntry(ModelRegistry.EP_SELFLINK, factory, converterSelfLink);
     }
 
-    public void addEntryMap(EntityProperty<Map<String, Object>> property, ExpressionFactory<T> factory) {
+    public void addEntryMap(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
         PropertyFields<T> pf = new PropertyFields<>(property, true, new ConverterMap<>(property, factory));
         pf.addField(null, factory);
         epMapSelect.put(property, pf);
@@ -672,7 +673,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
                 return;
             }
             dataSize.increase(data.getStringLength());
-            entity.setProperty(property, data.getMapValue());
+            entity.setProperty(property, data.getTreeValue());
         }
 
         @Override
