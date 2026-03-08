@@ -98,7 +98,7 @@ class EntityFormatterTest {
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
-                        .build());
+                        .buildTreeNode());
         assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -128,7 +128,7 @@ class EntityFormatterTest {
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
-                        .build());
+                        .buildTreeNode());
         assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -149,7 +149,7 @@ class EntityFormatterTest {
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
-                        .build());
+                        .buildTreeNode());
         assertTrue(jsonEqual(expResult, JsonWriter.writeEntity(entity)));
     }
 
@@ -183,7 +183,7 @@ class EntityFormatterTest {
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
-                        .build());
+                        .buildTreeNode());
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);
         things.add(entity);
@@ -204,7 +204,7 @@ class EntityFormatterTest {
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
-                        .build())
+                        .buildTreeNode())
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(2L)));
@@ -279,7 +279,7 @@ class EntityFormatterTest {
                 .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
-                        .build());
+                        .buildTreeNode());
         ((EntitySet) entity.getProperty(pluginCoreModel.npDatastreamsThing)).setCount(1);
         EntitySet things = new EntitySetImpl(pluginCoreModel.etThing);
         things.add(entity);

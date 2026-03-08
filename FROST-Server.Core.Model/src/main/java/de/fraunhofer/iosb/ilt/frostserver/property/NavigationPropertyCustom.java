@@ -36,6 +36,9 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  *
@@ -135,7 +138,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     public void setElementOn(Entity entity, NavigableElement expandedElement) {
         init(entity);
-        targetData.containingMap.put(name + "." + type.entityName, expandedElement);
+        targetData.setKey(name + "." + type.entityName, expandedElement);
     }
 
     public PkValue getTargetIdFrom(Entity entity) {
@@ -146,10 +149,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     @Override
     public Entity getFrom(Entity entity) {
         init(entity);
-        if (targetData.containingMap == null) {
-            return null;
-        }
-        return (Entity) targetData.containingMap.get(targetData.fullKeyEntity);
+        return (Entity) targetData.getKey(targetData.fullKeyEntity);
     }
 
     @Override
@@ -160,10 +160,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     @Override
     public boolean isSetOn(Entity entity) {
         init(entity);
-        if (targetData.containingMap == null) {
-            return false;
-        }
-        return targetData.containingMap.containsKey(targetData.fullKeyEntity);
+        return targetData.containsKey(targetData.fullKeyEntity);
     }
 
     @Override
@@ -191,14 +188,45 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
         private Entity entity;
         private Map<String, Object> containingMap;
+        private ObjectNode containingNode;
         private String fullKeyEntity;
         private Object targetId;
 
         public void clear() {
             entity = null;
             containingMap = null;
+            containingNode = null;
             fullKeyEntity = null;
             targetId = null;
+        }
+
+        public boolean containsKey(String key) {
+            if (containingNode != null) {
+                return containingNode.has(key);
+            }
+            if (containingMap != null) {
+                return containingMap.containsKey(key);
+            }
+            return false;
+        }
+
+        public Object getKey(String key) {
+            if (containingNode != null) {
+                return containingNode.get(key);
+            }
+            if (containingMap != null) {
+                return containingMap.get(key);
+            }
+            return null;
+        }
+
+        public void setKey(String key, NavigableElement value) {
+            if (containingNode != null) {
+                containingNode.putPOJO(key, value);
+            }
+            if (containingMap != null) {
+                containingMap.put(key, value);
+            }
         }
 
         public void findLinkTargetData(Entity entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
@@ -207,20 +235,44 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
             int count = subPath.size() - 1;
             for (int idx = 0; idx < count; idx++) {
                 String curPathItem = subPath.get(idx);
-                if (curTarget instanceof Map) {
-                    Map<String, Object> map = (Map<String, Object>) curTarget;
-                    curTarget = map.get(curPathItem);
+                if (curTarget instanceof ObjectNode on) {
+                    curTarget = on.get(curPathItem);
+                } else if (curTarget instanceof ArrayNode an) {
+                    try {
+                        int nr = Integer.parseInt(curPathItem);
+                        curTarget = an.get(nr);
+                    } catch (NumberFormatException ex) {
+                        LOGGER.trace("Not a number, can't access array: {}", curPathItem, ex);
+                        return;
+                    }
+                } else if (curTarget instanceof Map m) {
+                    curTarget = m.get(curPathItem);
                 } else {
                     return;
                 }
             }
-            if (curTarget instanceof Map) {
-                findLinkEntryInMap((Map<String, Object>) curTarget, name, type);
+            if (curTarget instanceof ObjectNode on) {
+                findLinkEntryIn(on, name, type);
+            } else if (curTarget instanceof Map m) {
+                findLinkEntryIn(m, name, type);
             }
             this.entity = entity;
         }
 
-        private void findLinkEntryInMap(Map<String, Object> map, String name, EntityType type) {
+        private void findLinkEntryIn(ObjectNode on, String name, EntityType type) {
+            fullKeyEntity = name + "." + type.entityName;
+            String keyId = fullKeyEntity + AT_IOT_ID;
+            JsonNode keyValue = on.get(keyId);
+            if (keyValue == null) {
+                LOGGER.trace("Not found in map: {}", name);
+            } else {
+                containingMap = null;
+                containingNode = on;
+                targetId = valueNodeToObject(keyValue);
+            }
+        }
+
+        private void findLinkEntryIn(Map<String, Object> map, String name, EntityType type) {
             fullKeyEntity = name + "." + type.entityName;
             String keyId = fullKeyEntity + AT_IOT_ID;
             Object keyValue = map.get(keyId);
@@ -228,8 +280,19 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
                 LOGGER.trace("Not found in map: {}", name);
             } else {
                 containingMap = map;
+                containingNode = null;
                 targetId = keyValue;
             }
+        }
+
+        private Object valueNodeToObject(JsonNode value) {
+            if (value.isIntegralNumber()) {
+                return value.asLong();
+            }
+            if (value.isString()) {
+                return value.asString();
+            }
+            return null;
         }
     }
 

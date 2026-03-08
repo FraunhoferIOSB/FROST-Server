@@ -32,8 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
@@ -141,7 +141,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
                         (TableImpFeatures table, Record tuple, Entity entity, DataSize dataSize) -> {
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
-                            entity.setProperty(pluginCoreModel.epFeature, Utils.jsonToTreeOrString(locationString));
+                            entity.setProperty(pluginCoreModel.epFeature, SimpleJsonMapper.jsonToTreeOrString(locationString));
                         },
                         (table, entity, insertFields) -> {
                             Object feature = entity.getProperty(pluginCoreModel.epFeature);

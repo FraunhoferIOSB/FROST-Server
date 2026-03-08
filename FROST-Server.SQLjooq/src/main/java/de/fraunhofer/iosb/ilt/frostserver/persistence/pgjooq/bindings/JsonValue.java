@@ -17,8 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings;
 
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP_SORTED;
+
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.Map;
+import tools.jackson.core.TreeNode;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 
@@ -52,17 +55,21 @@ public class JsonValue {
 
     public Object getValue() {
         if (value == null) {
-            return Utils.jsonToTreeOrString(stringValue);
+            return SimpleJsonMapper.jsonToTreeOrString(stringValue);
         }
         return value;
     }
 
+    public TreeNode getTreeValue() {
+        return SimpleJsonMapper.jsonToTree(stringValue);
+    }
+
     public Map<String, Object> getMapValue() {
-        return Utils.jsonToObject(stringValue, Utils.TYPE_SORTED_MAP_STRING_OBJECT);
+        return SimpleJsonMapper.jsonToObject(stringValue, TYPE_REFERENCE_MAP_SORTED);
     }
 
     public <T> T getValue(TypeReference<T> typeReference) {
-        return Utils.jsonToObject(stringValue, typeReference);
+        return SimpleJsonMapper.jsonToObject(stringValue, typeReference);
     }
 
     public int getStringLength() {

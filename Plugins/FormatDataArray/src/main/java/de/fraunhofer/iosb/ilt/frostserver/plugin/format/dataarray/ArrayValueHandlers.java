@@ -28,15 +28,13 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.TreeNode;
 
-/**
- *
- * @author scf
- */
 public class ArrayValueHandlers {
 
     /**
@@ -73,8 +71,12 @@ public class ArrayValueHandlers {
                 "resultQuality",
                 (Object value, Entity target) -> target.setProperty(pluginCoreModel.epResultQuality, value));
         handlers.put("parameters", (Object value, Entity target) -> {
+            if (value instanceof TreeNode tn) {
+                target.setProperty(pluginCoreModel.epParameters, tn);
+                return;
+            }
             if (value instanceof Map map) {
-                target.setProperty(pluginCoreModel.epParameters, map);
+                target.setProperty(pluginCoreModel.epParameters, SimpleJsonMapper.valueToTree(map));
                 return;
             }
             throw new IllegalArgumentException("parameters has to be a map.");

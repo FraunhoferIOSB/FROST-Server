@@ -56,6 +56,7 @@ import java.util.Set;
 import org.jooq.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.TreeNode;
 
 /**
  *
@@ -78,7 +79,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
-    public final EntityPropertyMain<Map<String, Object>> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
+    public final EntityPropertyMain<TreeNode> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
     private EntityPropertyMain<?> epIdActuator;
     private EntityPropertyMain<?> epIdTask;
     private EntityPropertyMain<?> epIdTaskingCap;

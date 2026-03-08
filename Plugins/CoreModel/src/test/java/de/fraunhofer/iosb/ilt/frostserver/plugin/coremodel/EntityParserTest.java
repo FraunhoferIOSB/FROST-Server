@@ -699,7 +699,7 @@ class EntityParserTest {
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
-                        .build());
+                        .buildTreeNode());
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -753,7 +753,7 @@ class EntityParserTest {
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", property3)
-                        .build());
+                        .buildTreeNode());
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
 
@@ -787,7 +787,7 @@ class EntityParserTest {
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
-                        .build())
+                        .buildTreeNode())
                 .addNavigationEntity(
                         pluginCoreModel.npLocationsThing,
                         new DefaultEntity(pluginCoreModel.etLocation)
@@ -819,7 +819,7 @@ class EntityParserTest {
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
-                        .build())
+                        .buildTreeNode())
                 .addNavigationEntity(
                         pluginCoreModel.npLocationsThing,
                         new DefaultEntity(pluginCoreModel.etLocation)
@@ -848,7 +848,7 @@ class EntityParserTest {
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
-                        .build())
+                        .buildTreeNode())
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
@@ -905,7 +905,7 @@ class EntityParserTest {
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
-                        .build())
+                        .buildTreeNode())
                 .addNavigationEntity(
                         pluginCoreModel.npLocationsThing,
                         new DefaultEntity(pluginCoreModel.etLocation)

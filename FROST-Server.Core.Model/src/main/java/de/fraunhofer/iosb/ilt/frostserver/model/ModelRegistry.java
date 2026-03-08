@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.TreeNode;
 
 /**
  *
@@ -48,7 +49,7 @@ public class ModelRegistry {
     /**
      * The global EntityProperty properties.
      */
-    public static final EntityPropertyMain<Map<String, Object>> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, false, true, true, false);
+    public static final EntityPropertyMain<TreeNode> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, false, true, true, false);
     /**
      * The global EntityProperty encodingType.
      */

@@ -31,6 +31,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ValueNode;
 
 /**
  *
@@ -85,36 +90,51 @@ public class CustomLinksHelper {
 
     private void expandCustomLinks(Query query, EntityPropertyMain property, Entity entity, ResourcePath path, int recurseDepth) {
         final Object properties = entity.getProperty(property);
-        if (properties instanceof Map) {
-            expandCustomLinks(query, (Map<String, Object>) properties, path, recurseDepth);
+        if (properties instanceof TreeNode tn) {
+            expandCustomLinks(query, tn, path, recurseDepth);
         }
     }
 
-    public void expandCustomLinks(Query query, Map<String, Object> properties, ResourcePath path, int recurseDepth) {
+    public void expandCustomLinks(Query query, TreeNode properties, ResourcePath path, int recurseDepth) {
         if (properties == null) {
             return;
         }
-        Map<String, Object> toAdd = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> propertyEntry : properties.entrySet()) {
-            Object value = propertyEntry.getValue();
-            if (value instanceof Map) {
-                Map<String, Object> subMap = (Map<String, Object>) value;
-                if (recurseDepth > 0) {
-                    expandCustomLinks(query, subMap, path, recurseDepth - 1);
-                }
-            } else if (value instanceof Number || value instanceof String) {
+        if (properties instanceof ObjectNode oNode) {
+            expandCustomLinks(query, oNode, path, recurseDepth);
+        } else if (properties instanceof ArrayNode aNode) {
+            expandCustomLinks(query, aNode, path, recurseDepth);
+        }
+
+    }
+
+    public void expandCustomLinks(Query query, ObjectNode properties, ResourcePath path, int recurseDepth) {
+        Map<String, String> toAdd = new LinkedHashMap<>();
+        for (Map.Entry<String, JsonNode> propertyEntry : properties.properties()) {
+            JsonNode value = propertyEntry.getValue();
+            if (value instanceof ValueNode vn && (vn.isNumber() || vn.isString())) {
                 String key = propertyEntry.getKey();
                 Matcher matcher = entityLinkNamePattern.matcher(key);
                 if (matcher.matches()) {
                     String name = matcher.group(1);
                     EntityType type = modelRegistry.getEntityTypeForName(matcher.group(2));
-                    Object id = propertyEntry.getValue();
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, id));
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, vn));
+                }
+            } else {
+                if (recurseDepth > 0) {
+                    expandCustomLinks(query, value, path, recurseDepth - 1);
                 }
             }
         }
-        properties.putAll(toAdd);
+        for (Map.Entry<String, String> entry : toAdd.entrySet()) {
+            properties.put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public void expandCustomLinks(Query query, ArrayNode array, ResourcePath path, int recurseDepth) {
+        for (JsonNode entry : array) {
+            expandCustomLinks(query, entry, path, recurseDepth);
+        }
     }
 
     public void cleanPropertiesMap(Entity entity) {
