@@ -24,10 +24,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_UNTYPED;
-import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_CONFORMANCE_LIST;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
@@ -237,28 +235,11 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
         Version version = request.getVersion();
-        if (version == PluginCoreService.V_1_1) {
-            Map<String, Object> serverSettings = new LinkedHashMap<>();
-            result.put(KEY_SERVER_SETTINGS, serverSettings);
-
-            final Set<Extension> enabledSettings = settings.getEnabledExtensions();
-            Set<String> extensionList = new TreeSet<>();
-            serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
-            for (Extension setting : enabledSettings) {
-                if (setting.isExposedFeature()) {
-                    extensionList.addAll(setting.getRequirements());
-                }
-            }
-
-            settings.getMqttSettings().fillServerSettings(serverSettings);
-        }
-
-        Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
-        if (serverSettings == null) {
-            // Nothing to add to.
+        if (version == PluginCoreService.V_1_0) {
             return;
         }
-        Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
+        Map<String, Object> serverSettings = (Map<String, Object>) result.computeIfAbsent(KEY_SERVER_SETTINGS, t -> new LinkedHashMap<>());
+        Set<String> extensionList = (Set<String>) serverSettings.computeIfAbsent(Service.KEY_CONFORMANCE_LIST, t -> new TreeSet<>());
         extensionList.addAll(REQUIREMENTS_CORE_MODEL);
     }
 

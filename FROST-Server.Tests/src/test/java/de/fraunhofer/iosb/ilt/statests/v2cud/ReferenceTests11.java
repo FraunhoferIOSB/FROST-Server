@@ -126,8 +126,7 @@ public class ReferenceTests11 extends AbstractTestClass {
      * This method is run after all the tests of this class is run and clean the
      * database.
      *
-     * @throws
-     * de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
+     * @throws ServiceFailureException
      */
     @AfterAll
     public static void deleteEverything() throws ServiceFailureException {

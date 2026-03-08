@@ -65,8 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * The API of STA version 2.0.
  */
 public class PluginCoreServiceV2 implements PluginRootDocument, PluginService, ConfigDefaults {
 
