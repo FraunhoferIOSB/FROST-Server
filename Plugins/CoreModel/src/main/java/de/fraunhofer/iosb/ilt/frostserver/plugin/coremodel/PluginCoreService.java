@@ -29,13 +29,17 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
+import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_CONFORMANCE_LIST;
+import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -49,14 +53,17 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * The API of STA version 1.0 and 1.1.
  */
-public class PluginCoreService implements PluginService, ConfigDefaults {
+public class PluginCoreService implements PluginRootDocument, PluginService, ConfigDefaults {
 
     private static final EditFeatures INSERT_STA_11 = new EditFeatures(true, false, false);
     private static final EditFeatures UPDATE_STA_11 = new EditFeatures(false, false, false);
@@ -92,12 +99,14 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreService.class.getName());
 
     private boolean enabled;
+    private CoreSettings settings;
 
     @Override
     public InitResult init(CoreSettings settings) {
         final Settings pluginSettings = settings.getPluginSettings();
         enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_SERVICE, PluginCoreService.class);
         if (enabled) {
+            this.settings = settings;
             settings.getPluginManager().registerPlugin(this);
             settings.getPluginManager().registerPlugin(new PluginResultFormatSta());
         }
@@ -107,6 +116,25 @@ public class PluginCoreService implements PluginService, ConfigDefaults {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
+        Version version = request.getVersion();
+        if (version != PluginCoreService.V_1_1) {
+            return;
+        }
+        Map<String, Object> serverSettings = (Map<String, Object>) result.computeIfAbsent(KEY_SERVER_SETTINGS, t -> new LinkedHashMap<>());
+
+        final Set<Extension> enabledSettings = settings.getEnabledExtensions();
+        Set<String> extensionList = new TreeSet<>();
+        serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
+        for (Extension setting : enabledSettings) {
+            if (setting.isExposedFeature()) {
+                extensionList.addAll(setting.getRequirements());
+            }
+        }
+        settings.getMqttSettings().fillServerSettings(serverSettings);
     }
 
     @Override

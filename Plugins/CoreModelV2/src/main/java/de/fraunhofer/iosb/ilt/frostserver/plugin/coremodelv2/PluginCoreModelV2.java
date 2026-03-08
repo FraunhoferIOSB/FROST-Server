@@ -20,8 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings.TAG_ENABLE_CORE_MODEL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 
-import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -100,22 +98,8 @@ public class PluginCoreModelV2 implements Plugin, PluginRootDocument, ConfigDefa
 
     @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
-        Version version = request.getVersion();
-        if (version != PluginCoreServiceV2.VERSION_STA_2_0) {
-            return;
-        }
         Map<String, Object> serverSettings = (Map<String, Object>) result.computeIfAbsent(Service.KEY_SERVER_SETTINGS, t -> new LinkedHashMap<>());
-
-        final Set<Extension> enabledSettings = settings.getEnabledExtensions();
         Set<String> extensionList = (Set<String>) serverSettings.computeIfAbsent(Service.KEY_CONFORMANCE_LIST, t -> new TreeSet<>());
-        for (Extension setting : enabledSettings) {
-            if (setting.isExposedFeature()) {
-                extensionList.addAll(setting.getRequirements());
-            }
-        }
-
-        settings.getMqttSettings().fillServerSettings(serverSettings);
-
         extensionList.addAll(REQUIREMENTS_CORE_MODEL);
     }
 
