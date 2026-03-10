@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.util;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.AbstractSWE;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.AbstractSWEIdentifiable;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.constraint.AbstractConstraint;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class SweTypeIdResolver implements TypeIdResolver {
     private static final Map<String, Class<?>> annnotatedClasses;
 
     static {
-        final Reflections reflections = new Reflections("de.fraunhofer.iosb.ilt.frostclient.models.swecommon");
+        final Reflections reflections = new Reflections(AbstractSWE.class.getPackageName());
         annnotatedClasses = reflections
                 .getSubTypesOf(AbstractSWEIdentifiable.class)
                 .stream()

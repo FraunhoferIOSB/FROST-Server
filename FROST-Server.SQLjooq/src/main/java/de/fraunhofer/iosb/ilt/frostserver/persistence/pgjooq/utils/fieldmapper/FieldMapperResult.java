@@ -107,10 +107,10 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
         pfReg.addEntry(property,
                 true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (T t, Record tuple, Entity entity, DataSize dataSize) -> readResultFromDb(entity, property, t, tuple, dataSize, idxType, idxString, idxNumber, idxBoolean, idxJson),
-                        (t, entity, insertFields) -> handleResult(entity, property, t, insertFields, idxType, idxString, idxNumber, idxBoolean, idxJson),
+                        (T t, Record tuple, Entity entity, DataSize dataSize) -> readResultFromDb(entity, property, t, tuple, dataSize),
+                        (t, entity, insertFields) -> handleResult(entity, property, t, insertFields),
                         (t, entity, updateFields, message) -> {
-                            handleResult(entity, property, t, updateFields, idxType, idxString, idxNumber, idxBoolean, idxJson);
+                            handleResult(entity, property, t, updateFields);
                             message.addField(property);
                         }),
                 new PropertyFieldRegistry.NFP<>("n", t -> t.field(idxNumber)),
@@ -120,62 +120,56 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
                 new PropertyFieldRegistry.NFP<>("t", t -> t.field(idxType)));
     }
 
-    private <T extends StaMainTable<T>> void handleResult(
-            Entity entity, Property property,
-            T table, Map<Field, Object> output,
-            int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
+    private <T extends StaMainTable<T>> void handleResult(Entity entity, Property property, T table, Map<Field, Object> output) {
         Object result = entity.getProperty(property);
         if (result instanceof Number number) {
-            output.put(table.field(idxReTy), ResultType.NUMBER.sqlValue());
-            output.put(table.field(idxReSt), result.toString());
-            output.put(table.field(idxReNu), number.doubleValue());
-            output.put(table.field(idxReBo), null);
-            output.put(table.field(idxReJs), null);
+            output.put(table.field(fieldTypeIdx), ResultType.NUMBER.sqlValue());
+            output.put(table.field(fieldStringIdx), result.toString());
+            output.put(table.field(fieldNumberIdx), number.doubleValue());
+            output.put(table.field(fieldBooleanIdx), null);
+            output.put(table.field(fieldJsonIdx), null);
         } else if (result instanceof Boolean) {
-            output.put(table.field(idxReTy), ResultType.BOOLEAN.sqlValue());
-            output.put(table.field(idxReSt), result.toString());
-            output.put(table.field(idxReBo), result);
-            output.put(table.field(idxReNu), null);
-            output.put(table.field(idxReJs), null);
+            output.put(table.field(fieldTypeIdx), ResultType.BOOLEAN.sqlValue());
+            output.put(table.field(fieldStringIdx), result.toString());
+            output.put(table.field(fieldBooleanIdx), result);
+            output.put(table.field(fieldNumberIdx), null);
+            output.put(table.field(fieldJsonIdx), null);
         } else if (result instanceof String) {
-            output.put(table.field(idxReTy), ResultType.STRING.sqlValue());
-            output.put(table.field(idxReSt), result.toString());
-            output.put(table.field(idxReNu), null);
-            output.put(table.field(idxReBo), null);
-            output.put(table.field(idxReJs), null);
+            output.put(table.field(fieldTypeIdx), ResultType.STRING.sqlValue());
+            output.put(table.field(fieldStringIdx), result.toString());
+            output.put(table.field(fieldNumberIdx), null);
+            output.put(table.field(fieldBooleanIdx), null);
+            output.put(table.field(fieldJsonIdx), null);
         } else {
-            output.put(table.field(idxReTy), ResultType.OBJECT_ARRAY.sqlValue());
-            output.put(table.field(idxReJs), EntityFactories.objectToJson(result));
-            output.put(table.field(idxReSt), null);
-            output.put(table.field(idxReNu), null);
-            output.put(table.field(idxReBo), null);
+            output.put(table.field(fieldTypeIdx), ResultType.OBJECT_ARRAY.sqlValue());
+            output.put(table.field(fieldJsonIdx), EntityFactories.objectToJson(result));
+            output.put(table.field(fieldStringIdx), null);
+            output.put(table.field(fieldNumberIdx), null);
+            output.put(table.field(fieldBooleanIdx), null);
         }
     }
 
-    private <T extends StaMainTable<T>> void readResultFromDb(
-            Entity entity, Property property,
-            T table, Record tuple, DataSize dataSize,
-            int idxReTy, int idxReSt, int idxReNu, int idxReBo, int idxReJs) {
-        Short resultTypeOrd = Utils.getFieldOrNull(tuple, (Field<Short>) table.field(idxReTy));
+    private <T extends StaMainTable<T>> void readResultFromDb(Entity entity, Property property, T table, Record tuple, DataSize dataSize) {
+        Short resultTypeOrd = Utils.getFieldOrNull(tuple, (Field<Short>) table.field(fieldTypeIdx));
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
             switch (resultType) {
                 case BOOLEAN:
-                    entity.setProperty(property, Utils.getFieldOrNull(tuple, table.field(idxReBo)));
+                    entity.setProperty(property, Utils.getFieldOrNull(tuple, table.field(fieldBooleanIdx)));
                     break;
 
                 case NUMBER:
-                    handleNumber(entity, property, table, tuple, idxReSt, idxReNu);
+                    handleNumber(entity, property, table, tuple, fieldStringIdx, fieldNumberIdx);
                     break;
 
                 case OBJECT_ARRAY:
-                    JsonValue jsonData = Utils.getFieldJsonValue(tuple, (Field<JsonValue>) table.field(idxReJs));
+                    JsonValue jsonData = Utils.getFieldJsonValue(tuple, (Field<JsonValue>) table.field(fieldJsonIdx));
                     dataSize.increase(jsonData.getStringLength());
                     entity.setProperty(property, jsonData.getValue());
                     break;
 
                 case STRING:
-                    String stringData = Utils.getFieldOrNull(tuple, (Field<String>) table.field(idxReSt));
+                    String stringData = Utils.getFieldOrNull(tuple, (Field<String>) table.field(fieldStringIdx));
                     dataSize.increase(stringData == null ? 0 : stringData.length());
                     entity.setProperty(property, stringData);
                     break;

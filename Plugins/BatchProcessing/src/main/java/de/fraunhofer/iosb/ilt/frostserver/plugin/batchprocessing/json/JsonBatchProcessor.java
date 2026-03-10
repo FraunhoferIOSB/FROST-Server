@@ -64,7 +64,13 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonBatchProcessor.class.getName());
     private static final String REFERENCE_URL_REGEX = "^" + Pattern.quote("$") + "([a-zA-Z0-9_.:,;-]+)";
     private static final Pattern REFERENCE_URL_PATTERN = Pattern.compile(REFERENCE_URL_REGEX);
-    private static final String REFERENCE_JSON_REGEX = Pattern.quote("\"$") + "([a-zA-Z0-9_.:,;-]+)" + Pattern.quote("\"");
+    private static final String Q_QUOTE = Pattern.quote("\"");
+    private static final String Q_DOLLAR = Pattern.quote("$");
+    private static final String Q_BOPEN = Pattern.quote("(");
+    private static final String Q_BCLOSE = Pattern.quote(")");
+    private static final String MIDDLE = Q_DOLLAR + "([a-zA-Z0-9_.:,;-]+)";
+
+    private static final String REFERENCE_JSON_REGEX = "(" + Q_BOPEN + MIDDLE + Q_BCLOSE + "|" + Q_QUOTE + MIDDLE + Q_QUOTE + ")";
     private static final Pattern REFERENCE_JSON_PATTERN = Pattern.compile(REFERENCE_JSON_REGEX);
 
     private final Service service;
@@ -209,14 +215,23 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         int idx = 0;
         while (matcher.find()) {
             result.append(body.substring(idx, matcher.start(0)));
-            String name = matcher.group(1);
+            boolean brackets = false;
+            String name = matcher.group(3);
+            if (name == null) {
+                name = matcher.group(2);
+                brackets = true;
+            }
             ContentIdPair pair = ids.get(name);
             if (pair == null) {
                 LOGGER.debug("Not a match: {}", matcher.group(0));
                 result.append(matcher.group(0));
             } else {
                 String value = UrlHelper.quoteForJson(pair.value.get(0));
-                result.append(value);
+                if (brackets) {
+                    result.append('(').append(value).append(')');
+                } else {
+                    result.append(value);
+                }
             }
             idx = matcher.end(0);
         }
