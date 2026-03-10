@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.TreeNode;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
@@ -83,6 +84,17 @@ public class SimpleJsonMapper {
 
         try {
             return getSimpleObjectMapper().readTree(json);
+        } catch (JacksonException ex) {
+            throw new IllegalStateException(FAILED_JSON_PARSE, ex);
+        }
+    }
+
+    public static <T> T treeToObject(TreeNode json, Class<T> clazz) {
+        if (json == null) {
+            return null;
+        }
+        try {
+            return getSimpleObjectMapper().treeToValue(json, clazz);
         } catch (JacksonException ex) {
             throw new IllegalStateException(FAILED_JSON_PARSE, ex);
         }

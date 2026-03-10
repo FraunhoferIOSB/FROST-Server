@@ -237,6 +237,30 @@
                     "annotations": []
                 }
             ],
+            "validators": {
+                "createValidators": [
+                    {
+                        "name": "resultType",
+                        "validator": {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.SweCommonValidator",
+                            "nameEncoding": "resultEncoding",
+                            "nameStructure": "resultType",
+                            "nameDefinitions": "ObservedProperties"
+                        }
+                    }
+                ],
+                "updateValidators": [
+                    {
+                        "name": "resultType",
+                        "validator": {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.SweCommonValidator",
+                            "nameEncoding": "resultEncoding",
+                            "nameStructure": "resultType",
+                            "nameDefinitions": "ObservedProperties"
+                        }
+                    }
+                ]
+            },
             "annotations": []
         }
     ]
