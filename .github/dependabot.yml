@@ -30,6 +30,8 @@ updates:
       - dependency-name: "org.openjfx:*"
         versions: ["[24,)"]
       - dependency-name: "org.liquibase:*"
+      - dependency-name: "de.grundid.opendatalab:geojson-jackson"
+      - dependency-name: "de.fraunhofer.iosb.ilt:FROST-Client-Dynamic"
   
   
   # Maintain dependencies for Maven in the v2.6.x branch
@@ -46,6 +48,8 @@ updates:
       - dependency-name: "org.openjfx:*"
         versions: ["[24,)"]
       - dependency-name: "org.liquibase:*"
+      - dependency-name: "de.grundid.opendatalab:geojson-jackson"
+      - dependency-name: "de.fraunhofer.iosb.ilt:FROST-Client-Dynamic"
   
   
   # Maintain dependencies for GitHub Actions
