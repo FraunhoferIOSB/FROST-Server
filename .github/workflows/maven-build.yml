@@ -99,11 +99,11 @@ jobs:
 
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@v4
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Login to DockerHub
-      uses: docker/login-action@v3 
+      uses: docker/login-action@v4 
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
@@ -113,7 +113,7 @@ jobs:
 
     - name: Build and push - HTTP - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -127,7 +127,7 @@ jobs:
 
     - name: Build and push - MQTTP - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -143,7 +143,7 @@ jobs:
 
     - name: Build and push - MQTT - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
@@ -159,7 +159,7 @@ jobs:
 
     - name: Build and push - HTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -172,7 +172,7 @@ jobs:
 
     - name: Build and push - MQTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -186,7 +186,7 @@ jobs:
 
     - name: Build and push - MQTT - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
