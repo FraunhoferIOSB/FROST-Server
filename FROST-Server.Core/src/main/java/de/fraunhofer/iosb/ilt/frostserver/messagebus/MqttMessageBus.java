@@ -37,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnknownEntityTypeException;
 import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
@@ -353,6 +354,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         EntityChangedMessage ecMessage;
         try {
             ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
+        } catch (UnknownEntityTypeException ex) {
+            LOGGER.debug("Failed to decode due to unknown entity type", ex);
+            return;
         } catch (IllegalArgumentException ex) {
             LOGGER.error("Failed to decode message from bus. Details in DEBUG.");
             LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);

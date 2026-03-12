@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnknownEntityTypeException;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,8 @@ public class CustomEntityChangedMessageDeserializer extends JsonDeserializer<Ent
         final String typeString = parser.getValueAsString();
         EntityType type = modelRegistry.getEntityTypeForName(typeString, true);
         if (type == null) {
-            throw new IllegalArgumentException("Unknown EntityType: " + typeString);
+            LOGGER.info("Unknown EntityType: {}", typeString);
+            throw new UnknownEntityTypeException("Unknown EntityType: " + typeString);
         }
         if (entity != null) {
             entity.setEntityType(type);
