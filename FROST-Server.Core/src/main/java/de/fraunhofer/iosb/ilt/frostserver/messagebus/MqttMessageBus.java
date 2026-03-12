@@ -361,6 +361,9 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             LOGGER.error("Failed to decode message from bus. Details in DEBUG.");
             LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);
             return;
+        } catch (RuntimeException ex) {
+            LOGGER.warn("Non-JSON received on bus.", ex);
+            return;
         }
         if (recvQueue.offer(ecMessage)) {
             logStatus.setRecvQueueCount(recvQueueCount.incrementAndGet());
