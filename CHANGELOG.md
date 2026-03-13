@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.7.2-SNAPSHOT
+## Version 2.7.2
 
 **Internal changes & Bugfixes**
 * Bumped dependencies.
