@@ -3,6 +3,7 @@
 ## Version 2.7.2-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Bumped dependencies.
 * Reduced bus errors when receiving unknown entity types. This can happen when one instance has a reduced data model.
 
 
