@@ -97,10 +97,10 @@
         <version.jackson>3.0.4</version.jackson>
         <version.jacksonGeojson>3.0</version.jacksonGeojson>
         <version.jakarta-servlet>6.1.0</version.jakarta-servlet>
-        <version.jakarta.json>2.0.1</version.jakarta.json>
         <version.jakartaee-web-api>11.0.0</version.jakartaee-web-api>
         <version.jetty>12.1.5</version.jetty>
         <version.jooq>3.20.10</version.jooq>
+        <version.joy-classic>2.1.0</version.joy-classic>
         <version.junit>6.0.2</version.junit>
         <version.junit-platform-suite>6.0.2</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
@@ -251,11 +251,6 @@
                 <version>${version.geolatte-common}</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.json</artifactId>
-                <version>${version.jakarta.json}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq</artifactId>
                 <version>${version.jooq}</version>
@@ -286,6 +281,11 @@
                 <groupId>org.keycloak</groupId>
                 <artifactId>keycloak-jakarta-servlet-filter-adapter</artifactId>
                 <version>${version.keycloak}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.leadpony.joy</groupId>
+                <artifactId>joy-classic</artifactId>
+                <version>${version.joy-classic}</version>
             </dependency>
             <dependency>
                 <groupId>org.liquibase</groupId>
