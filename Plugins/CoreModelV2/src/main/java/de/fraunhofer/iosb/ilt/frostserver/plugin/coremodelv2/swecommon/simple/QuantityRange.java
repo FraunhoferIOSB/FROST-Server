@@ -28,7 +28,7 @@ import tools.jackson.databind.JsonNode;
 /**
  * SWE Class QuantityRange.
  */
-public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> {
+public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> implements Quality<QuantityRange, List<BigDecimal>> {
 
     /**
      * The logger for this class.

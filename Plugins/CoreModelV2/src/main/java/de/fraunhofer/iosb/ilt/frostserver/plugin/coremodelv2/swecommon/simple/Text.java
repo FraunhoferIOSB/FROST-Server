@@ -26,7 +26,7 @@ import tools.jackson.databind.JsonNode;
 /**
  * SWE Text class.
  */
-public class Text extends AbstractSimpleComponent<Text, String> {
+public class Text extends AbstractSimpleComponent<Text, String> implements Quality<Text, String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Text.class.getName());
 

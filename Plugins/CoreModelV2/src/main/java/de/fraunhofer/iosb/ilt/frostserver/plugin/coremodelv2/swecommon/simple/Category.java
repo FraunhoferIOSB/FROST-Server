@@ -27,7 +27,7 @@ import tools.jackson.databind.JsonNode;
 /**
  * SWE Category class.
  */
-public class Category extends AbstractSimpleComponent<Category, String> {
+public class Category extends AbstractSimpleComponent<Category, String> implements Quality<Category, String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Category.class.getName());
 
