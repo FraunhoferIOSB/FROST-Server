@@ -31,7 +31,7 @@ import java.util.Objects;
 public abstract class AbstractSimpleComponent<T extends AbstractSimpleComponent<T, V>, V> extends AbstractDataComponent<T, V> {
 
     /**
-     * Axis ID
+     * Axis ID.
      *
      * A string that uniquely identifies one of the reference frame’s axes along
      * which the coordinate value is given.
@@ -39,7 +39,7 @@ public abstract class AbstractSimpleComponent<T extends AbstractSimpleComponent<
     private String axisID;
 
     /**
-     * Reference Frame
+     * Reference Frame.
      *
      * The reference frame relative to which the coordinate value is given.
      * Commonly an EPSG identifier.
@@ -47,14 +47,19 @@ public abstract class AbstractSimpleComponent<T extends AbstractSimpleComponent<
     private String referenceFrame;
 
     /**
-     * NilValues
+     * NilValues.
      *
-     * a list (i.e. one or more) of NIL values.
+     * A list (one or more) of NIL values.
      */
     private List<NillValue> nilValues;
 
-    // TODO
-    private Object quality;
+    /**
+     * Quality.
+     *
+     * 8.2.15. Quality Union. A union of the Quantity, QuantityRange, Category
+     * and Text classes.
+     */
+    private Quality quality;
 
     public String getReferenceFrame() {
         return referenceFrame;

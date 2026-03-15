@@ -28,7 +28,7 @@ import tools.jackson.databind.JsonNode;
 /**
  * SWE Quantity class.
  */
-public class Quantity extends AbstractSimpleComponent<Quantity, Number> {
+public class Quantity extends AbstractSimpleComponent<Quantity, Number> implements Quality<Quantity, Number> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Quantity.class.getName());
 
