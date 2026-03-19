@@ -25,7 +25,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Connec
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;

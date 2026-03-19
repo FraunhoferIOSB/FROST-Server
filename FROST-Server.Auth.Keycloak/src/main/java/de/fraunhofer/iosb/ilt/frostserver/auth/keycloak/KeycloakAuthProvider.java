@@ -31,12 +31,12 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
@@ -54,10 +54,6 @@ import org.keycloak.adapters.jaas.AbstractKeycloakLoginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author scf
- */
 public class KeycloakAuthProvider implements AuthProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakAuthProvider.class);

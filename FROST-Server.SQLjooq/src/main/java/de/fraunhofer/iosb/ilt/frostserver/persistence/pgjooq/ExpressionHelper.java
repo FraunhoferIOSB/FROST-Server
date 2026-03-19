@@ -34,7 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.*;
 import net.time4j.Moment;
 import org.apache.commons.lang3.NotImplementedException;

@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 
-import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.SensitiveValue;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

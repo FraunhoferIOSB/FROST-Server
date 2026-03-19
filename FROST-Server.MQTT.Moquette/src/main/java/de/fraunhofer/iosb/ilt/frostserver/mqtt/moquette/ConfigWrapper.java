@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import io.moquette.broker.config.FileResourceLoader;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.IResourceLoader;

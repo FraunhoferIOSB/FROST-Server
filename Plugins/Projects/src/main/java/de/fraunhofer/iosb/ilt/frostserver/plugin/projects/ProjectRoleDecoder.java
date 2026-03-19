@@ -22,10 +22,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.
 
 import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings;
 import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.UserRoleDecoder;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

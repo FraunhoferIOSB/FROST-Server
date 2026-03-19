@@ -21,7 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_USER_TABLE;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.Field;

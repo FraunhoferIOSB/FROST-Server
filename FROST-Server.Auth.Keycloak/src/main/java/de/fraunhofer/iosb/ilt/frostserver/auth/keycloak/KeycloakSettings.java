@@ -20,11 +20,11 @@ package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
 
-import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.annotation.SensitiveValue;
 
 /**
  * Holds the settigs for the Keycloak Auth Provider.
