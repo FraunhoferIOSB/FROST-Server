@@ -18,9 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

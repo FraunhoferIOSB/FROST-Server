@@ -28,10 +28,10 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.Plugin;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

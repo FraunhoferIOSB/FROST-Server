@@ -17,7 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 
 /**
  *

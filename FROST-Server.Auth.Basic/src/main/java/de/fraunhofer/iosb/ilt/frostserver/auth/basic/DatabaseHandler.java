@@ -29,10 +29,10 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUti
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ConnectionUtils.ConnectionWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;

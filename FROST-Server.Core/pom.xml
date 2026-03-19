@@ -44,6 +44,10 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.fraunhofer.iosb.ilt</groupId>
+            <artifactId>Settings</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.grundid.opendatalab</groupId>
             <artifactId>geojson-jackson</artifactId>
         </dependency>

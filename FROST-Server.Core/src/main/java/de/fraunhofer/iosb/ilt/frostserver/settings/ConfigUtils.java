@@ -17,11 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
-import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.DefaultValueDouble;
-import de.fraunhofer.iosb.ilt.frostclient.settings.annotation.SensitiveValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueDouble;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.annotation.SensitiveValue;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;

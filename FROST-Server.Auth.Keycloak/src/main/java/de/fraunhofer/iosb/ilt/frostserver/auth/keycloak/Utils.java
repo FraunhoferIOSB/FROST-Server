@@ -23,10 +23,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_KEYCLOAK_CONFIG_URL;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,10 +41,6 @@ import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author scf
- */
 public class Utils {
 
     /**

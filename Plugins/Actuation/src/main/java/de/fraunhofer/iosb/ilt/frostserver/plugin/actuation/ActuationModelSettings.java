@@ -18,11 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 
 /**
  *

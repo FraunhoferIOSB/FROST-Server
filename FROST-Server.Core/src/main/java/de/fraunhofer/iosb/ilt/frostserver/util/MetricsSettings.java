@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 
 /**
  * Settings for the metrics system.

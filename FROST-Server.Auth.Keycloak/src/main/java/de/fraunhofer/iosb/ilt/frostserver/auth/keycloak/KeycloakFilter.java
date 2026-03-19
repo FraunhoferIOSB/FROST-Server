@@ -24,12 +24,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -64,8 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * A Filter for KeyCloak based auth.
  */
 public class KeycloakFilter implements Filter {
 

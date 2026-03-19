@@ -41,10 +41,10 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiData
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
-import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import org.jooq.Field;
 import org.jooq.Record1;
 import org.jooq.Record2;

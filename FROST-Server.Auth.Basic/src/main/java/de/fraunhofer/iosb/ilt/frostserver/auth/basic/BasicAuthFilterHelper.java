@@ -28,9 +28,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;

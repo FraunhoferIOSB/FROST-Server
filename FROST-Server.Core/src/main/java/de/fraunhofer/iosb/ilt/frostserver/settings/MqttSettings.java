@@ -21,9 +21,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQ
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValue;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
-import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueInt;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;

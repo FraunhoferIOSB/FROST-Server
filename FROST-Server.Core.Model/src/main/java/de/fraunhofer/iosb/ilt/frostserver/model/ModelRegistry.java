@@ -35,8 +35,7 @@ import org.slf4j.LoggerFactory;
 import tools.jackson.core.TreeNode;
 
 /**
- *
- * @author hylke
+ * A registry for a data model.
  */
 public class ModelRegistry {
 
