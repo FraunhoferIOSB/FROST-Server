@@ -33,6 +33,7 @@ import java.io.Writer;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import net.time4j.Moment;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JacksonModule;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
@@ -98,23 +99,23 @@ public class JsonWriter {
     private JsonWriter() {
     }
 
-    public static <T extends Entity> void writeEntity(Writer writer, T entity) throws IOException {
+    public static <T extends Entity> void writeEntity(Writer writer, T entity) throws JacksonException {
         getObjectMapper().writeValue(writer, entity);
     }
 
-    public static <T extends Entity> String writeEntity(T entity) throws IOException {
+    public static <T extends Entity> String writeEntity(T entity) throws JacksonException {
         return getObjectMapper().writeValueAsString(entity);
     }
 
-    public static void writeEntityCollection(Writer writer, EntitySet entityCollection, Query query) throws IOException {
+    public static void writeEntityCollection(Writer writer, EntitySet entityCollection, Query query) throws JacksonException {
         getObjectMapper().writeValue(writer, new EntitySetResult(entityCollection, query));
     }
 
-    public static String writeEntityCollection(EntitySet entityCollection, Query query) throws IOException {
+    public static String writeEntityCollection(EntitySet entityCollection, Query query) throws JacksonException {
         return getObjectMapper().writeValueAsString(new EntitySetResult(entityCollection, query));
     }
 
-    public static void writeObject(Writer writer, Object object) throws IOException {
+    public static void writeObject(Writer writer, Object object) throws JacksonException {
         getObjectMapper().writeValue(writer, object);
     }
 

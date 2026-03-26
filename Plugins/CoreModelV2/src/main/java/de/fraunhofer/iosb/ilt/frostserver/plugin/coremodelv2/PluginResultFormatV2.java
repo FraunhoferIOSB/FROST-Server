@@ -15,10 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2;
 
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_401;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_JSON;
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
@@ -33,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntitySetResultOdata;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.EntityWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -50,10 +47,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * The result formatter for STA V2.
  */
-public class PluginResultFormatOData implements PluginResultFormat {
+public class PluginResultFormatV2 implements PluginResultFormat {
 
     /**
      * The "name" of the OData resultFormatter.
@@ -62,9 +58,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
     public static final String FORMAT_PARAM_EXP_DECIMALS = "ExponentialDecimals";
     public static final String FORMAT_PARAM_IEEE754 = "IEEE754Compatible";
     public static final String FORMAT_PARAM_METADATA401 = "metadata";
-    public static final String FORMAT_PARAM_METADATA40 = "odata.metadata";
     public static final String FORMAT_PARAM_STREAMING401 = "streaming";
-    public static final String FORMAT_PARAM_STREAMING40 = "odata.streaming";
 
     private CoreSettings settings;
 
@@ -82,12 +76,13 @@ public class PluginResultFormatOData implements PluginResultFormat {
 
     @Override
     public Collection<Version> getVersions() {
-        return Arrays.asList(VERSION_ODATA_40, VERSION_ODATA_401);
+        return Arrays.asList(PluginCoreServiceV2.VERSION_STA_2_0);
     }
 
     @Override
     public Collection<String> getFormatNames() {
-        return Arrays.asList(PluginResultFormat.FORMAT_NAME_DEFAULT,
+        return Arrays.asList(
+                PluginResultFormat.FORMAT_NAME_DEFAULT,
                 FORMAT_NAME_ODATA_JSON,
                 FORMAT_NAME_EMPTY);
     }
@@ -109,7 +104,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
                 if (paramSplit == null) {
                     continue;
                 }
-                if (paramSplit.length == 2 && (FORMAT_PARAM_METADATA401.equalsIgnoreCase(paramSplit[0]) || FORMAT_PARAM_METADATA40.equalsIgnoreCase(paramSplit[0]))) {
+                if (paramSplit.length == 2 && FORMAT_PARAM_METADATA401.equalsIgnoreCase(paramSplit[0])) {
                     query.setMetadata(Metadata.lookup(paramSplit[1], Metadata.DEFAULT));
                 }
             }
@@ -121,35 +116,41 @@ public class PluginResultFormatOData implements PluginResultFormat {
         if (FORMAT_NAME_EMPTY.equalsIgnoreCase(format)) {
             return new ResultFormatterEmpty();
         }
-        return new ResultFormatterOData(settings);
+        return new ResultFormatterV2(settings);
     }
 
-    public static class ResultFormatterOData implements ResultFormatter {
+    public static class ResultFormatterV2 implements ResultFormatter {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterOData.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(ResultFormatterV2.class);
 
         public final CoreSettings settings;
 
-        public ResultFormatterOData(CoreSettings settings) {
+        public ResultFormatterV2(CoreSettings settings) {
             LOGGER.trace("Creating a new resultFormatter.");
             this.settings = settings;
         }
 
-        @Override
-        public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+        private String createContextBase(ResourcePath path) {
             final Version version = path.getVersion();
             final String contextBase = path.getServiceRootUrl()
                     + '/' + version.urlPart
                     + "/$metadata";
+            return contextBase;
+        }
+
+        @Override
+        public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
             if (Entity.class.isAssignableFrom(result.getClass())) {
-                return formatAsEntity(result, contextBase, version);
+                String contextBase = createContextBase(path);
+                return formatAsEntity(result, contextBase);
             }
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                return formatAsEntitySet(result, contextBase, version, query);
+                String contextBase = createContextBase(path);
+                return formatAsEntitySet(result, contextBase, query);
             }
             // Not an Entity nor an EntitySet.
             String entityJsonString;
-            if (path.isValue()) {
+            if (path != null && path.isValue()) {
                 LOGGER.trace("Formatting as $Value.");
                 if (result instanceof Map || result instanceof GeoJsonObject) {
                     entityJsonString = JsonWriterOdata401.writeObject(result);
@@ -163,29 +164,21 @@ public class PluginResultFormatOData implements PluginResultFormat {
             return new FormatWriterGeneric(entityJsonString);
         }
 
-        private FormatWriter formatAsEntity(Object result, final String contextBase, final Version version) {
+        private FormatWriter formatAsEntity(Object result, final String contextBase) {
             LOGGER.trace("Formatting as Entity.");
             final Entity entity = (Entity) result;
             final EntityWrapper wrappedEntity = new EntityWrapper()
                     .setEntity(entity)
                     .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
-            if (version == PluginOData.VERSION_ODATA_40) {
-                return target -> JsonWriterOdata40.writeEntity(target, wrappedEntity);
-            } else {
-                return target -> JsonWriterOdata401.writeEntity(target, wrappedEntity);
-            }
+            return target -> JsonWriterOdata401.writeEntity(target, wrappedEntity);
         }
 
-        private FormatWriter formatAsEntitySet(Object result, final String contextBase, final Version version, final Query query) {
+        private FormatWriter formatAsEntitySet(Object result, final String contextBase, final Query query) {
             LOGGER.trace("Formatting as EntitySet.");
             EntitySet entitySet = (EntitySet) result;
             EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet, query)
                     .setContext(contextBase + '#' + entitySet.getEntityType().plural);
-            if (version == PluginOData.VERSION_ODATA_40) {
-                return target -> JsonWriterOdata40.writeEntityCollection(target, wrappedSet);
-            } else {
-                return target -> JsonWriterOdata401.writeEntityCollection(target, wrappedSet);
-            }
+            return target -> JsonWriterOdata401.writeEntityCollection(target, wrappedSet);
         }
 
         @Override

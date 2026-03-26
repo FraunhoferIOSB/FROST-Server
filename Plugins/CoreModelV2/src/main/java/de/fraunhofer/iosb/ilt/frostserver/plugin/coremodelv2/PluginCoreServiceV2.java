@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.MetaDataGenerator;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginResultFormatOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -52,8 +51,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
-import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,7 +65,9 @@ import org.slf4j.LoggerFactory;
 /**
  * The API of STA version 2.0.
  */
-public class PluginCoreServiceV2 implements PluginRootDocument, PluginService, ConfigDefaults {
+public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> implements PluginRootDocument, PluginService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreServiceV2.class.getName());
 
     private static final EditFeatures INSERT_STA_20 = new EditFeatures(true, false, false);
     private static final EditFeatures UPDATE_STA_20 = new EditFeatures(true, true, true);
@@ -86,22 +86,22 @@ public class PluginCoreServiceV2 implements PluginRootDocument, PluginService, C
             .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
             .build();
 
+    public static final String SETTINGS_NAMESPACE = "coreServiceV2.";
+
     @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE_CORE_SERVICE_V2 = "coreServiceV2.enable";
+    public static final String TAG_ENABLE = "enable";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreServiceV2.class.getName());
-
-    private CoreSettings settings;
+    private CoreSettings coreSettings;
     private boolean enabled;
 
     @Override
     public InitResult init(CoreSettings settings) {
-        this.settings = settings;
-        final Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_CORE_SERVICE_V2, PluginCoreServiceV2.class);
+        this.coreSettings = settings;
+        setSettings(settings.getPluginSettings().getSubSettings(SETTINGS_NAMESPACE));
+        enabled = getBoolean(TAG_ENABLE);
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
-            settings.getPluginManager().registerPlugin(new PluginResultFormatOData());
+            settings.getPluginManager().registerPlugin(new PluginResultFormatV2());
         }
         return InitResult.INIT_OK;
     }
@@ -181,7 +181,7 @@ public class PluginCoreServiceV2 implements PluginRootDocument, PluginService, C
         request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
-                return new MetaDataGenerator(settings).generateMetaData(request, response);
+                return new MetaDataGenerator(coreSettings).generateMetaData(request, response);
 
             case CREATE:
             case UPDATE_ALL:
@@ -211,17 +211,17 @@ public class PluginCoreServiceV2 implements PluginRootDocument, PluginService, C
 
         Map<String, Object> serverSettings = (Map<String, Object>) result.computeIfAbsent(KEY_SERVER_SETTINGS, t -> new LinkedHashMap<>());
 
-        final Set<Extension> enabledSettings = settings.getEnabledExtensions();
-        Set<String> extensionList = new TreeSet<>();
-        serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
+        final Set<Extension> enabledSettings = coreSettings.getEnabledExtensions();
+        Set<String> extensionList = (Set<String>) serverSettings.computeIfAbsent(KEY_CONFORMANCE_LIST, t -> new TreeSet<>());
         for (Extension setting : enabledSettings) {
             if (setting.isExposedFeature()) {
                 extensionList.addAll(setting.getRequirements());
             }
         }
+        // ToDo: functions
+        // ToDo: endpoint bindings
 
-        settings.getMqttSettings().fillServerSettings(serverSettings);
-
+        coreSettings.getMqttSettings().fillServerSettings(serverSettings);
     }
 
 }

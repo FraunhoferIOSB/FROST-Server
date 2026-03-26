@@ -17,10 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2;
 
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings.TAG_ENABLE_CORE_MODEL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.Plugin;
@@ -30,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
-import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -44,32 +43,36 @@ import org.slf4j.LoggerFactory;
 /**
  * The core data model of STA Version 2.0.
  */
-public class PluginCoreModelV2 implements Plugin, PluginRootDocument, ConfigDefaults {
+public class PluginCoreModelV2 extends ConfigProvider<PluginCoreModelV2> implements Plugin, PluginRootDocument, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModelV2.class.getName());
+
     private static final List<String> REQUIREMENTS_CORE_MODEL = Arrays.asList(
             "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core");
 
     public static final String CONFORMANCE_CLASS_CORE_MODEL = "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core";
 
-    @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_PCMV2 = "coreModelV2.enable";
+    public static final String SETTINGS_NAMESPACE = "coreModelV2.";
 
-    private CoreSettings settings;
+    @DefaultValueBoolean(false)
+    public static final String TAG_ENABLE = "enable";
+
+    private CoreSettings coreSettings;
     private boolean enabled;
 
     @Override
     public InitResult init(CoreSettings settings) {
-        this.settings = settings;
-        Settings pluginSettings = settings.getPluginSettings();
-        boolean enabledV1 = pluginSettings.getBoolean(TAG_ENABLE_CORE_MODEL, CoreModelSettings.class);
-        enabled = pluginSettings.getBoolean(TAG_ENABLE_PCMV2, PluginCoreModelV2.class);
+        this.coreSettings = settings;
+        setSettings(settings.getPluginSettings().getSubSettings(SETTINGS_NAMESPACE));
+
+        PluginManager pluginManager = settings.getPluginManager();
+        boolean enabledV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
+        enabled = getBoolean(TAG_ENABLE);
         if (enabled) {
             if (enabledV1) {
                 LOGGER.error("Can not enable both CoreModelV1 and CoreModelV2");
                 return InitResult.INIT_FAILED;
             }
-            final PluginManager pluginManager = settings.getPluginManager();
             PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
             if (pml == null || !pml.isEnabled()) {
                 LOGGER.warn("PluginModelLoader must be enabled first, delaying initialisation...");
