@@ -1,5 +1,5 @@
 {
-    "conformance": [],
+    "conformance": ["http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core"],
     "simplePropertyTypes": [],
     "entityTypes": [
         {

@@ -296,14 +296,15 @@ public class Service implements AutoCloseable {
     private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
         final Map<String, Object> result = new LinkedHashMap<>();
         final Version version = request.getVersion();
+        final String serviceRootUrl = request.getQueryDefaults().getServiceRootUrl();
+        final String path = URI.create(serviceRootUrl + '/' + request.getVersion().urlPart + '/')
+                .normalize()
+                .toString();
 
         final List<Map<String, String>> capList = new ArrayList<>();
         result.put("value", capList);
-        final String serviceRootUrl = request.getQueryDefaults().getServiceRootUrl();
         for (EntityType entityType : modelRegistry.getEntityTypes(request.getUserPrincipal().isAdmin())) {
-            String collectionUri = URI.create(serviceRootUrl
-                    + "/" + version.urlPart
-                    + "/" + entityType.plural).normalize().toString();
+            String collectionUri = path + entityType.plural;
             capList.add(createCapability(entityType.plural, collectionUri));
         }
 

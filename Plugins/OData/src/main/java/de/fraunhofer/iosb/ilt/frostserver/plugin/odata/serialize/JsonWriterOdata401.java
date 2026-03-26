@@ -33,10 +33,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 import net.time4j.Moment;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.cfg.EnumFeature;
@@ -45,9 +45,6 @@ import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Enables serialization of entities as JSON.
- *
- * @author jab
- * @author scf
  */
 public class JsonWriterOdata401 {
 
@@ -103,19 +100,19 @@ public class JsonWriterOdata401 {
         return mapper;
     }
 
-    public static void writeEntity(Writer writer, EntityWrapper entity) throws IOException {
+    public static void writeEntity(Writer writer, EntityWrapper entity) throws JacksonException {
         getObjectMapper().writeValue(writer, entity);
     }
 
-    public static void writeEntityCollection(Writer writer, EntitySetResultOdata entityCollection) throws IOException {
+    public static void writeEntityCollection(Writer writer, EntitySetResultOdata entityCollection) throws JacksonException {
         getObjectMapper().writeValue(writer, entityCollection);
     }
 
-    public static void writeObject(Writer writer, Object object) throws IOException {
+    public static void writeObject(Writer writer, Object object) throws JacksonException {
         getObjectMapper().writeValue(writer, object);
     }
 
-    public static String writeObject(Object object) throws IOException {
+    public static String writeObject(Object object) throws JacksonException {
         return getObjectMapper().writeValueAsString(object);
     }
 }
