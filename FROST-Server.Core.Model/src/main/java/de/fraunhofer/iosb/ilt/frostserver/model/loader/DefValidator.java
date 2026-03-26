@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,13 +54,17 @@ public class DefValidator {
      *
      * @param modelRegistry The model to modify.
      * @param entityType The entity type to create the validator for.
+     * @param settings The settings object used to load settings for the
+     * validators.
      */
-    public void createValidators(ModelRegistry modelRegistry, EntityType entityType) {
+    public void createValidators(ModelRegistry modelRegistry, EntityType entityType, Settings settings) {
         for (var namedValidator : getCreateValidators()) {
             entityType.addCreateValidator(namedValidator.name, namedValidator.validator);
+            namedValidator.validator.init(settings.getSubSettings(namedValidator.name + '.'));
         }
         for (var namedValidator : getUpdateValidators()) {
             entityType.addUpdateValidator(namedValidator.name, namedValidator.validator);
+            namedValidator.validator.init(settings.getSubSettings(namedValidator.name + '.'));
         }
     }
 

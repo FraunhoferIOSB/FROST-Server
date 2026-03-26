@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,9 +67,9 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
         }
     }
 
-    public void registerEntityTypes(ModelRegistry modelRegistry) {
+    public void registerEntityTypes(ModelRegistry modelRegistry, Settings settings) {
         for (DefEntityType defType : entityTypes) {
-            modelRegistry.registerEntityType(defType.getEntityType(modelRegistry));
+            modelRegistry.registerEntityType(defType.getEntityType(modelRegistry, settings));
         }
     }
 

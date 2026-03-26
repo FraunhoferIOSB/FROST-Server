@@ -133,7 +133,7 @@
         <version.postgis>2025.1.1</version.postgis>
         <version.postgres>42.7.8</version.postgres>
         <version.prometheus>1.4.3</version.prometheus>
-        <version.settings>1.1</version.settings>
+        <version.settings>1.2</version.settings>
         <version.slf4j-api>2.0.17</version.slf4j-api>
         <version.testcontainers>2.0.3</version.testcontainers>
         <version.testcontainers-keycloak>4.1.0</version.testcontainers-keycloak>

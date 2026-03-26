@@ -67,6 +67,7 @@ import tools.jackson.databind.ObjectMapper;
  */
 public class PluginModelLoader implements PluginRootDocument, PluginModel, LiquibaseUser {
 
+    public static final String PREFIX_DATA_MODEL = "dataModel.";
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginModelLoader.class.getName());
 
     private CoreSettings settings;
@@ -329,7 +330,8 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
         ModelRegistry modelRegistry = settings.getModelRegistry();
         for (DefModel modelDefinition : modelDefinitions) {
-            modelDefinition.registerEntityTypes(modelRegistry);
+            final Settings dmSettings = settings.getSettings().getSubSettings(PREFIX_DATA_MODEL);
+            modelDefinition.registerEntityTypes(modelRegistry, dmSettings);
         }
     }
 

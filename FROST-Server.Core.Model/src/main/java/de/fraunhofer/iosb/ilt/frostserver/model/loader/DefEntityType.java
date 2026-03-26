@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -158,6 +159,13 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
 
     public EntityType getEntityType(ModelRegistry modelRegistry) {
         if (entityType == null) {
+            throw new IllegalStateException("EntityType " + name + " not initialised!");
+        }
+        return entityType;
+    }
+
+    public EntityType getEntityType(ModelRegistry modelRegistry, Settings settings) {
+        if (entityType == null) {
             entityType = modelRegistry.getEntityTypeForName(name, true);
             if (entityType == null) {
                 entityType = new EntityType(name, plural, adminOnly);
@@ -165,7 +173,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
                 entityType.setAdminOnly(adminOnly);
             }
             if (validators != null) {
-                validators.createValidators(modelRegistry, entityType);
+                validators.createValidators(modelRegistry, entityType, settings.getSubSettings(name + '.'));
             }
             entityType.addAnnotations(annotations);
         }
