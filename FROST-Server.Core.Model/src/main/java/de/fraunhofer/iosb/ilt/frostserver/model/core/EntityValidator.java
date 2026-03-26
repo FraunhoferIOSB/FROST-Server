@@ -19,12 +19,17 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
+import de.fraunhofer.iosb.ilt.settings.Settings;
 
 /**
  * A validator that checks if an Entity has no missing properties.
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface EntityValidator {
+
+    public default void init(Settings settings) {
+        // Does nothing by default.
+    }
 
     /**
      * Check if all required properties are non-null on the given Entity.
