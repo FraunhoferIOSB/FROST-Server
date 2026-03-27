@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
+
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -33,13 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * Factory for subscription instances.
  */
 public class SubscriptionFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionFactory.class);
-    private static final String URI_PATH_SEP = "/";
 
     private final CoreSettings settings;
 

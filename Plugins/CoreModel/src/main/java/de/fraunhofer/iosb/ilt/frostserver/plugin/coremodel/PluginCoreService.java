@@ -46,6 +46,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
@@ -53,12 +54,12 @@ import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The API of STA version 1.0 and 1.1.
@@ -96,7 +97,30 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CORE_SERVICE = "coreService.enable";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreService.class.getName());
+    private static final Map<Extension, List<String>> CONFORMANCE_BY_EXTENSION = new HashMap<>();
+
+    static {
+        CONFORMANCE_BY_EXTENSION.put(Extension.CORE, Arrays.asList(
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities",
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
+                "https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html",
+                "https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html",
+                "https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT, Arrays.asList(
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation",
+                "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT_EXPAND, Arrays.asList(
+                "https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttExpand.html"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT_FILTER, Arrays.asList(
+                "https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttFilter.html"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.FILTERED_DELETES, Arrays.asList(
+                "https://fraunhoferiosb.github.io/FROST-Server/extensions/FilteredDelete.html"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.ENTITY_LINKING, Arrays.asList(
+                "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
+                "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
+                "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"));
+    }
 
     private boolean enabled;
     private CoreSettings settings;
@@ -131,10 +155,26 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
         serverSettings.put(KEY_CONFORMANCE_LIST, extensionList);
         for (Extension setting : enabledSettings) {
             if (setting.isExposedFeature()) {
-                extensionList.addAll(setting.getRequirements());
+                final List<String> confList = CONFORMANCE_BY_EXTENSION.get(setting);
+                if (!StringHelper.isNullOrEmpty(confList)) {
+                    extensionList.addAll(confList);
+                }
             }
         }
-        settings.getMqttSettings().fillServerSettings(serverSettings);
+        addMqttData(serverSettings);
+    }
+
+    private void addMqttData(Map<String, Object> target) {
+        final MqttSettings mqttSettings = settings.getMqttSettings();
+        boolean enableMqtt = mqttSettings.isEnableMqtt();
+        if (enableMqtt) {
+            List<String> endpoints = mqttSettings.getEndpoints();
+            for (String requirement : CONFORMANCE_BY_EXTENSION.get(Extension.MQTT)) {
+                Map<String, Object> mqttData = new HashMap<>();
+                mqttData.put("endpoints", endpoints);
+                target.put(requirement, mqttData);
+            }
+        }
     }
 
     @Override

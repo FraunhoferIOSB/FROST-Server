@@ -17,55 +17,28 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.extensions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
- *
- * @author scf
+ * The list of hard-coded functionality.
  */
 public enum Extension {
-    CORE(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/resource-path/resource-path-to-entities",
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data",
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/create-update-delete",
-            "https://fraunhoferiosb.github.io/FROST-Server/extensions/DeepSelect.html",
-            "https://fraunhoferiosb.github.io/FROST-Server/extensions/SelectDistinct.html",
-            "https://fraunhoferiosb.github.io/FROST-Server/extensions/ResponseMetadata.html"),
-    MQTT(
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/create-observations-via-mqtt/observations-creation",
-            "http://www.opengis.net/spec/iot_sensing/1.1/req/receive-updates-via-mqtt/receive-updates"),
-    ENTITY_LINKING(
-            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
-            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
-            "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"),
-    FILTERED_DELETES("https://fraunhoferiosb.github.io/FROST-Server/extensions/FilteredDelete.html"),
-    MQTT_EXPAND("https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttExpand.html"),
-    MQTT_FILTER("https://fraunhoferiosb.github.io/FROST-Server/extensions/MqttFilter.html");
+    CORE,
+    ENTITY_LINKING,
+    FILTERED_DELETES,
+    MQTT,
+    MQTT_EXPAND,
+    MQTT_FILTER;
 
     /**
      * Flag indicating the server feature should be exposed on the index page.
      */
     private final boolean exposedFeature;
-    /**
-     * The requirements implemented by this extension.
-     */
-    private final Set<String> requirements;
 
-    private Extension(String... requirements) {
+    private Extension() {
         this.exposedFeature = true;
-        Set<String> reqs = new HashSet<>(Arrays.asList(requirements));
-        this.requirements = Collections.unmodifiableSet(reqs);
     }
 
     public boolean isExposedFeature() {
         return exposedFeature;
-    }
-
-    public Set<String> getRequirements() {
-        return requirements;
     }
 
 }
