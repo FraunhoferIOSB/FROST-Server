@@ -28,10 +28,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_CONFORMANCE_LIST;
+import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_FUNCTIONS;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSONPATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETURN;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -40,6 +42,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.MetaDataGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
@@ -48,26 +52,27 @@ import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The API of STA version 2.0.
  */
 public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> implements PluginRootDocument, PluginService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreServiceV2.class.getName());
 
     private static final EditFeatures INSERT_STA_20 = new EditFeatures(true, false, false);
     private static final EditFeatures UPDATE_STA_20 = new EditFeatures(true, true, true);
@@ -93,6 +98,46 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
 
     private CoreSettings coreSettings;
     private boolean enabled;
+    private final List<String> functionNames = new ArrayList<>();
+
+    private static final Map<Extension, List<String>> CONFORMANCE_BY_EXTENSION = new HashMap<>();
+    private static final String REQ_CLASS_API_CUD = "http://www.opengis.net/spec/sensorthings/2.0/req-class/api/cud";
+    private static final String REQ_CLASS_API_READ = "http://www.opengis.net/spec/sensorthings/2.0/req-class/api/read";
+    private static final String REQ_CLASS_BINDING_HTTP = "http://www.opengis.net/spec/sensorthings/2.0/req-class/binding/http";
+    private static final String REQ_CLASS_BINDING_MQTT = "http://www.opengis.net/spec/sensorthings/2.0/req-class/binding/mqtt";
+
+    static {
+        CONFORMANCE_BY_EXTENSION.put(Extension.CORE,
+                Arrays.asList(REQ_CLASS_API_READ,
+                        REQ_CLASS_API_CUD,
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/api/read/options/select_distinct",
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/deep_update",
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/json_patch",
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/replace",
+                        REQ_CLASS_BINDING_HTTP,
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/http/request_response"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT,
+                Arrays.asList(
+                        REQ_CLASS_BINDING_MQTT,
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/request_response",
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub",
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub/select",
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/simple_create"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT_EXPAND,
+                Arrays.asList(
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub/expand"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT_FILTER,
+                Arrays.asList(
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub/filter"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.FILTERED_DELETES,
+                Arrays.asList(
+                        "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/filtered_delete"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.ENTITY_LINKING,
+                Arrays.asList(
+                        "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
+                        "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
+                        "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"));
+    }
 
     @Override
     public InitResult init(CoreSettings settings) {
@@ -215,13 +260,49 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         Set<String> extensionList = (Set<String>) serverSettings.computeIfAbsent(KEY_CONFORMANCE_LIST, t -> new TreeSet<>());
         for (Extension setting : enabledSettings) {
             if (setting.isExposedFeature()) {
-                extensionList.addAll(setting.getRequirements());
+                final List<String> confList = CONFORMANCE_BY_EXTENSION.get(setting);
+                if (!StringHelper.isNullOrEmpty(confList)) {
+                    extensionList.addAll(confList);
+                }
             }
         }
-        // ToDo: functions
+        if (functionNames.isEmpty()) {
+            for (var function : coreSettings.getFunctionRegistry().getExpressions()) {
+                if (function instanceof Operator) {
+                    continue;
+                }
+                if (function instanceof Constant) {
+                    continue;
+                }
+                functionNames.add(function.getName());
+            }
+            Collections.sort(functionNames);
+        }
+        serverSettings.put(KEY_FUNCTIONS, functionNames);
         // ToDo: endpoint bindings
+        // ToDo: endpoint Settings
 
-        coreSettings.getMqttSettings().fillServerSettings(serverSettings);
+        addHttpEndpoint(serverSettings);
+        addMqttEndpoint(serverSettings);
+    }
+
+    private void addHttpEndpoint(Map<String, Object> target) {
+        Map<String, Object> mqttData = new HashMap<>();
+        final String endpointUrl = coreSettings.getQueryDefaults().getServiceRootUrl() + URI_PATH_SEP + VERSION_STA_V20_NAME + URI_PATH_SEP;
+        List<String> endpoints = Arrays.asList(endpointUrl);
+        mqttData.put("endpoints", endpoints);
+        target.put(REQ_CLASS_BINDING_HTTP, mqttData);
+    }
+
+    private void addMqttEndpoint(Map<String, Object> target) {
+        final MqttSettings mqttSettings = coreSettings.getMqttSettings();
+        boolean enableMqtt = mqttSettings.isEnableMqtt();
+        if (enableMqtt) {
+            List<String> endpoints = mqttSettings.getEndpoints();
+            Map<String, Object> mqttData = new HashMap<>();
+            mqttData.put("endpoints", endpoints);
+            target.put(REQ_CLASS_BINDING_MQTT, mqttData);
+        }
     }
 
 }

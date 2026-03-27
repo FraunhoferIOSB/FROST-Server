@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQ
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
@@ -32,9 +33,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +183,14 @@ public class MqttSettings implements ConfigDefaults {
         }
     }
 
-    private void searchExposedEndpoints(CoreSettings coreSettings) {
+    public List<String> getEndpoints() {
+        if (StringHelper.isNullOrEmpty(endpoints)) {
+            searchExposedEndpoints();
+        }
+        return endpoints;
+    }
+
+    private void searchExposedEndpoints() {
         if (!enableMqtt) {
             endpoints = Collections.emptyList();
             return;
@@ -204,19 +210,6 @@ public class MqttSettings implements ConfigDefaults {
                 LOGGER.info("Please set " + PREFIX_MQTT + TAG_EXPOSED_MQTT_ENDPOINTS + " to set the correct MQTT end points.");
             } catch (MalformedURLException ex) {
                 LOGGER.error("Failed to create MQTT urls.", ex);
-            }
-        }
-    }
-
-    public void fillServerSettings(Map<String, Object> target) {
-        if (enableMqtt) {
-            if (endpoints == null) {
-                searchExposedEndpoints(coreSettings);
-            }
-            for (String requirement : Extension.MQTT.getRequirements()) {
-                Map<String, Object> mqttSettings = new HashMap<>();
-                mqttSettings.put("endpoints", endpoints);
-                target.put(requirement, mqttSettings);
             }
         }
     }

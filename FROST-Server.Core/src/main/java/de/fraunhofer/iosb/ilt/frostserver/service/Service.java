@@ -112,6 +112,11 @@ public class Service implements AutoCloseable {
      * object in the index document.
      */
     public static final String KEY_CONFORMANCE_LIST = "conformance";
+    /**
+     * The name of the list of implemented functions in the server settings
+     * object in the index document.
+     */
+    public static final String KEY_FUNCTIONS = "functions";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Service.class);
     private static final String LABEL_REQUEST_TYPE = "requestType";

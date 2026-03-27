@@ -42,6 +42,8 @@ public class Constants {
 
     public static final String REQUEST_PARAM_FORMAT = "$format";
 
+    public static final String URI_PATH_SEP = "/";
+
     public static final String VALUE_ID_TYPE_LONG = "LONG";
     public static final String VALUE_ID_TYPE_STRING = "STRING";
     public static final String VALUE_ID_TYPE_UUID = "UUID";
