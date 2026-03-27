@@ -45,9 +45,4 @@ public class STTouches extends Function<STTouches> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STTouches getSelf() {
-        return this;
-    }
-
 }

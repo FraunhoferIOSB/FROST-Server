@@ -44,9 +44,4 @@ public class PolygonConstant extends GeoJsonConstant<PolygonConstant, Polygon> {
         }
         throw new IllegalArgumentException("Can not parse Polygon from: " + StringHelper.cleanForLogging(value));
     }
-
-    @Override
-    public PolygonConstant getSelf() {
-        return this;
-    }
 }

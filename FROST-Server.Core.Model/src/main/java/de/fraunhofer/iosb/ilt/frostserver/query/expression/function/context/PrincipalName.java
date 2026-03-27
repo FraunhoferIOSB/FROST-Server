@@ -46,9 +46,4 @@ public class PrincipalName extends Function<PrincipalName> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public PrincipalName getSelf() {
-        return this;
-    }
-
 }

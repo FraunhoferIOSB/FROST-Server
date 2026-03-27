@@ -51,9 +51,4 @@ public class Round extends Function<Round> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Round getSelf() {
-        return this;
-    }
-
 }

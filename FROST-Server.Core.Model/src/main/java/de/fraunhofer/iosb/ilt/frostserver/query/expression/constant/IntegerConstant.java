@@ -39,9 +39,4 @@ public class IntegerConstant extends NumericConstant<IntegerConstant, Long> {
     public IntegerConstant(String value) {
         super(EXPR_NAME_INTCONSTANT, Long.valueOf(value));
     }
-
-    @Override
-    public IntegerConstant getSelf() {
-        return this;
-    }
 }

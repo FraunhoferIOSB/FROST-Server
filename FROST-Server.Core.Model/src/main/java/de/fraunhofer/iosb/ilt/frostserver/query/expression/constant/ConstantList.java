@@ -67,9 +67,4 @@ public class ConstantList<T extends Constant<T, V>, V> extends Constant<Constant
         }
         return '(' + result.substring(0, result.length() - 1) + ')';
     }
-
-    @Override
-    public ConstantList getSelf() {
-        return this;
-    }
 }

@@ -63,9 +63,4 @@ public class Month extends Function<Month> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Month getSelf() {
-        return this;
-    }
-
 }

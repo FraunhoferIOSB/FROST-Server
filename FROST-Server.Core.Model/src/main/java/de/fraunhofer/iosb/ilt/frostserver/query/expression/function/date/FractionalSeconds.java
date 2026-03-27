@@ -57,9 +57,4 @@ public class FractionalSeconds extends Function<FractionalSeconds> {
         return new FractionalSeconds()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public FractionalSeconds getSelf() {
-        return this;
-    }
 }

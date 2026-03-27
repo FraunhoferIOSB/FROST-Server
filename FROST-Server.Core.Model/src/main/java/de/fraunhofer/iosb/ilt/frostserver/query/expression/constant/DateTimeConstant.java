@@ -63,9 +63,4 @@ public class DateTimeConstant extends Constant<DateTimeConstant, ZonalDateTime> 
             throw new IllegalArgumentException("Failed to parse PlainTimestamp " + StringHelper.cleanForLogging(value), ex);
         }
     }
-
-    @Override
-    public DateTimeConstant getSelf() {
-        return this;
-    }
 }

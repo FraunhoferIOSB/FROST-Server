@@ -53,9 +53,4 @@ public class TimeConstant extends Constant<TimeConstant, PlainTime> {
             throw new IllegalArgumentException("Failed to parse PlainTime " + StringHelper.cleanForLogging(value), ex);
         }
     }
-
-    @Override
-    public TimeConstant getSelf() {
-        return this;
-    }
 }

@@ -50,9 +50,4 @@ public class Not extends Operator<Not> {
         return new Not()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public Not getSelf() {
-        return this;
-    }
 }

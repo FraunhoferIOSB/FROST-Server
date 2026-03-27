@@ -52,9 +52,4 @@ public class DateConstant extends Constant<DateConstant, PlainDate> {
     public static DateConstant parse(String value) {
         return new DateConstant(value);
     }
-
-    @Override
-    public DateConstant getSelf() {
-        return this;
-    }
 }

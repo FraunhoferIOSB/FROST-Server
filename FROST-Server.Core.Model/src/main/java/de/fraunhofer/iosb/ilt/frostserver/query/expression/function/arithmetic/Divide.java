@@ -59,9 +59,4 @@ public class Divide extends Operator<Divide> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Divide getSelf() {
-        return this;
-    }
-
 }

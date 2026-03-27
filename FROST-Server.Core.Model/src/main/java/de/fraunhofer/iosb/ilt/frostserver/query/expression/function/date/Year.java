@@ -63,9 +63,4 @@ public class Year extends Function<Year> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Year getSelf() {
-        return this;
-    }
-
 }

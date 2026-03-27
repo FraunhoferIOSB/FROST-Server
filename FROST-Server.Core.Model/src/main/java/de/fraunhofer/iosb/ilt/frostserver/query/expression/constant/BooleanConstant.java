@@ -40,9 +40,4 @@ public class BooleanConstant extends Constant<BooleanConstant, Boolean> {
     public String toUrl() {
         return getValue().toString();
     }
-
-    @Override
-    public BooleanConstant getSelf() {
-        return this;
-    }
 }

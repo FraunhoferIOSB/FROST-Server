@@ -65,10 +65,4 @@ public class Add extends Operator<Add> {
         return new Add()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public Add getSelf() {
-        return this;
-    }
-
 }

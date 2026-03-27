@@ -50,9 +50,4 @@ public class Or extends Operator<Or> {
         return new Or()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public Or getSelf() {
-        return this;
-    }
 }

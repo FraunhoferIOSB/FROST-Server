@@ -62,9 +62,4 @@ public class Hour extends Function<Hour> {
         return new Hour()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public Hour getSelf() {
-        return this;
-    }
 }

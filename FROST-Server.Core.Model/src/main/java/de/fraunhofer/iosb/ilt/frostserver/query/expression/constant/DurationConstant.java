@@ -56,9 +56,4 @@ public class DurationConstant extends Constant<DurationConstant, Duration> {
             throw new IllegalArgumentException("Failed to parse Duration " + StringHelper.cleanForLogging(value), ex);
         }
     }
-
-    @Override
-    public DurationConstant getSelf() {
-        return this;
-    }
 }

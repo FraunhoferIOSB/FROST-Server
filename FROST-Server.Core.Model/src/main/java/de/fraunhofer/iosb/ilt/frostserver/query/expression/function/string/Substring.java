@@ -57,9 +57,4 @@ public class Substring extends Function<Substring> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Substring getSelf() {
-        return this;
-    }
-
 }

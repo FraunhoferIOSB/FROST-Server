@@ -52,9 +52,4 @@ public class IndexOf extends Function<IndexOf> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public IndexOf getSelf() {
-        return this;
-    }
-
 }

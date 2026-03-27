@@ -49,9 +49,4 @@ public class GeoIntersects extends Function<GeoIntersects> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public GeoIntersects getSelf() {
-        return this;
-    }
-
 }

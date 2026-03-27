@@ -56,9 +56,4 @@ public class Time extends Function<Time> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Time getSelf() {
-        return this;
-    }
-
 }

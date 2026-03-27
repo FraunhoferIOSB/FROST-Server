@@ -45,9 +45,4 @@ public class STCrosses extends Function<STCrosses> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STCrosses getSelf() {
-        return this;
-    }
-
 }

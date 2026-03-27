@@ -54,9 +54,4 @@ public class Now extends Function<Now> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Now getSelf() {
-        return this;
-    }
-
 }

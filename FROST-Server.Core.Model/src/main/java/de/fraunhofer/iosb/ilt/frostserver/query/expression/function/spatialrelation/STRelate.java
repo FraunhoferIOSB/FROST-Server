@@ -45,9 +45,4 @@ public class STRelate extends Function<STRelate> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STRelate getSelf() {
-        return this;
-    }
-
 }

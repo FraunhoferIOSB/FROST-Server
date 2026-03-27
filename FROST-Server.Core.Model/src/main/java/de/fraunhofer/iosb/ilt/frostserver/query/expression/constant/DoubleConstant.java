@@ -35,9 +35,4 @@ public class DoubleConstant extends NumericConstant<DoubleConstant, Double> {
     public DoubleConstant(String value) {
         super(EXPR_NAME_DOUBLECONSTANT, Double.valueOf(value));
     }
-
-    @Override
-    public DoubleConstant getSelf() {
-        return this;
-    }
 }

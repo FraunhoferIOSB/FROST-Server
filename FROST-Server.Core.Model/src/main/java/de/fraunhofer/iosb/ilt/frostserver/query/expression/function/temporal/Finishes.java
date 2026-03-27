@@ -58,9 +58,4 @@ public class Finishes extends Function<Finishes> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Finishes getSelf() {
-        return this;
-    }
-
 }

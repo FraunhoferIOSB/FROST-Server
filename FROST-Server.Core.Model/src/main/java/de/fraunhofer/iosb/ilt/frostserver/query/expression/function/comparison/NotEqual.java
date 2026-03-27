@@ -45,9 +45,4 @@ public class NotEqual extends ComparisonFunction<NotEqual> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public NotEqual getSelf() {
-        return this;
-    }
-
 }

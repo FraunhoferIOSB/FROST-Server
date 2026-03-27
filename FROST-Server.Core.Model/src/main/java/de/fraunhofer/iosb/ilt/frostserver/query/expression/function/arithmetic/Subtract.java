@@ -69,9 +69,4 @@ public class Subtract extends Operator<Subtract> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Subtract getSelf() {
-        return this;
-    }
-
 }

@@ -68,9 +68,4 @@ public class Before extends Function<Before> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Before getSelf() {
-        return this;
-    }
-
 }

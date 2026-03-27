@@ -51,9 +51,4 @@ public class Concat extends Function<Concat> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Concat getSelf() {
-        return this;
-    }
-
 }

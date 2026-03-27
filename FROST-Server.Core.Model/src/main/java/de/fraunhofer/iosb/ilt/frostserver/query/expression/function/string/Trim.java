@@ -51,9 +51,4 @@ public class Trim extends Function<Trim> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Trim getSelf() {
-        return this;
-    }
-
 }

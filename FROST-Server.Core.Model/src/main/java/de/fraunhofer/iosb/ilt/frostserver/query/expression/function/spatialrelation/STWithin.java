@@ -45,9 +45,4 @@ public class STWithin extends Function<STWithin> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STWithin getSelf() {
-        return this;
-    }
-
 }

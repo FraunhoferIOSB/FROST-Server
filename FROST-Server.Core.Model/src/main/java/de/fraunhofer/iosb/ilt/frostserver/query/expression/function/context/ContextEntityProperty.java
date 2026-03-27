@@ -54,9 +54,4 @@ public class ContextEntityProperty extends Function<ContextEntityProperty> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public ContextEntityProperty getSelf() {
-        return this;
-    }
-
 }

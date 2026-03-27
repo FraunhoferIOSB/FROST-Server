@@ -48,9 +48,4 @@ public class GeoDistance extends Function<GeoDistance> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public GeoDistance getSelf() {
-        return this;
-    }
-
 }

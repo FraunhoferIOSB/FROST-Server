@@ -50,9 +50,4 @@ public class And extends Function<And> {
         return new And()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public And getSelf() {
-        return this;
-    }
 }

@@ -45,9 +45,4 @@ public class STContains extends Function<STContains> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STContains getSelf() {
-        return this;
-    }
-
 }
