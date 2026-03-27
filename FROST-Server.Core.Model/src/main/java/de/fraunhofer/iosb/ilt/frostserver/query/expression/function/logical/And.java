@@ -19,13 +19,13 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.BooleanConstant;
-import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.FunctionTypeBinding;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 
 /**
  * The and operator.
  */
-public class And extends Function<And> {
+public class And extends Operator<And> {
 
     public And() {
         super("and");
