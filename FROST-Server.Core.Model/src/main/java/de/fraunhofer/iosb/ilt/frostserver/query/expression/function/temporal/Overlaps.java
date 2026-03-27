@@ -58,9 +58,4 @@ public class Overlaps extends Function<Overlaps> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Overlaps getSelf() {
-        return this;
-    }
-
 }

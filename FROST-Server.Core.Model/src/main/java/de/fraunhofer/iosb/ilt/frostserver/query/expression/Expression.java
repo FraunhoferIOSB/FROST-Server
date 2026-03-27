@@ -87,6 +87,8 @@ public interface Expression<T extends Expression<T>> {
      */
     public T newInstance();
 
-    public T getSelf();
+    public default T getSelf() {
+        return (T) this;
+    }
 
 }

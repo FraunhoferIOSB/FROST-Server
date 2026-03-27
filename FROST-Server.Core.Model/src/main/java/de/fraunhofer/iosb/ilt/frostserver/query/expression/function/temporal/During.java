@@ -58,9 +58,4 @@ public class During extends Function<During> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public During getSelf() {
-        return this;
-    }
-
 }

@@ -70,9 +70,4 @@ public class After extends Function<After> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public After getSelf() {
-        return this;
-    }
-
 }

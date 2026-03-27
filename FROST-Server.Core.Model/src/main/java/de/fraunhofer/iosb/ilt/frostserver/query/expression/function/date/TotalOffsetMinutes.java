@@ -50,9 +50,4 @@ public class TotalOffsetMinutes extends Function<TotalOffsetMinutes> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public TotalOffsetMinutes getSelf() {
-        return this;
-    }
-
 }

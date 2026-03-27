@@ -56,9 +56,4 @@ public class Date extends Function<Date> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Date getSelf() {
-        return this;
-    }
-
 }

@@ -45,9 +45,4 @@ public class GreaterThan extends ComparisonFunction<GreaterThan> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public GreaterThan getSelf() {
-        return this;
-    }
-
 }

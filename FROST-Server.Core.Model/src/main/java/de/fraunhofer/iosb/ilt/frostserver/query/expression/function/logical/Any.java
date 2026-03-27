@@ -145,9 +145,4 @@ public class Any extends Function<Any> {
         return new Any()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public Any getSelf() {
-        return this;
-    }
 }

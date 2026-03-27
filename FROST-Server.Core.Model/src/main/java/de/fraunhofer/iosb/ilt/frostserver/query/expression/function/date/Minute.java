@@ -63,9 +63,4 @@ public class Minute extends Function<Minute> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Minute getSelf() {
-        return this;
-    }
-
 }

@@ -53,9 +53,4 @@ public class IntervalConstant extends Constant<IntervalConstant, MomentInterval>
         }
     }
 
-    @Override
-    public IntervalConstant getSelf() {
-        return this;
-    }
-
 }

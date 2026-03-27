@@ -45,9 +45,4 @@ public class LessEqual extends ComparisonFunction<LessEqual> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public LessEqual getSelf() {
-        return this;
-    }
-
 }

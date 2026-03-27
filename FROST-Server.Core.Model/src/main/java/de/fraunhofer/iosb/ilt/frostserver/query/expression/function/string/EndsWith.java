@@ -52,9 +52,4 @@ public class EndsWith extends Function<EndsWith> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public EndsWith getSelf() {
-        return this;
-    }
-
 }

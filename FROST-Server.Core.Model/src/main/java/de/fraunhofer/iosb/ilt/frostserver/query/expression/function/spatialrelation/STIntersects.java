@@ -45,9 +45,4 @@ public class STIntersects extends Function<STIntersects> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STIntersects getSelf() {
-        return this;
-    }
-
 }

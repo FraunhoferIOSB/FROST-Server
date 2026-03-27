@@ -45,9 +45,4 @@ public class STOverlaps extends Function<STOverlaps> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STOverlaps getSelf() {
-        return this;
-    }
-
 }

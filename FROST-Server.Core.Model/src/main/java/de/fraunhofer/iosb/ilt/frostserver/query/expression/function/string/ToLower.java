@@ -51,9 +51,4 @@ public class ToLower extends Function<ToLower> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public ToLower getSelf() {
-        return this;
-    }
-
 }

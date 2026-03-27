@@ -59,9 +59,4 @@ public class Modulo extends Operator<Modulo> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Modulo getSelf() {
-        return this;
-    }
-
 }

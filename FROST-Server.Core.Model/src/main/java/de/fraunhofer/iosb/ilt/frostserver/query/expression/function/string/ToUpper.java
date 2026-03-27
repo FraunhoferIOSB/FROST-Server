@@ -51,9 +51,4 @@ public class ToUpper extends Function<ToUpper> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public ToUpper getSelf() {
-        return this;
-    }
-
 }

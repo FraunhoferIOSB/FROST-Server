@@ -46,9 +46,4 @@ public class In extends ComparisonFunction<In> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public In getSelf() {
-        return this;
-    }
-
 }

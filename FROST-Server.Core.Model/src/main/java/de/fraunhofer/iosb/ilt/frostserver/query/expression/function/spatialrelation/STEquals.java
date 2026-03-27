@@ -45,9 +45,4 @@ public class STEquals extends Function<STEquals> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STEquals getSelf() {
-        return this;
-    }
-
 }

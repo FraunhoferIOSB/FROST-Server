@@ -63,9 +63,4 @@ public class Second extends Function<Second> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Second getSelf() {
-        return this;
-    }
-
 }

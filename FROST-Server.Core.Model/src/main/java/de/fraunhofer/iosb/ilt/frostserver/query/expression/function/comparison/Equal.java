@@ -45,9 +45,4 @@ public class Equal extends ComparisonFunction<Equal> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Equal getSelf() {
-        return this;
-    }
-
 }

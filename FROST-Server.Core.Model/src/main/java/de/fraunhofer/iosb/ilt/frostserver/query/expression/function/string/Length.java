@@ -52,9 +52,4 @@ public class Length extends Function<Length> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Length getSelf() {
-        return this;
-    }
-
 }

@@ -52,9 +52,4 @@ public class StartsWith extends Function<StartsWith> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public StartsWith getSelf() {
-        return this;
-    }
-
 }

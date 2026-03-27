@@ -70,9 +70,4 @@ public class Meets extends Function<Meets> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Meets getSelf() {
-        return this;
-    }
-
 }

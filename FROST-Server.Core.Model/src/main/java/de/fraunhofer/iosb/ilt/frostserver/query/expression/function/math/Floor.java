@@ -51,9 +51,4 @@ public class Floor extends Function<Floor> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Floor getSelf() {
-        return this;
-    }
-
 }

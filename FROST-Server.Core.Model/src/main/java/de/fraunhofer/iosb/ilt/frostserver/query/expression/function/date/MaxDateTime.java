@@ -53,9 +53,4 @@ public class MaxDateTime extends Function<MaxDateTime> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public MaxDateTime getSelf() {
-        return this;
-    }
-
 }

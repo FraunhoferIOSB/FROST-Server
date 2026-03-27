@@ -57,9 +57,4 @@ public class SubstringOf extends Function<SubstringOf> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public SubstringOf getSelf() {
-        return this;
-    }
-
 }

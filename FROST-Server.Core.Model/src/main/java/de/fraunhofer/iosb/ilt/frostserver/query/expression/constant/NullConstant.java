@@ -32,9 +32,4 @@ public class NullConstant extends Constant<NullConstant, Void> {
     public String toUrl() {
         return "null";
     }
-
-    @Override
-    public NullConstant getSelf() {
-        return this;
-    }
 }

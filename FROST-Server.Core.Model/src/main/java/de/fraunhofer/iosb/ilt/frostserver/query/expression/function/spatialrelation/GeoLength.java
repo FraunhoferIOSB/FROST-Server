@@ -48,9 +48,4 @@ public class GeoLength extends Function<GeoLength> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public GeoLength getSelf() {
-        return this;
-    }
-
 }

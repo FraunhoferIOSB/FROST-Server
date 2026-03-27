@@ -36,9 +36,4 @@ public class StringConstant extends Constant<StringConstant, String> {
     public String toUrl() {
         return "'" + getValue().replace("'", "''") + "'";
     }
-
-    @Override
-    public StringConstant getSelf() {
-        return this;
-    }
 }

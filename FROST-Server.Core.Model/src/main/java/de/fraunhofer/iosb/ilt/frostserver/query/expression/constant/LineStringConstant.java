@@ -44,9 +44,4 @@ public class LineStringConstant extends GeoJsonConstant<LineStringConstant, Line
         }
         throw new IllegalArgumentException("Can not parse LineString from: " + StringHelper.cleanForLogging(value));
     }
-
-    @Override
-    public LineStringConstant getSelf() {
-        return this;
-    }
 }

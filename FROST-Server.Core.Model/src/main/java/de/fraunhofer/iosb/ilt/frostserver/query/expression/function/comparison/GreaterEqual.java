@@ -45,9 +45,4 @@ public class GreaterEqual extends ComparisonFunction<GreaterEqual> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public GreaterEqual getSelf() {
-        return this;
-    }
-
 }

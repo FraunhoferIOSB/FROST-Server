@@ -38,9 +38,4 @@ public class TimeObjectConstant extends Constant<TimeObjectConstant, TimeObject>
     public String toUrl() {
         return value.asISO8601();
     }
-
-    @Override
-    public TimeObjectConstant getSelf() {
-        return this;
-    }
 }

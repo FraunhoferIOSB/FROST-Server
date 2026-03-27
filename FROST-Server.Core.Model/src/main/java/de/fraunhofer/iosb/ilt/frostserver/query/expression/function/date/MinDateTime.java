@@ -53,9 +53,4 @@ public class MinDateTime extends Function<MinDateTime> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public MinDateTime getSelf() {
-        return this;
-    }
-
 }

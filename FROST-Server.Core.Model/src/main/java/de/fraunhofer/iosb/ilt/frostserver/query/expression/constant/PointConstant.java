@@ -44,9 +44,4 @@ public class PointConstant extends GeoJsonConstant<PointConstant, Point> {
         }
         throw new IllegalArgumentException("Can not parse Point from: " + StringHelper.cleanForLogging(value));
     }
-
-    @Override
-    public PointConstant getSelf() {
-        return this;
-    }
 }

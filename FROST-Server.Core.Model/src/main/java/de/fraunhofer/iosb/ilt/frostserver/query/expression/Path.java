@@ -180,9 +180,4 @@ public class Path implements Variable<Path> {
         return new Path(rawElements).setHandler(handler);
     }
 
-    @Override
-    public Path getSelf() {
-        return this;
-    }
-
 }

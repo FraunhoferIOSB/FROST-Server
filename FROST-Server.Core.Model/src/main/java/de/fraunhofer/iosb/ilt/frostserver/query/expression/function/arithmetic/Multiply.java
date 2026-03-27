@@ -59,9 +59,4 @@ public class Multiply extends Operator<Multiply> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Multiply getSelf() {
-        return this;
-    }
-
 }

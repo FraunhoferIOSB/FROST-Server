@@ -45,9 +45,4 @@ public class STDisjoint extends Function<STDisjoint> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public STDisjoint getSelf() {
-        return this;
-    }
-
 }

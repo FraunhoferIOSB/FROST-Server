@@ -51,9 +51,4 @@ public class Ceiling extends Function<Ceiling> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Ceiling getSelf() {
-        return this;
-    }
-
 }

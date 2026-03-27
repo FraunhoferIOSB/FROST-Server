@@ -44,9 +44,4 @@ public class LessThan extends ComparisonFunction<LessThan> {
         return new LessThan()
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
-
-    @Override
-    public LessThan getSelf() {
-        return this;
-    }
 }

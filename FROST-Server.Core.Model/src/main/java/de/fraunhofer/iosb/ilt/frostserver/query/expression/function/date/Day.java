@@ -63,9 +63,4 @@ public class Day extends Function<Day> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Day getSelf() {
-        return this;
-    }
-
 }

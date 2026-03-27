@@ -58,9 +58,4 @@ public class Starts extends Function<Starts> {
                 .setAllowedTypeBindings(getAllowedTypeBindings());
     }
 
-    @Override
-    public Starts getSelf() {
-        return this;
-    }
-
 }
