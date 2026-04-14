@@ -17,13 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
-import static de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData.VERSION_ODATA_40;
-
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.io.Writer;
@@ -38,10 +35,20 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
- * @author hylke
+ * A CSDL Document representation.
  */
 public class CsdlDocument {
+
+    public static enum ODataVersion {
+        V4_0("4.0"),
+        V4_01("4.01");
+
+        private ODataVersion(String name) {
+            this.name = name;
+        }
+
+        public final String name;
+    }
 
     @JsonProperty("$Version")
     public String version = "4.01";
@@ -157,11 +164,12 @@ public class CsdlDocument {
     /**
      * Fill the document using the given Settings, and return itself.
      *
+     * @param version the OData version to generate the document for.
      * @param settings the CoreSettings to use.
      * @return this.
      */
-    public CsdlDocument generateFrom(Version version, CoreSettings settings) {
-        this.version = version == VERSION_ODATA_40 ? "4.0" : "4.01";
+    public CsdlDocument generateFrom(ODataVersion version, CoreSettings settings) {
+        this.version = version.name;
         String nameSpace = "de.FROST";
         nameSpaces.put(nameSpace, new CsdlSchema().generateFrom(this, version, nameSpace, settings));
         return this;
@@ -171,12 +179,8 @@ public class CsdlDocument {
         referencedDocs.computeIfAbsent(baseUrl, ReferencedDoc::new).addAnnotation(annotation);
     }
 
-    public void writeXml(Version version, Writer writer) throws IOException {
-        if (version == VERSION_ODATA_40) {
-            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">");
-        } else {
-            writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"4.01\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">");
-        }
+    public void writeXml(Writer writer) throws IOException {
+        writer.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><edmx:Edmx Version=\"" + version + "\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">");
         for (ReferencedDoc refDoc : referencedDocs.values()) {
             refDoc.writeXml(writer);
         }
