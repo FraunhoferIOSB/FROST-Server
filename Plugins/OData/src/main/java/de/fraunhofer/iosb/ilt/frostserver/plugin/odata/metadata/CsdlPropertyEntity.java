@@ -23,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
@@ -54,7 +52,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, Version version, String nameSpace, EntityType et, EntityPropertyMain<?> ep) {
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, String nameSpace, EntityType et, EntityPropertyMain<?> ep) {
         final PropertyType propertyType = ep.getType();
         type = propertyType.getName();
         collection = propertyType.isCollection();
@@ -64,7 +62,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
         if (TYPE_DEFAULT.equals(type)) {
             type = null;
         }
-        if (TypeSimplePrimitive.EDM_UNTYPED == propertyType && version == PluginOData.VERSION_ODATA_40) {
+        if (TypeSimplePrimitive.EDM_UNTYPED == propertyType && version == CsdlDocument.ODataVersion.V4_0) {
             type = TypeSimplePrimitive.EDM_STRING.getName();
         }
         if (!et.getPrimaryKey().getKeyProperties().contains(ep)) {

@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument.ODataVersion;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -193,17 +194,21 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
+        ODataVersion version;
         boolean isOdata401 = false;
         if (request.getVersion() == VERSION_ODATA_40) {
-            response.addHeader("OData-Version", "4.0");
+            version = ODataVersion.V4_0;
         } else {
             isOdata401 = true;
-            response.addHeader("OData-Version", "4.01");
+            version = ODataVersion.V4_01;
         }
+        response.addHeader("OData-Version", version.name);
         request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
-                return new MetaDataGenerator(settings).generateMetaData(request, response);
+                return new MetaDataGenerator(settings)
+                        .setVersion(version)
+                        .generateMetaData(request, response);
 
             case GET_CAPABILITIES:
                 return executeGetCapabilities(request, response);

@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.MetaDataGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument.ODataVersion;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
@@ -226,7 +227,10 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
-                return new MetaDataGenerator(coreSettings).generateMetaData(request, response);
+                return new MetaDataGenerator(coreSettings)
+                        .setVersion(ODataVersion.V4_01)
+                        .setJsonDefault(true)
+                        .generateMetaData(request, response);
 
             case CREATE:
             case UPDATE_ALL:

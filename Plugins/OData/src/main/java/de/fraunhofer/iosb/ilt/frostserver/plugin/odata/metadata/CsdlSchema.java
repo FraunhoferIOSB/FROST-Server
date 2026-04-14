@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEnumeration;
@@ -48,7 +47,7 @@ public class CsdlSchema {
     @JsonAnySetter
     public Map<String, CsdlSchemaItem> schemaItems = new LinkedHashMap<>();
 
-    public CsdlSchema generateFrom(CsdlDocument doc, Version version, String nameSpace, CoreSettings settings) {
+    public CsdlSchema generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, String nameSpace, CoreSettings settings) {
         ModelRegistry mr = settings.getModelRegistry();
         for (EntityType entityType : mr.getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, nameSpace, entityType));

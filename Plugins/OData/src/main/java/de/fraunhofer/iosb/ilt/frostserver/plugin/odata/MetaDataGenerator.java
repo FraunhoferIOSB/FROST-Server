@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_ACCEPT;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.MxGraphGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
@@ -32,22 +31,33 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
- *
- * @author hylke
+ * A generator for OData CSDL documents.
  */
 public class MetaDataGenerator {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(MetaDataGenerator.class.getName());
     private final CoreSettings settings;
+    private boolean jsonDefault = false;
+    private CsdlDocument.ODataVersion version = CsdlDocument.ODataVersion.V4_01;
 
     public MetaDataGenerator(CoreSettings settings) {
         this.settings = settings;
     }
 
+    public MetaDataGenerator setJsonDefault(boolean jsonDefault) {
+        this.jsonDefault = jsonDefault;
+        return this;
+    }
+
+    public MetaDataGenerator setVersion(CsdlDocument.ODataVersion version) {
+        this.version = version;
+        return this;
+    }
+
     public ServiceResponse generateMetaData(ServiceRequest request, ServiceResponse response) {
-        final Version version = request.getVersion();
         try {
             final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
             String format = request.getParameter(REQUEST_PARAM_FORMAT, "");
@@ -67,18 +77,34 @@ public class MetaDataGenerator {
                         settings.getModelRegistry(),
                         PrincipalExtended.getLocalPrincipal().isAdmin());
                 response.setCode(200);
-            } else if (idxJson < idxXml || "json".equalsIgnoreCase(format)) {
-                response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
-                SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
-                response.setCode(200);
+            } else if ("json".equalsIgnoreCase(format)) {
+                generateJson(response, doc);
+            } else if ("xml".equalsIgnoreCase(format)) {
+                generateXml(response, doc);
+            } else if (idxJson < idxXml) {
+                generateJson(response, doc);
             } else {
-                response.setContentType(CONTENT_TYPE_APPLICATION_XML);
-                doc.writeXml(version, response.getWriter());
-                response.setCode(200);
+                if (jsonDefault) {
+                    generateJson(response, doc);
+                } else {
+                    generateXml(response, doc);
+                }
             }
         } catch (IOException ex) {
             LOGGER.error("Failed to generate metadata document", ex);
         }
         return response;
+    }
+
+    private void generateXml(ServiceResponse response, final CsdlDocument doc) throws IOException {
+        response.setContentType(CONTENT_TYPE_APPLICATION_XML);
+        doc.writeXml(response.getWriter());
+        response.setCode(200);
+    }
+
+    private void generateJson(ServiceResponse response, final CsdlDocument doc) throws JacksonException {
+        response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
+        SimpleJsonMapper.getSimpleObjectMapper().writeValue(response.getWriter(), doc);
+        response.setCode(200);
     }
 }
