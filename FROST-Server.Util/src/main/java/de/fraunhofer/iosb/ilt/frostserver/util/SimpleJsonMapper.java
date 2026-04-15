@@ -23,6 +23,7 @@ import tools.jackson.core.TreeNode;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -55,6 +56,7 @@ public class SimpleJsonMapper {
                     .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
                     .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                     .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                    .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
                     .addModule(new JSONPModule())
                     .build();
         }

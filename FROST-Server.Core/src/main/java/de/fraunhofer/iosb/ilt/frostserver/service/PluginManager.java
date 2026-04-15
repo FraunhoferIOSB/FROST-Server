@@ -52,6 +52,8 @@ public class PluginManager implements ConfigDefaults {
     public static final String VALUE_PROVIDED_PLUGINS = "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatInternal"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreServiceV2"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.PluginBatchProcessing"
@@ -60,14 +62,12 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreServiceV2"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelsampling.PluginModelSampling"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelrelations.PluginModelRelations"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.projects.PluginProjects"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.opencitysense.PluginOpenCitySense";
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.opencitysense.PluginOpenCitySense"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader";
 
     /**
      * The plugins provided with FROST by default. When editing these, also

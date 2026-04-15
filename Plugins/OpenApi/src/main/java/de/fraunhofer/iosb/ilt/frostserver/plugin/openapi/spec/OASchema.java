@@ -204,11 +204,12 @@ public final class OASchema {
         }
     }
 
-    public void addProperty(String name, OASchema property) {
+    public OASchema addProperty(String name, OASchema property) {
         if (properties == null) {
             properties = new TreeMap<>();
         }
         properties.put(name, property);
+        return this;
     }
 
     /**
@@ -220,9 +221,11 @@ public final class OASchema {
 
     /**
      * @param ref the ref to set
+     * @return this
      */
-    public void setRef(String ref) {
+    public OASchema setRef(String ref) {
         this.ref = ref;
+        return this;
     }
 
     /**
@@ -234,9 +237,11 @@ public final class OASchema {
 
     /**
      * @param type the type to set
+     * @return this
      */
-    public void setType(Type type) {
+    public OASchema setType(Type type) {
         this.type = type;
+        return this;
     }
 
     /**
@@ -248,9 +253,11 @@ public final class OASchema {
 
     /**
      * @param format the format to set
+     * @return this
      */
-    public void setFormat(Format format) {
+    public OASchema setFormat(Format format) {
         this.format = format;
+        return this;
     }
 
     /**
@@ -262,9 +269,11 @@ public final class OASchema {
 
     /**
      * @param description the description to set
+     * @return this
      */
-    public void setDescription(String description) {
+    public OASchema setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     /**
@@ -276,9 +285,11 @@ public final class OASchema {
 
     /**
      * @param deflt the deflt to set
+     * @return this
      */
-    public void setDeflt(String deflt) {
+    public OASchema setDeflt(String deflt) {
         this.deflt = deflt;
+        return this;
     }
 
     /**
@@ -290,9 +301,11 @@ public final class OASchema {
 
     /**
      * @param items the items to set
+     * @return this
      */
-    public void setItems(OASchema items) {
+    public OASchema setItems(OASchema items) {
         this.items = items;
+        return this;
     }
 
     /**
@@ -311,17 +324,20 @@ public final class OASchema {
 
     /**
      * @param additionalProperties the additionalProperties to set
+     * @return this
      */
-    public void setAdditionalProperties(Boolean additionalProperties) {
+    public OASchema setAdditionalProperties(Boolean additionalProperties) {
         this.additionalProperties = additionalProperties;
+        return this;
     }
 
     public Boolean isReadOnly() {
         return readOnly;
     }
 
-    public void setReadOnly(boolean readOnly) {
+    public OASchema setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
+        return this;
     }
 
 }
