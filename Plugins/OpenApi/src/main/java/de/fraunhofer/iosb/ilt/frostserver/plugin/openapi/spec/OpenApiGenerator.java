@@ -63,7 +63,7 @@ public class OpenApiGenerator {
         document.setInfo(new OADocInfo(
                 "SensorThings " + context.getVersion().urlPart,
                 "1.0.0",
-                "Version " + context.getVersion().urlPart + " of the OGC SensorThings API, including Part 2 - Tasking."));
+                "Version " + context.getVersion().urlPart + " of the OGC SensorThings API."));
         addComponents(context, document);
 
         document.addServer(new OAServer(context.getServiceRootUrl(), "FROST-Server"));
@@ -137,7 +137,7 @@ public class OpenApiGenerator {
 
         OASchema selfLink = new OASchema(OASchema.Type.STRING, null);
         selfLink.setReadOnly(true);
-        selfLink.setDescription("The direct link to the entity");
+        selfLink.setDescription("A globally unique identifier for an Entity.");
         document.getComponents().addSchema("selfLink", selfLink);
 
         OASchema navLink = new OASchema(OASchema.Type.STRING, null);
@@ -434,6 +434,8 @@ public class OpenApiGenerator {
         final String schemaName = entityType.entityName;
         final OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
         components.addSchema(schemaName, schema);
+
+        schema.addProperty(version.selfLinkName, new OASchema("#/components/schemas/selfLink"));
 
         for (Property property : entityType.getPropertySet()) {
             String propertyName = property.getJsonName();
