@@ -105,12 +105,11 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         final String requestURI = request.getRequestURI();
         final String contextPath = request.getContextPath();
         final String servletPath = request.getServletPath();
-        final String basePath = contextPath + servletPath;
         final String pathInfo;
-        if (requestURI.startsWith(basePath)) {
-            pathInfo = StringHelper.urlDecode(requestURI.substring(basePath.length()));
+        if (requestURI.startsWith(contextPath)) {
+            pathInfo = StringHelper.urlDecode(requestURI.substring(contextPath.length()));
         } else {
-            pathInfo = request.getPathInfo();
+            pathInfo = servletPath;
         }
         final int idxSlash2 = pathInfo.indexOf('/', 1);
         final String path;
@@ -129,7 +128,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
 
         QueryDefaults queryDefaults = coreSettings.getQueryDefaults().copy();
         if (autodetectRootUrl) {
-            String detectedRootUrl = generateRootUrl(request, version, basePath);
+            String detectedRootUrl = generateRootUrl(request, version, contextPath);
             LOGGER.debug("Detected serviceRootURL: {}", detectedRootUrl);
             queryDefaults.setServiceRootUrl(detectedRootUrl);
         }
