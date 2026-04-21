@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.http.common;
 import static de.fraunhofer.iosb.ilt.frostserver.http.common.HttpRequestDecoder.serviceRequestFromHttpRequest;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_TEXT_HTML;
 
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -33,7 +32,6 @@ import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Histogram;
 import io.prometheus.metrics.model.snapshots.Unit;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,7 +39,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 @WebServlet(
         name = "CoreServlet",
-        urlPatterns = {"/*"},
+        urlPatterns = {"/"},
         initParams = {
             @WebInitParam(name = "readonly", value = "false")
         })
@@ -82,9 +79,9 @@ public class ServletMain extends HttpServlet {
 
     private void executeRequest(HttpServletRequest request, HttpServletResponse response) {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        String pathInfo = request.getPathInfo();
+        String servletPath = request.getServletPath();
         final CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-        if (StringHelper.isNullOrEmpty(pathInfo)) {
+        if (StringHelper.isNullOrEmpty(servletPath)) {
             try {
                 response.sendRedirect(coreSettings.getQueryDefaults().getServiceRootUrl() + "/");
                 return;
@@ -93,16 +90,8 @@ public class ServletMain extends HttpServlet {
                 return;
             }
         }
-        if (pathInfo.equals("/")) {
-            try (InputStream in = getServletContext().getResourceAsStream("/index.html")) {
-                response.setContentType(CONTENT_TYPE_TEXT_HTML);
-                ServletOutputStream out = response.getOutputStream();
-                in.transferTo(out);
-                return;
-            } catch (IOException exc) {
-                sendResponse(Service.errorResponse(null, 500, NOT_FOUND), response);
-                return;
-            }
+        if (servletPath.equals("/")) {
+            return;
         }
         response.setContentType(CONTENT_TYPE_APPLICATION_JSON);
         try {

@@ -1,3 +1,18 @@
+<%@page import="de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"%>
+<%@page import="de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreServiceV2"%>
+<%@page import="de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"%>
+<%@page import="de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"%>
+<%@page import="de.fraunhofer.iosb.ilt.frostserver.service.PluginManager"%>
+<%@page import="de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+    CoreSettings coreSettings = (CoreSettings) pageContext.getServletContext().getAttribute(CoreSettings.TAG_CORE_SETTINGS);
+    PluginManager pm = coreSettings.getPluginManager();
+    boolean hasOpenApi = pm.isPluginEnabled(PluginOpenApi.class);
+    boolean hasV1 = pm.isPluginEnabled(PluginCoreService.class);
+    boolean hasV2 = pm.isPluginEnabled(PluginCoreServiceV2.class);
+    boolean hasOData = pm.isPluginEnabled(PluginOData.class);
+%>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -32,10 +47,10 @@
                                 location = "";
                             try {
                                 var data = JSON.parse(request.responseText);
-                                document.getElementById('result').innerHTML = 'Done:<br><pre>' + JSON.stringify(data,null,'  ') + '</pre>' + location;
+                                document.getElementById('result').innerHTML = 'Done:<br><pre>' + JSON.stringify(data, null, '  ') + '</pre>' + location;
                             } catch (err) {
                                 document.getElementById('result').innerHTML = 'Done: ' + request.responseText + "<br>"
-                                    + location;
+                                        + location;
                             }
                         } else {
                             document.getElementById('result').innerHTML = 'Error ' + request.status + ": " + request.responseText + "";
@@ -57,17 +72,33 @@
 
         <h2>Some Links</h2>
         <table>
-            <caption>Relevant links</caption>
             <tr><th>Link</th><th>Description</th></tr>
-            <tr><td><a href="v1.0">v1.0/</a></td><td>SensorThingsApi v1.0</td></tr>
-            <tr><td><a href="v1.1">v1.1/</a></td><td>SensorThingsApi v1.1</td></tr>
-            <tr><td><a href="v1.1/api">v1.1/api</a></td><td>OpenAPI definition for SensorThingsApi v1.1 (If OpenAPI plugin is enabled)</td></tr>
-            <tr><td><a href="ODATA_4.01">ODATA_4.01/</a></td><td>OData version 4.01 (If OData plugin is enabled)</td></tr>
-            <tr><td><a href="ODATA_4.01/api">ODATA_4.01/api</a></td><td>OpenAPI definition for OData version 4.01 (If OpenAPI plugin is enabled)</td></tr>
-            <tr><td><a href="ODATA_4.01/$metadata?$format=json">ODATA_4.01/$metadata</a></td><td>OData version 4.01 Data Model Metadata</td></tr>
-            <tr><td><a href="ODATA_4.0">ODATA_4.0</a></td><td>OData version 4.0 (If OData plugin is enabled)</td></tr>
-            <tr><td><a href="ODATA_4.0/api">ODATA_4.0/api</a></td><td>OpenAPI definition for OData version 4.0 (If OpenAPI plugin is enabled)</td></tr>
-            <tr><td><a href="ODATA_4.0/$metadata?$format=json">ODATA_4.0/$metadata</a></td><td>OData version 4.0 Data Model Metadata</td></tr>
+            <% if (hasV1) { %>
+                <tr><td><a href="v1.0">v1.0/</a></td><td>SensorThingsApi v1.0</td></tr>
+                <tr><td><a href="v1.1">v1.1/</a></td><td>SensorThingsApi v1.1</td></tr>
+                <% if (hasOpenApi) { %>
+                    <tr><td><a href="v1.1/api">v1.1/api</a></td><td>OpenAPI definition for SensorThingsApi v1.1</td></tr>
+                <% } %>
+            <% } %>
+            <% if (hasV2) { %>
+                <tr><td><a href="v2.0">v2.0/</a></td><td>SensorThingsApi v2.0</td></tr>
+                <tr><td><a href="v2.0/$metadata?$format=json">v2.0/$metadata</a></td><td>SensorThingsApi v2.0 Data Model Metadata</td></tr>
+                <% if (hasOpenApi) { %>
+                    <tr><td><a href="v2.0/api">v2.0/api</a></td><td>OpenAPI definition for SensorThingsApi v2.0</td></tr>
+                <% } %>
+            <% } %>
+            <% if (hasOData) { %>
+                <tr><td><a href="ODATA_4.01">ODATA_4.01/</a></td><td>OData version 4.01</td></tr>
+                <tr><td><a href="ODATA_4.01/$metadata?$format=json">ODATA_4.01/$metadata</a></td><td>OData version 4.01 Data Model Metadata</td></tr>
+                <% if (hasOpenApi) { %>
+                    <tr><td><a href="ODATA_4.01/api">ODATA_4.01/api</a></td><td>OpenAPI definition for OData version 4.01</td></tr>
+                <% } %>
+                <tr><td><a href="ODATA_4.0">ODATA_4.0</a></td><td>OData version 4.0</td></tr>
+                <tr><td><a href="ODATA_4.0/$metadata?$format=json">ODATA_4.0/$metadata</a></td><td>OData version 4.0 Data Model Metadata</td></tr>
+                <% if (hasOpenApi) { %>
+                    <tr><td><a href="ODATA_4.0/api">ODATA_4.0/api</a></td><td>OpenAPI definition for OData version 4.0</td></tr>
+                <% } %>
+            <% } %>
             <tr><td><a href="DatabaseStatus">DatabaseStatus</a></td><td>Database Status and Update</td></tr>
         </table>
         <a href="https://github.com/FraunhoferIOSB/FROST-Server">FROST-Server on GitHub</a>

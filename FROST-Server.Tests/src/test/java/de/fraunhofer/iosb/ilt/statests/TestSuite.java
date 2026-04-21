@@ -401,7 +401,7 @@ public class TestSuite {
 
         handler.addEventListener(new HttpContextListener());
         handler.addServlet(DatabaseStatus.class, "/DatabaseStatus");
-        handler.addServlet(ServletMain.class, "/*");
+        handler.addServlet(ServletMain.class, "/");
         contextHandlerCollection.addHandler(handler);
         try {
             handler.start();
