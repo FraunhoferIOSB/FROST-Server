@@ -343,7 +343,14 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
 
     @Override
     public void onSubscribe(SubscriptionEvent e) {
-        Subscription subscription = subscriptionFactory.get(e.getTopicIntrnl());
+        Subscription subscription;
+        try {
+            subscription = subscriptionFactory.get(e.getTopicIntrnl());
+        } catch (IllegalArgumentException ex) {
+            // Not a valid topic.
+            LOGGER.debug("Ignoring subscription to {}", e);
+            return;
+        }
         if (subscription == null) {
             LOGGER.debug("Ignoring subscription to {}", e);
             // Not a valid topic.

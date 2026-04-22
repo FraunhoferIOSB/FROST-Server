@@ -330,21 +330,24 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
         Version version;
         try {
             version = MqttManager.getVersionFromTopic(settings, topicInternal);
+            final String pathNonVersion = pathString.substring(version.urlPart.length());
+            final ResourcePath path = PathParser.parsePath(contextNormalise, version, pathNonVersion);
+            final Query query = QueryParser.parseQuery(queryString, contextNormalise, path)
+                    .validate(null, path.getMainElementType());
+            query.normalise();
+            final String nQueryString = query.toUnencodedString(false);
+            if (StringHelper.isNullOrEmpty(nQueryString)) {
+                topicInternal = version.urlPart + '/' + path.getUrl();
+            } else {
+                topicInternal = version.urlPart + '/' + path.getUrl() + "?" + nQueryString;
+            }
         } catch (UnknownVersionException ex) {
             // Not a STA topic.
             LOGGER.debug("\nNormalised {}\n        to {}", topicClient, topicInternal);
             return topicInternal;
-        }
-        final String pathNonVersion = pathString.substring(version.urlPart.length());
-        final ResourcePath path = PathParser.parsePath(contextNormalise, version, pathNonVersion);
-        final Query query = QueryParser.parseQuery(queryString, contextNormalise, path)
-                .validate(null, path.getMainElementType());
-        query.normalise();
-        final String nQueryString = query.toUnencodedString(false);
-        if (StringHelper.isNullOrEmpty(nQueryString)) {
-            topicInternal = version.urlPart + '/' + path.getUrl();
-        } else {
-            topicInternal = version.urlPart + '/' + path.getUrl() + "?" + nQueryString;
+        } catch (RuntimeException ex) {
+            LOGGER.debug("Failed to normalise {}", topicClient);
+            return topicInternal;
         }
         LOGGER.debug("Normalised {}\n        to {}", topicClient, topicInternal);
         return topicInternal;
