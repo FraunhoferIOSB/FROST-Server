@@ -20,6 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.settings.annotation.SensitiveValue;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -68,13 +70,13 @@ public class ConnectionUtils implements ConfigDefaults {
     public static final String TAG_DB_MINIDLE = "db.conn.idle.min";
 
     // Connection validation settings
-    @DefaultValue("false")
+    @DefaultValueBoolean(false)
     public static final String TAG_DB_TEST_ON_BORROW = "db.conn.testOnBorrow";
-    @DefaultValue("false")
+    @DefaultValueBoolean(false)
     public static final String TAG_DB_TEST_WHILE_IDLE = "db.conn.testWhileIdle";
     @DefaultValue("")
     public static final String TAG_DB_VALIDATION_QUERY = "db.conn.validationQuery";
-    @DefaultValue("0")
+    @DefaultValueInt(0)
     public static final String TAG_DB_EVICTION_INTERVAL = "db.conn.timeBetweenEvictionRunsMillis";
 
     /**
@@ -142,16 +144,15 @@ public class ConnectionUtils implements ConfigDefaults {
             ds.setMaxTotal(settings.getInt(TAG_DB_MAXCONN, ds.getMaxTotal()));
             ds.setMinIdle(settings.getInt(TAG_DB_MINIDLE, ds.getMinIdle()));
 
-            // Connection validation settings (default false for backward compatibility)
-            ds.setTestOnBorrow(settings.getBoolean(TAG_DB_TEST_ON_BORROW, false));
-            ds.setTestWhileIdle(settings.getBoolean(TAG_DB_TEST_WHILE_IDLE, false));
+            ds.setTestOnBorrow(settings.getBoolean(TAG_DB_TEST_ON_BORROW, ConnectionUtils.class));
+            ds.setTestWhileIdle(settings.getBoolean(TAG_DB_TEST_WHILE_IDLE, ConnectionUtils.class));
 
             String validationQuery = settings.get(TAG_DB_VALIDATION_QUERY, ConnectionUtils.class);
             if (!validationQuery.isEmpty()) {
                 ds.setValidationQuery(validationQuery);
             }
 
-            long evictionInterval = settings.getLong(TAG_DB_EVICTION_INTERVAL, 0L);
+            long evictionInterval = settings.getLong(TAG_DB_EVICTION_INTERVAL, ConnectionUtils.class);
             if (evictionInterval > 0) {
                 ds.setTimeBetweenEvictionRunsMillis(evictionInterval);
             }
