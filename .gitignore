@@ -3,6 +3,7 @@
 */nbproject/
 */*/nbproject/
 *~
+*.bkp
 .idea/
 *.iml
 nbactions.xml

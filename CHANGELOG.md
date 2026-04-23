@@ -1,8 +1,10 @@
 # Changelog
 
-## Version 2.6.3-SNAPSHOT
+## Version 2.6.3
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
+* Add connection validation settings to BasicDataSource.
 * Fixed #2263: Custom Entity Linking Fails with UUID primary keys.
 
 
