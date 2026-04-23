@@ -124,11 +124,13 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         anonymousRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         String topicAllowListRegex = authSettings.get(TAG_MQTT_TOPIC_ALLOWLIST, MoquetteMqttServer.class);
 
+        // Ensure PM is initialised early.
+        PersistenceManagerFactory.init(coreSettings);
+
         if (isNullOrEmpty(topicAllowListRegex)) {
             topicAllowPattern = null;
         } else {
             topicAllowPattern = Pattern.compile(topicAllowListRegex);
-            PersistenceManagerFactory.init(coreSettings);
         }
 
         Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
