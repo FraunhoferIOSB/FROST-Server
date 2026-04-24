@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
-import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
@@ -324,20 +323,20 @@ public class MqttExtraTests11 extends AbstractTestClass {
                     eh.getCache(sMdl.etObservation));
             JsonNode entityJson1 = eh.getEntityJson(
                     sMdl.etObservation,
+                    obs.getPrimaryKeyValues(),
                     eh.selectAllWithId(sMdl.etObservation),
-                    "id eq " + StringHelper.formatKeyValuesForUrl(obs),
                     "Datastream($select=description)");
             obsFuture1.complete(entityJson1);
             JsonNode entityJson2 = eh.getEntityJson(
                     sMdl.etObservation,
+                    obs.getPrimaryKeyValues(),
                     eh.selectAllWithId(sMdl.etObservation),
-                    "id eq " + StringHelper.formatKeyValuesForUrl(obs),
                     "Datastream");
             obsFuture2.complete(entityJson2);
             JsonNode entityJson3 = eh.getEntityJson(
                     sMdl.etObservation,
-                    eh.selectAllWithId(sMdl.etObservation),
-                    "id eq " + StringHelper.formatKeyValuesForUrl(obs),
+                    obs.getPrimaryKeyValues(),
+                    Arrays.asList(new String[]{"id", "result"}),
                     "FeatureOfInterest($select=feature)");
             obsFuture3.complete(entityJson3);
             JsonNode entityJson4 = eh.getEntityJson(sMdl.etObservation, obs.getPrimaryKeyValues(), null, Arrays.asList("result"), "FeatureOfInterest($select=feature)", null);
@@ -350,7 +349,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         final TestSubscription testSubscription2 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream")
                 .addExpectedJson(obsFuture2)
                 .createReceivedListener(sMdl.etObservation);
-        final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=FeatureOfInterest($select=feature)")
+        final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$select=id,result&$expand=FeatureOfInterest($select=feature)")
                 .addExpectedJson(obsFuture3)
                 .createReceivedListener(sMdl.etObservation);
         final TestSubscription testSubscription4 = new TestSubscription(mqttHelper, "v1.1/Observations?$select=result&$expand=FeatureOfInterest($select=feature)")
