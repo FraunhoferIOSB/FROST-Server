@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -111,8 +112,8 @@ class EntityParserTest {
                 + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
-                .setProperty(pluginCoreModel.getEpUnitOfMeasurement(),
-                        new UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
+                .setProperty(pluginCoreModel.epUnitOfMeasurement,
+                        UnitOfMeasurement.UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
@@ -171,9 +172,9 @@ class EntityParserTest {
                 + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
                 + "    }\n"
                 + "}";
-        List<UnitOfMeasurement> unitsOfMeasurement = new ArrayList<>();
-        unitsOfMeasurement.add(new UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
-        unitsOfMeasurement.add(new UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
+        List<ComplexValueImpl> unitsOfMeasurement = new ArrayList<>();
+        unitsOfMeasurement.add(UnitOfMeasurement.UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
+        unitsOfMeasurement.add(UnitOfMeasurement.UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
         List<String> observationTypes = new ArrayList<>();
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");

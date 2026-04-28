@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -423,8 +424,8 @@ class QueryParserTest {
             expResult.setFilter(
                     new Equal(
                             new Path(
-                                    pluginCoreModel.getEpUnitOfMeasurement(),
-                                    new EntityPropertyCustom("name")),
+                                    pluginCoreModel.epUnitOfMeasurement,
+                                    UnitOfMeasurement.EP_NAME),
                             new StringConstant("metre")));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
             result.validate(pluginCoreModel.etDatastream);
@@ -601,7 +602,7 @@ class QueryParserTest {
             String query = "$select=properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
+                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("type"));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
@@ -612,7 +613,7 @@ class QueryParserTest {
             String query = "$select=properties/my[5]/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
+                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -624,7 +625,7 @@ class QueryParserTest {
             String query = "$select=properties/my/5/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
+                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -642,7 +643,7 @@ class QueryParserTest {
             expResult
                     .addSelect(pluginCoreModel.etThing.getPrimaryKey().getKeyProperties())
                     .addSelect(pluginCoreModel.epName)
-                    .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
+                    .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("type"));
             expResult.setSelectDistinct(true);
@@ -655,7 +656,7 @@ class QueryParserTest {
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult
                     .addSelect(pluginCoreModel.epName)
-                    .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
+                    .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -668,7 +669,7 @@ class QueryParserTest {
             String query = "$select=distinct:properties/my/5/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES.getName())
+                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));

@@ -154,8 +154,9 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
                             EntityFactories.insertGeometry(updateFields, table.colFeature, table.colGeom, encodingType, feature);
                             message.addField(pluginCoreModel.epFeature);
                         }),
-                new NFP<>("j", table -> table.colFeature));
-        pfReg.addEntryNoSelect(pluginCoreModel.epFeature, "g", table -> table.colGeom);
+                new NFP<>("j", table -> table.colFeature),
+                new NFP<>("g", table -> table.colGeom));
+        // TODO: Make the g non-selectable again.
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npObservationsFeature, TableImpFeatures::getId);
     }

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jackson.jsonpointer.JsonPointerException;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
@@ -101,8 +102,13 @@ public class ReferenceTests11 extends AbstractTestClass {
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV20Core.class);
-        EntityUtils.deleteAll(sSrvc);
-        createEntities();
+        try {
+            EntityUtils.deleteAll(sSrvc);
+            createEntities();
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Failed to create entities: {}", ex.getReturnedContent());
+            throw ex;
+        }
     }
 
     @Override

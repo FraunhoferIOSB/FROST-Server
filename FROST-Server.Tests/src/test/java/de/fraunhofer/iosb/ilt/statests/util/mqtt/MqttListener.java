@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
@@ -73,6 +72,18 @@ public class MqttListener implements Callable<JsonNode> {
         this.topic = topic;
         barrier = new CountDownLatch(expectedMessages);
         LOGGER.debug("{} Created MqttListener for {} expecting {} on {}", name, mqttServer, expectedMessages, topic);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public boolean isDone() {
+        return barrier.getCount() == 0;
     }
 
     public void setListener(ReceivedListener listener) {
@@ -218,9 +229,7 @@ public class MqttListener implements Callable<JsonNode> {
         try {
             barrier.await();
         } catch (InterruptedException ex) {
-            LOGGER.error("waiting for MQTT events on {} timed out.", topic);
-            LOGGER.error("Exception:", ex);
-            fail("waiting for MQTT events on " + topic + " timed out: " + ex.getMessage());
+            LOGGER.error("waiting for MQTT events on {} timed out: Barrier={}.", topic, barrier.getCount());
         } finally {
             if (mqttClient != null) {
                 LOGGER.trace("        Closing client: unsubscribing...");

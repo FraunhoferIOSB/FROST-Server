@@ -74,7 +74,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -810,17 +809,17 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void validateMappings(final StaMainTable<?> tableForType, PropertyFieldRegistry<?> pfReg, ContainerType<?> type) {
         for (var property : type.getEntityProperties()) {
-            PropertyFieldRegistry.PropertyFields<?> pf = pfReg.getSelectFieldsForProperty(property);
-            if (pf == null || pf.converter == null) {
-                LOGGER.error("Property {}/{} is not backed by table {}.", type, property.getName(), tableForType.getName());
-            }
-            final PropertyType subType = property.getType();
-            if (subType instanceof ContainerType ct) {
-                var subReg = pfReg.getSubRegistryFor(property);
-                if (subReg != null) {
-                    validateMappings(tableForType, subReg, ct);
-                }
-            }
+            var pf = pfReg.getSelectFieldsForProperty(property);
+            validateMapping(pf, "", tableForType);
+        }
+    }
+
+    private void validateMapping(PropertyFieldRegistry.PropertyFields<? extends StaMainTable<?>> pf, String parent, final StaMainTable<?> tableForType) {
+        if (pf == null || pf.converter == null) {
+            LOGGER.error("Property {}/{} is not backed by table {}.", parent, pf.property.getName(), tableForType.getName());
+        }
+        for (var subPf : pf.subFields.values()) {
+            validateMapping(subPf, parent, tableForType);
         }
     }
 

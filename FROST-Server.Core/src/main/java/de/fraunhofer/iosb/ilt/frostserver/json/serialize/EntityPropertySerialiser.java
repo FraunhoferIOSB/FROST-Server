@@ -24,7 +24,7 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;
 
 /**
- * Serializer for TimeValue objects.
+ * Serializer for EntityProperty objects.
  */
 public class EntityPropertySerialiser extends ValueSerializer<Property> {
 

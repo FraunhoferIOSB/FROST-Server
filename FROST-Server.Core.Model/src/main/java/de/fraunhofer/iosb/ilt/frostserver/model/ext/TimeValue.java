@@ -35,7 +35,7 @@ import net.time4j.Moment;
 public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
 
     public static EntityPropertyMain<TimeInstant> EP_START_TIME = TypeComplex.EP_START_TIME;
-    public static EntityPropertyMain<TimeInstant> EP_END_TIME = TypeComplex.EP_INTERVAL_END_TIME;
+    public static EntityPropertyMain<TimeInstant> EP_END_TIME = TypeComplex.EP_VALUE_END_TIME;
 
     private TimeInstant instant;
     private TimeInterval interval;
@@ -147,6 +147,8 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
             moment = m;
         } else if (value instanceof Instant i) {
             moment = Moment.from(i);
+        } else if (value instanceof TimeInstant i) {
+            moment = i.getDateTime();
         } else {
             throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
         }

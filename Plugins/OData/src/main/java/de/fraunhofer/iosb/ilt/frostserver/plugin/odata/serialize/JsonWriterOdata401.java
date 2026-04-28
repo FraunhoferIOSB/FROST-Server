@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.DateSerialiser;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityChangedMessageSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityPropertySerialiser;
@@ -31,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import java.io.Writer;
 import java.util.Date;
@@ -93,7 +91,6 @@ public class JsonWriterOdata401 {
                 .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
-                .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)
                 .addModule(module)
                 .build();
 

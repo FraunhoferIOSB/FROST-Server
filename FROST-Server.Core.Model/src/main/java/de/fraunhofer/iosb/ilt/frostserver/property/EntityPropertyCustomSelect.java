@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,24 +31,21 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * A custom property as used in $select. In this case the entire custom property
  * path is captured in one single property.
- *
- * @author Hylke van der Schaaf
  */
 public class EntityPropertyCustomSelect extends PropertyAbstract<Object> implements EntityProperty<Object> {
 
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
-    private final String entityPropertyName;
-    private EntityPropertyMain entityProperty;
+    private final EntityPropertyMain mainProperty;
     private final List<String> subPath = new ArrayList<>();
 
-    public EntityPropertyCustomSelect(String entityPropertyName) {
-        super(entityPropertyName, TypeSimplePrimitive.EDM_UNTYPED, false, true, false);
-        this.entityPropertyName = entityPropertyName;
+    public EntityPropertyCustomSelect(EntityPropertyMain mainProperty) {
+        super(mainProperty.getName(), TypeSimplePrimitive.EDM_UNTYPED, false, true, false);
+        this.mainProperty = mainProperty;
     }
 
-    public String getMainEntityPropertyName() {
-        return entityPropertyName;
+    public EntityPropertyMain getMainProperty() {
+        return mainProperty;
     }
 
     public List<String> getSubPath() {
@@ -58,13 +54,13 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
 
     public EntityPropertyCustomSelect addToSubPath(Collection<String> subPathElements) {
         subPath.addAll(subPathElements);
-        setName(entityPropertyName + "/" + StringUtils.join(subPath, '/'));
+        setName(mainProperty.getName() + "/" + StringUtils.join(subPath, '/'));
         return this;
     }
 
     public EntityPropertyCustomSelect addToSubPath(String subPathElement) {
         subPath.add(subPathElement);
-        setName(entityPropertyName + "/" + StringUtils.join(subPath, '/'));
+        setName(mainProperty.getName() + "/" + StringUtils.join(subPath, '/'));
         return this;
     }
 
@@ -74,11 +70,8 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     }
 
     @Override
-    public Object getFrom(Entity entity) {
-        if (entityProperty == null) {
-            entityProperty = entity.getEntityType().getEntityProperty(entityPropertyName);
-        }
-        Object baseProperty = entity.getProperty(entityProperty);
+    public Object getFrom(ComplexValue<?> entity) {
+        Object baseProperty = entity.getProperty(mainProperty);
         if (baseProperty instanceof Map map) {
             return CollectionsHelper.getFrom(map, subPath);
         }
@@ -89,31 +82,28 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     }
 
     @Override
-    public void setOn(Entity entity, Object value) {
-        if (entityProperty == null) {
-            entityProperty = entity.getEntityType().getEntityProperty(entityPropertyName);
-        }
-        Object baseProperty = entity.getProperty(entityProperty);
+    public void setOn(ComplexValue<?> entity, Object value) {
+        Object baseProperty = entity.getProperty(mainProperty);
         if (baseProperty == null) {
             Map<String, Object> basePropertyMap = new LinkedHashMap<>();
             baseProperty = basePropertyMap;
-            entity.setProperty(entityProperty, baseProperty);
+            entity.setProperty(mainProperty, baseProperty);
         }
         if (baseProperty instanceof Map) {
             CollectionsHelper.setOn((Map<String, Object>) baseProperty, subPath, value);
         } else {
-            throw new UnsupportedOperationException("Can not set: " + entityPropertyName + " value is not a map.");
+            throw new UnsupportedOperationException("Can not set: " + mainProperty + " value is not a map.");
         }
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue<?> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entityPropertyName, subPath);
+        return Objects.hash(mainProperty, subPath);
     }
 
     @Override
@@ -128,7 +118,7 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
             return false;
         }
         final EntityPropertyCustomSelect other = (EntityPropertyCustomSelect) obj;
-        return Objects.equals(this.entityPropertyName, other.entityPropertyName)
+        return Objects.equals(this.mainProperty, other.mainProperty)
                 && Objects.equals(this.subPath, other.subPath);
     }
 

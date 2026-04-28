@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.formatter;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -32,9 +33,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The default resultFormatter, generating JSON.
- *
- * @author scf
- * @author jab
  */
 public class ResultFormatterDefault implements ResultFormatter {
 
@@ -57,7 +55,7 @@ public class ResultFormatterDefault implements ResultFormatter {
         // Not an Entity nor an EntitySet.
         if (path != null && path.isValue()) {
             LOGGER.trace("Formatting as $Value.");
-            if (result instanceof Map || result instanceof GeoJsonObject) {
+            if (result instanceof ComplexValue || result instanceof Map || result instanceof GeoJsonObject) {
                 return target -> JsonWriter.writeObject(target, result);
             } else {
                 return target -> target.append(Objects.toString(result));

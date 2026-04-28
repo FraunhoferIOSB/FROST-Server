@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 import static net.time4j.tz.ZonalOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -162,8 +163,8 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.epResultTimeDs, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
         propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
-        UnitOfMeasurement unit1 = new UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
-        propertyValues.put(pluginCoreModel.getEpUnitOfMeasurement(), unit1);
+        ComplexValueImpl unit1 = UnitOfMeasurement.UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
+        propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
 
         long nextId = 100;

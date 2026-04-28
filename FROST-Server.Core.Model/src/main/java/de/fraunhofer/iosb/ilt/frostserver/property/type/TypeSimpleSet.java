@@ -20,8 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 import tools.jackson.core.type.TypeReference;
 
 /**
- *
- * @author hylke
+ * A type that represents a set.
  */
 public class TypeSimpleSet extends PropertyType {
 
@@ -32,8 +31,8 @@ public class TypeSimpleSet extends PropertyType {
         this.containtedType = containedType;
     }
 
-    public TypeSimpleSet(TypeComplex containedType, TypeReference typeReference) {
-        super(containedType.getName(), "Collection of " + containedType.getName(), ParserUtils.getDefaultDeserializer(typeReference));
+    public TypeSimpleSet(TypeComplex containedType) {
+        super(containedType.getName(), "Collection of " + containedType.getName(), ParserUtils.getComplexTypeListDeserializer(containedType));
         this.containtedType = containedType;
     }
 

@@ -62,8 +62,8 @@ public class FieldMapperTimeInstant extends FieldMapperAbstractEp {
         final int idx = fieldIdx;
         pfReg.addEntry(
                 entityProperty,
-                t -> t.field(idx),
-                new PropertyFieldRegistry.ConverterTimeInstant<>(entityProperty, t -> t.field(idx)));
+                new PropertyFieldRegistry.ConverterTimeInstant<>(entityProperty, t -> t.field(idx)),
+                t -> t.field(idx));
     }
 
     /**

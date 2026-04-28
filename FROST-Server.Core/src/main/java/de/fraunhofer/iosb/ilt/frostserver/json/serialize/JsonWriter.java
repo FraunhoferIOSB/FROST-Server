@@ -18,14 +18,12 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import de.fraunhofer.iosb.ilt.frostserver.json.mixin.UnitOfMeasurementMixIn;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.io.IOException;
@@ -83,7 +81,6 @@ public class JsonWriter {
                 .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .addModule(module)
                 .addModule(new JSONPModule())
-                .addMixIn(UnitOfMeasurement.class, UnitOfMeasurementMixIn.class)
                 .build();
 
         return mapper;

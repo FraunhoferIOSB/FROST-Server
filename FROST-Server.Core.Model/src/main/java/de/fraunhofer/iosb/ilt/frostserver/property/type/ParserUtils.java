@@ -21,6 +21,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
@@ -28,6 +31,7 @@ import tools.jackson.core.JsonToken;
 import tools.jackson.core.TreeNode;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.ValueSerializer;
@@ -107,6 +111,43 @@ public class ParserUtils {
      * @param type the type of the complex type.
      * @return The deserialiser.
      */
+    public static ValueDeserializer<List<ComplexValue>> getComplexTypeListDeserializer(TypeComplex type) {
+        return new ComplexTypeListDeserializer(type);
+    }
+
+    private static class ComplexTypeListDeserializer extends ValueDeserializer<List<ComplexValue>> {
+
+        private final TypeComplex type;
+        private final ComplexTypeDeserializer itemDeser;
+
+        public ComplexTypeListDeserializer(TypeComplex type) {
+            this.type = type;
+            this.itemDeser = new ComplexTypeDeserializer(type);
+        }
+
+        @Override
+        public List<ComplexValue> deserialize(JsonParser parser, DeserializationContext ctxt) {
+            List<ComplexValue> result = new ArrayList<>();
+            JsonToken currentToken = parser.currentToken();
+            if (currentToken == null) {
+                currentToken = parser.nextToken();
+            }
+            if (currentToken == JsonToken.VALUE_NULL) {
+                return null;
+            }
+            if (currentToken != JsonToken.START_ARRAY) {
+                throw new IllegalArgumentException("Expected " + JsonToken.START_ARRAY + " got " + currentToken);
+            }
+            currentToken = parser.nextToken();
+            while (currentToken != JsonToken.END_ARRAY) {
+                result.add(itemDeser.deserialize(parser, ctxt));
+                currentToken = parser.nextToken();
+            }
+            return result;
+        }
+
+    }
+
     public static ValueDeserializer<ComplexValue> getComplexTypeDeserializer(TypeComplex type) {
         return new ComplexTypeDeserializer(type);
     }
@@ -166,4 +207,25 @@ public class ParserUtils {
             }
         }
     }
+
+    public static ComplexValue parseComplexValue(ObjectMapper mapper, TypeComplex type, String value) throws IOException {
+        try (final JsonParser parser = mapper.createParser(value)) {
+            DeserializationContext dsc = mapper._deserializationContext();
+            return ParserUtils.getComplexTypeDeserializer(type)
+                    .deserialize(parser, dsc);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
+        }
+    }
+
+    public static List<ComplexValue> parseComplexValueList(ObjectMapper mapper, TypeComplex type, String value) throws IOException {
+        try (final JsonParser parser = mapper.createParser(value)) {
+            DeserializationContext dsc = mapper._deserializationContext();
+            return ParserUtils.getComplexTypeListDeserializer(type)
+                    .deserialize(parser, dsc);
+        } catch (StackOverflowError err) {
+            throw new IOException("Json is too deeply nested.");
+        }
+    }
+
 }

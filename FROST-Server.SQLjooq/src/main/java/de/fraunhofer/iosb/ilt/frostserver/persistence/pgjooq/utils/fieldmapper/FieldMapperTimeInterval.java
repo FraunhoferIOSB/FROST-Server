@@ -17,9 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
@@ -70,10 +67,10 @@ public class FieldMapperTimeInterval extends FieldMapperAbstractEp {
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idxStart = fieldStartIdx;
         final int idxEnd = fieldEndIdx;
-        pfReg.addEntry(property,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(property, t -> t.field(idxStart), t -> t.field(idxEnd)),
-                new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_START, t -> t.field(idxStart)),
-                new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_END, t -> t.field(idxEnd)));
+        pfReg.addEntryTimeInterval(
+                property,
+                t -> t.field(idxStart),
+                t -> t.field(idxEnd));
     }
 
     /**

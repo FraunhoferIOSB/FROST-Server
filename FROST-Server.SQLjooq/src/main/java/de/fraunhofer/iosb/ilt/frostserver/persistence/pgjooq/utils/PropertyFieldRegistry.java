@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -29,8 +30,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
@@ -39,6 +44,9 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,29 +61,33 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.TreeNode;
 
 /**
+ * The registry with methods for accessing and manipulating the properties and
+ * fields of a single table.
  *
- * @author hylke
  * @param <T> The table type this registry has fields for.
  */
 public class PropertyFieldRegistry<T extends StaMainTable<T>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyFieldRegistry.class.getName());
 
     private final T table;
     /**
      * The Fields that are allowed be appear in select statements.
      */
-    private final Map<Property, PropertyFields<T>> epMapSelect;
-    /**
-     * The Fields that are allowed in where and orderby statements.
-     */
-    private final Map<Property, Map<String, ExpressionFactory<T>>> epMapAll;
+    private final Map<Property, PropertyFields<T>> propFieldsMap;
+
     /**
      * All select-able fields, by class.
      */
-    private final List<PropertyFields<T>> allSelectPropertyFields;
+    private final List<PropertyFields<T>> propFieldsList;
 
+    // TODO: Rename to FieldFetcher.
+    // TODO: Move static stuff down.
     public static interface ExpressionFactory<U extends StaMainTable<U>> {
 
         public Field get(U table);
@@ -101,6 +113,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
          */
         public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize);
     }
+
+    public static final ConverterRecordRead NULL_READ = (table, input, entity, dataSize) -> {
+        // Does nothing
+    };
 
     public static interface ConverterRecordInsert<U extends StaMainTable<U>> {
 
@@ -130,12 +146,16 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         private final ConverterRecordInsert<U> insert;
         private final ConverterRecordUpdate<U> update;
 
+        public ConverterRecordDeflt() {
+            this(null, null, null);
+        }
+
         public ConverterRecordDeflt(ConverterRecordRead<U> read) {
             this(read, null, null);
         }
 
         public ConverterRecordDeflt(ConverterRecordRead<U> read, ConverterRecordInsert<U> insert, ConverterRecordUpdate<U> update) {
-            this.read = read;
+            this.read = (read == null) ? NULL_READ : read;
             this.insert = (insert == null) ? NULL_INSERT : insert;
             this.update = (update == null) ? NULL_UPDATE : update;
         }
@@ -157,16 +177,13 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     }
 
-    public static class PropertyFields<U extends StaMainTable<U>> {
+    public static abstract class PropertyFields<U extends StaMainTable<U>> {
 
         public final Property property;
         public final boolean jsonType;
         public final Map<String, ExpressionFactory<U>> fields = new LinkedHashMap<>();
+        public final Map<EntityProperty, PropertyFields<U>> subFields = new LinkedHashMap<>();
         public final ConverterRecord<U> converter;
-
-        public PropertyFields(Property property, ConverterRecord<U> converter) {
-            this(property, false, converter);
-        }
 
         public PropertyFields(Property property, boolean jsonType, ConverterRecord<U> converter) {
             this.property = property;
@@ -174,14 +191,42 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
             this.jsonType = jsonType;
         }
 
+        public PropertyFields<U> getSubField(EntityProperty property) {
+            return subFields.get(property);
+        }
+
+        public abstract void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize);
+
+        public abstract void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields);
+
+        public abstract void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message);
+
         public PropertyFields<U> addField(String name, ExpressionFactory<U> field) {
             String key = name;
-            if (key == null) {
+            if (StringHelper.isNullOrEmpty(key)) {
                 key = Integer.toString(fields.size());
             }
             fields.put(key, field);
             return this;
         }
+
+        public PropertyFields<U> addSubProperty(PropertyFields<U> propFields) {
+            if (propFields.property instanceof EntityProperty ep) {
+                subFields.put(ep, propFields);
+            } else {
+                LOGGER.error("Adding non-EntityProperty {} as subField of {}", propFields.property, property);
+            }
+            return this;
+        }
+
+        public void getFieldsRecursive(Collection<ExpressionFactory<U>> target) {
+            target.addAll(fields.values());
+            for (var subField : subFields.values()) {
+                subField.getFieldsRecursive(target);
+            }
+        }
+
+        public abstract PropertyFields<U> emptyCopy();
 
         @Override
         public String toString() {
@@ -190,14 +235,87 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     }
 
-    public static class PropertyFactoryCombo<U extends StaMainTable<U>> {
+    public static class PropertyFieldsSimple<U extends StaMainTable<U>> extends PropertyFields<U> {
 
-        public final Property property;
-        public final ExpressionFactory<U> factory;
+        public PropertyFieldsSimple(Property property, ConverterRecord<U> converter) {
+            super(property, false, converter);
+        }
 
-        public PropertyFactoryCombo(Property property, ExpressionFactory<U> factory) {
-            this.property = property;
-            this.factory = factory;
+        public PropertyFieldsSimple(Property property, boolean jsonType, ConverterRecord<U> converter) {
+            super(property, jsonType, converter);
+        }
+
+        @Override
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
+            converter.convert(table, input, entity, dataSize);
+        }
+
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
+            converter.convert(table, entity, insertFields);
+        }
+
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+            converter.convert(table, entity, updateFields, message);
+        }
+
+        @Override
+        public PropertyFieldsSimple<U> emptyCopy() {
+            return new PropertyFieldsSimple<>(property, jsonType, converter);
+        }
+
+    }
+
+    public static class PropertyFieldsComplex<U extends StaMainTable<U>> extends PropertyFields<U> {
+
+        public PropertyFieldsComplex(Property property, ConverterRecord<U> converter) {
+            super(property, false, converter);
+        }
+
+        public PropertyFieldsComplex(Property property, boolean jsonType, ConverterRecord<U> converter) {
+            super(property, jsonType, converter);
+        }
+
+        @Override
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
+            ComplexValue value = ((TypeComplex) property.getType()).instantiate();
+            entity.setProperty(property, value);
+            converter.convert(table, input, value, dataSize);
+            for (PropertyFields<U> subField : subFields.values()) {
+                subField.convert(table, input, value, dataSize);
+            }
+        }
+
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
+            Object value = entity.getProperty(property);
+            if (value instanceof ComplexValue cv) {
+                converter.convert(table, cv, insertFields);
+                for (PropertyFields<U> subField : subFields.values()) {
+                    subField.convert(table, cv, insertFields);
+                }
+            }
+        }
+
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+            Object value = entity.getProperty(property);
+            if (value instanceof ComplexValue cv) {
+                converter.convert(table, cv, updateFields, message);
+                EntityChangedMessage subMessage = new EntityChangedMessage();
+                for (PropertyFields<U> subField : subFields.values()) {
+                    subField.convert(table, cv, updateFields, subMessage);
+                }
+                if (!StringHelper.isNullOrEmpty(subMessage.getEpFields())) {
+                    message.addField(property);
+                }
+            }
+        }
+
+        @Override
+        public PropertyFields<U> emptyCopy() {
+            return new PropertyFieldsComplex<>(property, jsonType, converter);
         }
 
     }
@@ -212,6 +330,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         public final String name;
         public final ExpressionFactory<U> factory;
 
+        public NFP(ExpressionFactory<U> factory) {
+            this("", factory);
+        }
+
         public NFP(String name, ExpressionFactory<U> factory) {
             this.name = name;
             this.factory = factory;
@@ -220,17 +342,14 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     public PropertyFieldRegistry(T table) {
         this.table = table;
-        this.epMapSelect = new HashMap<>();
-        this.epMapAll = new HashMap<>();
-        this.allSelectPropertyFields = new ArrayList<>();
-
+        this.propFieldsMap = new HashMap<>();
+        this.propFieldsList = new ArrayList<>();
     }
 
     public PropertyFieldRegistry(T table, PropertyFieldRegistry<T> copyFrom) {
         this.table = table;
-        this.epMapSelect = copyFrom.epMapSelect;
-        this.epMapAll = copyFrom.epMapAll;
-        this.allSelectPropertyFields = copyFrom.allSelectPropertyFields;
+        this.propFieldsMap = copyFrom.propFieldsMap;
+        this.propFieldsList = copyFrom.propFieldsList;
     }
 
     /**
@@ -247,7 +366,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         if (result == null) {
             result = (C) new ArrayList();
         }
-        result.addAll(allSelectPropertyFields);
+        result.addAll(propFieldsList);
         return result;
     }
 
@@ -259,11 +378,89 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      * @return The target list, or a new list if target was null.
      */
     public PropertyFields<T> getSelectFieldsForProperty(Property property) {
-        if (property instanceof EntityPropertyCustomSelect epCustomSelect) {
-            return table.handleEntityPropertyCustomSelect(epCustomSelect);
+        if (property instanceof EntityPropertyCustomSelect epcs) {
+            EntityPropertyMain parentProp = epcs.getMainProperty();
+            PropertyFields<T> lastPropFields = propFieldsMap.get(parentProp);
+            final PropertyFields<T> mainPropCopy = lastPropFields.emptyCopy();
+            PropertyFields<T> lastPropCopy = mainPropCopy;
+
+            PropertyType parentType = parentProp.getType();
+            final List<String> subPath = epcs.getSubPath();
+            EntityPropertyMain lastProp = parentProp;
+            PropertyType lastType = parentType;
+            for (int idx = 0; idx < subPath.size(); idx++) {
+                if (lastType instanceof TypeComplex tc) {
+                    boolean openType = tc.isOpenType();
+                    String pathPart = subPath.get(idx);
+                    EntityPropertyMain subProp = tc.getEntityProperty(pathPart);
+                    if (subProp == null) {
+                        // We have reached a custom property.
+                        if (!openType) {
+                            throw new IllegalArgumentException("No path: at " + pathPart + " of " + epcs);
+                        }
+                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
+                    } else {
+                        // Nested properties
+                        PropertyFields<T> subPropFields = lastPropFields.subFields.get(subProp);
+                        PropertyFields<T> subPropCopy = subPropFields.emptyCopy();
+                        lastPropCopy.addSubProperty(subPropCopy);
+
+                        lastProp = subProp;
+                        lastPropFields = subPropFields;
+                        lastPropCopy = subPropCopy;
+                    }
+                } else {
+                    if (lastProp.hasCustomProperties || lastPropFields.jsonType) {
+                        if (lastProp.hasCustomProperties != lastPropFields.jsonType) {
+                            LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", lastProp.hasCustomProperties, lastPropFields.jsonType);
+                        }
+                        // Not a complex type, but can be queried.
+                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
+                    } else {
+                        LOGGER.error("Not a complex property: {} {}", property, parentType);
+                        return null;
+                    }
+                }
+            }
+            lastPropCopy.fields.putAll(lastPropFields.fields);
+            return mainPropCopy;
         } else {
-            return epMapSelect.get(property);
+            return propFieldsMap.get(property);
         }
+    }
+
+    public PropertyFields<T> handleEntityPropertyCustomSelect(EntityPropertyCustomSelect epcs, PropertyFields<T> propFields, List<String> subPath, int idx) {
+        ExpressionFactory<T> factory = propFields.fields.get("j");
+        if (factory == null) {
+            factory = propFields.fields.values().iterator().next();
+        }
+        final Field mainField = factory.get(table);
+        final JsonFieldFactory.JsonFieldWrapper jsonFactory = jsonFieldFromPath(mainField, subPath, idx);
+        return propertyFieldForJsonField(jsonFactory, epcs);
+    }
+
+    public static JsonFieldWrapper jsonFieldFromPath(final Field mainField, List<String> subPath, int startIdx) {
+        JsonFieldWrapper jsonFactory = new JsonFieldWrapper(mainField);
+        for (int idx = startIdx; idx < subPath.size(); idx++) {
+            String pathItem = subPath.get(idx);
+            jsonFactory.addToPath(pathItem);
+        }
+        return jsonFactory;
+    }
+
+    protected PropertyFields<T> propertyFieldForJsonField(JsonFieldWrapper jsonFactory, final EntityPropertyCustomSelect epcs) {
+        final Field<Object> deepField = jsonFactory.materialise().getJsonExpression();
+        PropertyFields<T> pfs = new PropertyFieldsSimple<T>(
+                epcs,
+                new PropertyFieldRegistry.ConverterRecordDeflt<>(
+                        (tbl, tuple, entity, dataSize) -> {
+                            final JsonValue jsonValue = JsonBinding.getConverterInstance().from(tuple.get(deepField));
+                            dataSize.increase(jsonValue.getStringLength());
+                            Object value = jsonValue.getValue();
+                            epcs.setOn(entity, value);
+                        }, null, null));
+        pfs.addField("1", t -> deepField);
+        return pfs;
     }
 
     /**
@@ -274,16 +471,20 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      * @param target The Map to add to. If null a new Map will be created.
      * @return The target Map, or a new Map if target was null.
      */
-    public Map<String, Field> getAllFieldsForProperty(EntityPropertyMain property, Map<String, Field> target) {
-        Map<String, ExpressionFactory<T>> coreMap = epMapAll.get(property);
-        if (coreMap == null) {
+    public Map<String, Field> resolveFieldsForProperty(EntityPropertyMain property, Map<String, Field> target) {
+        PropertyFields<T> propFields = propFieldsMap.get(property);
+        if (propFields == null) {
             throw new IllegalArgumentException("No property called " + property.toString() + " for " + table.getClass());
         }
+        return resolveFieldsForProperty(propFields, target);
+    }
+
+    public Map<String, Field> resolveFieldsForProperty(PropertyFields<T> propFields, Map<String, Field> target) {
         Map<String, Field> result = target;
         if (result == null) {
             result = new LinkedHashMap<>();
         }
-        for (Map.Entry<String, ExpressionFactory<T>> es : coreMap.entrySet()) {
+        for (Map.Entry<String, ExpressionFactory<T>> es : propFields.fields.entrySet()) {
             result.put(es.getKey(), es.getValue().get(table));
         }
         return result;
@@ -322,137 +523,161 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterEntity<>(property, factory));
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterEntity<>(property, factory));
         pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
     }
 
     public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
-        PropertyFields<T> pf = new PropertyFields<>(property, ps);
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, ps);
         pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
     }
 
     public void addEntry(NavigationPropertyEntitySet property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<T>(property, new ConverterEntitySet<>());
+        PropertyFields<T> pf = new PropertyFieldsSimple<T>(property, new ConverterEntitySet<>());
         pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
     }
 
-    public void addEntryString(EntityProperty<String> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterString<>(property, factory));
+    public PropertyFields<T> createEntryString(EntityProperty<String> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterString<>(property, factory));
         pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        return pf;
+    }
+
+    public PropertyFields<T> addEntryString(EntityProperty<String> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = createEntryString(property, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
+        return pf;
+    }
+
+    public PropertyFields<T> createEntryNumeric(EntityProperty<BigDecimal> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterSimple<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
     }
 
     public void addEntryNumeric(EntityProperty<BigDecimal> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterSimple<>(property, factory));
-        pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        PropertyFields<T> pf = createEntryNumeric(property, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
     }
 
     public void addEntryId(ExpressionFactory<T> factory) {
         final EntityPropertyMain keyProperty = table.getEntityType().getPrimaryKey().getKeyProperty(0);
-        final ConverterSimple<T> converterId = new ConverterSimple<>(keyProperty, factory, true, false);
-        addEntry(keyProperty, factory, converterId);
+        final var converterId = new ConverterSimple<>(keyProperty, factory, true, false);
+        addEntry(keyProperty, converterId, new NFP<>("", factory));
         final ConverterSimple<T> converterSelfLink = new ConverterSimple<>(keyProperty, factory, false, false);
-        addEntry(ModelRegistry.EP_SELFLINK, factory, converterSelfLink);
+        addEntry(ModelRegistry.EP_SELFLINK, converterSelfLink, new NFP<>("", factory));
+    }
+
+    private PropertyFields<T> createEntryMap(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterMap<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
     }
 
     public void addEntryMap(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, true, new ConverterMap<>(property, factory));
+        PropertyFields<T> pf = createEntryMap(property, factory);
+        addEntry(pf);
+    }
+
+    private PropertyFields<T> createEntryJson(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterJson<>(property, factory));
         pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        return pf;
+    }
+
+    public void addEntryJson(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = createEntryJson(property, factory);
+        addEntry(pf);
+    }
+
+    public PropertyFields<T> createEntrySimple(EntityProperty property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterSimple<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
     }
 
     public void addEntrySimple(EntityProperty property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFields<>(property, new ConverterSimple<>(property, factory));
+        PropertyFields<T> pf = createEntrySimple(property, factory);
+        addEntry(pf);
+    }
+
+    public PropertyFields<T> createEntryTimeInstant(EntityProperty property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterTimeInstant<>(property, factory));
         pf.addField(null, factory);
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
-        addEntry(epMapAll, property, null, factory);
+        return pf;
     }
 
-    /**
-     * Add an unnamed entry to the Field registry.
-     *
-     * @param property The property that this field supplies data for.
-     * @param factory The factory to use to generate the Field instance.
-     * @param ps The ConverterRecordRead to use to set the get the property from
-     * a record and set it on an Entity.
-     */
-    public void addEntry(Property property, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
-        addEntry(property, false, factory, ps);
+    public void addEntryTimeInstant(EntityProperty property, ExpressionFactory<T> factory) {
+        PropertyFields<T> pf = createEntryTimeInstant(property, factory);
+        addEntry(pf);
     }
 
-    public void addEntry(Property property, boolean isJson, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
-        PropertyFields<T> pf = new PropertyFields<>(property, isJson, ps);
-        if (factory != null) {
-            pf.addField(null, factory);
-            addEntry(epMapAll, property, null, factory);
+    public void addEntryTimeInterval(EntityProperty property, ExpressionFactory<T> factoryStart, ExpressionFactory<T> factoryEnd) {
+        final var converter = new ConverterTimeInterval<>(property, factoryStart, factoryEnd);
+        final var nfpStart = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START, factoryStart);
+        final var nfpEnd = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END, factoryEnd);
+        final var pf = createEntrySimple(property, false, converter, nfpStart, nfpEnd)
+                .addSubProperty(createEntryTimeInstant(TimeInterval.EP_START_TIME, factoryStart))
+                .addSubProperty(createEntryTimeInstant(TimeInterval.EP_END_TIME, factoryEnd));
+        addEntry(pf);
+    }
+
+    public void addEntryTimeValue(EntityProperty property, ExpressionFactory<T> factoryStart, ExpressionFactory<T> factoryEnd) {
+        final var converter = new ConverterTimeValue<>(property, factoryStart, factoryEnd);
+        final var nfpStart = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START, factoryStart);
+        final var nfpEnd = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END, factoryEnd);
+        final var pf = createEntrySimple(property, false, converter, nfpStart, nfpEnd)
+                .addSubProperty(createEntryTimeInstant(TimeValue.EP_START_TIME, factoryStart))
+                .addSubProperty(createEntryTimeInstant(TimeValue.EP_END_TIME, factoryEnd));
+        addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntry(PropertyFields<T> pf) {
+        propFieldsMap.put(pf.property, pf);
+        propFieldsList.add(pf);
+        return pf;
+    }
+
+    public PropertyFields<T> addEntry(Property property, ConverterRecord<T> converter, ExpressionFactory<T> factory) {
+        return addEntry(property, false, converter, new NFP<>(factory));
+    }
+
+    public PropertyFields<T> addEntry(Property property, ConverterRecord<T> converter, NFP<T>... factories) {
+        return addEntry(property, false, converter, factories);
+    }
+
+    public PropertyFields<T> addEntry(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
+        PropertyFields<T> pf;
+        if (property.getType() instanceof TypeComplex) {
+            pf = createEntryComplex(property, isJson, converter, factories);
+        } else {
+            pf = createEntrySimple(property, isJson, converter, factories);
         }
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
+        return addEntry(pf);
     }
 
-    /**
-     * Add an entry to the Field registry.
-     *
-     * @param property The property that this field supplies data for.
-     * @param ps The ConverterRecordRead used to set the property from a
-     * database record.
-     * @param factories The factories to use to generate the Field instance used
-     * for filter and orderby.
-     */
-    public void addEntry(Property property, ConverterRecord<T> ps, NFP<T>... factories) {
-        addEntry(property, false, ps, factories);
-    }
-
-    public void addEntry(Property property, boolean isJson, ConverterRecord<T> ps, NFP<T>... factories) {
-        PropertyFields<T> pf = new PropertyFields<>(property, isJson, ps);
+    public PropertyFields<T> createEntrySimple(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, isJson, converter);
         for (NFP<T> nfp : factories) {
             pf.addField(nfp.name, nfp.factory);
-            addEntry(epMapAll, property, nfp.name, nfp.factory);
         }
-        epMapSelect.put(property, pf);
-        allSelectPropertyFields.add(pf);
+        return pf;
     }
 
-    /**
-     * Add an entry to the Field registry, but do not register it to the entity.
-     * This means the field is never used in "select" clauses, but can be used
-     * in "filter" clauses.
-     *
-     * @param property The property that this field supplies data for.
-     * @param name The name to use for this field. (j for json, s for string, g
-     * for geometry, b for boolean)
-     * @param factory The factory to use to generate the Field instance.
-     */
-    public void addEntryNoSelect(Property property, String name, ExpressionFactory<T> factory) {
-        addEntry(epMapAll, property, name, factory);
-    }
-
-    private void addEntry(Map<Property, Map<String, ExpressionFactory<T>>> map, Property property, String name, ExpressionFactory<T> factory) {
-        Map<String, ExpressionFactory<T>> coreMap = map.computeIfAbsent(
-                property,
-                k -> new LinkedHashMap<>());
-        String key = name;
-        if (key == null) {
-            key = Integer.toString(coreMap.size());
+    public PropertyFields<T> createEntryComplex(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
+        PropertyFields<T> pf = new PropertyFieldsComplex<>(property, isJson, converter);
+        for (NFP<T> nfp : factories) {
+            pf.addField(nfp.name, nfp.factory);
         }
-        coreMap.put(key, factory);
+        return pf;
     }
 
     public static class ConverterSimple<U extends StaMainTable<U>> implements ConverterRecord<U> {
@@ -474,19 +699,19 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             entity.setProperty(property, input.get(factory.get(table)));
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             if (canCreate) {
                 insertFields.put(factory.get(table), entity.getProperty(property));
             }
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             if (canUpdate) {
                 updateFields.put(factory.get(table), entity.getProperty(property));
                 message.addField(property);
@@ -505,19 +730,19 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             String data = (String) input.get(factory.get(table));
             dataSize.increase(data == null ? 0 : data.length());
             entity.setProperty(property, data);
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             insertFields.put(factory.get(table), entity.getProperty(property));
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             updateFields.put(factory.get(table), entity.getProperty(property));
             message.addField(property);
         }
@@ -536,12 +761,12 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             // Passwords can not be read.
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             if (plainTextPassword) {
                 insertFields.put(factory.get(table), entity.getProperty(property));
             } else {
@@ -551,7 +776,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             if (plainTextPassword) {
                 updateFields.put(factory.get(table), entity.getProperty(property));
             } else {
@@ -576,20 +801,20 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             entity.setProperty(property, Utils.intervalFromTimes(
                     (Moment) input.get(factoryStart.get(table)),
                     (Moment) input.get(factoryEnd.get(table))));
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             TimeInterval interval = entity.getProperty(property);
             EntityFactories.insertTimeInterval(insertFields, factoryStart.get(table), factoryEnd.get(table), interval);
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             TimeInterval interval = entity.getProperty(property);
             EntityFactories.insertTimeInterval(updateFields, factoryStart.get(table), factoryEnd.get(table), interval);
             message.addField(property);
@@ -607,20 +832,20 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             entity.setProperty(
                     property,
                     Utils.instantFromTime((Moment) input.get(factory.get(table))));
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             TimeInstant instant = entity.getProperty(property);
             EntityFactories.insertTimeInstant(insertFields, factory.get(table), instant);
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             TimeInstant instant = entity.getProperty(property);
             EntityFactories.insertTimeInstant(updateFields, factory.get(table), instant);
             message.addField(property);
@@ -640,7 +865,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             entity.setProperty(
                     property,
                     Utils.valueFromTimes(
@@ -649,13 +874,13 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             TimeValue value = entity.getProperty(property);
             EntityFactories.insertTimeValue(insertFields, factoryStart.get(table), factoryEnd.get(table), value);
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             TimeValue value = entity.getProperty(property);
             EntityFactories.insertTimeValue(updateFields, factoryStart.get(table), factoryEnd.get(table), value);
             message.addField(property);
@@ -673,7 +898,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             JsonValue data = Utils.getFieldJsonValue(input, factory.get(table));
             if (data == null) {
                 return;
@@ -683,12 +908,44 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             insertFields.put(factory.get(table), new JsonValue(entity.getProperty(property)));
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+            updateFields.put(factory.get(table), new JsonValue(entity.getProperty(property)));
+            message.addField(property);
+        }
+    }
+
+    public static class ConverterJson<U extends StaMainTable<U>> implements ConverterRecord<U> {
+
+        private final Property property;
+        private final ExpressionFactory<U> factory;
+
+        public ConverterJson(Property property, ExpressionFactory<U> factory) {
+            this.property = property;
+            this.factory = factory;
+        }
+
+        @Override
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
+            JsonValue data = Utils.getFieldJsonValue(input, factory.get(table));
+            if (data == null) {
+                return;
+            }
+            dataSize.increase(data.getStringLength());
+            entity.setProperty(property, data.getValue());
+        }
+
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
+            insertFields.put(factory.get(table), new JsonValue(entity.getProperty(property)));
+        }
+
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             updateFields.put(factory.get(table), new JsonValue(entity.getProperty(property)));
             message.addField(property);
         }
@@ -708,7 +965,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             final Object rawId = getFieldOrNull(input, factory.get(table));
             if (rawId == null) {
                 return;
@@ -718,13 +975,13 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             Entity child = entity.getProperty(property);
             insertFields.put(factory.get(table), child.getPrimaryKeyValues().get(0));
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             Entity child = entity.getProperty(property);
             updateFields.put(factory.get(table), child.getPrimaryKeyValues().get(0));
             message.addField(property);
@@ -734,17 +991,17 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterEntitySet<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             // EntitySet properties are not fetched in this way
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             // EntitySet properties are not created in this way
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             // EntitySet properties are not updated in this way
         }
     }

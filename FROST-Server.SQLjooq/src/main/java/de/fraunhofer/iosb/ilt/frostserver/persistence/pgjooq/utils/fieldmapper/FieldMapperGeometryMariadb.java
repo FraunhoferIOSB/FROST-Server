@@ -75,10 +75,9 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
         if (idxLocation >= 0) {
             sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> t.field(idxLocation));
         } else {
-            sourcePfr = new PropertyFieldRegistry.NFP<>(
-                    "j",
-                    t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
+            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
         }
+        final PropertyFieldRegistry.NFP<T> geoPfr = new PropertyFieldRegistry.NFP<>("g", t -> t.field(idxGeom));
         pfReg.addEntry(
                 property,
                 true,
@@ -103,8 +102,9 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
                             EntityFactories.insertGeometry(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature, false);
                             message.addField(property);
                         }),
-                sourcePfr);
-        pfReg.addEntryNoSelect(property, "g", t -> t.field(idxGeom));
+                sourcePfr,
+                geoPfr);
+        // TODO: Make the g non-selectable again.
     }
 
     /**

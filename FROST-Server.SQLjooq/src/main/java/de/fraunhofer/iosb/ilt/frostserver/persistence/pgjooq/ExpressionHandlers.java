@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaDur
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.TimeFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
@@ -165,9 +166,26 @@ public class ExpressionHandlers {
 
             public TableRef pathTableRef;
             public List<Property> elements;
+            public PropertyFields parentPropFields;
             public FieldWrapper finalExpression = null;
             public int curIndex;
             public boolean finished = false;
+
+            public Property getCur() {
+                return elements.get(curIndex);
+            }
+
+            public boolean hasNext() {
+                return curIndex + 1 < elements.size();
+            }
+
+            public Property getNext() {
+                int nextIdx = curIndex + 1;
+                if (nextIdx < elements.size()) {
+                    return elements.get(nextIdx);
+                }
+                return null;
+            }
         }
     }
 

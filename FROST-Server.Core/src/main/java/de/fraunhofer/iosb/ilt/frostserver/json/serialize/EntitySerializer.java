@@ -22,12 +22,15 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NA
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
@@ -72,7 +75,8 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         this.navLinkField = navLinkField;
         this.nextLinkField = nextLinkField;
         this.odata = odata;
-        propertySerializers.put(ModelRegistry.EP_SELFLINK, (ep, entity, gen) -> {
+        propertySerializers.put(ModelRegistry.EP_SELFLINK, (ep, target, gen) -> {
+            Entity entity = (Entity) target;
             if (entity.getQuery().getMetadata() == Metadata.FULL) {
                 final String value = entity.getSelfLink();
                 if (value != null) {
@@ -139,7 +143,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         }
     }
 
-    public void writeProperty(EntityPropertyMain<?> ep, Entity entity, JsonGenerator gen) throws IOException {
+    public void writeProperty(EntityPropertyMain<?> ep, ComplexValue<?> entity, JsonGenerator gen) throws IOException {
         SimplePropertySerializer ser = propertySerializers.get(ep);
         if (ser != null) {
             ser.writeProperty(ep, entity, gen);
@@ -151,7 +155,13 @@ public class EntitySerializer extends ValueSerializer<Entity> {
             return;
         }
         final Object value = entity.getProperty(ep);
-        if (value != null || ep.serialiseNull) {
+        writeProperty(value, ep, gen);
+    }
+
+    private void writeProperty(final Object value, EntityPropertyMain<?> ep, JsonGenerator gen) throws IOException, JacksonException {
+        if (value instanceof ComplexValueImpl cv) {
+            writeComplexValueImpl(ep, cv, gen);
+        } else if (value != null || ep.serialiseNull) {
             final String name = ep.getName();
             Collection<String> aliases = ep.getAliases();
             if (aliases.size() > 1) {
@@ -176,6 +186,17 @@ public class EntitySerializer extends ValueSerializer<Entity> {
             // Either no aliases, or no matching found.
             gen.writePOJOProperty(name, value);
         }
+    }
+
+    private void writeComplexValueImpl(EntityPropertyMain<?> ep, ComplexValueImpl cv, JsonGenerator gen) throws IOException {
+        gen.writeName(ep.getName());
+        gen.writeStartObject();
+        for (Map.Entry<Property, Object> entry : cv.getAllProperties().entrySet()) {
+            Property key = entry.getKey();
+            Object value = entry.getValue();
+            writeProperty(value, (EntityPropertyMain<?>) key, gen);
+        }
+        gen.writeEndObject();
     }
 
     private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
@@ -240,6 +261,6 @@ public class EntitySerializer extends ValueSerializer<Entity> {
 
     public static interface SimplePropertySerializer {
 
-        public void writeProperty(EntityPropertyMain ep, Entity entity, JsonGenerator gen) throws IOException;
+        public void writeProperty(EntityPropertyMain ep, ComplexValue<?> entity, JsonGenerator gen) throws IOException;
     }
 }

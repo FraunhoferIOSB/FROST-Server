@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
@@ -109,8 +110,9 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         pfReg.addEntryId(TableImpHistLocations::getId);
-        pfReg.addEntry(pluginCoreModel.epTime, table -> table.time,
-                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time));
+        pfReg.addEntry(pluginCoreModel.epTime,
+                new PropertyFieldRegistry.ConverterTimeInstant<>(pluginCoreModel.epTime, table -> table.time),
+                new NFP<>(table -> table.time));
         pfReg.addEntry(pluginCoreModel.npThingHistLoc, TableImpHistLocations::getThingId);
         pfReg.addEntry(pluginCoreModel.npLocationsHistLoc, TableImpHistLocations::getId);
         registerHookPostInsert(0, new HookPostInsertHistLoc());

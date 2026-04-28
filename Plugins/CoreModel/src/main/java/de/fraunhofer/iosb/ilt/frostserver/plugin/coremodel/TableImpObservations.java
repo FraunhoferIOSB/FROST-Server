@@ -19,8 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
@@ -43,9 +41,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbst
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.ResultType;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
@@ -221,11 +216,13 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         pfReg.addEntryId(TableImpObservations::getId);
-        pfReg.addEntryMap(pluginCoreModel.epParameters, table -> table.colParameters);
-        pfReg.addEntry(pluginCoreModel.epPhenomenonTime,
-                new ConverterTimeValue<>(pluginCoreModel.epPhenomenonTime, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
-                new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
-                new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
+        pfReg.addEntryMap(
+                pluginCoreModel.epParameters,
+                table -> table.colParameters);
+        pfReg.addEntryTimeValue(
+                pluginCoreModel.epPhenomenonTime,
+                table -> table.colPhenomenonTimeStart,
+                table -> table.colPhenomenonTimeEnd);
         pfReg.addEntry(pluginCoreModel.epResult,
                 true,
                 new ConverterRecordDeflt<>(
@@ -240,7 +237,8 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 new NFP<>("s", table -> table.colResultString),
                 new NFP<>("j", table -> table.colResultJson),
                 new NFP<>("t", table -> table.colResultType));
-        pfReg.addEntry(pluginCoreModel.epResultQuality, table -> table.colResultQuality,
+
+        pfReg.addEntry(pluginCoreModel.epResultQuality,
                 new ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
@@ -251,13 +249,17 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                         (table, entity, updateFields, message) -> {
                             updateFields.put(table.colResultQuality, EntityFactories.objectToJson(entity.getProperty(pluginCoreModel.epResultQuality)));
                             message.addField(pluginCoreModel.epResultQuality);
-                        }));
-        pfReg.addEntry(pluginCoreModel.epResultTime, table -> table.colResultTime,
-                new ConverterTimeInstant<>(pluginCoreModel.epResultTime, table -> table.colResultTime));
-        pfReg.addEntry(pluginCoreModel.epValidTime,
-                new ConverterTimeInterval<>(pluginCoreModel.epValidTime, table -> table.colValidTimeStart, table -> table.colValidTimeEnd),
-                new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colValidTimeStart),
-                new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colValidTimeEnd));
+                        }),
+                new NFP<>("", table -> table.colResultQuality));
+
+        pfReg.addEntryTimeInstant(
+                pluginCoreModel.epResultTime,
+                table -> table.colResultTime);
+
+        pfReg.addEntryTimeInterval(
+                pluginCoreModel.epValidTime,
+                table -> table.colValidTimeStart,
+                table -> table.colValidTimeEnd);
         pfReg.addEntry(pluginCoreModel.npFeatureOfInterestObservation, TableImpObservations::getFeatureId);
         pfReg.addEntry(pluginCoreModel.npDatastreamObservation, TableImpObservations::getDatastreamId);
 

@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,7 +68,7 @@ public class QueryState<T extends StaMainTable<T>> {
 
     private int aliasNr = 0;
     private QueryState parent;
-    private Map<NavigationPropertyEntity, QueryState> childStates = new HashMap<>();
+    private final Map<NavigationPropertyEntity, QueryState> childStates = new HashMap<>();
     private String staAlias;
 
     /**
@@ -87,8 +88,8 @@ public class QueryState<T extends StaMainTable<T>> {
         this.staAlias = staAlias;
     }
 
-    public QueryState(JooqPersistenceManager pm, T table, Set<PropertyFields<T>> sqlSelectFields) {
-        this(pm, table, new TableRef(table), sqlSelectFields);
+    public QueryState(JooqPersistenceManager pm, T table, Set<PropertyFields<T>> selectFields) {
+        this(pm, table, new TableRef(table), selectFields);
     }
 
     public QueryState(JooqPersistenceManager pm, T table, TableRef tableRef, Set<PropertyFields<T>> sqlSelectFields) {
@@ -328,8 +329,10 @@ public class QueryState<T extends StaMainTable<T>> {
      */
     public static <U extends StaMainTable<U>> Set<Field> propertiesToFields(StaMainTable<U> table, Set<PropertyFields<U>> properties) {
         Set<Field> fields = new HashSet<>();
-        for (PropertyFields<?> sp : properties) {
-            for (ExpressionFactory f : sp.fields.values()) {
+        for (PropertyFields<U> sp : properties) {
+            List<ExpressionFactory<U>> factories = new ArrayList<>();
+            sp.getFieldsRecursive(factories);
+            for (ExpressionFactory f : factories) {
                 fields.add(f.get(table));
             }
         }

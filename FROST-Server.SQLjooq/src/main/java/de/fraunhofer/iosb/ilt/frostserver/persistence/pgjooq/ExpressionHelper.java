@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.*;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
@@ -210,9 +211,32 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         if (state.finalExpression != null) {
             throw new IllegalArgumentException("EntityProperty can not follow an other EntityProperty: " + path);
         }
-        Map<String, Field> pathExpressions = state.pathTableRef.getTable()
-                .getPropertyFieldRegistry()
-                .getAllFieldsForProperty(element, new LinkedHashMap<>());
+        if (state.hasNext() && element.getType() instanceof TypeComplex && state.getNext() instanceof EntityPropertyMain) {
+            // The next element is a proper sub-property.
+            if (state.parentPropFields == null) {
+                state.parentPropFields = state.pathTableRef.getTable()
+                        .getPropertyFieldRegistry()
+                        .getSelectFieldsForProperty(element);
+            } else {
+                state.parentPropFields = state.parentPropFields.getSubField(element);
+            }
+            return;
+        }
+        Map<String, Field> pathExpressions;
+        if (state.parentPropFields != null) {
+            state.parentPropFields = state.parentPropFields.getSubField(element);
+            if (state.parentPropFields == null) {
+                LOGGER.error("No subField {} found!", element);
+                return;
+            }
+            pathExpressions = state.pathTableRef.getTable()
+                    .getPropertyFieldRegistry()
+                    .resolveFieldsForProperty(state.parentPropFields, new LinkedHashMap<>());
+        } else {
+            pathExpressions = state.pathTableRef.getTable()
+                    .getPropertyFieldRegistry()
+                    .resolveFieldsForProperty(element, new LinkedHashMap<>());
+        }
         if (pathExpressions.size() == 1) {
             final Field field = pathExpressions.values().stream().iterator().next();
             Field optimisedField = state.pathTableRef.getJoinEqual(field);
@@ -220,6 +244,7 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         } else {
             state.finalExpression = getSubExpression(state, pathExpressions);
         }
+        state.parentPropFields = null;
     }
 
     private void handleNavigationProperty(PathState state, Path path, NavigationPropertyMain np) {

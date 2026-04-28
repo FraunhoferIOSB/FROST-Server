@@ -170,8 +170,9 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                             EntityFactories.insertGeometry(updateFields, table.colLocation, table.colGeom, encodingType, feature);
                             message.addField(pluginCoreModel.epLocation);
                         }),
-                new NFP<>("j", table -> table.colLocation));
-        pfReg.addEntryNoSelect(pluginCoreModel.epLocation, "g", table -> table.colGeom);
+                new NFP<>("j", table -> table.colLocation),
+                new NFP<>("g", table -> table.colGeom));
+        // TODO: Make the g non-selectable again.
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId);
         pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId);

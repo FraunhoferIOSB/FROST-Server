@@ -23,14 +23,11 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import java.util.HashMap;
 import java.util.Map;
-import org.jooq.Field;
 import org.jooq.Name;
 import org.jooq.Table;
 
@@ -70,18 +67,7 @@ public class FieldMapperJson extends FieldMapperAbstractEp {
         if (isMap) {
             pfReg.addEntryMap(entityProperty, t -> t.field(idx));
         } else {
-            pfReg.addEntry(entityProperty, true, t -> t.field(idx),
-                    new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                            (t, tuple, entity, dataSize) -> {
-                                final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, (Field) t.field(idx));
-                                dataSize.increase(fieldJsonValue.getStringLength());
-                                entity.setProperty(entityProperty, fieldJsonValue.getValue());
-                            },
-                            (t, entity, insertFields) -> insertFields.put(t.field(idx), new JsonValue(entity.getProperty(entityProperty))),
-                            (t, entity, updateFields, message) -> {
-                                updateFields.put(t.field(idx), new JsonValue(entity.getProperty(entityProperty)));
-                                message.addField(entityProperty);
-                            }));
+            pfReg.addEntryJson(entityProperty, t -> t.field(idx));
         }
     }
 
