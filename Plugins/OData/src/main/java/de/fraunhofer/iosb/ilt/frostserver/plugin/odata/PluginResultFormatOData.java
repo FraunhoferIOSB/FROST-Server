@@ -168,7 +168,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
             final Entity entity = (Entity) result;
             final EntityWrapper wrappedEntity = new EntityWrapper()
                     .setEntity(entity)
-                    .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
+                    .setContext(contextBase + '#' + entity.getType().plural + "/$entity");
             if (version == PluginOData.VERSION_ODATA_40) {
                 return target -> JsonWriterOdata40.writeEntity(target, wrappedEntity);
             } else {

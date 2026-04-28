@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
@@ -73,7 +74,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -400,7 +401,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     @Override
     public Entity doInsert(Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
         init();
-        StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(entity.getType());
         return table.insertIntoDatabase(this, entity, updateMode, dataSize);
     }
 
@@ -415,7 +416,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             throw new NoSuchEntityException("No entity of type " + pathElement.getEntityType() + " with id " + id);
         }
 
-        StaMainTable<?> table = getTableCollection().getTableForType(entity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(entity.getType());
         return table.updateInDatabase(this, entity, id, updateMode, dataSize);
     }
 
@@ -445,7 +446,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
             JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, PrincipalExtended.getLocalPrincipal());
-            newEntity = entityParser.parseEntity(original.getEntityType(), newNode.toString());
+            newEntity = entityParser.parseEntity(original.getType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setPrimaryKeyValues(id);
         } catch (IOException ex) {
@@ -477,10 +478,10 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
         }
         if (!entityFactories.entityExists(this, target, userIsAdmin)) {
-            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
+            throw new NoSuchEntityException("Source entity not found: " + target.getType() + "(" + target.getPrimaryKeyValues() + ")");
         }
 
-        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getType());
         sourceEntity.addNavigationEntity(np, target);
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : table.getHooksPreUpdate()) {
             try {
@@ -502,10 +503,10 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
         }
         if (!entityFactories.entityExists(this, target, userIsAdmin)) {
-            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
+            throw new NoSuchEntityException("Source entity not found: " + target.getType() + "(" + target.getPrimaryKeyValues() + ")");
         }
 
-        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getType());
         sourceEntity.setProperty(np, target);
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : table.getHooksPreUpdate()) {
             try {
@@ -528,10 +529,10 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         }
         for (var target : targets) {
             if (!entityFactories.entityExists(this, target, userIsAdmin)) {
-                throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPrimaryKeyValues() + ")");
+                throw new NoSuchEntityException("Source entity not found: " + target.getType() + "(" + target.getPrimaryKeyValues() + ")");
             }
         }
-        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getType());
         for (var target : targets) {
             sourceEntity.addNavigationEntity(np, target);
         }
@@ -561,7 +562,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
         }
-        StaMainTable<?> tableSource = getTableCollection().getTableForType(sourceEntity.getEntityType());
+        StaMainTable<?> tableSource = getTableCollection().getTableForType(sourceEntity.getType());
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : tableSource.getHooksPreUpdate()) {
             try {
                 hookWrapper.getObject().preUpdateInDatabase(this, sourceEntity, sourceEntity.getPrimaryKeyValues(), EditFeatures.NONE);
@@ -574,7 +575,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         if (!entityFactories.entityExists(this, targetEntity, userIsAdmin)) {
             throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPkValues() + ")");
         }
-        StaMainTable<?> tableTarget = getTableCollection().getTableForType(targetEntity.getEntityType());
+        StaMainTable<?> tableTarget = getTableCollection().getTableForType(targetEntity.getType());
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : tableTarget.getHooksPreUpdate()) {
             try {
                 hookWrapper.getObject().preUpdateInDatabase(this, targetEntity, targetEntity.getPrimaryKeyValues(), EditFeatures.NONE);
@@ -669,7 +670,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     @Override
     public boolean useClientSuppliedId(Entity entity) throws IncompleteEntityException {
         final PkValue entityId = entity.getPrimaryKeyValues();
-        final EntityType entityType = entity.getEntityType();
+        final EntityType entityType = entity.getType();
         final IdGenerationType typeIdGenerationMode = (IdGenerationType) entityType.getIdGenerationMode();
         switch (typeIdGenerationMode) {
             case SERVER_GENERATED_ONLY:
@@ -801,14 +802,25 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         for (EntityType entityType : modelRegistry.getEntityTypes(true)) {
             final StaMainTable<?> tableForType = tableCollection.getTableForType(entityType);
             final PropertyFieldRegistry<?> pfReg = tableForType.getPropertyFieldRegistry();
-            for (Property property : entityType.getPropertySet()) {
-                PropertyFieldRegistry.PropertyFields<?> pf = pfReg.getSelectFieldsForProperty(property);
-                if (pf == null || pf.converter == null) {
-                    LOGGER.error("Property {} is not backed by table {}.", property.getName(), tableForType.getName());
-                }
-            }
+            validateMappings(tableForType, pfReg, entityType);
             final IdGenerationType idGenMode = IdGenerationType.findType(persistenceSettings.getIdGenerationMode(entityType));
             entityType.setIdGenerationMode(idGenMode);
+        }
+    }
+
+    private void validateMappings(final StaMainTable<?> tableForType, PropertyFieldRegistry<?> pfReg, ContainerType<?> type) {
+        for (var property : type.getEntityProperties()) {
+            PropertyFieldRegistry.PropertyFields<?> pf = pfReg.getSelectFieldsForProperty(property);
+            if (pf == null || pf.converter == null) {
+                LOGGER.error("Property {}/{} is not backed by table {}.", type, property.getName(), tableForType.getName());
+            }
+            final PropertyType subType = property.getType();
+            if (subType instanceof ContainerType ct) {
+                var subReg = pfReg.getSubRegistryFor(property);
+                if (subReg != null) {
+                    validateMappings(tableForType, subReg, ct);
+                }
+            }
         }
     }
 

@@ -41,10 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author scf
- */
 class EntityBuilderTest {
 
     /**
@@ -86,7 +82,7 @@ class EntityBuilderTest {
         final Set<EntityType> entityTypes = modelRegistry.getEntityTypes();
         assertTrue(entityTypes.contains(pluginActuation.etActuator), "Actuation entities not registered.");
         for (EntityType type : entityTypes) {
-            testEntityType(type, type.getPropertySet());
+            testEntityType(type, type.getProperties());
         }
     }
 
@@ -129,13 +125,13 @@ class EntityBuilderTest {
     private void getPropertyFromObject(Entity entity, Property property) {
         try {
             if (!(property instanceof NavigationPropertyMain) && !entity.isSetProperty(property)) {
-                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getType());
             }
             Object value = propertyValues.get(property);
             Object setValue = property.getFrom(entity);
 
             if (!Objects.equals(value, setValue)) {
-                fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
+                fail("Getter did not return set value for property " + property + " on entity type " + entity.getType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);

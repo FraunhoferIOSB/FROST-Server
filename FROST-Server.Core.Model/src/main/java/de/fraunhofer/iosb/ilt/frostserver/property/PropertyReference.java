@@ -17,14 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.Objects;
 
 /**
  * A reference to a property, used in lambdas like any().
  *
- * @author scf
  * @param <P> The type of the value of the referenced property.
  */
 public class PropertyReference<P> implements Property<P> {
@@ -72,17 +71,17 @@ public class PropertyReference<P> implements Property<P> {
     }
 
     @Override
-    public P getFrom(Entity entity) {
+    public P getFrom(ComplexValue<?> entity) {
         return referencedProperty.getFrom(entity);
     }
 
     @Override
-    public void setOn(Entity entity, P value) {
+    public void setOn(ComplexValue<?> entity, P value) {
         referencedProperty.setOn(entity, value);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue<?> entity) {
         return referencedProperty.isSetOn(entity);
     }
 

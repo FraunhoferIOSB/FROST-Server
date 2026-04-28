@@ -102,7 +102,7 @@ public class HookPrePostInsertUpdateThing implements HookPreInsert, HookPostInse
     @Override
     public void preUpdateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
         TableCollection tables = pm.getTableCollection();
-        EntityType et = entity.getEntityType();
+        EntityType et = entity.getType();
         NavigationPropertyEntitySet npThingLocations = et.getNavigationPropertyEntitySet("Locations");
         if (npThingLocations == null) {
             LOGGER.error("Given Entity of type {} has no navigationPropertySet Locations", et);
@@ -130,7 +130,7 @@ public class HookPrePostInsertUpdateThing implements HookPreInsert, HookPostInse
 
     public void createHistLocationLinkLocations(JooqPersistenceManager pm, Entity entity, PkValue entityId) throws DataAccessException {
         TableCollection tables = pm.getTableCollection();
-        EntityType et = entity.getEntityType();
+        EntityType et = entity.getType();
         NavigationPropertyEntitySet npThingLocations = et.getNavigationPropertyEntitySet("Locations");
         if (npThingLocations == null) {
             LOGGER.error("EntityType {} has no navigationPropertySet Locations", et);
@@ -175,7 +175,7 @@ public class HookPrePostInsertUpdateThing implements HookPreInsert, HookPostInse
             // Send a message about the creation of a new HL
             Entity newHl = pm.get(etHistLoc, PkValue.of(histLocationId));
             ModelRegistry modelRegistry = pm.getCoreSettings().getModelRegistry();
-            newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
+            newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getType()));
             pm.getEntityChangedMessages().add(
                     new EntityChangedMessage()
                             .setEventType(EntityChangedMessage.Type.CREATE)

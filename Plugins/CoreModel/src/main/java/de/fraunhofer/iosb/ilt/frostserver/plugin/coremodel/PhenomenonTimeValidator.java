@@ -35,7 +35,7 @@ public class PhenomenonTimeValidator implements EntityValidator {
     @Override
     public void validate(Entity entity) throws IncompleteEntityException {
         if (epPhenomenonTime == null) {
-            epPhenomenonTime = entity.getEntityType().getEntityProperty(PluginCoreModel.NAME_EP_PHENOMENONTIME);
+            epPhenomenonTime = entity.getType().getEntityProperty(PluginCoreModel.NAME_EP_PHENOMENONTIME);
         }
         if (entity.getProperty(epPhenomenonTime) == null) {
             entity.setProperty(epPhenomenonTime, new TimeValue(TimeInstant.now()));

@@ -37,7 +37,7 @@ public class CreateTimeValidator implements EntityValidator {
     @Override
     public void validate(Entity entity) throws IncompleteEntityException {
         if (epCreationTime == null) {
-            epCreationTime = entity.getEntityType().getEntityProperty(NAME_EP_CREATIONTIME);
+            epCreationTime = entity.getType().getEntityProperty(NAME_EP_CREATIONTIME);
         }
         if (entity.getProperty(epCreationTime) == null) {
             entity.setProperty(epCreationTime, new TimeInstant(Moment.nowInSystemTime()));

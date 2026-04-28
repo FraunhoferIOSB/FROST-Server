@@ -136,7 +136,7 @@ public class CheckNavLinkQuery implements ValidationCheck {
             return;
         }
         try {
-            entityType = contextEntity.getEntityType();
+            entityType = contextEntity.getType();
             targetNp = entityType.getNavigationProperty(getTargetNavLink());
             targetType = targetNp.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();

@@ -17,11 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 
 /**
  * Interface that values of complex properties should implement to make it
- * easier to access sub-properties.
+ * easier to access sub-properties. An Entity is also a ComplexValue.
  *
  * @param <S> The type of the complex value (for fluent API)
  */
@@ -65,4 +67,15 @@ public interface ComplexValue<S extends ComplexValue<S>> {
      */
     public S setProperty(String name, Object value);
 
+    /**
+     * Returns true if the property is explicitly set to a value, even if this
+     * value is null.
+     *
+     * @param property the property to check.
+     * @return true if the property is explicitly set.
+     */
+    public boolean isSetProperty(Property property);
+
+    @JsonIgnore
+    public ContainerType getType();
 }

@@ -169,7 +169,7 @@ public class PluginResultFormatV2 implements PluginResultFormat {
             final Entity entity = (Entity) result;
             final EntityWrapper wrappedEntity = new EntityWrapper()
                     .setEntity(entity)
-                    .setContext(contextBase + '#' + entity.getEntityType().plural + "/$entity");
+                    .setContext(contextBase + '#' + entity.getType().plural + "/$entity");
             return target -> JsonWriterOdata401.writeEntity(target, wrappedEntity);
         }
 

@@ -112,7 +112,7 @@ public class CheckNavLinksEmpty implements ValidationCheck {
         if (targetNps != null) {
             return;
         }
-        entityType = contextEntity.getEntityType();
+        entityType = contextEntity.getType();
         targetNps = new ArrayList<>();
         for (String targetNavLink : targetNavLinks) {
             NavigationPropertyMain targetNp = entityType.getNavigationProperty(targetNavLink);

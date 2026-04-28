@@ -42,7 +42,7 @@ public class TimeDefaultValidator implements EntityValidator {
     @Override
     public void validate(Entity entity) throws IncompleteEntityException {
         if (epTime == null) {
-            epTime = entity.getEntityType().getEntityProperty(propertyName);
+            epTime = entity.getType().getEntityProperty(propertyName);
         }
         if (entity.getProperty(epTime) == null) {
             entity.setProperty(epTime, new TimeInstant(Moment.nowInSystemTime()));

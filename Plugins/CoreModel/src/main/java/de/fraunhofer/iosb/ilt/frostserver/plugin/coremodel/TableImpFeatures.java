@@ -17,9 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -138,7 +138,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
         pfReg.addEntry(pluginCoreModel.epFeature,
                 true,
                 new ConverterRecordDeflt<>(
-                        (TableImpFeatures table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (TableImpFeatures table, Record tuple, ComplexValue<?> entity, DataSize dataSize) -> {
                             String locationString = tuple.get(table.colFeature);
                             dataSize.increase(locationString == null ? 0 : locationString.length());
                             entity.setProperty(pluginCoreModel.epFeature, SimpleJsonMapper.jsonToTreeOrString(locationString));

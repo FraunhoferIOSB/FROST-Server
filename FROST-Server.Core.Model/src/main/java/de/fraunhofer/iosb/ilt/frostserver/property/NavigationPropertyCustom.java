@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -41,8 +42,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- *
- * @author hylke
+ * A user-defined navigation property.
  */
 public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
@@ -82,7 +82,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         return this;
     }
 
-    private void init(Entity entity) {
+    private void init(ComplexValue<?> entity) {
         if (type == null) {
             throw new IllegalArgumentException("Path not to a custom link: " + entityProperty + "/" + StringUtils.join(subPath, '/'));
         }
@@ -147,18 +147,18 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     }
 
     @Override
-    public Entity getFrom(Entity entity) {
+    public Entity getFrom(ComplexValue<?> entity) {
         init(entity);
         return (Entity) targetData.getKey(targetData.fullKeyEntity);
     }
 
     @Override
-    public void setOn(Entity entity, Entity value) {
+    public void setOn(ComplexValue<?> entity, Entity value) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue<?> entity) {
         init(entity);
         return targetData.containsKey(targetData.fullKeyEntity);
     }
@@ -186,7 +186,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
 
     private static class LinkTargetData {
 
-        private Entity entity;
+        private ComplexValue<?> entity;
         private Map<String, Object> containingMap;
         private ObjectNode containingNode;
         private String fullKeyEntity;
@@ -229,7 +229,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
             }
         }
 
-        public void findLinkTargetData(Entity entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
+        public void findLinkTargetData(ComplexValue entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
             clear();
             Object curTarget = entityProperty.getFrom(entity);
             int count = subPath.size() - 1;

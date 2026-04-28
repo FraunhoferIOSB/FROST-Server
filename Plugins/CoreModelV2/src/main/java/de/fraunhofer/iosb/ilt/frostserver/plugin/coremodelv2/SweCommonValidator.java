@@ -71,15 +71,15 @@ public class SweCommonValidator implements EntityValidator {
             return;
         }
         if (!StringHelper.isNullOrEmpty(nameEncoding)) {
-            epEncoding = entity.getEntityType().getEntityProperty(nameEncoding);
+            epEncoding = entity.getType().getEntityProperty(nameEncoding);
         }
         if (!StringHelper.isNullOrEmpty(nameStructure)) {
-            epStructure = entity.getEntityType().getEntityProperty(nameStructure);
+            epStructure = entity.getType().getEntityProperty(nameStructure);
         }
         if (!StringHelper.isNullOrEmpty(nameDefinitions)) {
-            npDefinitions = entity.getEntityType().getNavigationPropertyEntitySet(nameDefinitions);
+            npDefinitions = entity.getType().getNavigationPropertyEntitySet(nameDefinitions);
         }
-        mr = entity.getEntityType().getModelRegistry();
+        mr = entity.getType().getModelRegistry();
         initialised = true;
     }
 

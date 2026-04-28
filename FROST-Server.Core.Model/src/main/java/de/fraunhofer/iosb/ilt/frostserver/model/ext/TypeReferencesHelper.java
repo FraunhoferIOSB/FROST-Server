@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
 import tools.jackson.core.type.TypeReference;
 
 /**
- *
- * @author hylke
+ * A collection of TypeReferences.
  */
 public class TypeReferencesHelper {
 

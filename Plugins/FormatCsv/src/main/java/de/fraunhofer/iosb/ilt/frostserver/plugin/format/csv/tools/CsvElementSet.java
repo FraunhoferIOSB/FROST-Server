@@ -56,7 +56,7 @@ public class CsvElementSet {
 
     public void initFrom(EntityType type, Query query) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type.getPropertySet(), query);
+            initFrom(type.getProperties(), query);
         } else {
             initFrom(query.getSelect(), query);
         }

@@ -84,7 +84,7 @@ public abstract class AbstractSubscription implements Subscription {
 
     @Override
     public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
-        if (!newEntity.getEntityType().equals(entityType)) {
+        if (!newEntity.getType().equals(entityType)) {
             return false;
         }
         if (matcher != null && !matcher.test(newEntity)) {

@@ -130,7 +130,7 @@ public class ParserUtils {
             while (currentToken == JsonToken.PROPERTY_NAME) {
                 String fieldName = parser.currentName();
                 parser.nextValue();
-                Property property = type.getProperty(fieldName);
+                Property property = type.getEntityProperty(fieldName);
                 if (property == null) {
                     if (!type.isOpenType()) {
                         final String message = "Unknown field: " + fieldName + " on " + type.getName() + " expected one of: " + type.getPropertiesByName().keySet();

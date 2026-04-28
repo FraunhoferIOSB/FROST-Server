@@ -496,8 +496,8 @@ public class Service implements AutoCloseable {
             try {
                 EntityReference entityReference = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReference.class);
                 Entity targetEntity = entityReference.resolve(modelRegistry, request.getUserPrincipal().isAdmin());
-                if (targetEntity.getEntityType() != mainSet.getEntityType()) {
-                    throw new IllegalArgumentException("Can not add a " + targetEntity.getEntityType() + " to a " + mainSet.getEntityType() + " Set");
+                if (targetEntity.getType() != mainSet.getEntityType()) {
+                    throw new IllegalArgumentException("Can not add a " + targetEntity.getType() + " to a " + mainSet.getEntityType() + " Set");
                 }
                 PathElement parent = mainSet.getParent();
                 if (parent == null) {
@@ -631,7 +631,7 @@ public class Service implements AutoCloseable {
             JsonReader entityParser = request.getJsonReader();
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
-            entity.getEntityType().validateUpdate(entity);
+            entity.getType().validateUpdate(entity);
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
@@ -831,8 +831,8 @@ public class Service implements AutoCloseable {
         try {
             EntityReference entityReference = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReference.class);
             Entity targetEntity = entityReference.resolve(modelRegistry, request.getUserPrincipal().isAdmin());
-            if (targetEntity.getEntityType() != mainEntity.getEntityType()) {
-                throw new IllegalArgumentException("Can not use a " + targetEntity.getEntityType() + " as a " + mainEntity.getEntityType() + " Set");
+            if (targetEntity.getType() != mainEntity.getEntityType()) {
+                throw new IllegalArgumentException("Can not use a " + targetEntity.getType() + " as a " + mainEntity.getEntityType() + " Set");
             }
             PathElement parent = mainEntity.getParent();
             if (parent == null) {

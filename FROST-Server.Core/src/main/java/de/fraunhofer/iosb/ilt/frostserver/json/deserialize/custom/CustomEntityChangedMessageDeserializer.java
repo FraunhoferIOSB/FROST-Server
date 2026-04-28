@@ -99,7 +99,7 @@ public class CustomEntityChangedMessageDeserializer extends ValueDeserializer<En
             throw new IllegalArgumentException("Unknown EntityType: " + typeString);
         }
         if (entity != null) {
-            entity.setEntityType(type);
+            entity.setType(type);
             entity.setQuery(queryGenerator.getQueryFor(type));
             message.setEntity(entity);
         }

@@ -40,8 +40,8 @@ public class EntityReferenceList {
         return value.stream()
                 .map(r -> {
                     final Entity e = r.resolve(mr, isAdmin);
-                    if (reqType != e.getEntityType()) {
-                        throw new IllegalArgumentException("Entity of type " + e.getEntityType() + " can not be added to set of " + reqType);
+                    if (reqType != e.getType()) {
+                        throw new IllegalArgumentException("Entity of type " + e.getType() + " can not be added to set of " + reqType);
                     }
                     return e;
                 })

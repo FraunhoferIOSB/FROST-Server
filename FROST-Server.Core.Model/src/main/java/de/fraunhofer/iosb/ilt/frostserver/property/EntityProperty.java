@@ -18,8 +18,8 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 /**
+ * Entity Properties are normal properties, not navigation properties.
  *
- * @author hylke
  * @param <T> The type of the value of the property.
  */
 public interface EntityProperty<T> extends Property<T> {

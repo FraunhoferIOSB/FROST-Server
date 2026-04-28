@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
@@ -50,6 +51,11 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
             throw new IllegalArgumentException("Interval must be non-null");
         }
         this.interval = interval;
+    }
+
+    @Override
+    public ContainerType getType() {
+        return TypeComplex.STA_TIMEINTERVAL;
     }
 
     @Override
@@ -172,6 +178,14 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
             return this;
         }
         throw new IllegalArgumentException("Unknown sub-property: " + property);
+    }
+
+    @Override
+    public boolean isSetProperty(Property property) {
+        if (property == EP_START_TIME) {
+            return true;
+        }
+        return property == EP_END_TIME;
     }
 
 }

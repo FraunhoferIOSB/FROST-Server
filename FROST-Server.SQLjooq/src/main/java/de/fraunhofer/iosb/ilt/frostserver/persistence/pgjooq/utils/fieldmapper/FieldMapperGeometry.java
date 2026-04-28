@@ -20,12 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
@@ -33,14 +31,12 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jooq.Name;
-import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
 /**
- *
- * @author hylke
+ * A FieldMapper for Geometry columns.
  */
 public class FieldMapperGeometry extends FieldMapperAbstractEp {
 
@@ -87,7 +83,7 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                 property,
                 true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (T t, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (t, tuple, entity, dataSize) -> {
                             String locationString;
                             if (idxLocation >= 0) {
                                 locationString = tuple.get(t.field(idxLocation, SQLDataType.CLOB));

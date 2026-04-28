@@ -95,7 +95,7 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
             Property property = entityType.getProperty(fieldName);
             if (property == null) {
                 if (failOnUnknown) {
-                    final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + entityType.getPropertySet();
+                    final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + entityType.getProperties();
                     throw new UnrecognizedPropertyException(parser, message, parser.currentLocation(), DefaultEntity.class, fieldName, null);
                 } else {
                     parser.nextValue();

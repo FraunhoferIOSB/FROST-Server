@@ -80,7 +80,7 @@ public class CustomLinksHelper {
 
     public void expandCustomLinks(Query query, Entity entity, ResourcePath path) {
         if (enable) {
-            for (EntityPropertyMain property : entity.getEntityType().getEntityProperties()) {
+            for (EntityPropertyMain property : entity.getType().getEntityProperties()) {
                 if (property.hasCustomProperties) {
                     expandCustomLinks(query, property, entity, path, recurseDepth);
                 }
@@ -141,7 +141,7 @@ public class CustomLinksHelper {
         if (!enable) {
             return;
         }
-        for (EntityPropertyMain property : entity.getEntityType().getEntityProperties()) {
+        for (EntityPropertyMain property : entity.getType().getEntityProperties()) {
             if (property.hasCustomProperties) {
                 final Object properties = entity.getProperty(property);
                 if (properties instanceof Map) {

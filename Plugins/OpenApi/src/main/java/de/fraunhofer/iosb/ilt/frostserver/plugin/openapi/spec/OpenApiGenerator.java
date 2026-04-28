@@ -437,7 +437,7 @@ public class OpenApiGenerator {
 
         schema.addProperty(version.selfLinkName, new OASchema("#/components/schemas/selfLink"));
 
-        for (Property property : entityType.getPropertySet()) {
+        for (Property property : entityType.getProperties()) {
             String propertyName = property.getJsonName();
             if (property instanceof EntityPropertyMain<?> epm) {
                 if (epm.getAliases().contains("@iot.id")) {
@@ -549,7 +549,7 @@ public class OpenApiGenerator {
     }
 
     private static void addPathsForEntityProperties(EntityType entityType, Map<String, OAPath> paths, String base, GeneratorContext context) {
-        for (Property entityProperty : entityType.getPropertySet()) {
+        for (Property entityProperty : entityType.getProperties()) {
             if (entityProperty instanceof NavigationProperty) {
                 // Ignore NavProps here
             } else if (ModelRegistry.EP_SELFLINK.equals(entityProperty)) {
