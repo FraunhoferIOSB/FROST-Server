@@ -33,8 +33,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostInsert;
@@ -42,17 +40,14 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostU
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.JsonFieldFactory.JsonFieldWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
@@ -284,7 +279,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     public Entity entityFromQuery(Record tuple, QueryState<T> state, DataSize dataSize) {
         Entity newEntity = new DefaultEntity(getEntityType());
         for (PropertyFields<T> sp : state.getSelectedProperties()) {
-            sp.converter.convert(state.getMainTable(), tuple, newEntity, dataSize);
+            sp.convert(state.getMainTable(), tuple, newEntity, dataSize);
         }
         return newEntity;
     }
@@ -311,7 +306,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 Entity ne = entity.getProperty(np);
                 entityFactories.entityExistsOrCreate(pm, ne, updateMode);
                 PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);
-                registry.converter.convert(thisTable, entity, insertFields);
+                registry.convert(thisTable, entity, insertFields);
             }
         }
 
@@ -334,7 +329,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 continue;
             }
             if (entity.isSetProperty(ep)) {
-                pfReg.getSelectFieldsForProperty(ep).converter.convert(thisTable, entity, insertFields);
+                pfReg.getSelectFieldsForProperty(ep).convert(thisTable, entity, insertFields);
             }
         }
 
@@ -375,7 +370,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         // Finally, create a new Entity from the returned result and return it.
         Entity newEntity = new DefaultEntity(getEntityType(), entity.getPrimaryKeyValues());
         for (PropertyFields<T> sp : propertyFields) {
-            sp.converter.convert(thisTable, result, newEntity, dataSize);
+            sp.convert(thisTable, result, newEntity, dataSize);
         }
         return newEntity;
     }
@@ -454,7 +449,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                     throw new NoSuchEntityException("Linked " + ne.getType() + " not found.");
                 }
                 PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);
-                registry.converter.convert(thisTable, entity, updateFields, message);
+                registry.convert(thisTable, entity, updateFields, message);
             }
         }
 
@@ -466,7 +461,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 continue;
             }
             if (entity.isSetProperty(ep)) {
-                pfReg.getSelectFieldsForProperty(ep).converter.convert(thisTable, entity, updateFields, message);
+                pfReg.getSelectFieldsForProperty(ep).convert(thisTable, entity, updateFields, message);
             }
         }
 
@@ -500,7 +495,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         if (result != null) {
             for (PropertyFields<T> sp : propertyFields) {
-                sp.converter.convert(thisTable, result, newEntity, dataSize);
+                sp.convert(thisTable, result, newEntity, dataSize);
             }
         }
 
@@ -593,64 +588,4 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         this.tables = tables;
     }
 
-    @Override
-    public PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect) {
-        final String epName = epCustomSelect.getMainEntityPropertyName();
-        final EntityPropertyMain mainEntityProperty = getEntityType().getEntityProperty(epName);
-        if (mainEntityProperty.hasCustomProperties) {
-            PropertyFields<T> mainPropertyFields = pfReg.getSelectFieldsForProperty(mainEntityProperty);
-
-            if (mainPropertyFields.jsonType) {
-                ExpressionFactory<T> factory = mainPropertyFields.fields.get("j");
-                if (factory == null) {
-                    factory = mainPropertyFields.fields.values().iterator().next();
-                }
-                final Field mainField = factory.get(getThis());
-                final JsonFieldWrapper jsonFactory = jsonFieldFromPath(mainField, epCustomSelect);
-                return propertyFieldForJsonField(jsonFactory, epCustomSelect);
-            } else {
-                final ExpressionFactory<T> factory = mainPropertyFields.fields.get(epCustomSelect.getSubPath().get(0));
-                if (factory == null) {
-                    throw new IllegalArgumentException("No path: " + epCustomSelect);
-                }
-                final Field field = factory.get(getThis());
-                return propertyFieldForCustom(field, epCustomSelect);
-            }
-        }
-        return null;
-    }
-
-    public static JsonFieldWrapper jsonFieldFromPath(final Field mainField, final EntityPropertyCustomSelect epCustomSelect) {
-        JsonFieldWrapper jsonFactory = new JsonFieldWrapper(mainField);
-        for (String pathItem : epCustomSelect.getSubPath()) {
-            jsonFactory.addToPath(pathItem);
-        }
-        return jsonFactory;
-    }
-
-    protected PropertyFields<T> propertyFieldForJsonField(final JsonFieldWrapper jsonFactory, final EntityPropertyCustomSelect epCustomSelect) {
-        final Field<Object> deepField = jsonFactory.materialise().getJsonExpression();
-        PropertyFields<T> pfs = new PropertyFields<T>(
-                epCustomSelect,
-                new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (tbl, tuple, entity, dataSize) -> {
-                            final JsonValue jsonValue = JsonBinding.getConverterInstance().from(tuple.get(deepField));
-                            dataSize.increase(jsonValue.getStringLength());
-                            Object value = jsonValue.getValue();
-                            epCustomSelect.setOn(entity, value);
-                        }, null, null));
-        pfs.addField("1", t -> deepField);
-        return pfs;
-    }
-
-    protected PropertyFields<T> propertyFieldForCustom(final Field field, final EntityPropertyCustomSelect epCustomSelect) {
-        PropertyFields<T> pfs = new PropertyFields<T>(
-                epCustomSelect,
-                new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (tbl, tuple, entity, dataSize) -> epCustomSelect.setOn(entity, tuple.get(field)),
-                        null,
-                        null));
-        pfs.addField("1", t -> field);
-        return pfs;
-    }
 }

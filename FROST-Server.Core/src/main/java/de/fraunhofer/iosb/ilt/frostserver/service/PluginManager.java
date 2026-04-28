@@ -62,6 +62,7 @@ public class PluginManager implements ConfigDefaults {
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.PluginResultFormatGeoJson"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.PluginOpenApi"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelemissionml.PluginModelEmissionML"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.PluginModelOM"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelsampling.PluginModelSampling"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.modelrelations.PluginModelRelations"

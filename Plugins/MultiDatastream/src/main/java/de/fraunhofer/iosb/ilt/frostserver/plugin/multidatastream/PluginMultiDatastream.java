@@ -23,12 +23,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Liquib
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
@@ -38,6 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -73,7 +73,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
     public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING), true, false);
-    private EntityPropertyMain<List<UnitOfMeasurement>> epUnitOfMeasurements;
+    public final EntityPropertyMain<List<ComplexValue>> epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(TypeComplex.TYPE_UOM), true, false);
     private EntityPropertyMain<?> epIdMultiDatastream;
 
     public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM, false);
@@ -149,7 +149,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
         if (pluginCoreModel == null || !pluginCoreModel.isFullyInitialised()) {
             return false;
         }
-        epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(pluginCoreModel.getEptUom(), TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM), true, false);
+
         etMultiDatastream
                 .registerProperty(epIdMultiDatastream)
                 .registerProperty(EP_SELFLINK)
@@ -167,7 +167,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 .registerProperty(npThingMDs)
                 .registerProperty(npObservationsMDs)
                 .addCreateValidator("MD-Properties", entity -> {
-                    List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
+                    List<ComplexValue> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
                     EntitySet observedProperties = entity.getProperty(npObservedPropertiesMDs);
                     if (unitOfMeasurements == null || unitOfMeasurements.size() != multiObservationDataTypes.size()) {
@@ -183,7 +183,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                     }
                 })
                 .addUpdateValidator("MD-Properties", entity -> {
-                    List<UnitOfMeasurement> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
+                    List<ComplexValue> unitOfMeasurements = entity.getProperty(epUnitOfMeasurements);
                     List<String> multiObservationDataTypes = entity.getProperty(epMultiObservationDataTypes);
                     if (unitOfMeasurements != null && multiObservationDataTypes != null && unitOfMeasurements.size() != multiObservationDataTypes.size()) {
                         throw new IllegalArgumentException("Size of list of unitOfMeasurements (" + unitOfMeasurements.size() + IS_NOT_EQUAL + multiObservationDataTypes.size() + ").");
@@ -264,13 +264,6 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
             out.append("Unknown persistence manager class");
             return false;
         }
-    }
-
-    /**
-     * @return the entity property UnitOfMeasurements
-     */
-    public EntityPropertyMain<List<UnitOfMeasurement>> getEpUnitOfMeasurements() {
-        return epUnitOfMeasurements;
     }
 
     /**

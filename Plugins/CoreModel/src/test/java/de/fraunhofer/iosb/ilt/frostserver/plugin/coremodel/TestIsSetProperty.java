@@ -183,7 +183,7 @@ public class TestIsSetProperty {
     private void testIsSetPropertyDatastream(boolean shouldBeSet, boolean shouldIdBeSet, Entity datastream) {
         testIsSetPropertyAbstractDatastream(shouldBeSet, shouldIdBeSet, datastream);
         assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.npObservedPropertyDatastream));
-        assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.getEpUnitOfMeasurement()));
+        assertEquals(shouldBeSet, datastream.isSetProperty(pluginCoreModel.epUnitOfMeasurement));
     }
 
     @Test

@@ -179,9 +179,9 @@ public class Query {
             }
             if (property instanceof NavigationProperty) {
                 select.add(property);
-            } else if (property instanceof EntityPropertyMain) {
+            } else if (property instanceof EntityPropertyMain epm) {
                 if (pp.hasSubPath()) {
-                    select.add(new EntityPropertyCustomSelect(property.getName()).addToSubPath(pp.getSubPath()));
+                    select.add(new EntityPropertyCustomSelect(epm).addToSubPath(pp.getSubPath()));
                 } else {
                     select.add(property);
                 }
@@ -411,7 +411,7 @@ public class Query {
                 if (s instanceof EntityPropertyMain epm) {
                     selectedEntityPropMain.add(epm);
                 } else if (s instanceof EntityPropertyCustomSelect epcs) {
-                    selectedEntityPropMain.add(entityType.getEntityProperty(epcs.getMainEntityPropertyName()));
+                    selectedEntityPropMain.add(epcs.getMainProperty());
                 } else if (s instanceof NavigationPropertyMain np && (!np.isAdminOnly() || principal.isAdmin())) {
                     selectNavProp.add(np);
                 }

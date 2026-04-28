@@ -21,6 +21,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModel
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -121,8 +122,8 @@ class EntityCompleteTest {
         entity.setProperty(pluginCoreModel.epDescription, "Test Description");
         assertFalse(isEntityComplete(entity, containingSet));
 
-        List<UnitOfMeasurement> unitOfMeasurements = new ArrayList<>();
-        unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
+        List<ComplexValueImpl> unitOfMeasurements = new ArrayList<>();
+        unitOfMeasurements.add(UnitOfMeasurement.UnitOfMeasurement("temperature", "degC", "SomeUrl"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
         assertFalse(isEntityComplete(entity, containingSet));
 
@@ -151,7 +152,7 @@ class EntityCompleteTest {
 
         assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, new PathElementEntity(PkValue.of(2L), pluginCoreModel.etThing, null))));
 
-        unitOfMeasurements.add(new UnitOfMeasurement().setName("temperature").setDefinition("SomeUrl").setSymbol("degC"));
+        unitOfMeasurements.add(UnitOfMeasurement.UnitOfMeasurement("temperature", "degC", "SomeUrl"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
         assertFalse(isEntityComplete(entity, containingSet));
 

@@ -64,7 +64,7 @@ public class FieldMapperPassword extends FieldMapperAbstractEp {
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
         final ExpressionFactory<T> factory = t -> t.field(idx);
-        pfReg.addEntry(entityProperty, factory, new ConverterPassword<>(plainTextPw, entityProperty, factory));
+        pfReg.addEntry(entityProperty, new ConverterPassword<>(plainTextPw, entityProperty, factory), factory);
     }
 
     /**

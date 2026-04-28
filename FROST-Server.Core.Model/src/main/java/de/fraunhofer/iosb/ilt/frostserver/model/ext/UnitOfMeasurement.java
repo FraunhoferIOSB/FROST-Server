@@ -19,188 +19,30 @@ package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import java.util.Objects;
-import tools.jackson.core.JacksonException;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.
  */
-public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
+public class UnitOfMeasurement {
 
     public static final String NAME_DEFINITION = "definition";
     public static final String NAME_NAME = "name";
     public static final String NAME_SYMBOL = "symbol";
-    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>(NAME_NAME, EDM_STRING);
-    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>(NAME_DEFINITION, EDM_STRING);
-    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>(NAME_SYMBOL, EDM_STRING);
+    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>(NAME_NAME, EDM_STRING, false, true, false, true);
+    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>(NAME_DEFINITION, EDM_STRING, false, true, false, true);
+    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>(NAME_SYMBOL, EDM_STRING, false, true, false, true);
 
-    private String name;
-    private String symbol;
-    private String definition;
-
-    public UnitOfMeasurement() {
-    }
-
-    public UnitOfMeasurement(
+    public static ComplexValueImpl UnitOfMeasurement(
             String name,
             String symbol,
             String definition) {
-        this.name = name;
-        this.symbol = symbol;
-        this.definition = definition;
+        return new ComplexValueImpl(TypeComplex.TYPE_UOM)
+                .setProperty(EP_NAME, name)
+                .setProperty(EP_DEFINITION, definition)
+                .setProperty(EP_SYMBOL, symbol);
     }
 
-    @Override
-    public TypeComplex getType() {
-        return TypeComplex.TYPE_UOM;
-    }
-
-    @Override
-    public Object getProperty(String name) {
-        switch (name) {
-            case NAME_NAME:
-                return getName();
-            case NAME_SYMBOL:
-                return getSymbol();
-            case NAME_DEFINITION:
-                return getDefinition();
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public UnitOfMeasurement setProperty(String name, Object value) {
-        switch (name) {
-            case NAME_NAME:
-                return setName((String) value);
-            case NAME_SYMBOL:
-                return setSymbol((String) value);
-            case NAME_DEFINITION:
-                return setDefinition((String) value);
-            default:
-                return this;
-        }
-    }
-
-    @Override
-    public <P> P getProperty(Property<P> property) {
-        if (property == EP_NAME) {
-            return (P) name;
-        }
-        if (property == EP_DEFINITION) {
-            return (P) definition;
-        }
-        if (property == EP_SYMBOL) {
-            return (P) symbol;
-        }
-        throw new IllegalArgumentException("Unknown sub-property: " + property);
-    }
-
-    @Override
-    public <P> UnitOfMeasurement setProperty(Property<P> property, P value) {
-        if (property == EP_NAME) {
-            return setName((String) value);
-        }
-        if (property == EP_DEFINITION) {
-            return setDefinition((String) value);
-        }
-        if (property == EP_SYMBOL) {
-            return setSymbol((String) value);
-        }
-        throw new IllegalArgumentException("Unknown sub-property: " + property);
-    }
-
-    @Override
-    public boolean isSetProperty(Property property) {
-        return getProperty(property) != null;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return the symbol
-     */
-    public String getSymbol() {
-        return symbol;
-    }
-
-    /**
-     * @return the definition
-     */
-    public String getDefinition() {
-        return definition;
-    }
-
-    /**
-     * @param name the name to set
-     * @return this
-     */
-    public UnitOfMeasurement setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @param symbol the symbol to set
-     * @return this
-     */
-    public UnitOfMeasurement setSymbol(String symbol) {
-        this.symbol = symbol;
-        return this;
-    }
-
-    /**
-     * @param definition the definition to set
-     * @return this
-     */
-    public UnitOfMeasurement setDefinition(String definition) {
-        this.definition = definition;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        try {
-            return SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(this);
-        } catch (JacksonException ex) {
-            return super.toString();
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, symbol, definition);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final UnitOfMeasurement other = (UnitOfMeasurement) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.symbol, other.symbol)) {
-            return false;
-        }
-        return Objects.equals(this.definition, other.definition);
-    }
 }

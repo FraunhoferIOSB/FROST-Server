@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationO
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterTimeInstant;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -109,8 +110,9 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
     @Override
     public void initProperties(final EntityFactories entityFactories) {
         pfReg.addEntryId(TableImpTasks::getId);
-        pfReg.addEntry(pluginCoreModel.epCreationTime, table -> table.colCreationTime,
-                new ConverterTimeInstant<>(pluginCoreModel.epCreationTime, table -> table.colCreationTime));
+        pfReg.addEntry(pluginCoreModel.epCreationTime,
+                new ConverterTimeInstant<>(pluginCoreModel.epCreationTime, table -> table.colCreationTime),
+                new NFP<>(table -> table.colCreationTime));
         pfReg.addEntryMap(pluginActuation.epTaskingParameters, table -> table.colTaskingParameters);
         pfReg.addEntry(pluginActuation.npTaskingCapabilityTask, TableImpTasks::getTaskingCapabilityId);
     }

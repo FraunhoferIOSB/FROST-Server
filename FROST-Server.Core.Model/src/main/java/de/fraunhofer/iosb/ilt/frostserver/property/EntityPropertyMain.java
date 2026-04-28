@@ -28,14 +28,15 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author jab
- * @author scf
+ * A main data Property of an Entity or ComplexValue.
+ *
  * @param <P> The type of the value of the property.
  */
 public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annotatable, EntityProperty<P> {
 
     /**
-     * Flag indicating the property has sub-properties.
+     * Flag indicating the property has sub-properties and can be queried, even
+     * though it is not a complex type.
      */
     public final boolean hasCustomProperties;
 

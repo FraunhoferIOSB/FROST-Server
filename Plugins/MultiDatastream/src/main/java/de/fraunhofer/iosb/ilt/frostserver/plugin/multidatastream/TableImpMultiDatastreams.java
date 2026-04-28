@@ -19,16 +19,14 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager.LINK_TABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase.PRE_RELATIONS;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -50,7 +48,10 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObservations;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.ParserUtils;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -246,11 +247,11 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         pfReg.addEntryId(TableImpMultiDatastreams::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
-        pfReg.addEntry(pluginCoreModel.epObservationType, null,
+        pfReg.addEntry(pluginCoreModel.epObservationType,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> entity.setProperty(pluginCoreModel.epObservationType, DEF_COMPLEX_OBSERVATION),
                         null, null));
-        pfReg.addEntry(pluginMultiDatastream.epMultiObservationDataTypes, table -> table.colObservationTypes,
+        pfReg.addEntry(pluginMultiDatastream.epMultiObservationDataTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
@@ -262,7 +263,8 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                         (table, entity, updateFields, message) -> {
                             updateFields.put(table.colObservationTypes, new JsonValue(entity.getProperty(pluginMultiDatastream.epMultiObservationDataTypes)));
                             message.addField(pluginMultiDatastream.epMultiObservationDataTypes);
-                        }));
+                        }),
+                new NFP<>("", table -> table.colObservationTypes));
         pfReg.addEntry(pluginCoreModel.epObservedArea,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
@@ -276,30 +278,42 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                                 }
                             }
                         }, null, null),
-                new NFP<>("s", table -> table.colObservedAreaText));
-        pfReg.addEntryNoSelect(pluginCoreModel.epObservedArea, "g", table -> table.colObservedArea);
-        pfReg.addEntry(pluginCoreModel.epPhenomenonTimeDs,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(pluginCoreModel.epPhenomenonTimeDs, table -> table.colPhenomenonTimeStart, table -> table.colPhenomenonTimeEnd),
-                new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colPhenomenonTimeStart),
-                new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colPhenomenonTimeEnd));
+                new NFP<>("s", table -> table.colObservedAreaText),
+                new NFP<>("g", table -> table.colObservedArea));
+        // TODO: Make the g non-selectable again.
+
+        pfReg.addEntryTimeInterval(
+                pluginCoreModel.epPhenomenonTimeDs,
+                table -> table.colPhenomenonTimeStart,
+                table -> table.colPhenomenonTimeEnd);
+
+        pfReg.addEntryTimeInterval(
+                pluginCoreModel.epResultTimeDs,
+                table -> table.colResultTimeStart,
+                table -> table.colResultTimeEnd);
+
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
-        pfReg.addEntry(pluginCoreModel.epResultTimeDs,
-                new PropertyFieldRegistry.ConverterTimeInterval<>(pluginCoreModel.epResultTimeDs, table -> table.colResultTimeStart, table -> table.colResultTimeEnd),
-                new NFP<>(KEY_TIME_INTERVAL_START, table -> table.colResultTimeStart),
-                new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
-        pfReg.addEntry(pluginMultiDatastream.getEpUnitOfMeasurements(), table -> table.colUnitOfMeasurements,
+
+        pfReg.addEntry(pluginMultiDatastream.epUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
-                            List<UnitOfMeasurement> units = fieldJsonValue.getValue(TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM);
-                            entity.setProperty(pluginMultiDatastream.getEpUnitOfMeasurements(), units);
+
+                            try {
+                                List<ComplexValue> units = ParserUtils.parseComplexValueList(SimpleJsonMapper.getSimpleObjectMapper(), TypeComplex.TYPE_UOM, fieldJsonValue.getStringValue());
+                                entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, units);
+                            } catch (IOException ex) {
+                                LOGGER.error("Failed to parse stored UnitOfMeasure List.", ex.getMessage());
+                                LOGGER.debug("Failed to parse stored UnitOfMeasure List.", ex);
+                            }
                         },
-                        (table, entity, insertFields) -> insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.getEpUnitOfMeasurements()))),
+                        (table, entity, insertFields) -> insertFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements))),
                         (table, entity, updateFields, message) -> {
-                            updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.getEpUnitOfMeasurements())));
-                            message.addField(pluginMultiDatastream.getEpUnitOfMeasurements());
-                        }));
+                            updateFields.put(table.colUnitOfMeasurements, new JsonValue(entity.getProperty(pluginMultiDatastream.epUnitOfMeasurements)));
+                            message.addField(pluginMultiDatastream.epUnitOfMeasurements);
+                        }),
+                new NFP<>(table -> table.colUnitOfMeasurements));
         pfReg.addEntry(pluginMultiDatastream.npSensorMDs, TableImpMultiDatastreams::getSensorId);
         pfReg.addEntry(pluginMultiDatastream.npThingMDs, TableImpMultiDatastreams::getThingId);
         pfReg.addEntry(pluginMultiDatastream.npObservedPropertiesMDs, TableImpMultiDatastreams::getId);

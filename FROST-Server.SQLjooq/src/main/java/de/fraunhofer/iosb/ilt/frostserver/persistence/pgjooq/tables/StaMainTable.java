@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import java.util.List;
@@ -99,8 +98,6 @@ public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {
     public <U extends StaMainTable<U>> void createSemiJoin(String name, U targetTable, QueryState queryState);
 
     public PropertyFieldRegistry<T> getPropertyFieldRegistry();
-
-    public PropertyFieldRegistry.PropertyFields<T> handleEntityPropertyCustomSelect(final EntityPropertyCustomSelect epCustomSelect);
 
     public EntityType getEntityType();
 

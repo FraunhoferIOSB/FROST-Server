@@ -171,6 +171,7 @@ public class MqttHelper2 {
     public void executeRequest(MqttAction ma) {
         LOGGER.debug("  Executing Request...");
         final ExecutorService executor = Executors.newFixedThreadPool(ma.topics.size());
+        List<MqttListener> listeners = new ArrayList<>();
         try {
             for (TestSubscription tl : ma.topics) {
                 LOGGER.debug("  {} Creating Subsctiption for {} messages on {}", tl.name, tl.getExpectedCount(), tl.topic);
@@ -181,6 +182,7 @@ public class MqttHelper2 {
                 }
                 listener.setListener(tl.mqttReceivedListener);
                 listener.connect();
+                listeners.add(listener);
                 executor.submit(listener);
             }
             LOGGER.debug("  Calling action...");
@@ -211,7 +213,15 @@ public class MqttHelper2 {
                     tl.hasErrors(),
                     () -> "Errors encountered for " + tl.getName() + " on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
         }
-
+        boolean failed = false;
+        String messages = "";
+        for (var listener : listeners) {
+            if (!listener.isDone()) {
+                failed = true;
+                messages += "\n" + listener.getName() + " not done on " + listener.getTopic();
+            }
+        }
+        Assertions.assertFalse(failed, messages);
     }
 
     private static boolean jsonEqualsWithLinkResolving(JsonNode node1, JsonNode node2, String topic) {

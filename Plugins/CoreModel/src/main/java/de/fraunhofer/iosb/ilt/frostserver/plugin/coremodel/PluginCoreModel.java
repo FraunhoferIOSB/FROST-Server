@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings.TAG_ENABLE_CORE_MODEL;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
@@ -26,12 +25,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimiti
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_UNTYPED;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
@@ -68,8 +67,7 @@ import org.slf4j.LoggerFactory;
 import tools.jackson.core.TreeNode;
 
 /**
- *
- * @author scf
+ * The core SensorThings v1.1 data model plugin.
  */
 public class PluginCoreModel implements PluginRootDocument, PluginModel, LiquibaseUser {
 
@@ -134,17 +132,15 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModel.class.getName());
 
-    private TypeComplex eptUom;
-
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET, false, false);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING, true, false);
     public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
     public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_LOCATION, true, false, true, false);
-    public final EntityPropertyMain<Object> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_UNTYPED, true, false);
+    public final EntityPropertyMain<Object> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_UNTYPED, true, false, true, false);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING, true, false);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING, true, false);
-    public final EntityPropertyMain<Object> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY);
+    public final EntityPropertyMain<Object> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY, false, true, true, false);
     public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE, false, false, true, false);
     public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, false, true, true, false);
     public final EntityPropertyMain<TreeNode> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, false, true, true, false);
@@ -153,7 +149,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, false, true, false, false);
     public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeSimplePrimitive.EDM_UNTYPED, false, true, true, false);
     public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET, true, false);
-    private EntityPropertyMain<UnitOfMeasurement> epUnitOfMeasurement;
+    public final EntityPropertyMain<ComplexValueImpl> epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, TypeComplex.TYPE_UOM, true, false);
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeComplex.STA_TIMEINTERVAL);
 
     private EntityPropertyMain<?> epIdDatastream;
@@ -248,11 +244,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         LOGGER.info("Initialising Core Model Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
-        eptUom = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false, UnitOfMeasurement::new, TYPE_REFERENCE_UOM)
-                .registerProperty(UnitOfMeasurement.EP_NAME)
-                .registerProperty(UnitOfMeasurement.EP_DEFINITION)
-                .registerProperty(UnitOfMeasurement.EP_SYMBOL);
-        mr.registerPropertyType(eptUom)
+        mr.registerPropertyType(TypeComplex.TYPE_UOM)
                 .registerPropertyType(TypeSimpleCustom.STA_LOCATION)
                 .registerPropertyType(TypeComplex.STA_MAP)
                 .registerPropertyType(TypeComplex.STA_TIMEINTERVAL)
@@ -273,7 +265,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         epIdObservation = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeObservation)).setAliases("id");
         epIdSensor = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeSensor)).setAliases("id");
         epIdThing = new EntityPropertyMain<>(AT_IOT_ID, mr.getPropertyType(modelSettings.idTypeThing)).setAliases("id");
-        epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, eptUom, true, false);
     }
 
     @Override
@@ -414,20 +405,6 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
             out.append("Unknown persistence manager class");
             return false;
         }
-    }
-
-    /**
-     * @return the entity property type for Unit Of Measurement
-     */
-    public TypeComplex getEptUom() {
-        return eptUom;
-    }
-
-    /**
-     * @return the entity property for UnitOfMeasurement
-     */
-    public EntityPropertyMain<UnitOfMeasurement> getEpUnitOfMeasurement() {
-        return epUnitOfMeasurement;
     }
 
     /**

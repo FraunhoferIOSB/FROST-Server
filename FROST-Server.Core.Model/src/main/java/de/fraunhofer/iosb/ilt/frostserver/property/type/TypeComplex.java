@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
@@ -75,7 +74,7 @@ public class TypeComplex extends PropertyType implements ContainerType<TypeCompl
     public static final TypeComplex STA_TIMEVALUE = new TypeComplex(STA_TIMEVALUE_NAME, "An ISO time instant or time interval.", false, t -> new TimeValue(), TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
             .registerProperty(EP_START_TIME)
             .registerProperty(EP_VALUE_END_TIME);
-    public static final TypeComplex TYPE_UOM = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false, t -> new UnitOfMeasurement(), TYPE_REFERENCE_UOM)
+    public static final TypeComplex TYPE_UOM = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false)
             .registerProperty(UnitOfMeasurement.EP_NAME)
             .registerProperty(UnitOfMeasurement.EP_DEFINITION)
             .registerProperty(UnitOfMeasurement.EP_SYMBOL);

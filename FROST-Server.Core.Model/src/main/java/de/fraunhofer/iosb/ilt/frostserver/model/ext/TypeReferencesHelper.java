@@ -70,9 +70,6 @@ public class TypeReferencesHelper {
     public static final TypeReference<Long> TYPE_REFERENCE_LONG = new TypeReference<Long>() {
         // Empty on purpose.
     };
-    public static final TypeReference<List<UnitOfMeasurement>> TYPE_REFERENCE_LIST_UOM = new TypeReference<List<UnitOfMeasurement>>() {
-        // Empty on purpose.
-    };
     public static final TypeReference<Map<String, Object>> TYPE_REFERENCE_MAP = new TypeReference<Map<String, Object>>() {
         // Empty on purpose.
     };
@@ -95,9 +92,6 @@ public class TypeReferencesHelper {
         // Empty on purpose.
     };
     public static final TypeReference<TimeValue> TYPE_REFERENCE_TIMEVALUE = new TypeReference<TimeValue>() {
-        // Empty on purpose.
-    };
-    public static final TypeReference<UnitOfMeasurement> TYPE_REFERENCE_UOM = new TypeReference<UnitOfMeasurement>() {
         // Empty on purpose.
     };
     public static final TypeReference<UUID> TYPE_REFERENCE_UUID = new TypeReference<UUID>() {

@@ -60,7 +60,6 @@ public class FieldMapperStatic implements FieldMapper {
         PropertyFieldRegistry<T> pfReg = staTable.getPropertyFieldRegistry();
         pfReg.addEntry(
                 entityProperty,
-                null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (table, tuple, entity, dataSize) -> entity.setProperty(entityProperty, value),
                         null, null));

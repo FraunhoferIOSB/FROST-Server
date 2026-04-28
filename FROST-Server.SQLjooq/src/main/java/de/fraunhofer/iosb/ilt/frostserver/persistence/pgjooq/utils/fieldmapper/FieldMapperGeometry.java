@@ -79,6 +79,7 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                     "j",
                     t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
         }
+        final PropertyFieldRegistry.NFP<T> geoPfr = new PropertyFieldRegistry.NFP<>("g", t -> t.field(idxGeom));
         pfReg.addEntry(
                 property,
                 true,
@@ -103,8 +104,9 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                             EntityFactories.insertGeometry(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature);
                             message.addField(property);
                         }),
-                sourcePfr);
-        pfReg.addEntryNoSelect(property, "g", t -> t.field(idxGeom));
+                sourcePfr,
+                geoPfr);
+        // TODO: Make the g non-selectable again.
     }
 
     /**

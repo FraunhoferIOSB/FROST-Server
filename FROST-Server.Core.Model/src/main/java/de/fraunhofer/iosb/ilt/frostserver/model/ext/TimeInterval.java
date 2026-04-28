@@ -166,6 +166,8 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
             moment = m;
         } else if (value instanceof Instant i) {
             moment = Moment.from(i);
+        } else if (value instanceof TimeInstant i) {
+            moment = i.getDateTime();
         } else {
             throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
         }

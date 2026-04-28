@@ -25,6 +25,8 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,7 +77,21 @@ public class ParserContext {
         if (variable != null) {
             return variable;
         }
-        if (previous instanceof EntityPropertyMain || previous instanceof EntityPropertyCustom) {
+        if (previous instanceof EntityPropertyMain epm) {
+            PropertyType prevType = previous.getType();
+            if (prevType instanceof TypeComplex tc) {
+                EntityPropertyMain child = tc.getEntityProperty(decodedName);
+                if (child != null) {
+                    return child;
+                }
+                if (tc.isOpenType()) {
+                    return parseCustomProperty(decodedName);
+                }
+            } else if (epm.hasCustomProperties) {
+                return parseCustomProperty(decodedName);
+            }
+            throw new IllegalArgumentException("Could not place " + propertyName + " under type " + type + " after " + previous + ": not an open type.");
+        } else if (previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
         NavigationPropertyMain navProp = type.getNavigationProperty(decodedName);

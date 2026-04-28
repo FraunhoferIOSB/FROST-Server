@@ -25,8 +25,6 @@ import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * A function that returns a property from the entity in the DynamicContext.
- *
- * TODO: Work in progress.
  */
 public class ContextEntityProperty extends Function<ContextEntityProperty> {
 
