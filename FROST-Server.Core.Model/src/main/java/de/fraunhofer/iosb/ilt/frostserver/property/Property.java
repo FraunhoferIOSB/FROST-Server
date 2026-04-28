@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.Comparator;
 
@@ -78,7 +78,7 @@ public interface Property<P> extends Comparable<Property<?>> {
      * @param entity The entity to get this property from.
      * @return This property, fetched from the given entity.
      */
-    public P getFrom(Entity entity);
+    public P getFrom(ComplexValue<?> entity);
 
     /**
      * Set this property to the given value, on the given entity.
@@ -86,7 +86,7 @@ public interface Property<P> extends Comparable<Property<?>> {
      * @param entity The entity to set this property on.
      * @param value The value to set the property to.
      */
-    public void setOn(Entity entity, P value);
+    public void setOn(ComplexValue<?> entity, P value);
 
     /**
      * Check if this property is set on the given entity.
@@ -94,7 +94,7 @@ public interface Property<P> extends Comparable<Property<?>> {
      * @param entity The entity for which to check if this entity is set.
      * @return True if this property is set on the given entity.
      */
-    public boolean isSetOn(Entity entity);
+    public boolean isSetOn(ComplexValue<?> entity);
 
     /**
      * The priority used for ordering. Important when a property needs to be

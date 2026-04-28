@@ -145,7 +145,7 @@ public class EntityChangedMessage {
 
     public EntityChangedMessage setEntity(Entity entity) {
         this.entity = entity;
-        this.entityType = entity.getEntityType();
+        this.entityType = entity.getType();
         return this;
     }
 

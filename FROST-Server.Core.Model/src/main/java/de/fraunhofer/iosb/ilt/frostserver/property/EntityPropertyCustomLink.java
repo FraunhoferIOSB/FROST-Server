@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntity;
 import java.util.Objects;
 
 /**
- *
- * @author hylke
+ * A normal property that can partially double as a navigation property.
  */
 public class EntityPropertyCustomLink extends PropertyAbstract<Entity> implements NavigationProperty<Entity> {
 
@@ -38,17 +38,17 @@ public class EntityPropertyCustomLink extends PropertyAbstract<Entity> implement
     }
 
     @Override
-    public Entity getFrom(Entity entity) {
+    public Entity getFrom(ComplexValue entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
-    public void setOn(Entity entity, Entity value) {
+    public void setOn(ComplexValue entity, Entity value) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue entity) {
         throw new UnsupportedOperationException(UNSUPPORTED);
     }
 

@@ -17,13 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.Objects;
 
 /**
- *
- * @author Hylke van der Schaaf
+ * A custom (user-defined) entity property.
  */
 public class EntityPropertyCustom extends PropertyAbstract<Object> implements EntityProperty<Object> {
 
@@ -35,7 +34,7 @@ public class EntityPropertyCustom extends PropertyAbstract<Object> implements En
         Integer realIndex;
         if (finalName.startsWith("[") && finalName.endsWith("]")) {
             try {
-                realIndex = Integer.parseInt(finalName.substring(1, finalName.length() - 1));
+                realIndex = Integer.valueOf(finalName.substring(1, finalName.length() - 1));
                 finalName = realIndex.toString();
             } catch (NumberFormatException e) {
                 // Not a number...
@@ -45,17 +44,17 @@ public class EntityPropertyCustom extends PropertyAbstract<Object> implements En
     }
 
     @Override
-    public Object getFrom(Entity entity) {
+    public Object getFrom(ComplexValue<?> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void setOn(Entity entity, Object value) {
+    public void setOn(ComplexValue<?> entity, Object value) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue<?> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 

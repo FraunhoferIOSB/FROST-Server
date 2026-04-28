@@ -34,8 +34,6 @@ import org.geojson.Polygon;
 
 /**
  * Helper class for testing JSON de-/serialization.
- *
- * @author jab
  */
 public class TestHelper {
 

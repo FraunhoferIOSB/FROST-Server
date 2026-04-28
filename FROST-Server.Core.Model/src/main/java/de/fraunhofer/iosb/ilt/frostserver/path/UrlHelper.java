@@ -245,11 +245,11 @@ public class UrlHelper {
     }
 
     public static String generateSelfLink(String serviceRootUrl, Version version, Entity entity) {
-        return generateSelfLink(serviceRootUrl, version, entity.getEntityType(), entity.getPrimaryKeyValues());
+        return generateSelfLink(serviceRootUrl, version, entity.getType(), entity.getPrimaryKeyValues());
     }
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {
-        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getEntityType(), entity.getPrimaryKeyValues());
+        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getType(), entity.getPrimaryKeyValues());
     }
 
     public static Entity parseSelfLink(String selfLink, ModelRegistry mr, boolean isAdmin) {
@@ -278,7 +278,7 @@ public class UrlHelper {
      * @return A navigation link or null depending on query responseMetadata.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + entity.getEntityType().entityName;
+        String result = generateSelfLink(path, parent) + "/" + entity.getType().entityName;
         if (!absolute) {
             String curPath = path.getServiceRootUrl() + path.getPath();
             result = getRelativePath(result, curPath);

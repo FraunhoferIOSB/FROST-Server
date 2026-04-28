@@ -93,7 +93,7 @@ class HookPostInsertHistLoc implements HookPostInsert {
     public boolean postInsertIntoDatabase(JooqPersistenceManager pm, Entity histLoc, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException {
         final EntityFactories ef = pm.getEntityFactories();
         final TableCollection tc = pm.getTableCollection();
-        final EntityType etHistLoc = histLoc.getEntityType();
+        final EntityType etHistLoc = histLoc.getType();
         final NavigationPropertyEntity npThing = (NavigationPropertyEntity) etHistLoc.getNavigationProperty("Thing");
         final NavigationPropertyEntitySet npLocations = (NavigationPropertyEntitySet) etHistLoc.getNavigationProperty("Locations");
         final EntityPropertyMain<TimeInstant> epTime = etHistLoc.getEntityProperty("time");
@@ -120,7 +120,7 @@ class HookPostInsertHistLoc implements HookPostInsert {
                                 .and(thlTime.gt(newTime)))
                         .orderBy(thlTime.desc())
                         .limit(1),
-                histLoc.getEntityType().entityName);
+                histLoc.getType().entityName);
         if (lastHistLocation == null) {
             // We are the newest.
             // Unlink old Locations from Thing.

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
@@ -30,11 +31,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityExcepti
 
 /**
  * Interface defining basic methods of an Entity.
- *
- * @author jab
- * @author scf
  */
-public interface Entity extends NavigableElement {
+public interface Entity extends NavigableElement, ComplexValue<Entity> {
 
     /**
      * Get the primary key definition of the (EntityType of the) Entity. This is
@@ -62,11 +60,9 @@ public interface Entity extends NavigableElement {
 
     public Entity setSelfLink(String selfLink);
 
-    /**
-     * @return The type of this entity.
-     */
     @JsonIgnore
-    public EntityType getEntityType();
+    @Override
+    public EntityType getType();
 
     /**
      * Sets the type of the entity if it had not been previously set. This will
@@ -75,25 +71,7 @@ public interface Entity extends NavigableElement {
      * @param entityType The type of the entity to set.
      * @return this;
      */
-    public Entity setEntityType(EntityType entityType);
-
-    /**
-     * Returns true if the property is explicitly set to a value, even if this
-     * value is null.
-     *
-     * @param property the property to check.
-     * @return true if the property is explicitly set.
-     */
-    public boolean isSetProperty(Property property);
-
-    /**
-     * Get the value of the given Property as it is set on this Entity.
-     *
-     * @param <P> The type of the value of the property.
-     * @param property The property to get
-     * @return The value of the property.
-     */
-    public <P> P getProperty(Property<P> property);
+    public Entity setType(EntityType entityType);
 
     /**
      * Get the value pointed to by the given Path.
@@ -103,15 +81,15 @@ public interface Entity extends NavigableElement {
      */
     public Object getProperty(Path path);
 
-    /**
-     * Set the value of the given property.
-     *
-     * @param <P> The type of the value of the property.
-     * @param property The property to set the value for.
-     * @param value The value to set for the given property.
-     * @return This.
-     */
-    public <P> Entity setProperty(Property<P> property, P value);
+    @Override
+    public default Object getProperty(String name) {
+        return null;
+    }
+
+    @Override
+    public default Entity setProperty(String name, Object value) {
+        return this;
+    }
 
     public Entity unsetProperty(Property property);
 
@@ -169,7 +147,7 @@ public interface Entity extends NavigableElement {
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
     public default void validateCreate() throws IncompleteEntityException {
-        getEntityType().validateCreate(this);
+        getType().validateCreate(this);
     }
 
     /**
@@ -182,7 +160,7 @@ public interface Entity extends NavigableElement {
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
     public default void validateUpdate() throws IncompleteEntityException {
-        getEntityType().validateUpdate(this);
+        getType().validateUpdate(this);
     }
 
     /**
@@ -206,7 +184,7 @@ public interface Entity extends NavigableElement {
      */
     @JsonIgnore
     public default ResourcePath getPath() {
-        EntityType type = getEntityType();
+        EntityType type = getType();
         PathElementEntity epe = new PathElementEntity(type, null);
         epe.setPkValues(getPrimaryKeyValues());
         ResourcePath resourcePath = new ResourcePath();

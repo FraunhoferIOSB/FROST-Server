@@ -55,6 +55,11 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
         this.interval = timeInterval;
     }
 
+    @Override
+    public TypeComplex getType() {
+        return TypeComplex.STA_TIMEVALUE;
+    }
+
     public static TimeValue create(Moment start) {
         return new TimeValue(TimeInstant.create(start));
     }
@@ -204,6 +209,26 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
             default:
                 throw new IllegalArgumentException("Unknown sub-property: " + name);
         }
+    }
+
+    @Override
+    public boolean isSetProperty(Property property) {
+        if (property == EP_START_TIME) {
+            if (isInterval()) {
+                return interval.isSetProperty(EP_START_TIME);
+            } else {
+                return instant != null;
+            }
+        }
+
+        if (property == EP_END_TIME) {
+            if (isInterval()) {
+                return interval.isSetProperty(EP_END_TIME);
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
 
 }

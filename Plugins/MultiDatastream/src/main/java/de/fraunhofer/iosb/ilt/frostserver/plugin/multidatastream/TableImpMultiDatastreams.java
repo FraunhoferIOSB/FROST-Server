@@ -39,7 +39,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationM
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
@@ -249,11 +248,11 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntry(pluginCoreModel.epObservationType, null,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> entity.setProperty(pluginCoreModel.epObservationType, DEF_COMPLEX_OBSERVATION),
+                        (table, tuple, entity, dataSize) -> entity.setProperty(pluginCoreModel.epObservationType, DEF_COMPLEX_OBSERVATION),
                         null, null));
         pfReg.addEntry(pluginMultiDatastream.epMultiObservationDataTypes, table -> table.colObservationTypes,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (table, tuple, entity, dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colObservationTypes);
                             List<String> observationTypes = fieldJsonValue.getValue(TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING);
                             dataSize.increase(fieldJsonValue.getStringLength());
@@ -290,7 +289,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 new NFP<>(KEY_TIME_INTERVAL_END, table -> table.colResultTimeEnd));
         pfReg.addEntry(pluginMultiDatastream.getEpUnitOfMeasurements(), table -> table.colUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpMultiDatastreams table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (table, tuple, entity, dataSize) -> {
                             final JsonValue fieldJsonValue = Utils.getFieldJsonValue(tuple, table.colUnitOfMeasurements);
                             dataSize.increase(fieldJsonValue.getStringLength());
                             List<UnitOfMeasurement> units = fieldJsonValue.getValue(TypeReferencesHelper.TYPE_REFERENCE_LIST_UOM);

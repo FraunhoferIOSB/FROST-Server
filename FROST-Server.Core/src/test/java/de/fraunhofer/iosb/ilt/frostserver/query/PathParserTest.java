@@ -114,7 +114,7 @@ class PathParserTest {
     @Test
     void testPathEntityProperty() {
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
-            for (Property property : entityType.getPropertySet()) {
+            for (Property property : entityType.getProperties()) {
                 String basePath = "/" + entityType.plural + "(1)/";
                 String path = basePath + property.getName();
                 ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);

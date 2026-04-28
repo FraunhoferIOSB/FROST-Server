@@ -61,7 +61,7 @@ class MessageSerialisationTest {
                 .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing");
-        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getType()));
         message.setEntity(entity);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
@@ -81,7 +81,7 @@ class MessageSerialisationTest {
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing")
                 .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.jsonPoint(-117.123, 54.123));
-        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getType()));
         message.setEntity(entity);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();
@@ -99,7 +99,7 @@ class MessageSerialisationTest {
                 .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing");
-        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getType()));
         message.setEntity(entity);
         message.addEpField(pluginCoreModel.epName);
         message.addEpField(pluginCoreModel.epDescription);
@@ -124,7 +124,7 @@ class MessageSerialisationTest {
                         .buildTreeNode())
                 .setProperty(pluginCoreModel.npDatastreamObservation, new DefaultEntity(pluginCoreModel.etDatastream, PkValue.of(12L)));
         entity.setProperty(pluginCoreModel.epResultTime, null);
-        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getEntityType()));
+        entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getType()));
         message.setEntity(entity);
 
         ObjectMapper mapper = JsonWriter.getObjectMapper();

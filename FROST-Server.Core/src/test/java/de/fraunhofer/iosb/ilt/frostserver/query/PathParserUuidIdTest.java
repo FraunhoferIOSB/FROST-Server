@@ -112,7 +112,7 @@ class PathParserUuidIdTest {
     @Test
     void testPathEntityProperty() {
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
-            for (Property property : entityType.getPropertySet()) {
+            for (Property property : entityType.getProperties()) {
                 String basePath = "/" + entityType.plural + "('123e4567-e89b-12d3-a456-426614174000')/";
                 String path = basePath + property.getName();
                 ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);

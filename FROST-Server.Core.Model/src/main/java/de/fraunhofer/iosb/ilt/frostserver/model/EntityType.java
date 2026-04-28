@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
@@ -53,10 +54,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The types of entities in STA.
- *
- * @author jab, scf
  */
-public class EntityType implements Annotatable, Comparable<EntityType> {
+public class EntityType implements Annotatable, Comparable<EntityType>, ContainerType<EntityType> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityType.class.getName());
 
@@ -139,6 +138,12 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         this.adminOnly = adminOnly;
     }
 
+    @Override
+    public boolean isOpenType() {
+        return false;
+    }
+
+    @Override
     public EntityType registerProperty(Property property) {
         properties.add(property);
         propertiesByName.put(property.getName(), property);
@@ -288,6 +293,12 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
         return propertiesByName.get(name);
     }
 
+    @Override
+    public Map<String, Property> getPropertiesByName() {
+        return propertiesByName;
+    }
+
+    @Override
     public EntityPropertyMain getEntityProperty(String name) {
         Property<?> property = propertiesByName.get(name);
         if (property instanceof EntityPropertyMain entityPropertyMain) {
@@ -325,7 +336,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      *
      * @return The Set of PROPERTIES that Entities of this type have.
      */
-    public Set<Property> getPropertySet() {
+    public Set<Property> getProperties() {
         return properties;
     }
 
@@ -334,6 +345,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      *
      * @return The set of Entity properties.
      */
+    @Override
     public Set<EntityPropertyMain> getEntityProperties() {
         return entityProperties;
     }
@@ -377,7 +389,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
      * incorrect (i.e. Observation with both a Datastream and a MultiDatastream.
      */
     public void validateCreate(Entity entity) throws IncompleteEntityException {
-        for (Property property : getPropertySet()) {
+        for (Property property : getProperties()) {
             if (entity.isSetProperty(property)) {
                 if (property.isReadOnly()) {
                     entity.unsetProperty(property);
@@ -398,7 +410,7 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
     }
 
     public void validateUpdate(Entity entity) throws IncompleteEntityException {
-        for (Property property : getPropertySet()) {
+        for (Property property : getProperties()) {
             if (!(property instanceof EntityPropertyMain)) {
                 continue;
             }
@@ -419,8 +431,8 @@ public class EntityType implements Annotatable, Comparable<EntityType> {
 
     public void setParent(PathElementEntitySet containingSet, Entity entity) throws IncompleteEntityException {
         EntityType setType = containingSet.getEntityType();
-        if (setType != entity.getEntityType()) {
-            throw new IllegalArgumentException("Set of type " + setType + " can not contain a " + entity.getEntityType());
+        if (setType != entity.getType()) {
+            throw new IllegalArgumentException("Set of type " + setType + " can not contain a " + entity.getType());
         }
         PathElement parent = containingSet.getParent();
         if (parent == null) {

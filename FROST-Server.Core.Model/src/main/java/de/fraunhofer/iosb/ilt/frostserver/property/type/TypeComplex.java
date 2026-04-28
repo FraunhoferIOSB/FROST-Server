@@ -17,15 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
+import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_UOM;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -46,7 +49,7 @@ import tools.jackson.databind.ValueSerializer;
 /**
  * The complex type definition.
  */
-public class TypeComplex extends PropertyType {
+public class TypeComplex extends PropertyType implements ContainerType<TypeComplex> {
 
     public static final String STA_MAP_NAME = "Object";
     public static final String STA_TIMEINTERVAL_NAME = "TM_Period";
@@ -66,12 +69,16 @@ public class TypeComplex extends PropertyType {
 
     public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, ParserUtils.getTreeNodeDeserializer(), ParserUtils.getTreeNodeSerializer());
 
-    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex(STA_TIMEINTERVAL_NAME, "An ISO time interval.", false, TimeInterval::new, TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
+    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex(STA_TIMEINTERVAL_NAME, "An ISO time interval.", false, t -> new TimeInterval(), TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
             .registerProperty(EP_START_TIME)
             .registerProperty(EP_INTERVAL_END_TIME);
-    public static final TypeComplex STA_TIMEVALUE = new TypeComplex(STA_TIMEVALUE_NAME, "An ISO time instant or time interval.", false, TimeValue::new, TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
+    public static final TypeComplex STA_TIMEVALUE = new TypeComplex(STA_TIMEVALUE_NAME, "An ISO time instant or time interval.", false, t -> new TimeValue(), TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
             .registerProperty(EP_START_TIME)
             .registerProperty(EP_VALUE_END_TIME);
+    public static final TypeComplex TYPE_UOM = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false, t -> new UnitOfMeasurement(), TYPE_REFERENCE_UOM)
+            .registerProperty(UnitOfMeasurement.EP_NAME)
+            .registerProperty(UnitOfMeasurement.EP_DEFINITION)
+            .registerProperty(UnitOfMeasurement.EP_SYMBOL);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeComplex.class.getName());
     private static final Map<String, TypeComplex> TYPES = new HashMap<>();
@@ -107,7 +114,7 @@ public class TypeComplex extends PropertyType {
     /**
      * The Set of PROPERTIES that Elements of this type have.
      */
-    private final Set<Property> properties = new LinkedHashSet<>();
+    private final Set<EntityPropertyMain> properties = new LinkedHashSet<>();
 
     /**
      * The Set of PROPERTIES that Entities of this type have, mapped by their
@@ -137,25 +144,37 @@ public class TypeComplex extends PropertyType {
         setMediaType(Constants.CONTENT_TYPE_APPLICATION_JSON);
     }
 
+    @Override
     public boolean isOpenType() {
         return openType;
     }
 
-    public Set<Property> getProperties() {
+    @Override
+    public Set<EntityPropertyMain> getEntityProperties() {
         return properties;
     }
 
-    public Property getProperty(String name) {
-        return propertiesByName.get(name);
+    @Override
+    public EntityPropertyMain getEntityProperty(String name) {
+        return (EntityPropertyMain) propertiesByName.get(name);
     }
 
+    @Override
     public Map<String, Property> getPropertiesByName() {
         return propertiesByName;
     }
 
+    @Override
     public TypeComplex registerProperty(Property property) {
-        properties.add(property);
-        propertiesByName.put(property.getName(), property);
+        if (property == null) {
+            return this;
+        }
+        if (property instanceof EntityPropertyMain epm) {
+            properties.add(epm);
+            propertiesByName.put(epm.getName(), epm);
+        } else {
+            throw new IllegalArgumentException("Complex types can only have entity properties, not " + property.getClass().getName());
+        }
         return this;
     }
 
@@ -192,12 +211,12 @@ public class TypeComplex extends PropertyType {
         if (instantiator == null) {
             this.instantiator = ComplexValueImpl.createFor(this);
         }
-        return instantiator.instantiate();
+        return instantiator.instantiate(this);
     }
 
     public static interface Instantiator {
 
-        public ComplexValue instantiate();
+        public ComplexValue instantiate(TypeComplex type);
     }
 
 }

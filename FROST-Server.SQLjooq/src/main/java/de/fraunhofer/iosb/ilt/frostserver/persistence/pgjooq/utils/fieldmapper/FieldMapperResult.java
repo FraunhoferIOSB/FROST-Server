@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -41,8 +41,7 @@ import org.jooq.Record;
 import org.jooq.Table;
 
 /**
- *
- * @author hylke
+ * A FieldMapper for observation results.
  */
 public class FieldMapperResult extends FieldMapperAbstractEp {
 
@@ -107,7 +106,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
         pfReg.addEntry(property,
                 true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (T t, Record tuple, Entity entity, DataSize dataSize) -> readResultFromDb(entity, property, t, tuple, dataSize),
+                        (t, tuple, entity, dataSize) -> readResultFromDb(entity, property, t, tuple, dataSize),
                         (t, entity, insertFields) -> handleResult(entity, property, t, insertFields),
                         (t, entity, updateFields, message) -> {
                             handleResult(entity, property, t, updateFields);
@@ -120,7 +119,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
                 new PropertyFieldRegistry.NFP<>("t", t -> t.field(idxType)));
     }
 
-    private <T extends StaMainTable<T>> void handleResult(Entity entity, Property property, T table, Map<Field, Object> output) {
+    private <T extends StaMainTable<T>> void handleResult(ComplexValue<?> entity, Property property, T table, Map<Field, Object> output) {
         Object result = entity.getProperty(property);
         if (result instanceof Number number) {
             output.put(table.field(fieldTypeIdx), ResultType.NUMBER.sqlValue());
@@ -149,7 +148,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
         }
     }
 
-    private <T extends StaMainTable<T>> void readResultFromDb(Entity entity, Property property, T table, Record tuple, DataSize dataSize) {
+    private <T extends StaMainTable<T>> void readResultFromDb(ComplexValue<?> entity, Property property, T table, Record tuple, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, (Field<Short>) table.field(fieldTypeIdx));
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -180,7 +179,7 @@ public class FieldMapperResult extends FieldMapperAbstractEp {
         }
     }
 
-    private <T extends StaMainTable<T>> void handleNumber(Entity entity, Property property, T table, Record tuple, int idxReSt, int idxReNu) {
+    private <T extends StaMainTable<T>> void handleNumber(ComplexValue<?> entity, Property property, T table, Record tuple, int idxReSt, int idxReNu) {
         try {
             entity.setProperty(property, new BigDecimal(Utils.getFieldOrNull(tuple, (Field<String>) table.field(idxReSt))));
         } catch (NumberFormatException | NullPointerException e) {

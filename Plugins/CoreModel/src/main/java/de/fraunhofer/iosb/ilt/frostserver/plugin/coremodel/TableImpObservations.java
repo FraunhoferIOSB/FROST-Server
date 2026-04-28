@@ -24,6 +24,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.getFieldOrNull;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -241,7 +242,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 new NFP<>("t", table -> table.colResultType));
         pfReg.addEntry(pluginCoreModel.epResultQuality, table -> table.colResultQuality,
                 new ConverterRecordDeflt<>(
-                        (TableImpObservations table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (table, tuple, entity, dataSize) -> {
                             JsonValue resultQuality = Utils.getFieldJsonValue(tuple, table.colResultQuality);
                             dataSize.increase(resultQuality.getStringLength());
                             entity.setProperty(pluginCoreModel.epResultQuality, resultQuality.getValue());
@@ -321,7 +322,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         return this;
     }
 
-    public void handleResult(TableImpObservations table, Entity entity, Map<Field, Object> output) {
+    public void handleResult(TableImpObservations table, ComplexValue<?> entity, Map<Field, Object> output) {
         Object result = entity.getProperty(pluginCoreModel.epResult);
         if (result instanceof Number number) {
             output.put(table.colResultType, ResultType.NUMBER.sqlValue());
@@ -350,7 +351,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         }
     }
 
-    public void readResultFromDb(TableImpObservations table, Record tuple, Entity entity, DataSize dataSize) {
+    public void readResultFromDb(TableImpObservations table, Record tuple, ComplexValue<?> entity, DataSize dataSize) {
         Short resultTypeOrd = Utils.getFieldOrNull(tuple, table.colResultType);
         if (resultTypeOrd != null) {
             ResultType resultType = ResultType.fromSqlValue(resultTypeOrd);
@@ -381,7 +382,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         }
     }
 
-    private void handleNumber(TableImpObservations table, Record tuple, Entity entity) {
+    private void handleNumber(TableImpObservations table, Record tuple, ComplexValue<?> entity) {
         try {
             entity.setProperty(pluginCoreModel.epResult, new BigDecimal(Utils.getFieldOrNull(tuple, table.colResultString)));
         } catch (NumberFormatException | NullPointerException e) {

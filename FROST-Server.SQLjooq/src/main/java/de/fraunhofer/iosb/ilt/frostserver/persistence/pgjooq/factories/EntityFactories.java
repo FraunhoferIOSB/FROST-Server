@@ -157,7 +157,7 @@ public class EntityFactories {
             e.validateCreate();
         } catch (IncompleteEntityException exc) {
             // not complete and link entity does not exist
-            throw new NoSuchEntityException("No such entity '" + e.getEntityType() + "' with id " + e.getPrimaryKeyValues());
+            throw new NoSuchEntityException("No such entity '" + e.getType() + "' with id " + e.getPrimaryKeyValues());
         }
 
         // complete with id -> create
@@ -195,7 +195,7 @@ public class EntityFactories {
         if (e == null || !e.primaryKeyFullySet()) {
             return false;
         }
-        return entityExists(pm, e.getEntityType(), e.getPrimaryKeyValues(), admin);
+        return entityExists(pm, e.getType(), e.getPrimaryKeyValues(), admin);
     }
 
     public static void insertTimeValue(Map<Field, Object> clause, Field<Moment> startField, Field<Moment> endField, TimeValue time) {

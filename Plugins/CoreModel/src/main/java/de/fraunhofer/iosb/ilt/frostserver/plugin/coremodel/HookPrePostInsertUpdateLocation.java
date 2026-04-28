@@ -112,7 +112,7 @@ public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostI
 
     private void unlinkExitingLocationsFromLinkedThings(JooqPersistenceManager pm, Entity entity) {
         TableCollection tables = pm.getTableCollection();
-        EntityType et = entity.getEntityType();
+        EntityType et = entity.getType();
         NavigationPropertyEntitySet npLocationThings = et.getNavigationPropertyEntitySet("Things");
         if (npLocationThings == null) {
             LOGGER.error("EntityType {} has no navigationPropertySet Things", et);
@@ -144,7 +144,7 @@ public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostI
 
     public void createHistLocationLinkLocations(JooqPersistenceManager pm, Entity entity, PkValue entityId) throws DataAccessException {
         TableCollection tables = pm.getTableCollection();
-        EntityType et = entity.getEntityType();
+        EntityType et = entity.getType();
         NavigationPropertyEntitySet npLocationThings = et.getNavigationPropertyEntitySet("Things");
         if (npLocationThings == null) {
             LOGGER.error("EntityType {} has no navigationPropertySet Things", et);
@@ -186,7 +186,7 @@ public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostI
 
                 // Send a message about the creation of a new HL
                 Entity newHl = pm.get(etHistLoc, PkValue.of(histLocationId));
-                newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getEntityType()));
+                newHl.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(newHl.getType()));
                 pm.getEntityChangedMessages().add(
                         new EntityChangedMessage()
                                 .setEventType(EntityChangedMessage.Type.CREATE)

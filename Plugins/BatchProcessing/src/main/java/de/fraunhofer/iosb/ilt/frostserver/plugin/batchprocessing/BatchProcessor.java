@@ -102,7 +102,7 @@ public class BatchProcessor<C extends Content> {
             Object createdObject = serviceResponse.getResult();
             if (createdObject instanceof Entity entity) {
                 httpRequest.setContentIdValue(entity.getPrimaryKeyValues());
-                httpRequest.setEntityType(entity.getEntityType());
+                httpRequest.setEntityType(entity.getType());
             }
         }
         Request httpResponse = batchFactory.createRequest(serviceRequest.getVersion(), inChangeSet);

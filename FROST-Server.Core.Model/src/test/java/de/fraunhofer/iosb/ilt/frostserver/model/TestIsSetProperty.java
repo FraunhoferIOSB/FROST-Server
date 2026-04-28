@@ -75,8 +75,8 @@ public class TestIsSetProperty {
     @Test
     void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : modelRegistry.getEntityTypes()) {
-            testEntityType(type, type.getPropertySet());
-            testEntityCompare(type, type.getPropertySet());
+            testEntityType(type, type.getProperties());
+            testEntityCompare(type, type.getProperties());
         }
     }
 
@@ -129,17 +129,17 @@ public class TestIsSetProperty {
                 }
             }
             if (shouldBeChanged && !changedFields.contains(p)) {
-                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
+                fail("Diff claims that Property: " + entity.getType() + "/" + p + " did not change.");
             }
             if (!shouldBeChanged && changedFields.contains(p)) {
-                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
+                fail("Diff claims that Property: " + entity.getType() + "/" + p + " did change.");
             }
             isSetPropertyOnObject(entity, p, shouldBeChanged);
         }
     }
 
     private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
-        addPropertyToObject(entity, property, propertyValues.get(entity.getEntityType()));
+        addPropertyToObject(entity, property, propertyValues.get(entity.getType()));
     }
 
     private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
@@ -153,7 +153,7 @@ public class TestIsSetProperty {
                 return;
             }
             if (shouldBeSet != entity.isSetProperty(property)) {
-                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);

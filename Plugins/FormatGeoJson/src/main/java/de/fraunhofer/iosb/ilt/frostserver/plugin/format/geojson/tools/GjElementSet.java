@@ -80,7 +80,7 @@ public class GjElementSet {
 
     public void initFrom(EntityType type) {
         if (query == null || query.getSelect().isEmpty()) {
-            initFrom(type, type.getPropertySet());
+            initFrom(type, type.getProperties());
         } else {
             initFrom(type, query.getSelect());
         }

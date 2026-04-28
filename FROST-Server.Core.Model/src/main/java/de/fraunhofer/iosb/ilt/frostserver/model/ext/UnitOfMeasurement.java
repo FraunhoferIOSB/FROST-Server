@@ -22,14 +22,13 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimiti
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.util.Objects;
 import tools.jackson.core.JacksonException;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.
- *
- * @author jab
  */
 public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
 
@@ -54,6 +53,11 @@ public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
         this.name = name;
         this.symbol = symbol;
         this.definition = definition;
+    }
+
+    @Override
+    public TypeComplex getType() {
+        return TypeComplex.TYPE_UOM;
     }
 
     @Override
@@ -110,6 +114,11 @@ public class UnitOfMeasurement implements ComplexValue<UnitOfMeasurement> {
             return setSymbol((String) value);
         }
         throw new IllegalArgumentException("Unknown sub-property: " + property);
+    }
+
+    @Override
+    public boolean isSetProperty(Property property) {
+        return getProperty(property) != null;
     }
 
     /**

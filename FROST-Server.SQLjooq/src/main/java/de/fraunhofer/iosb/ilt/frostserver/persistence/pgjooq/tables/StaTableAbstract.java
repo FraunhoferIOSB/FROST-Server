@@ -84,8 +84,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * The abstract base class of the main entity tables.
  *
- * @author hylke
  * @param <T> The exact type of the implementing class.
  */
 public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableImpl<Record> implements StaMainTable<T> {
@@ -293,7 +293,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         EntityFactories entityFactories = pm.getEntityFactories();
-        EntityType entityType = entity.getEntityType();
+        EntityType entityType = entity.getType();
         Map<Field, Object> insertFields = new HashMap<>();
 
         // First, run the pre-insert hooks in the PRE_RELATION phase.
@@ -406,7 +406,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
             for (Entity child : linkedSet) {
                 if (ef.entityExists(pm, child, admin)) {
-                    final PathElementEntity childPe = new PathElementEntity(child.getPrimaryKeyValues(), child.getEntityType(), null);
+                    final PathElementEntity childPe = new PathElementEntity(child.getPrimaryKeyValues(), child.getType(), null);
                     pm.update(childPe, child, updateMode);
                 }
             }
@@ -428,7 +428,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             for (Entity child : linkedSet) {
                 EntityFactories ef = pm.getEntityFactories();
                 if (!ef.entityExists(pm, child, false)) {
-                    throw new NoSuchEntityException("Can not link " + child.getEntityType() + " with no id.");
+                    throw new NoSuchEntityException("Can not link " + child.getType() + " with no id.");
                 }
                 relation.link(pm, entity, child);
             }
@@ -439,7 +439,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
         final EntityFactories entityFactories = pm.getEntityFactories();
-        final EntityType entityType = entity.getEntityType();
+        final EntityType entityType = entity.getType();
         final Map<Field, Object> updateFields = new HashMap<>();
         final EntityChangedMessage message = new EntityChangedMessage();
 
@@ -451,7 +451,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
                 if (!entityFactories.entityExists(pm, ne, PrincipalExtended.getLocalPrincipal().isAdmin())) {
-                    throw new NoSuchEntityException("Linked " + ne.getEntityType() + " not found.");
+                    throw new NoSuchEntityException("Linked " + ne.getType() + " not found.");
                 }
                 PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);
                 registry.converter.convert(thisTable, entity, updateFields, message);

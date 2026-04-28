@@ -95,7 +95,7 @@ public class CheckNavLinkEmpty implements ValidationCheck {
     }
 
     private void init(Entity contextEntity) {
-        entityType = contextEntity.getEntityType();
+        entityType = contextEntity.getType();
         targetNp = entityType.getNavigationProperty(getTargetNavLink());
         targetType = targetNp.getEntityType();
         LOGGER.info("Initialised check on {}.{}", entityType, targetNp);

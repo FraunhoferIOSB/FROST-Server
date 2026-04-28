@@ -49,7 +49,7 @@ class EntityCompleteTest {
     private boolean isEntityComplete(Entity entity, PathElementEntitySet containingSet) {
         try {
             if (containingSet.getParent() != null) {
-                entity.getEntityType().setParent(containingSet, entity);
+                entity.getType().setParent(containingSet, entity);
             }
             entity.validateCreate();
             return true;

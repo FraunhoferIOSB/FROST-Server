@@ -98,7 +98,7 @@ class EntityBuilderTest {
     @Test
     void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : modelRegistry.getEntityTypes()) {
-            testEntityType(type, type.getPropertySet());
+            testEntityType(type, type.getProperties());
         }
     }
 
@@ -147,14 +147,14 @@ class EntityBuilderTest {
     private void getPropertyFromObject(Entity entity, Property property) {
         try {
             if (!(property instanceof NavigationPropertyMain) && !entity.isSetProperty(property)) {
-                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getType());
             }
             Object value = propertyValues.get(property);
             Object value2 = propertyValuesAlternative.get(property);
             Object setValue = property.getFrom(entity);
 
             if (!(Objects.equals(value, setValue) || Objects.equals(value2, setValue))) {
-                fail("Getter did not return set value for property " + property + " on entity type " + entity.getEntityType());
+                fail("Getter did not return set value for property " + property + " on entity type " + entity.getType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);

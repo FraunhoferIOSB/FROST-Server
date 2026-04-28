@@ -40,8 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * The entity type JSON structure used by the model loader.
  */
 @ConfigurableClass
 public class DefEntityType implements AnnotatedConfigurable<Void, Void> {

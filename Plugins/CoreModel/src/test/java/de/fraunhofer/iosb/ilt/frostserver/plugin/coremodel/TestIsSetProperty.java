@@ -78,7 +78,7 @@ public class TestIsSetProperty {
     @Test
     void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         for (EntityType type : modelRegistry.getEntityTypes()) {
-            Set<Property> properties = type.getPropertySet().stream().filter(t -> !t.isReadOnly()).collect(Collectors.toSet());
+            Set<Property> properties = type.getProperties().stream().filter(t -> !t.isReadOnly()).collect(Collectors.toSet());
             testEntityType(type, properties);
             testEntityCompare(type, properties);
         }
@@ -133,10 +133,10 @@ public class TestIsSetProperty {
                 }
             }
             if (shouldBeChanged && !changedFields.contains(p)) {
-                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did not change.");
+                fail("Diff claims that Property: " + entity.getType() + "/" + p + " did not change.");
             }
             if (!shouldBeChanged && changedFields.contains(p)) {
-                fail("Diff claims that Property: " + entity.getEntityType() + "/" + p + " did change.");
+                fail("Diff claims that Property: " + entity.getType() + "/" + p + " did change.");
             }
             isSetPropertyOnObject(entity, p, shouldBeChanged);
         }
@@ -157,7 +157,7 @@ public class TestIsSetProperty {
                 return;
             }
             if (shouldBeSet != entity.isSetProperty(property)) {
-                fail("Property " + property + " returned false for isSet on entity type " + entity.getEntityType());
+                fail("Property " + property + " returned false for isSet on entity type " + entity.getType());
             }
         } catch (SecurityException | IllegalArgumentException ex) {
             LOGGER.error("Failed to set property", ex);
@@ -351,7 +351,7 @@ public class TestIsSetProperty {
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldIdBeSet, Entity entity) {
-        assertEquals(shouldIdBeSet, entity.isSetProperty(entity.getEntityType().getPrimaryKey().getKeyProperty(0)), "Failed isSet for ID");
+        assertEquals(shouldIdBeSet, entity.isSetProperty(entity.getType().getPrimaryKey().getKeyProperty(0)), "Failed isSet for ID");
         assertEquals(true, entity.isSetProperty(ModelRegistry.EP_SELFLINK), "Failed isSet for SelfLink");
     }
 }

@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
@@ -98,17 +98,17 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
     }
 
     @Override
-    public P getFrom(Entity entity) {
+    public P getFrom(ComplexValue<?> entity) {
         return entity.getProperty(this);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue entity) {
         return entity.isSetProperty(this);
     }
 
     @Override
-    public void setOn(Entity entity, P value) {
+    public void setOn(ComplexValue<?> entity, P value) {
         entity.setProperty(this, value);
     }
 

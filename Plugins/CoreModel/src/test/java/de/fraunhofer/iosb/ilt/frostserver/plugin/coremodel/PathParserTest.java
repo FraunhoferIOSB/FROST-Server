@@ -122,7 +122,7 @@ class PathParserTest {
     @Test
     void testPathEntityProperty() {
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
-            for (Property property : entityType.getPropertySet()) {
+            for (Property property : entityType.getProperties()) {
                 if (property instanceof EntityPropertyMain) {
                     EntityPropertyMain entityProperty = (EntityPropertyMain) property;
 

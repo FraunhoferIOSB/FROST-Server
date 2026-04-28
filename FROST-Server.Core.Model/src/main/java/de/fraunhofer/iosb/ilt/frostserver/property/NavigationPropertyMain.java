@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
@@ -173,17 +174,17 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     }
 
     @Override
-    public P getFrom(Entity entity) {
+    public P getFrom(ComplexValue<?> entity) {
         return entity.getProperty(this);
     }
 
     @Override
-    public void setOn(Entity entity, P value) {
+    public void setOn(ComplexValue<?> entity, P value) {
         entity.setProperty(this, value);
     }
 
     @Override
-    public boolean isSetOn(Entity entity) {
+    public boolean isSetOn(ComplexValue<?> entity) {
         return entity.isSetProperty(this);
     }
 

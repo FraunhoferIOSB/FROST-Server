@@ -55,7 +55,7 @@ public class DataArrayValue {
     }
 
     public DataArrayValue(Entity parentEntitiy, List<String> components, EntityType datastream) {
-        if (parentEntitiy.getEntityType() == datastream) {
+        if (parentEntitiy.getType() == datastream) {
             this.datastream = parentEntitiy;
         } else {
             this.multiDatastream = parentEntitiy;

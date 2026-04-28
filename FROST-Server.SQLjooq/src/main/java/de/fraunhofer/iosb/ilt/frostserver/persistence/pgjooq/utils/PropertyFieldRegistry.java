@@ -99,18 +99,26 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
          * @param entity The entity to write the data to.
          * @param dataSize The DataSize to use to register the amount of data.
          */
-        public void convert(U table, Record input, Entity entity, DataSize dataSize);
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize);
     }
 
     public static interface ConverterRecordInsert<U extends StaMainTable<U>> {
 
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields);
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields);
     }
+
+    public static final ConverterRecordInsert NULL_INSERT = (table, entity, insertFields) -> {
+        // Does nothing
+    };
 
     public static interface ConverterRecordUpdate<U extends StaMainTable<U>> {
 
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message);
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message);
     }
+
+    public static final ConverterRecordUpdate NULL_UPDATE = (table, entity, updateFields, message) -> {
+        // Does nothing
+    };
 
     public static interface ConverterRecord<U extends StaMainTable<U>> extends ConverterRecordRead<U>, ConverterRecordInsert<U>, ConverterRecordUpdate<U> {
         // No own methods.
@@ -118,15 +126,13 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     public static class ConverterRecordDeflt<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
-        private static final ConverterRecordInsert NULL_INSERT = (table, entity, insertFields) -> {
-            // Does nothing
-        };
-        private static final ConverterRecordUpdate NULL_UPDATE = (table, entity, updateFields, message) -> {
-            // Does nothing
-        };
         private final ConverterRecordRead<U> read;
         private final ConverterRecordInsert<U> insert;
         private final ConverterRecordUpdate<U> update;
+
+        public ConverterRecordDeflt(ConverterRecordRead<U> read) {
+            this(read, null, null);
+        }
 
         public ConverterRecordDeflt(ConverterRecordRead<U> read, ConverterRecordInsert<U> insert, ConverterRecordUpdate<U> update) {
             this.read = read;
@@ -135,17 +141,17 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
 
         @Override
-        public void convert(U table, Record input, Entity entity, DataSize dataSize) {
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
             read.convert(table, input, entity, dataSize);
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> insertFields) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
             insert.convert(table, entity, insertFields);
         }
 
         @Override
-        public void convert(U table, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
             update.convert(table, entity, updateFields, message);
         }
 

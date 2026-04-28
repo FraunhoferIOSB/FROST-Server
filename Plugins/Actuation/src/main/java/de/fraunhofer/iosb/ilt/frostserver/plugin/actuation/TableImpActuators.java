@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensor
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -30,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFac
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.RelationOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
@@ -128,7 +126,7 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
         pfReg.addEntry(pluginCoreModel.epMetadata,
                 true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (TableImpActuators table, Record tuple, Entity entity, DataSize dataSize) -> {
+                        (table, tuple, entity, dataSize) -> {
                             JsonValue data = Utils.getFieldJsonValue(tuple, colMetadata);
                             if (data == null) {
                                 return;

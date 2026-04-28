@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver.model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Collections;
@@ -40,7 +39,7 @@ public class ComplexValueImpl implements ComplexValue<ComplexValueImpl> {
         this.type = type;
     }
 
-    @JsonIgnore
+    @Override
     public TypeComplex getType() {
         return type;
     }
@@ -80,8 +79,13 @@ public class ComplexValueImpl implements ComplexValue<ComplexValueImpl> {
         return this;
     }
 
+    @Override
+    public boolean isSetProperty(Property property) {
+        return properties.containsKey(property.getJsonName());
+    }
+
     public static TypeComplex.Instantiator createFor(TypeComplex type) {
-        return () -> new ComplexValueImpl(type);
+        return t -> new ComplexValueImpl(t);
     }
 
 }

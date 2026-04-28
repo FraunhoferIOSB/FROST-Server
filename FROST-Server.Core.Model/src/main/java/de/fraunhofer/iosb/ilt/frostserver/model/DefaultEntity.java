@@ -37,8 +37,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- *
- * @author hylke
+ * The default entity implementation.
  */
 public class DefaultEntity implements Entity {
 
@@ -132,12 +131,12 @@ public class DefaultEntity implements Entity {
     }
 
     @Override
-    public EntityType getEntityType() {
+    public EntityType getType() {
         return entityType;
     }
 
     @Override
-    public DefaultEntity setEntityType(EntityType entityType) {
+    public DefaultEntity setType(EntityType entityType) {
         if (this.entityType != null) {
             throw new IllegalArgumentException("the type of this entity is alread yet to " + this.entityType.entityName);
         }

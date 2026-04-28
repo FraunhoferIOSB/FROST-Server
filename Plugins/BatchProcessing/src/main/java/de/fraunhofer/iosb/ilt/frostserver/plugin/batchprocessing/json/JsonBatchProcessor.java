@@ -313,7 +313,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             return;
         }
         final PkValue pkValues = entity.getPrimaryKeyValues();
-        final EntityType entityType = entity.getEntityType();
+        final EntityType entityType = entity.getType();
         result.setIdValue(pkValues);
         result.setEntityType(entityType);
         if (!requestId.startsWith("-")) {
