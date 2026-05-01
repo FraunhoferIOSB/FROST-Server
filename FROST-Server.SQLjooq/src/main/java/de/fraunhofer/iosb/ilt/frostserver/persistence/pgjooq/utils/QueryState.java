@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.EntitySetJooqCurser
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.ResultBuilder;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.FieldFetcher;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
@@ -195,7 +195,7 @@ public class QueryState<T extends StaMainTable<T>> {
      */
     public Set<Field> getSqlSelectFields() {
         if (sqlSelectFields == null) {
-            sqlSelectFields = propertiesToFields(mainTable, selectedProperties);
+            sqlSelectFields = propertiesToSelectFields(mainTable, selectedProperties);
             for (QueryState childState : childStates.values()) {
                 sqlSelectFields.addAll(childState.getSqlSelectFields());
             }
@@ -327,12 +327,12 @@ public class QueryState<T extends StaMainTable<T>> {
      * @param properties The properties to generate the Fields for.
      * @return a set of Fields.
      */
-    public static <U extends StaMainTable<U>> Set<Field> propertiesToFields(StaMainTable<U> table, Set<PropertyFields<U>> properties) {
+    public static <U extends StaMainTable<U>> Set<Field> propertiesToSelectFields(StaMainTable<U> table, Set<PropertyFields<U>> properties) {
         Set<Field> fields = new HashSet<>();
         for (PropertyFields<U> sp : properties) {
-            List<ExpressionFactory<U>> factories = new ArrayList<>();
-            sp.getFieldsRecursive(factories);
-            for (ExpressionFactory f : factories) {
+            List<FieldFetcher<U>> factories = new ArrayList<>();
+            sp.getFieldsSelectRecursive(factories);
+            for (FieldFetcher f : factories) {
                 fields.add(f.get(table));
             }
         }

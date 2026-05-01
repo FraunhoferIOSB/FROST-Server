@@ -31,7 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbst
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.FieldFetcher;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
@@ -254,9 +254,9 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                 table -> table.colResultTimeStart,
                 table -> table.colResultTimeEnd);
 
-        final ExpressionFactory<TableImpDatastreams> efUomName = table -> table.colUnitName;
-        final ExpressionFactory<TableImpDatastreams> efUomDefinition = table -> table.colUnitDefinition;
-        final ExpressionFactory<TableImpDatastreams> efUomSymbol = table -> table.colUnitSymbol;
+        final FieldFetcher<TableImpDatastreams> efUomName = table -> table.colUnitName;
+        final FieldFetcher<TableImpDatastreams> efUomDefinition = table -> table.colUnitDefinition;
+        final FieldFetcher<TableImpDatastreams> efUomSymbol = table -> table.colUnitSymbol;
         pfReg.addEntry(pluginCoreModel.epUnitOfMeasurement, new ConverterRecordDeflt<>())
                 .addSubProperty(pfReg.createEntryString(UnitOfMeasurement.EP_NAME, efUomName))
                 .addSubProperty(pfReg.createEntryString(UnitOfMeasurement.EP_DEFINITION, efUomDefinition))

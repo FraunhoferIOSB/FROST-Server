@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeo
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -79,7 +80,7 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                     "j",
                     t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
         }
-        final PropertyFieldRegistry.NFP<T> geoPfr = new PropertyFieldRegistry.NFP<>("g", t -> t.field(idxGeom));
+
         pfReg.addEntry(
                 property,
                 true,
@@ -105,7 +106,7 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                             message.addField(property);
                         }),
                 sourcePfr,
-                geoPfr);
+                new NFP<>("g", t -> t.field(idxGeom), false));
         // TODO: Make the g non-selectable again.
     }
 

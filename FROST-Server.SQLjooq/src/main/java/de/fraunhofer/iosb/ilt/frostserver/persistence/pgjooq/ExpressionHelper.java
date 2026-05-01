@@ -216,7 +216,7 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
             if (state.parentPropFields == null) {
                 state.parentPropFields = state.pathTableRef.getTable()
                         .getPropertyFieldRegistry()
-                        .getSelectFieldsForProperty(element);
+                        .getPropertyFieldsForProperty(element);
             } else {
                 state.parentPropFields = state.parentPropFields.getSubField(element);
             }
@@ -231,11 +231,11 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
             }
             pathExpressions = state.pathTableRef.getTable()
                     .getPropertyFieldRegistry()
-                    .resolveFieldsForProperty(state.parentPropFields, new LinkedHashMap<>());
+                    .resolveAllFieldsForProperty(state.parentPropFields, new LinkedHashMap<>());
         } else {
             pathExpressions = state.pathTableRef.getTable()
                     .getPropertyFieldRegistry()
-                    .resolveFieldsForProperty(element, new LinkedHashMap<>());
+                    .resolveAllFieldsForProperty(element, new LinkedHashMap<>());
         }
         if (pathExpressions.size() == 1) {
             final Field field = pathExpressions.values().stream().iterator().next();
