@@ -155,8 +155,8 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
                             message.addField(pluginCoreModel.epFeature);
                         }),
                 new NFP<>("j", table -> table.colFeature),
-                new NFP<>("g", table -> table.colGeom));
-        // TODO: Make the g non-selectable again.
+                new NFP<>("g", table -> table.colGeom, false));
+
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npObservationsFeature, TableImpFeatures::getId);
     }

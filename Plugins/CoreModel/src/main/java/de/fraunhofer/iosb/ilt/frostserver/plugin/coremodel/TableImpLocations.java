@@ -171,8 +171,8 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                             message.addField(pluginCoreModel.epLocation);
                         }),
                 new NFP<>("j", table -> table.colLocation),
-                new NFP<>("g", table -> table.colGeom));
-        // TODO: Make the g non-selectable again.
+                new NFP<>("g", table -> table.colGeom, false));
+
         pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId);
         pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId);

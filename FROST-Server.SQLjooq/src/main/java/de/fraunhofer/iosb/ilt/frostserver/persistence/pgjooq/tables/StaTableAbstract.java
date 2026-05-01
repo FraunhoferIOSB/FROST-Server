@@ -305,7 +305,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
                 entityFactories.entityExistsOrCreate(pm, ne, updateMode);
-                PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);
+                PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
                 registry.convert(thisTable, entity, insertFields);
             }
         }
@@ -329,15 +329,15 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 continue;
             }
             if (entity.isSetProperty(ep)) {
-                pfReg.getSelectFieldsForProperty(ep).convert(thisTable, entity, insertFields);
+                pfReg.getPropertyFieldsForProperty(ep).convert(thisTable, entity, insertFields);
             }
         }
 
         // Sixth, do the actual insert.
         // This returns the entire inserted row. It may or may not be changed by databse rules or before-triggers.
         DSLContext dslContext = pm.getDslContext();
-        final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getSelectFields(new HashSet<>());
-        final Set<Field> selectFields = QueryState.propertiesToFields(thisTable, propertyFields);
+        final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getPropertyFields(new HashSet<>());
+        final Set<Field> selectFields = QueryState.propertiesToSelectFields(thisTable, propertyFields);
         Record result = pm.timeFetchAny(
                 dslContext.insertInto(thisTable)
                         .set(insertFields)
@@ -448,7 +448,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 if (!entityFactories.entityExists(pm, ne, PrincipalExtended.getLocalPrincipal().isAdmin())) {
                     throw new NoSuchEntityException("Linked " + ne.getType() + " not found.");
                 }
-                PropertyFields<T> registry = pfReg.getSelectFieldsForProperty(np);
+                PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
                 registry.convert(thisTable, entity, updateFields, message);
             }
         }
@@ -461,7 +461,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                 continue;
             }
             if (entity.isSetProperty(ep)) {
-                pfReg.getSelectFieldsForProperty(ep).convert(thisTable, entity, updateFields, message);
+                pfReg.getPropertyFieldsForProperty(ep).convert(thisTable, entity, updateFields, message);
             }
         }
 
@@ -473,8 +473,8 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         DSLContext dslContext = pm.getDslContext();
-        final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getSelectFields(new HashSet<>());
-        final Set<Field> selectFields = QueryState.propertiesToFields(thisTable, propertyFields);
+        final Set<PropertyFields<T>> propertyFields = getPropertyFieldRegistry().getPropertyFields(new HashSet<>());
+        final Set<Field> selectFields = QueryState.propertiesToSelectFields(thisTable, propertyFields);
         Record result = null;
         if (!updateFields.isEmpty()) {
             result = executeUpdate(pm, dslContext, thisTable, updateFields, where, selectFields);

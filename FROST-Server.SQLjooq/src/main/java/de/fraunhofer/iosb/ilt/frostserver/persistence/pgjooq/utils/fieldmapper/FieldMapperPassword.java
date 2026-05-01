@@ -24,7 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterPassword;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ExpressionFactory;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.FieldFetcher;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityProperty;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +32,7 @@ import org.jooq.Name;
 import org.jooq.Table;
 
 /**
- *
- * @author hylke
+ * A FieldMapper for (write-only) password fields.
  */
 public class FieldMapperPassword extends FieldMapperAbstractEp {
 
@@ -63,7 +62,7 @@ public class FieldMapperPassword extends FieldMapperAbstractEp {
         final EntityProperty entityProperty = getParent().getEntityProperty();
         final PropertyFieldRegistry<T> pfReg = table.getPropertyFieldRegistry();
         final int idx = fieldIdx;
-        final ExpressionFactory<T> factory = t -> t.field(idx);
+        final FieldFetcher<T> factory = t -> t.field(idx);
         pfReg.addEntry(entityProperty, new ConverterPassword<>(plainTextPw, entityProperty, factory), factory);
     }
 

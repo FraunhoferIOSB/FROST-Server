@@ -279,8 +279,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             }
                         }, null, null),
                 new NFP<>("s", table -> table.colObservedAreaText),
-                new NFP<>("g", table -> table.colObservedArea));
-        // TODO: Make the g non-selectable again.
+                new NFP<>("g", table -> table.colObservedArea, false));
 
         pfReg.addEntryTimeInterval(
                 pluginCoreModel.epPhenomenonTimeDs,

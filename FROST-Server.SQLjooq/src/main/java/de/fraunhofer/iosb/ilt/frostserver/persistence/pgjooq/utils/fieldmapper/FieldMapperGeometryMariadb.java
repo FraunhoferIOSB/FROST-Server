@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeo
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -73,13 +74,12 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
         final int idxGeom = fieldGeomIdx;
         final PropertyFieldRegistry.NFP<T> sourcePfr;
         if (idxLocation >= 0) {
-            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> t.field(idxLocation));
+            sourcePfr = new NFP<>("j", t -> t.field(idxLocation));
         } else {
-            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
+            sourcePfr = new NFP<>("j", t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
         }
-        final PropertyFieldRegistry.NFP<T> geoPfr = new PropertyFieldRegistry.NFP<>("g", t -> t.field(idxGeom));
-        pfReg.addEntry(
-                property,
+
+        pfReg.addEntry(property,
                 true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
                         (t, tuple, entity, dataSize) -> {
@@ -103,8 +103,7 @@ public class FieldMapperGeometryMariadb extends FieldMapperAbstractEp {
                             message.addField(property);
                         }),
                 sourcePfr,
-                geoPfr);
-        // TODO: Make the g non-selectable again.
+                new NFP<>("g", t -> t.field(idxGeom), false));
     }
 
     /**

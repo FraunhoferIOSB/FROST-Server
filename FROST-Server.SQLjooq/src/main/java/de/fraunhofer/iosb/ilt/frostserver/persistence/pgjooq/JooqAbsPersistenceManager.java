@@ -809,7 +809,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void validateMappings(final StaMainTable<?> tableForType, PropertyFieldRegistry<?> pfReg, ContainerType<?> type) {
         for (var property : type.getEntityProperties()) {
-            var pf = pfReg.getSelectFieldsForProperty(property);
+            var pf = pfReg.getPropertyFieldsForProperty(property);
             validateMapping(pf, "", tableForType);
         }
     }

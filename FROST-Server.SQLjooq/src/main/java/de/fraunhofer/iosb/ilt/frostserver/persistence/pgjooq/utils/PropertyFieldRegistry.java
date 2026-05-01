@@ -75,7 +75,11 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyFieldRegistry.class.getName());
 
+    /**
+     * The table that this PropertyFieldRegistry handles.
+     */
     private final T table;
+
     /**
      * The Fields that are allowed be appear in select statements.
      */
@@ -86,102 +90,360 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      */
     private final List<PropertyFields<T>> propFieldsList;
 
-    // TODO: Rename to FieldFetcher.
-    // TODO: Move static stuff down.
-    public static interface ExpressionFactory<U extends StaMainTable<U>> {
+    public PropertyFieldRegistry(T table) {
+        this.table = table;
+        this.propFieldsMap = new HashMap<>();
+        this.propFieldsList = new ArrayList<>();
+    }
 
-        public Field get(U table);
+    public PropertyFieldRegistry(T table, PropertyFieldRegistry<T> copyFrom) {
+        this.table = table;
+        this.propFieldsMap = copyFrom.propFieldsMap;
+        this.propFieldsList = copyFrom.propFieldsList;
     }
 
     /**
-     * Convert the given Record, holding data from the given Table, into the
-     * given Entity.
+     * Get the PropertyFields of this registry.
      *
-     * @param <U> The table type.
+     * @param <C> The type of collection given as a target.
+     * @param target The list to add to. If null a new ArrayList will be
+     * created.
+     * @return The target list, or a new list if target was null.
      */
-    public static interface ConverterRecordRead<U extends StaMainTable<U>> {
-
-        /**
-         * Convert the given Record, holding data from the given Table, into the
-         * given Entity. If possible, the data size is added to the DataSize
-         * object.
-         *
-         * @param table The table used to generate the Record.
-         * @param input The Record to read the data from.
-         * @param entity The entity to write the data to.
-         * @param dataSize The DataSize to use to register the amount of data.
-         */
-        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize);
+    public <C extends Collection<PropertyFields<T>>> C getPropertyFields(C target) {
+        C result = target;
+        if (result == null) {
+            result = (C) new ArrayList();
+        }
+        result.addAll(propFieldsList);
+        return result;
     }
 
-    public static final ConverterRecordRead NULL_READ = (table, input, entity, dataSize) -> {
-        // Does nothing
-    };
+    /**
+     * Get a list of PropertyFields for the given property. If the property is a
+     * deep-select property, a trimmed copy of the real PropertyField tree is
+     * returned, containing only the relevant path through the tree.
+     *
+     * @param property The property to get expressions for.
+     * @return A PropertyFields that matches the requested property.
+     */
+    public PropertyFields<T> getPropertyFieldsForProperty(Property property) {
+        if (property instanceof EntityPropertyCustomSelect epcs) {
+            EntityPropertyMain parentProp = epcs.getMainProperty();
+            PropertyFields<T> lastPropFields = propFieldsMap.get(parentProp);
+            final PropertyFields<T> mainPropCopy = lastPropFields.emptyCopy();
+            PropertyFields<T> lastPropCopy = mainPropCopy;
 
-    public static interface ConverterRecordInsert<U extends StaMainTable<U>> {
+            PropertyType parentType = parentProp.getType();
+            final List<String> subPath = epcs.getSubPath();
+            EntityPropertyMain lastProp = parentProp;
+            PropertyType lastType = parentType;
+            for (int idx = 0; idx < subPath.size(); idx++) {
+                if (lastType instanceof TypeComplex tc) {
+                    boolean openType = tc.isOpenType();
+                    String pathPart = subPath.get(idx);
+                    EntityPropertyMain subProp = tc.getEntityProperty(pathPart);
+                    if (subProp == null) {
+                        // We have reached a custom property.
+                        if (!openType) {
+                            throw new IllegalArgumentException("No path: at " + pathPart + " of " + epcs);
+                        }
+                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
+                    } else {
+                        // Nested properties
+                        PropertyFields<T> subPropFields = lastPropFields.subFields.get(subProp);
+                        PropertyFields<T> subPropCopy = subPropFields.emptyCopy();
+                        lastPropCopy.addSubProperty(subPropCopy);
 
-        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields);
+                        lastProp = subProp;
+                        lastPropFields = subPropFields;
+                        lastPropCopy = subPropCopy;
+                    }
+                } else {
+                    if (lastProp.hasCustomProperties || lastPropFields.jsonType) {
+                        if (lastProp.hasCustomProperties != lastPropFields.jsonType) {
+                            LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", lastProp.hasCustomProperties, lastPropFields.jsonType);
+                        }
+                        // Not a complex type, but can be queried.
+                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
+                    } else {
+                        LOGGER.error("Not a complex property: {} {}", property, parentType);
+                        return null;
+                    }
+                }
+            }
+            lastPropCopy.fieldsAll.putAll(lastPropFields.fieldsAll);
+            lastPropCopy.fieldsSelect.putAll(lastPropFields.fieldsSelect);
+            return mainPropCopy;
+        } else {
+            return propFieldsMap.get(property);
+        }
     }
 
-    public static final ConverterRecordInsert NULL_INSERT = (table, entity, insertFields) -> {
-        // Does nothing
-    };
-
-    public static interface ConverterRecordUpdate<U extends StaMainTable<U>> {
-
-        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message);
+    private PropertyFields<T> handleEntityPropertyCustomSelect(EntityPropertyCustomSelect epcs, PropertyFields<T> propFields, List<String> subPath, int idx) {
+        FieldFetcher<T> factory = propFields.fieldsAll.get("j");
+        if (factory == null) {
+            factory = propFields.fieldsAll.values().iterator().next();
+        }
+        final Field mainField = factory.get(table);
+        final JsonFieldFactory.JsonFieldWrapper jsonFactory = jsonFieldFromPath(mainField, subPath, idx);
+        return propertyFieldForJsonField(jsonFactory, epcs);
     }
 
-    public static final ConverterRecordUpdate NULL_UPDATE = (table, entity, updateFields, message) -> {
-        // Does nothing
-    };
-
-    public static interface ConverterRecord<U extends StaMainTable<U>> extends ConverterRecordRead<U>, ConverterRecordInsert<U>, ConverterRecordUpdate<U> {
-        // No own methods.
+    private PropertyFields<T> propertyFieldForJsonField(JsonFieldWrapper jsonFactory, final EntityPropertyCustomSelect epcs) {
+        final Field<Object> deepField = jsonFactory.materialise().getJsonExpression();
+        PropertyFields<T> pfs = new PropertyFieldsSimple<T>(
+                epcs,
+                new PropertyFieldRegistry.ConverterRecordDeflt<>(
+                        (tbl, tuple, entity, dataSize) -> {
+                            final JsonValue jsonValue = JsonBinding.getConverterInstance().from(tuple.get(deepField));
+                            dataSize.increase(jsonValue.getStringLength());
+                            Object value = jsonValue.getValue();
+                            epcs.setOn(entity, value);
+                        }, null, null));
+        pfs.addField("1", t -> deepField);
+        return pfs;
     }
 
-    public static class ConverterRecordDeflt<U extends StaMainTable<U>> implements ConverterRecord<U> {
-
-        private final ConverterRecordRead<U> read;
-        private final ConverterRecordInsert<U> insert;
-        private final ConverterRecordUpdate<U> update;
-
-        public ConverterRecordDeflt() {
-            this(null, null, null);
+    /**
+     * Get a Map of expressions for the given property and table. Add it to the
+     * given Map, or a new Map.
+     *
+     * @param property The property to get expressions for.
+     * @param target The Map to add to. If null a new Map will be created.
+     * @return The target Map, or a new Map if target was null.
+     */
+    public Map<String, Field> resolveAllFieldsForProperty(EntityPropertyMain property, Map<String, Field> target) {
+        PropertyFields<T> propFields = propFieldsMap.get(property);
+        if (propFields == null) {
+            throw new IllegalArgumentException("No property called " + property.toString() + " for " + table.getClass());
         }
+        return PropertyFieldRegistry.this.resolveAllFieldsForProperty(propFields, target);
+    }
 
-        public ConverterRecordDeflt(ConverterRecordRead<U> read) {
-            this(read, null, null);
+    public Map<String, Field> resolveAllFieldsForProperty(PropertyFields<T> propFields, Map<String, Field> target) {
+        Map<String, Field> result = target;
+        if (result == null) {
+            result = new LinkedHashMap<>();
         }
-
-        public ConverterRecordDeflt(ConverterRecordRead<U> read, ConverterRecordInsert<U> insert, ConverterRecordUpdate<U> update) {
-            this.read = (read == null) ? NULL_READ : read;
-            this.insert = (insert == null) ? NULL_INSERT : insert;
-            this.update = (update == null) ? NULL_UPDATE : update;
+        for (Map.Entry<String, FieldFetcher<T>> es : propFields.fieldsAll.entrySet()) {
+            result.put(es.getKey(), es.getValue().get(table));
         }
+        return result;
+    }
 
-        @Override
-        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
-            read.convert(table, input, entity, dataSize);
+    /**
+     * Get the set of expressions for the given set of selected properties.
+     *
+     * @param selectedProperties The set of properties to get the expressions
+     * of.
+     * @return The set of expressions.
+     */
+    public Set<PropertyFields<T>> getFieldsForProperties(Set<Property> selectedProperties) {
+        Set<PropertyFields<T>> exprSet = new LinkedHashSet<>();
+        if (selectedProperties.isEmpty()) {
+            getPropertyFields(exprSet);
+        } else {
+            for (Property property : selectedProperties) {
+                final PropertyFields<T> selectFieldsForProperty = getPropertyFieldsForProperty(property);
+                if (selectFieldsForProperty != null) {
+                    exprSet.add(selectFieldsForProperty);
+                }
+            }
         }
+        return exprSet;
+    }
 
-        @Override
-        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
-            insert.convert(table, entity, insertFields);
+    public void addEntry(NavigationPropertyMain property, FieldFetcher<T> factory) {
+        if (property instanceof NavigationPropertyEntity navigationPropertyEntity) {
+            addEntry(navigationPropertyEntity, factory);
+        } else if (property instanceof NavigationPropertyEntitySet navigationPropertyEntitySet) {
+            addEntry(navigationPropertyEntitySet, factory);
+        } else {
+            throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
         }
+    }
 
-        @Override
-        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
-            update.convert(table, entity, updateFields, message);
+    public void addEntry(NavigationPropertyEntity property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterEntity<>(property, factory));
+        pf.addField(null, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
+    }
+
+    public void addEntry(NavigationPropertyEntity property, FieldFetcher<T> factory, ConverterRecord<T> ps) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, ps);
+        pf.addField(null, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
+    }
+
+    public void addEntry(NavigationPropertyEntitySet property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<T>(property, new ConverterEntitySet<>());
+        pf.addField(null, factory);
+        propFieldsMap.put(property, pf);
+        propFieldsList.add(pf);
+    }
+
+    public PropertyFields<T> addEntry(PropertyFields<T> pf) {
+        propFieldsMap.put(pf.property, pf);
+        propFieldsList.add(pf);
+        return pf;
+    }
+
+    public PropertyFields<T> addEntry(Property property, ConverterRecord<T> converter, FieldFetcher<T> factory) {
+        return addEntry(property, false, converter, new NFP<>(factory));
+    }
+
+    public PropertyFields<T> addEntry(Property property, ConverterRecord<T> converter, NFP<T>... factories) {
+        return addEntry(property, false, converter, factories);
+    }
+
+    public PropertyFields<T> addEntry(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
+        PropertyFields<T> pf;
+        if (property.getType() instanceof TypeComplex) {
+            pf = createEntryComplex(property, isJson, converter, factories);
+        } else {
+            pf = createEntrySimple(property, isJson, converter, factories);
         }
+        return addEntry(pf);
+    }
 
+    public void addEntryId(FieldFetcher<T> factory) {
+        final EntityPropertyMain keyProperty = table.getEntityType().getPrimaryKey().getKeyProperty(0);
+        final var converterId = new ConverterSimple<>(keyProperty, factory, true, false);
+        addEntry(keyProperty, converterId, new NFP<>("", factory));
+        final ConverterSimple<T> converterSelfLink = new ConverterSimple<>(keyProperty, factory, false, false);
+        addEntry(ModelRegistry.EP_SELFLINK, converterSelfLink, new NFP<>("", factory));
+    }
+
+    public PropertyFields<T> addEntrySimple(EntityProperty property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = createEntrySimple(property, factory);
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryString(EntityProperty<String> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = createEntryString(property, factory);
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryNumeric(EntityProperty<BigDecimal> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = createEntryNumeric(property, factory);
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryMap(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = createEntryMap(property, factory);
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryJson(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = createEntryJson(property, factory);
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryTimeInstant(EntityProperty property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = createEntryTimeInstant(property, factory);
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryTimeInterval(EntityProperty property, FieldFetcher<T> factoryStart, FieldFetcher<T> factoryEnd) {
+        final var converter = new ConverterTimeInterval<>(property, factoryStart, factoryEnd);
+        final var nfpStart = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START, factoryStart);
+        final var nfpEnd = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END, factoryEnd);
+        final var pf = createEntrySimple(property, false, converter, nfpStart, nfpEnd)
+                .addSubProperty(createEntryTimeInstant(TimeInterval.EP_START_TIME, factoryStart))
+                .addSubProperty(createEntryTimeInstant(TimeInterval.EP_END_TIME, factoryEnd));
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> addEntryTimeValue(EntityProperty property, FieldFetcher<T> factoryStart, FieldFetcher<T> factoryEnd) {
+        final var converter = new ConverterTimeValue<>(property, factoryStart, factoryEnd);
+        final var nfpStart = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START, factoryStart);
+        final var nfpEnd = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END, factoryEnd);
+        final var pf = createEntrySimple(property, false, converter, nfpStart, nfpEnd)
+                .addSubProperty(createEntryTimeInstant(TimeValue.EP_START_TIME, factoryStart))
+                .addSubProperty(createEntryTimeInstant(TimeValue.EP_END_TIME, factoryEnd));
+        return addEntry(pf);
+    }
+
+    public PropertyFields<T> createEntrySimple(EntityProperty property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterSimple<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
+    }
+
+    public PropertyFields<T> createEntrySimple(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, isJson, converter);
+        for (NFP<T> nfp : factories) {
+            pf.addField(nfp.name, nfp.factory);
+        }
+        return pf;
+    }
+
+    public PropertyFields<T> createEntryString(EntityProperty<String> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterString<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
+    }
+
+    public PropertyFields<T> createEntryNumeric(EntityProperty<BigDecimal> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterSimple<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
+    }
+
+    private PropertyFields<T> createEntryMap(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterMap<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
+    }
+
+    private PropertyFields<T> createEntryJson(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterJson<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
+    }
+
+    public PropertyFields<T> createEntryTimeInstant(EntityProperty property, FieldFetcher<T> factory) {
+        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterTimeInstant<>(property, factory));
+        pf.addField(null, factory);
+        return pf;
+    }
+
+    public PropertyFields<T> createEntryComplex(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
+        PropertyFields<T> pf = new PropertyFieldsComplex<>(property, isJson, converter);
+        for (NFP<T> nfp : factories) {
+            pf.addField(nfp);
+        }
+        return pf;
+    }
+
+    public static JsonFieldWrapper jsonFieldFromPath(final Field mainField, List<String> subPath, int startIdx) {
+        JsonFieldWrapper jsonFactory = new JsonFieldWrapper(mainField);
+        for (int idx = startIdx; idx < subPath.size(); idx++) {
+            String pathItem = subPath.get(idx);
+            jsonFactory.addToPath(pathItem);
+        }
+        return jsonFactory;
+    }
+
+    /**
+     * Interface for fetching a field from a table.
+     *
+     * @param <U> The type of table.
+     */
+    public static interface FieldFetcher<U extends StaMainTable<U>> {
+
+        public Field get(U table);
     }
 
     public static abstract class PropertyFields<U extends StaMainTable<U>> {
 
         public final Property property;
         public final boolean jsonType;
-        public final Map<String, ExpressionFactory<U>> fields = new LinkedHashMap<>();
+        public final Map<String, FieldFetcher<U>> fieldsAll = new LinkedHashMap<>();
+        public final Map<String, FieldFetcher<U>> fieldsSelect = new LinkedHashMap<>();
         public final Map<EntityProperty, PropertyFields<U>> subFields = new LinkedHashMap<>();
         public final ConverterRecord<U> converter;
 
@@ -201,12 +463,23 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
         public abstract void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message);
 
-        public PropertyFields<U> addField(String name, ExpressionFactory<U> field) {
+        public PropertyFields<U> addField(NFP<U> nfp) {
+            return addField(nfp.name, nfp.factory, nfp.canSelect);
+        }
+
+        public PropertyFields<U> addField(String name, FieldFetcher<U> field) {
+            return addField(name, field, true);
+        }
+
+        public PropertyFields<U> addField(String name, FieldFetcher<U> field, boolean canSelect) {
             String key = name;
             if (StringHelper.isNullOrEmpty(key)) {
-                key = Integer.toString(fields.size());
+                key = Integer.toString(fieldsAll.size());
             }
-            fields.put(key, field);
+            fieldsAll.put(key, field);
+            if (canSelect) {
+                fieldsSelect.put(key, field);
+            }
             return this;
         }
 
@@ -219,10 +492,17 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
             return this;
         }
 
-        public void getFieldsRecursive(Collection<ExpressionFactory<U>> target) {
-            target.addAll(fields.values());
+        public void getFieldsAllRecursive(Collection<FieldFetcher<U>> target) {
+            target.addAll(fieldsAll.values());
             for (var subField : subFields.values()) {
-                subField.getFieldsRecursive(target);
+                subField.getFieldsAllRecursive(target);
+            }
+        }
+
+        public void getFieldsSelectRecursive(Collection<FieldFetcher<U>> target) {
+            target.addAll(fieldsAll.values());
+            for (var subField : subFields.values()) {
+                subField.getFieldsSelectRecursive(target);
             }
         }
 
@@ -321,377 +601,125 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     /**
-     * A NameFactoryPair for easier passing of a name and a factory.
+     * A NameFetcherPair for easier passing of a name and a factory.
      *
      * @param <U> the table type this NFP fetches from.
      */
     public static class NFP<U extends StaMainTable<U>> {
 
         public final String name;
-        public final ExpressionFactory<U> factory;
+        public final FieldFetcher<U> factory;
+        public final boolean canSelect;
 
-        public NFP(ExpressionFactory<U> factory) {
-            this("", factory);
+        public NFP(FieldFetcher<U> factory) {
+            this("", factory, true);
         }
 
-        public NFP(String name, ExpressionFactory<U> factory) {
+        public NFP(String name, FieldFetcher<U> factory) {
+            this(name, factory, true);
+        }
+
+        public NFP(String name, FieldFetcher<U> factory, boolean canSelect) {
             this.name = name;
             this.factory = factory;
+            this.canSelect = canSelect;
         }
-    }
-
-    public PropertyFieldRegistry(T table) {
-        this.table = table;
-        this.propFieldsMap = new HashMap<>();
-        this.propFieldsList = new ArrayList<>();
-    }
-
-    public PropertyFieldRegistry(T table, PropertyFieldRegistry<T> copyFrom) {
-        this.table = table;
-        this.propFieldsMap = copyFrom.propFieldsMap;
-        this.propFieldsList = copyFrom.propFieldsList;
     }
 
     /**
-     * Get the Fields for the given class, that are allowed to be used in the
-     * select clause of a query.
+     * Convert the given Record, holding data from the given Table, into the
+     * given Entity.
      *
-     * @param <C> The type of collection given as a target.
-     * @param target The list to add to. If null a new ArrayList will be
-     * created.
-     * @return The target list, or a new list if target was null.
+     * @param <U> The table type.
      */
-    public <C extends Collection<PropertyFields<T>>> C getSelectFields(C target) {
-        C result = target;
-        if (result == null) {
-            result = (C) new ArrayList();
+    public static interface ConverterRecordRead<U extends StaMainTable<U>> {
+
+        /**
+         * Convert the given Record, holding data from the given Table, into the
+         * given Entity. If possible, the data size is added to the DataSize
+         * object.
+         *
+         * @param table The table used to generate the Record.
+         * @param input The Record to read the data from.
+         * @param entity The entity to write the data to.
+         * @param dataSize The DataSize to use to register the amount of data.
+         */
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize);
+    }
+
+    public static interface ConverterRecordInsert<U extends StaMainTable<U>> {
+
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields);
+    }
+
+    public static interface ConverterRecordUpdate<U extends StaMainTable<U>> {
+
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message);
+    }
+
+    public static final ConverterRecordRead NULL_READ = (table, input, entity, dataSize) -> {
+        // Does nothing
+    };
+    public static final ConverterRecordInsert NULL_INSERT = (table, entity, insertFields) -> {
+        // Does nothing
+    };
+    public static final ConverterRecordUpdate NULL_UPDATE = (table, entity, updateFields, message) -> {
+        // Does nothing
+    };
+
+    public static interface ConverterRecord<U extends StaMainTable<U>> extends ConverterRecordRead<U>, ConverterRecordInsert<U>, ConverterRecordUpdate<U> {
+        // No own methods.
+    }
+
+    public static class ConverterRecordDeflt<U extends StaMainTable<U>> implements ConverterRecord<U> {
+
+        private final ConverterRecordRead<U> read;
+        private final ConverterRecordInsert<U> insert;
+        private final ConverterRecordUpdate<U> update;
+
+        public ConverterRecordDeflt() {
+            this(null, null, null);
         }
-        result.addAll(propFieldsList);
-        return result;
-    }
 
-    /**
-     * Get a list of Fields for the given property and table. Add it to the
-     * given list, or a new list.
-     *
-     * @param property The property to get expressions for.
-     * @return The target list, or a new list if target was null.
-     */
-    public PropertyFields<T> getSelectFieldsForProperty(Property property) {
-        if (property instanceof EntityPropertyCustomSelect epcs) {
-            EntityPropertyMain parentProp = epcs.getMainProperty();
-            PropertyFields<T> lastPropFields = propFieldsMap.get(parentProp);
-            final PropertyFields<T> mainPropCopy = lastPropFields.emptyCopy();
-            PropertyFields<T> lastPropCopy = mainPropCopy;
-
-            PropertyType parentType = parentProp.getType();
-            final List<String> subPath = epcs.getSubPath();
-            EntityPropertyMain lastProp = parentProp;
-            PropertyType lastType = parentType;
-            for (int idx = 0; idx < subPath.size(); idx++) {
-                if (lastType instanceof TypeComplex tc) {
-                    boolean openType = tc.isOpenType();
-                    String pathPart = subPath.get(idx);
-                    EntityPropertyMain subProp = tc.getEntityProperty(pathPart);
-                    if (subProp == null) {
-                        // We have reached a custom property.
-                        if (!openType) {
-                            throw new IllegalArgumentException("No path: at " + pathPart + " of " + epcs);
-                        }
-                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
-                    } else {
-                        // Nested properties
-                        PropertyFields<T> subPropFields = lastPropFields.subFields.get(subProp);
-                        PropertyFields<T> subPropCopy = subPropFields.emptyCopy();
-                        lastPropCopy.addSubProperty(subPropCopy);
-
-                        lastProp = subProp;
-                        lastPropFields = subPropFields;
-                        lastPropCopy = subPropCopy;
-                    }
-                } else {
-                    if (lastProp.hasCustomProperties || lastPropFields.jsonType) {
-                        if (lastProp.hasCustomProperties != lastPropFields.jsonType) {
-                            LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", lastProp.hasCustomProperties, lastPropFields.jsonType);
-                        }
-                        // Not a complex type, but can be queried.
-                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
-                    } else {
-                        LOGGER.error("Not a complex property: {} {}", property, parentType);
-                        return null;
-                    }
-                }
-            }
-            lastPropCopy.fields.putAll(lastPropFields.fields);
-            return mainPropCopy;
-        } else {
-            return propFieldsMap.get(property);
+        public ConverterRecordDeflt(ConverterRecordRead<U> read) {
+            this(read, null, null);
         }
-    }
 
-    public PropertyFields<T> handleEntityPropertyCustomSelect(EntityPropertyCustomSelect epcs, PropertyFields<T> propFields, List<String> subPath, int idx) {
-        ExpressionFactory<T> factory = propFields.fields.get("j");
-        if (factory == null) {
-            factory = propFields.fields.values().iterator().next();
+        public ConverterRecordDeflt(ConverterRecordRead<U> read, ConverterRecordInsert<U> insert, ConverterRecordUpdate<U> update) {
+            this.read = (read == null) ? NULL_READ : read;
+            this.insert = (insert == null) ? NULL_INSERT : insert;
+            this.update = (update == null) ? NULL_UPDATE : update;
         }
-        final Field mainField = factory.get(table);
-        final JsonFieldFactory.JsonFieldWrapper jsonFactory = jsonFieldFromPath(mainField, subPath, idx);
-        return propertyFieldForJsonField(jsonFactory, epcs);
-    }
 
-    public static JsonFieldWrapper jsonFieldFromPath(final Field mainField, List<String> subPath, int startIdx) {
-        JsonFieldWrapper jsonFactory = new JsonFieldWrapper(mainField);
-        for (int idx = startIdx; idx < subPath.size(); idx++) {
-            String pathItem = subPath.get(idx);
-            jsonFactory.addToPath(pathItem);
+        @Override
+        public void convert(U table, Record input, ComplexValue<?> entity, DataSize dataSize) {
+            read.convert(table, input, entity, dataSize);
         }
-        return jsonFactory;
-    }
 
-    protected PropertyFields<T> propertyFieldForJsonField(JsonFieldWrapper jsonFactory, final EntityPropertyCustomSelect epcs) {
-        final Field<Object> deepField = jsonFactory.materialise().getJsonExpression();
-        PropertyFields<T> pfs = new PropertyFieldsSimple<T>(
-                epcs,
-                new PropertyFieldRegistry.ConverterRecordDeflt<>(
-                        (tbl, tuple, entity, dataSize) -> {
-                            final JsonValue jsonValue = JsonBinding.getConverterInstance().from(tuple.get(deepField));
-                            dataSize.increase(jsonValue.getStringLength());
-                            Object value = jsonValue.getValue();
-                            epcs.setOn(entity, value);
-                        }, null, null));
-        pfs.addField("1", t -> deepField);
-        return pfs;
-    }
-
-    /**
-     * Get a Map of expressions for the given property and table. Add it to the
-     * given Map, or a new Map.
-     *
-     * @param property The property to get expressions for.
-     * @param target The Map to add to. If null a new Map will be created.
-     * @return The target Map, or a new Map if target was null.
-     */
-    public Map<String, Field> resolveFieldsForProperty(EntityPropertyMain property, Map<String, Field> target) {
-        PropertyFields<T> propFields = propFieldsMap.get(property);
-        if (propFields == null) {
-            throw new IllegalArgumentException("No property called " + property.toString() + " for " + table.getClass());
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> insertFields) {
+            insert.convert(table, entity, insertFields);
         }
-        return resolveFieldsForProperty(propFields, target);
-    }
 
-    public Map<String, Field> resolveFieldsForProperty(PropertyFields<T> propFields, Map<String, Field> target) {
-        Map<String, Field> result = target;
-        if (result == null) {
-            result = new LinkedHashMap<>();
+        @Override
+        public void convert(U table, ComplexValue<?> entity, Map<Field, Object> updateFields, EntityChangedMessage message) {
+            update.convert(table, entity, updateFields, message);
         }
-        for (Map.Entry<String, ExpressionFactory<T>> es : propFields.fields.entrySet()) {
-            result.put(es.getKey(), es.getValue().get(table));
-        }
-        return result;
-    }
 
-    /**
-     * Get the set of expressions for the given set of selected properties.
-     *
-     * @param selectedProperties The set of properties to get the expressions
-     * of.
-     * @return The set of expressions.
-     */
-    public Set<PropertyFields<T>> getFieldsForProperties(Set<Property> selectedProperties) {
-        Set<PropertyFields<T>> exprSet = new LinkedHashSet<>();
-        if (selectedProperties.isEmpty()) {
-            getSelectFields(exprSet);
-        } else {
-            for (Property property : selectedProperties) {
-                final PropertyFields<T> selectFieldsForProperty = getSelectFieldsForProperty(property);
-                if (selectFieldsForProperty != null) {
-                    exprSet.add(selectFieldsForProperty);
-                }
-            }
-        }
-        return exprSet;
-    }
-
-    public void addEntry(NavigationPropertyMain property, ExpressionFactory<T> factory) {
-        if (property instanceof NavigationPropertyEntity navigationPropertyEntity) {
-            addEntry(navigationPropertyEntity, factory);
-        } else if (property instanceof NavigationPropertyEntitySet navigationPropertyEntitySet) {
-            addEntry(navigationPropertyEntitySet, factory);
-        } else {
-            throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
-        }
-    }
-
-    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterEntity<>(property, factory));
-        pf.addField(null, factory);
-        propFieldsMap.put(property, pf);
-        propFieldsList.add(pf);
-    }
-
-    public void addEntry(NavigationPropertyEntity property, ExpressionFactory<T> factory, ConverterRecord<T> ps) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, ps);
-        pf.addField(null, factory);
-        propFieldsMap.put(property, pf);
-        propFieldsList.add(pf);
-    }
-
-    public void addEntry(NavigationPropertyEntitySet property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<T>(property, new ConverterEntitySet<>());
-        pf.addField(null, factory);
-        propFieldsMap.put(property, pf);
-        propFieldsList.add(pf);
-    }
-
-    public PropertyFields<T> createEntryString(EntityProperty<String> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterString<>(property, factory));
-        pf.addField(null, factory);
-        return pf;
-    }
-
-    public PropertyFields<T> addEntryString(EntityProperty<String> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = createEntryString(property, factory);
-        propFieldsMap.put(property, pf);
-        propFieldsList.add(pf);
-        return pf;
-    }
-
-    public PropertyFields<T> createEntryNumeric(EntityProperty<BigDecimal> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterSimple<>(property, factory));
-        pf.addField(null, factory);
-        return pf;
-    }
-
-    public void addEntryNumeric(EntityProperty<BigDecimal> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = createEntryNumeric(property, factory);
-        propFieldsMap.put(property, pf);
-        propFieldsList.add(pf);
-    }
-
-    public void addEntryId(ExpressionFactory<T> factory) {
-        final EntityPropertyMain keyProperty = table.getEntityType().getPrimaryKey().getKeyProperty(0);
-        final var converterId = new ConverterSimple<>(keyProperty, factory, true, false);
-        addEntry(keyProperty, converterId, new NFP<>("", factory));
-        final ConverterSimple<T> converterSelfLink = new ConverterSimple<>(keyProperty, factory, false, false);
-        addEntry(ModelRegistry.EP_SELFLINK, converterSelfLink, new NFP<>("", factory));
-    }
-
-    private PropertyFields<T> createEntryMap(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterMap<>(property, factory));
-        pf.addField(null, factory);
-        return pf;
-    }
-
-    public void addEntryMap(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = createEntryMap(property, factory);
-        addEntry(pf);
-    }
-
-    private PropertyFields<T> createEntryJson(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterJson<>(property, factory));
-        pf.addField(null, factory);
-        return pf;
-    }
-
-    public void addEntryJson(EntityProperty<TreeNode> property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = createEntryJson(property, factory);
-        addEntry(pf);
-    }
-
-    public PropertyFields<T> createEntrySimple(EntityProperty property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterSimple<>(property, factory));
-        pf.addField(null, factory);
-        return pf;
-    }
-
-    public void addEntrySimple(EntityProperty property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = createEntrySimple(property, factory);
-        addEntry(pf);
-    }
-
-    public PropertyFields<T> createEntryTimeInstant(EntityProperty property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterTimeInstant<>(property, factory));
-        pf.addField(null, factory);
-        return pf;
-    }
-
-    public void addEntryTimeInstant(EntityProperty property, ExpressionFactory<T> factory) {
-        PropertyFields<T> pf = createEntryTimeInstant(property, factory);
-        addEntry(pf);
-    }
-
-    public void addEntryTimeInterval(EntityProperty property, ExpressionFactory<T> factoryStart, ExpressionFactory<T> factoryEnd) {
-        final var converter = new ConverterTimeInterval<>(property, factoryStart, factoryEnd);
-        final var nfpStart = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START, factoryStart);
-        final var nfpEnd = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END, factoryEnd);
-        final var pf = createEntrySimple(property, false, converter, nfpStart, nfpEnd)
-                .addSubProperty(createEntryTimeInstant(TimeInterval.EP_START_TIME, factoryStart))
-                .addSubProperty(createEntryTimeInstant(TimeInterval.EP_END_TIME, factoryEnd));
-        addEntry(pf);
-    }
-
-    public void addEntryTimeValue(EntityProperty property, ExpressionFactory<T> factoryStart, ExpressionFactory<T> factoryEnd) {
-        final var converter = new ConverterTimeValue<>(property, factoryStart, factoryEnd);
-        final var nfpStart = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START, factoryStart);
-        final var nfpEnd = new NFP<>(StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END, factoryEnd);
-        final var pf = createEntrySimple(property, false, converter, nfpStart, nfpEnd)
-                .addSubProperty(createEntryTimeInstant(TimeValue.EP_START_TIME, factoryStart))
-                .addSubProperty(createEntryTimeInstant(TimeValue.EP_END_TIME, factoryEnd));
-        addEntry(pf);
-    }
-
-    public PropertyFields<T> addEntry(PropertyFields<T> pf) {
-        propFieldsMap.put(pf.property, pf);
-        propFieldsList.add(pf);
-        return pf;
-    }
-
-    public PropertyFields<T> addEntry(Property property, ConverterRecord<T> converter, ExpressionFactory<T> factory) {
-        return addEntry(property, false, converter, new NFP<>(factory));
-    }
-
-    public PropertyFields<T> addEntry(Property property, ConverterRecord<T> converter, NFP<T>... factories) {
-        return addEntry(property, false, converter, factories);
-    }
-
-    public PropertyFields<T> addEntry(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
-        PropertyFields<T> pf;
-        if (property.getType() instanceof TypeComplex) {
-            pf = createEntryComplex(property, isJson, converter, factories);
-        } else {
-            pf = createEntrySimple(property, isJson, converter, factories);
-        }
-        return addEntry(pf);
-    }
-
-    public PropertyFields<T> createEntrySimple(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
-        PropertyFields<T> pf = new PropertyFieldsSimple<>(property, isJson, converter);
-        for (NFP<T> nfp : factories) {
-            pf.addField(nfp.name, nfp.factory);
-        }
-        return pf;
-    }
-
-    public PropertyFields<T> createEntryComplex(Property property, boolean isJson, ConverterRecord<T> converter, NFP<T>... factories) {
-        PropertyFields<T> pf = new PropertyFieldsComplex<>(property, isJson, converter);
-        for (NFP<T> nfp : factories) {
-            pf.addField(nfp.name, nfp.factory);
-        }
-        return pf;
     }
 
     public static class ConverterSimple<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
         private final boolean canCreate;
         private final boolean canUpdate;
 
-        public ConverterSimple(Property property, ExpressionFactory<U> factory) {
+        public ConverterSimple(Property property, FieldFetcher<U> factory) {
             this(property, factory, true, true);
         }
 
-        public ConverterSimple(Property property, ExpressionFactory<U> factory, boolean canCreate, boolean canUpdate) {
+        public ConverterSimple(Property property, FieldFetcher<U> factory, boolean canCreate, boolean canUpdate) {
             this.property = property;
             this.factory = factory;
             this.canCreate = canCreate;
@@ -722,9 +750,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterString<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
 
-        public ConverterString(Property property, ExpressionFactory<U> factory) {
+        public ConverterString(Property property, FieldFetcher<U> factory) {
             this.property = property;
             this.factory = factory;
         }
@@ -752,9 +780,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
 
         private final boolean plainTextPassword;
         private final Property property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
 
-        public ConverterPassword(boolean plainTextPassword, Property property, ExpressionFactory<U> factory) {
+        public ConverterPassword(boolean plainTextPassword, Property property, FieldFetcher<U> factory) {
             this.plainTextPassword = plainTextPassword;
             this.property = property;
             this.factory = factory;
@@ -791,10 +819,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterTimeInterval<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property<TimeInterval> property;
-        private final ExpressionFactory<U> factoryStart;
-        private final ExpressionFactory<U> factoryEnd;
+        private final FieldFetcher<U> factoryStart;
+        private final FieldFetcher<U> factoryEnd;
 
-        public ConverterTimeInterval(Property<TimeInterval> property, ExpressionFactory<U> factoryStart, ExpressionFactory<U> factoryEnd) {
+        public ConverterTimeInterval(Property<TimeInterval> property, FieldFetcher<U> factoryStart, FieldFetcher<U> factoryEnd) {
             this.property = property;
             this.factoryStart = factoryStart;
             this.factoryEnd = factoryEnd;
@@ -824,9 +852,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterTimeInstant<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property<TimeInstant> property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
 
-        public ConverterTimeInstant(Property<TimeInstant> property, ExpressionFactory<U> factory) {
+        public ConverterTimeInstant(Property<TimeInstant> property, FieldFetcher<U> factory) {
             this.property = property;
             this.factory = factory;
         }
@@ -855,10 +883,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterTimeValue<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property<TimeValue> property;
-        private final ExpressionFactory<U> factoryStart;
-        private final ExpressionFactory<U> factoryEnd;
+        private final FieldFetcher<U> factoryStart;
+        private final FieldFetcher<U> factoryEnd;
 
-        public ConverterTimeValue(Property<TimeValue> property, ExpressionFactory<U> factoryStart, ExpressionFactory<U> factoryEnd) {
+        public ConverterTimeValue(Property<TimeValue> property, FieldFetcher<U> factoryStart, FieldFetcher<U> factoryEnd) {
             this.property = property;
             this.factoryStart = factoryStart;
             this.factoryEnd = factoryEnd;
@@ -890,9 +918,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterMap<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
 
-        public ConverterMap(Property property, ExpressionFactory<U> factory) {
+        public ConverterMap(Property property, FieldFetcher<U> factory) {
             this.property = property;
             this.factory = factory;
         }
@@ -922,9 +950,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterJson<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final Property property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
 
-        public ConverterJson(Property property, ExpressionFactory<U> factory) {
+        public ConverterJson(Property property, FieldFetcher<U> factory) {
             this.property = property;
             this.factory = factory;
         }
@@ -954,9 +982,9 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     public static class ConverterEntity<U extends StaMainTable<U>> implements ConverterRecord<U> {
 
         private final NavigationPropertyEntity property;
-        private final ExpressionFactory<U> factory;
+        private final FieldFetcher<U> factory;
 
-        public ConverterEntity(NavigationPropertyEntity property, ExpressionFactory<U> factory) {
+        public ConverterEntity(NavigationPropertyEntity property, FieldFetcher<U> factory) {
             this.property = property;
             this.factory = factory;
             if (!(property.getEntityType().getPrimaryKey() instanceof PkSingle)) {
