@@ -40,7 +40,7 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     private final List<String> subPath = new ArrayList<>();
 
     public EntityPropertyCustomSelect(EntityPropertyMain mainProperty) {
-        super(mainProperty.getName(), TypeSimplePrimitive.EDM_UNTYPED, false, true, false);
+        super(mainProperty.getName(), TypeSimplePrimitive.EDM_UNTYPED, NULLABLE);
         this.mainProperty = mainProperty;
     }
 

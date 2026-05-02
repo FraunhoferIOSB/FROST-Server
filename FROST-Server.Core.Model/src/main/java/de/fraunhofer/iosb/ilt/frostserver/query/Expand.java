@@ -160,7 +160,7 @@ public class Expand {
                     subQuery.addExpand(subExpand);
                     subQuery.setParentExpand(this);
                 }
-            } else if (property instanceof EntityPropertyMain epm && epm.hasCustomProperties) {
+            } else if (property instanceof EntityPropertyMain epm && epm.hasCustomProperties()) {
                 NavigationPropertyCustom tempPath = new NavigationPropertyCustom(modelRegistry, epm);
                 for (int i = 1; i < rawCount; i++) {
                     tempPath.addToSubPath(rawPath.get(i));

@@ -18,34 +18,50 @@
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * An abstract base class for Properties.
+ *
+ * @param <P> The type of the values of this property.
+ */
 public abstract class PropertyAbstract<P> implements Property<P> {
+
+    public static final String READONLY = "readOnly";
+    public static final String REQUIRED = "required";
+    public static final String NULLABLE = "nullable";
 
     private String name;
     private PropertyType type;
     /**
      * Flag indicating the property must be explicitly set.
      */
-    protected boolean required;
+    private boolean required;
     /**
      * Flag indicating the property may be set to null.
      */
-    protected boolean nullable;
+    private boolean nullable;
     /**
      * Flag indicating the property is system generated and can not be edited by
      * the user.
      */
-    protected boolean readOnly;
+    private boolean readOnly;
 
-    protected PropertyAbstract(String name, PropertyType type, boolean required, boolean nullable, boolean readOnly) {
+    protected PropertyAbstract(String name, PropertyType type, String... options) {
+        this(name, type, new HashSet<>(Arrays.asList(options)));
+    }
+
+    protected PropertyAbstract(String name, PropertyType type, Set<String> options) {
         if (type == null) {
             throw new IllegalArgumentException("Type must not be null");
         }
         this.name = name;
         this.type = type;
-        this.required = required;
-        this.nullable = nullable;
-        this.readOnly = readOnly;
+        setRequired(options.contains(REQUIRED));
+        setReadOnly(options.contains(READONLY));
+        setNullable(options.contains(NULLABLE));
     }
 
     @Override
@@ -53,7 +69,7 @@ public abstract class PropertyAbstract<P> implements Property<P> {
         return name;
     }
 
-    protected void setName(String name) {
+    protected final void setName(String name) {
         this.name = name;
     }
 
@@ -67,7 +83,7 @@ public abstract class PropertyAbstract<P> implements Property<P> {
         return type;
     }
 
-    protected void setType(PropertyType type) {
+    protected final void setType(PropertyType type) {
         this.type = type;
     }
 
@@ -76,14 +92,26 @@ public abstract class PropertyAbstract<P> implements Property<P> {
         return required;
     }
 
+    public final void setRequired(boolean required) {
+        this.required = required;
+    }
+
     @Override
     public boolean isNullable() {
         return nullable;
     }
 
+    public final void setNullable(boolean nullable) {
+        this.nullable = nullable;
+    }
+
     @Override
     public boolean isReadOnly() {
         return readOnly;
+    }
+
+    public final void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
     }
 
     @Override

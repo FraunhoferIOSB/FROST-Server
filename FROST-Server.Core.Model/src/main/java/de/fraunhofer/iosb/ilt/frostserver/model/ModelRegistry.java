@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.CUSTOM_PROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
@@ -48,11 +51,11 @@ public class ModelRegistry {
     /**
      * The global EntityProperty properties.
      */
-    public static final EntityPropertyMain<TreeNode> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, false, true, true, false);
+    public static final EntityPropertyMain<TreeNode> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, NULLABLE, CUSTOM_PROPS);
     /**
      * The global EntityProperty encodingType.
      */
-    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING, true, false);
+    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING, REQUIRED);
 
     /**
      * All entity types, by their entityName (both singular and plural).

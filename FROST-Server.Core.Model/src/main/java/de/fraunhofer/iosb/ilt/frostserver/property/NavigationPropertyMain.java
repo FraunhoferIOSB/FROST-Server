@@ -31,33 +31,51 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
+ * The property that represents a link to another entity or set of entities.
  *
- * @author jab
- * @author scf
  * @param <P> The entityType of the value of the property.
  */
 public abstract class NavigationPropertyMain<P extends NavigableElement> extends PropertyAbstract<P> implements Annotatable, NavigationProperty<P> {
 
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
-        public NavigationPropertyEntity(String propertyName, boolean required) {
-            this(propertyName, null, required, 0);
+        public NavigationPropertyEntity(String propertyName, String... options) {
+            this(propertyName, null, 0, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, boolean required, int priority) {
-            this(propertyName, null, required, priority);
+        public NavigationPropertyEntity(String propertyName, Set<String> options) {
+            this(propertyName, null, 0, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, boolean required) {
-            this(propertyName, inverse, required, 0);
+        public NavigationPropertyEntity(String propertyName, int priority, String... options) {
+            this(propertyName, null, priority, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, boolean required, int priority) {
-            super(propertyName, false, required, !required, priority);
+        public NavigationPropertyEntity(String propertyName, int priority, Set<String> options) {
+            this(propertyName, null, priority, options);
+        }
+
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, String... options) {
+            this(propertyName, inverse, 0, options);
+        }
+
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, Set<String> options) {
+            this(propertyName, inverse, 0, options);
+        }
+
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, int priority, String... options) {
+            this(propertyName, inverse, priority, new HashSet<>(Arrays.asList(options)));
+        }
+
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, int priority, Set<String> options) {
+            super(propertyName, false, priority, options);
             if (inverse != null) {
                 setInverses(inverse);
             }
@@ -79,7 +97,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
         }
 
         public NavigationPropertyEntitySet(String propertyName, NavigationPropertyMain inverse, int priority) {
-            super(propertyName, true, false, true, priority);
+            super(propertyName, true, priority, NULLABLE);
             if (inverse != null) {
                 setInverses(inverse);
             }
@@ -96,22 +114,28 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
      */
     private final boolean entitySet;
 
+    /**
+     * The inverse of this navigation link.
+     */
     private NavigationPropertyMain<?> inverse;
 
     /**
      * The (OData)annotations for this Navigation Property.
      */
     private final List<Annotation> annotations = new ArrayList<>();
+
     /**
      * The priority used for ordering.
      */
     private final int priority;
 
-    private NavigationPropertyMain(String propertyName, boolean isSet, boolean required, boolean nullable, int priority) {
-        super(propertyName, TypeSimplePrimitive.EDM_UNTYPED, required, nullable, false);
+    private NavigationPropertyMain(String propertyName, boolean isSet, int priority, String... options) {
+        this(propertyName, isSet, priority, new HashSet<>(Arrays.asList(options)));
+    }
+
+    private NavigationPropertyMain(String propertyName, boolean isSet, int priority, Set<String> options) {
+        super(propertyName, TypeSimplePrimitive.EDM_UNTYPED, options);
         this.entitySet = isSet;
-        this.required = required;
-        this.nullable = nullable;
         this.priority = priority;
     }
 
@@ -163,14 +187,6 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     @Override
     public boolean isAdminOnly() {
         return entityType.isAdminOnly();
-    }
-
-    public void setRequired(boolean required) {
-        this.required = required;
-    }
-
-    public void setNullable(boolean nullable) {
-        this.nullable = nullable;
     }
 
     @Override

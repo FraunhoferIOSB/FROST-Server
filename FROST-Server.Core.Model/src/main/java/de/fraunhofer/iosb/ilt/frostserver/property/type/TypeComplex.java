@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
@@ -59,12 +61,9 @@ public class TypeComplex extends PropertyType implements ContainerType<TypeCompl
     public static final String NAME_INTERVAL_START = "start";
     public static final String NAME_INTERVAL_END = "end";
 
-    public static final EntityPropertyMain<TimeInstant> EP_START_TIME = new EntityPropertyMain<TimeInstant>(NAME_INTERVAL_START, EDM_DATETIMEOFFSET)
-            .setNullable(false);
-    public static final EntityPropertyMain<TimeInstant> EP_INTERVAL_END_TIME = new EntityPropertyMain<TimeInstant>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET)
-            .setNullable(false);
-    public static final EntityPropertyMain<TimeInstant> EP_VALUE_END_TIME = new EntityPropertyMain<TimeInstant>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET)
-            .setNullable(true);
+    public static final EntityPropertyMain<TimeInstant> EP_START_TIME = new EntityPropertyMain<>(NAME_INTERVAL_START, EDM_DATETIMEOFFSET, REQUIRED);
+    public static final EntityPropertyMain<TimeInstant> EP_INTERVAL_END_TIME = new EntityPropertyMain<>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET, REQUIRED);
+    public static final EntityPropertyMain<TimeInstant> EP_VALUE_END_TIME = new EntityPropertyMain<TimeInstant>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET, NULLABLE);
 
     public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, ParserUtils.getTreeNodeDeserializer(), ParserUtils.getTreeNodeSerializer());
 

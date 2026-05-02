@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings.TAG_ENABLE_ACTUATION;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
@@ -79,16 +80,16 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
-    public final EntityPropertyMain<TreeNode> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, true, false);
+    public final EntityPropertyMain<TreeNode> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, REQUIRED);
     private EntityPropertyMain<?> epIdActuator;
     private EntityPropertyMain<?> epIdTask;
     private EntityPropertyMain<?> epIdTaskingCap;
 
-    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR, true);
-    public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing", true);
+    public final NavigationPropertyEntity npActuatorTaskCap = new NavigationPropertyEntity(ACTUATOR, REQUIRED);
+    public final NavigationPropertyEntity npThingTaskCap = new NavigationPropertyEntity("Thing", REQUIRED);
     public final NavigationPropertyEntitySet npTasksTaskCap = new NavigationPropertyEntitySet(TASKS);
 
-    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity(TASKING_CAPABILITY, npTasksTaskCap, true);
+    public final NavigationPropertyEntity npTaskingCapabilityTask = new NavigationPropertyEntity(TASKING_CAPABILITY, npTasksTaskCap, REQUIRED);
     public final NavigationPropertyEntitySet npTaskingCapabilitiesActuator = new NavigationPropertyEntitySet(TASKING_CAPABILITIES, npActuatorTaskCap);
     public final NavigationPropertyEntitySet npTaskingCapabilitiesThing = new NavigationPropertyEntitySet(TASKING_CAPABILITIES, npThingTaskCap);
 

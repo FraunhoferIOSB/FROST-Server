@@ -17,6 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.CUSTOM_PROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SERIALISE_NULLS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.READONLY;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
@@ -31,7 +37,9 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +119,14 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     private boolean hasCustomProperties;
 
     /**
+     * Flag indicating this property can not be edited.
+     */
+    @ConfigurableField(editor = EditorBoolean.class, optional = true,
+            label = "ReadOnly", description = "Flag indicating this property can not be edited.")
+    @EditorBoolean.EdOptsBool()
+    private boolean readOnly;
+
+    /**
      * Handlers used to map the property to a persistence manager.
      */
     @ConfigurableField(editor = EditorList.class,
@@ -148,7 +164,23 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
             PropertyType propType = modelRegistry.getPropertyType(type);
-            entityProperty = new EntityPropertyMain<>(name, propType, required, isNullable(), hasCustomProperties, serialiseNull)
+            Set<String> options = new HashSet<>();
+            if (required) {
+                options.add(REQUIRED);
+            }
+            if (readOnly) {
+                options.add(READONLY);
+            }
+            if (nullable) {
+                options.add(NULLABLE);
+            }
+            if (serialiseNull) {
+                options.add(SERIALISE_NULLS);
+            }
+            if (hasCustomProperties) {
+                options.add(CUSTOM_PROPS);
+            }
+            entityProperty = new EntityPropertyMain<>(name, propType, options)
                     .setAliases(aliases.toArray(String[]::new))
                     .addAnnotations(annotations);
         }
@@ -245,6 +277,15 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
      */
     public DefEntityProperty setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public DefEntityProperty setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
         return this;
     }
 

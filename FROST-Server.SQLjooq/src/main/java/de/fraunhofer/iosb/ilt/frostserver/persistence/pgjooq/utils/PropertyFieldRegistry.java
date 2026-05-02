@@ -160,9 +160,10 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
                         lastPropCopy = subPropCopy;
                     }
                 } else {
-                    if (lastProp.hasCustomProperties || lastPropFields.jsonType) {
-                        if (lastProp.hasCustomProperties != lastPropFields.jsonType) {
-                            LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", lastProp.hasCustomProperties, lastPropFields.jsonType);
+                    final boolean hasCustomProperties = lastProp.hasCustomProperties();
+                    if (hasCustomProperties || lastPropFields.jsonType) {
+                        if (hasCustomProperties != lastPropFields.jsonType) {
+                            LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", hasCustomProperties, lastPropFields.jsonType);
                         }
                         // Not a complex type, but can be queried.
                         return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);

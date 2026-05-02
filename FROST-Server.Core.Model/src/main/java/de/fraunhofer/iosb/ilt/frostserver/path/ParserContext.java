@@ -87,7 +87,7 @@ public class ParserContext {
                 if (tc.isOpenType()) {
                     return parseCustomProperty(decodedName);
                 }
-            } else if (epm.hasCustomProperties) {
+            } else if (epm.hasCustomProperties()) {
                 return parseCustomProperty(decodedName);
             }
             throw new IllegalArgumentException("Could not place " + propertyName + " under type " + type + " after " + previous + ": not an open type.");

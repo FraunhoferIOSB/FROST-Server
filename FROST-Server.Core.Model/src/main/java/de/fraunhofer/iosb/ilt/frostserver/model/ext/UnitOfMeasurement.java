@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SERIALISE_NULLS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
@@ -31,9 +33,10 @@ public class UnitOfMeasurement {
     public static final String NAME_DEFINITION = "definition";
     public static final String NAME_NAME = "name";
     public static final String NAME_SYMBOL = "symbol";
-    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>(NAME_NAME, EDM_STRING, false, true, false, true);
-    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>(NAME_DEFINITION, EDM_STRING, false, true, false, true);
-    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>(NAME_SYMBOL, EDM_STRING, false, true, false, true);
+
+    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>(NAME_NAME, EDM_STRING, NULLABLE, SERIALISE_NULLS);
+    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>(NAME_DEFINITION, EDM_STRING, NULLABLE, SERIALISE_NULLS);
+    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>(NAME_SYMBOL, EDM_STRING, NULLABLE, SERIALISE_NULLS);
 
     public static ComplexValueImpl UnitOfMeasurement(
             String name,

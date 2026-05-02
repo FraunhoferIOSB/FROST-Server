@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -52,11 +53,11 @@ import java.util.Map;
  */
 public class TestModel implements PluginService {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, true, false);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, REQUIRED);
     public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
     public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_ROOM_HOUSE = new NavigationPropertyEntity("House", true);
+    public final NavigationPropertyEntity NP_ROOM_HOUSE = new NavigationPropertyEntity("House", REQUIRED);
     public final NavigationPropertyEntitySet NP_HOUSE_ROOMS = new NavigationPropertyEntitySet("Rooms", NP_ROOM_HOUSE);
 
     public final NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyEntitySet("Houses");

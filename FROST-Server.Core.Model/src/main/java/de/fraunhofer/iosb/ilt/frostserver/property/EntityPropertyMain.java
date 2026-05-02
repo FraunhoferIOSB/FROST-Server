@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
@@ -24,8 +26,10 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A main data Property of an Entity or ComplexValue.
@@ -33,6 +37,9 @@ import java.util.Objects;
  * @param <P> The type of the value of the property.
  */
 public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annotatable, EntityProperty<P> {
+
+    public static final String CUSTOM_PROPS = "hasCustomProperties";
+    public static final String SERIALISE_NULLS = "serialiseNulls";
 
     /**
      * Flag indicating the property has sub-properties and can be queried, even
@@ -46,7 +53,7 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
      */
     public final boolean serialiseNull;
 
-    private final Collection<String> aliases;
+    private final Collection<String> aliases = new ArrayList<>();
 
     /**
      * The (OData)annotations for this Entity Property.
@@ -54,21 +61,18 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
     private final List<Annotation> annotations = new ArrayList<>();
 
     public EntityPropertyMain(String name, PropertyType type) {
-        this(name, type, false, true, false, false);
+        this(name, type, NULLABLE);
     }
 
-    public EntityPropertyMain(String name, PropertyType type, boolean required, boolean nullable) {
-        this(name, type, required, nullable, false, false);
+    public EntityPropertyMain(String name, PropertyType type, String... options) {
+        this(name, type, new HashSet<>(Arrays.asList(options)));
     }
 
-    public EntityPropertyMain(String name, PropertyType type, boolean required, boolean nullable, boolean hasCustomProperties, boolean serialiseNull) {
-        super(name, type, required, nullable, false);
-
-        this.nullable = nullable;
-        this.aliases = new ArrayList<>();
-        this.aliases.add(name);
-        this.hasCustomProperties = hasCustomProperties;
-        this.serialiseNull = serialiseNull;
+    public EntityPropertyMain(String name, PropertyType type, Set<String> options) {
+        super(name, type, options);
+        aliases.add(name);
+        this.hasCustomProperties = options.contains(CUSTOM_PROPS);
+        this.serialiseNull = options.contains(SERIALISE_NULLS);
     }
 
     public Collection<String> getAliases() {
@@ -83,19 +87,12 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
         return this;
     }
 
-    public EntityPropertyMain<P> setRequired(boolean required) {
-        this.required = required;
-        return this;
+    public boolean hasCustomProperties() {
+        return hasCustomProperties;
     }
 
-    public EntityPropertyMain<P> setNullable(boolean nullable) {
-        this.nullable = nullable;
-        return this;
-    }
-
-    public EntityPropertyMain<P> setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-        return this;
+    public boolean isSerialiseNull() {
+        return serialiseNull;
     }
 
     @Override

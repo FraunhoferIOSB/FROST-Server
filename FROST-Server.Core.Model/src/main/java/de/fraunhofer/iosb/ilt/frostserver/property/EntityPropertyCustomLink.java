@@ -33,7 +33,7 @@ public class EntityPropertyCustomLink extends PropertyAbstract<Entity> implement
     private final EntityType targetEntityType;
 
     public EntityPropertyCustomLink(String name, EntityType targetEntityType) {
-        super(name, new TypeEntity(targetEntityType), false, true, false);
+        super(name, new TypeEntity(targetEntityType), NULLABLE);
         this.targetEntityType = targetEntityType;
     }
 

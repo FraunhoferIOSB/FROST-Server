@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableClass;
@@ -33,7 +35,9 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,11 +154,15 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         if (navProp != null) {
             return;
         }
+        Set<String> options = new HashSet<>();
+        if (required) {
+            options.add(REQUIRED);
+        }
 
         if (entitySet) {
             navProp = new NavigationPropertyMain.NavigationPropertyEntitySet(name, priority);
         } else {
-            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, required, priority);
+            navProp = new NavigationPropertyMain.NavigationPropertyEntity(name, priority, options);
         }
         targetEntityType = modelRegistry.getEntityTypeForName(entityType, true);
         if (targetEntityType == null) {
@@ -179,10 +187,14 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
             navPropInverse = targetEntityType.getNavigationProperty(inverse.name);
 
             if (navPropInverse == null) {
+                options = new HashSet<>();
+                if (inverse.required) {
+                    options.add(REQUIRED);
+                }
                 if (inverse.entitySet) {
                     navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp, inverse.priority);
                 } else {
-                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.required, inverse.priority);
+                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.priority, options);
                 }
                 navPropInverse.setEntityType(sourceEntityType);
                 navPropInverse.addAnnotations(inverse.annotations);

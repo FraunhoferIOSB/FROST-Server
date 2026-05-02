@@ -29,7 +29,7 @@ public class EntityPropertyCustom extends PropertyAbstract<Object> implements En
     private static final String NOT_SUPPORTED = "Not supported on custom properties.";
 
     public EntityPropertyCustom(String name) {
-        super(name, TypeSimplePrimitive.EDM_UNTYPED, false, true, false);
+        super(name, TypeSimplePrimitive.EDM_UNTYPED, NULLABLE);
         String finalName = name;
         Integer realIndex;
         if (finalName.startsWith("[") && finalName.endsWith("]")) {

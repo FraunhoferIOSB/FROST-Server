@@ -77,7 +77,6 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     public static final String NAME_COL_UNITSYMBOL = "UNIT_SYMBOL";
 
     private static final long serialVersionUID = -1460005950;
-    private static final String UOM_NO_PATH = "UnitOfMeasurement does not have the path ";
 
     /**
      * The column <code>public.DATASTREAMS.DESCRIPTION</code>.

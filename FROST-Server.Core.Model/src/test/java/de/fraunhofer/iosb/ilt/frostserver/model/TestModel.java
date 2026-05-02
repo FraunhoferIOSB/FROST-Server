@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -40,14 +41,14 @@ import java.util.Map;
  */
 public class TestModel {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, true, false);
+    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, REQUIRED);
     public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
     public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_HOUSE_ROOM = new NavigationPropertyEntity("House", true);
+    public final NavigationPropertyEntity NP_HOUSE_ROOM = new NavigationPropertyEntity("House", REQUIRED);
     public final NavigationPropertyEntitySet NP_ROOMS_HOUSE = new NavigationPropertyEntitySet("Rooms");
 
-    public final NavigationPropertyEntity NP_BATHROOMFOR_ROOM = new NavigationPropertyEntity("BathroomFor", false);
+    public final NavigationPropertyEntity NP_BATHROOMFOR_ROOM = new NavigationPropertyEntity("BathroomFor");
     public final NavigationPropertyEntitySet NP_BATHROOMS_HOUSE = new NavigationPropertyEntitySet("Bathrooms");
 
     public final NavigationPropertyEntitySet NP_STREETS_HOUSE = new NavigationPropertyEntitySet("Streets");
