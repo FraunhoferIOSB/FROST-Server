@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
-import static de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry.EP_SELFLINK;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
@@ -38,7 +37,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -74,7 +73,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginMultiDatastream.class.getName());
 
     public final EntityPropertyMain<List<String>> epMultiObservationDataTypes = new EntityPropertyMain<>("multiObservationDataTypes", new TypeSimpleSet(EDM_STRING, TYPE_REFERENCE_LIST_STRING), REQUIRED);
-    public final EntityPropertyMain<List<ComplexValue>> epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(TypeComplex.TYPE_UOM), REQUIRED);
+    public final EntityPropertyMain<List<ComplexValue>> epUnitOfMeasurements = new EntityPropertyMain<>("unitOfMeasurements", new TypeSimpleSet(StandardProperties.TYPE_UOM), REQUIRED);
     private EntityPropertyMain<?> epIdMultiDatastream;
 
     public final NavigationPropertyEntity npMultiDatastreamObservation = new NavigationPropertyEntity(MULTI_DATASTREAM);
@@ -153,7 +152,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
 
         etMultiDatastream
                 .registerProperty(epIdMultiDatastream)
-                .registerProperty(EP_SELFLINK)
+                .registerProperty(StandardProperties.EP_SELFLINK)
                 .registerProperty(pluginCoreModel.epName)
                 .registerProperty(pluginCoreModel.epDescription)
                 .registerProperty(pluginCoreModel.epObservationType)
@@ -161,7 +160,7 @@ public class PluginMultiDatastream implements PluginRootDocument, PluginModel, C
                 .registerProperty(epUnitOfMeasurements)
                 .registerProperty(pluginCoreModel.epObservedArea)
                 .registerProperty(pluginCoreModel.epPhenomenonTimeDs)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(StandardProperties.EP_PROPERTIES)
                 .registerProperty(pluginCoreModel.epResultTimeDs)
                 .registerProperty(npObservedPropertiesMDs)
                 .registerProperty(npSensorMDs)

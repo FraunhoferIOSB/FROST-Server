@@ -18,13 +18,13 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.csv.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -75,7 +75,7 @@ public class CsvElementSet {
 
     private void initProperties(Set<Property> properties) {
         for (Property property : properties) {
-            if (property == ModelRegistry.EP_SELFLINK) {
+            if (property == StandardProperties.EP_SELFLINK) {
                 continue;
             }
             if (property instanceof EntityPropertyMain epm) {

@@ -17,56 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Custom simple (non-complex) property types.
  */
 public class TypeSimpleCustom extends TypeSimple {
-
-    public static final String STA_GEOJSON_NAME = "Geometry";
-    public static final String STA_TM_INSTANT_NAME = "TM_Instant";
-    public static final String STA_TM_INSTANT_ALIAS = "TimeInstant";
-    public static final PropertyType STA_LOCATION = new TypeSimpleCustom(STA_GEOJSON_NAME, "A Free Location object", EDM_GEOMETRY)
-            .setDeserializer(ParserUtils.getLocationDeserializer());
-    public static final PropertyType STA_TM_INSTANT = new TypeSimpleCustom(STA_TM_INSTANT_NAME, "A Time Instant", EDM_DATETIMEOFFSET);
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TypeSimpleCustom.class.getName());
-    private static final Map<String, TypeSimpleCustom> TYPES = new HashMap<>();
-
-    static {
-        for (Field field : FieldUtils.getAllFields(TypeSimpleCustom.class)) {
-            if (!Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            try {
-                final TypeSimpleCustom type = (TypeSimpleCustom) FieldUtils.readStaticField(field, false);
-                final String name = type.getName();
-                TYPES.put(name, type);
-                LOGGER.debug("Registered type: {}", name);
-            } catch (IllegalArgumentException ex) {
-                LOGGER.error("Failed to initialise: {}", field, ex);
-            } catch (IllegalAccessException ex) {
-                LOGGER.trace("Failed to initialise: {}", field, ex);
-            } catch (ClassCastException ex) {
-                // It's not a TypeSimplePrimitive
-            }
-        }
-        TYPES.put(STA_TM_INSTANT_ALIAS, TYPES.get(STA_TM_INSTANT_NAME));
-    }
-
-    public static TypeSimpleCustom getType(String name) {
-        return TYPES.get(name);
-    }
 
     public TypeSimpleCustom(String name, String description, TypeSimplePrimitive underlyingType) {
         super(name, description, underlyingType);

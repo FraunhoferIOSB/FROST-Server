@@ -17,32 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
-
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.MapValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.ValueSerializer;
@@ -51,63 +35,6 @@ import tools.jackson.databind.ValueSerializer;
  * The complex type definition.
  */
 public class TypeComplex extends PropertyType implements ContainerType<TypeComplex> {
-
-    public static final String STA_MAP_NAME = "Object";
-    public static final String STA_TIMEINTERVAL_NAME = "TM_Period";
-    public static final String STA_TIMEINTERVAL_ALIAS = "TimeInterval";
-    public static final String STA_TIMEVALUE_NAME = "TM_Object";
-    public static final String STA_TIMEVALUE_ALIAS = "TimeValue";
-    public static final String STA_TIMEVALUE_ALIAS2 = "TimeObject";
-    public static final String NAME_INTERVAL_START = "start";
-    public static final String NAME_INTERVAL_END = "end";
-
-    public static final EntityPropertyMain<TimeInstant> EP_START_TIME = new EntityPropertyMain<>(NAME_INTERVAL_START, EDM_DATETIMEOFFSET, REQUIRED);
-    public static final EntityPropertyMain<TimeInstant> EP_INTERVAL_END_TIME = new EntityPropertyMain<>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET, REQUIRED);
-    public static final EntityPropertyMain<TimeInstant> EP_VALUE_END_TIME = new EntityPropertyMain<TimeInstant>(NAME_INTERVAL_END, EDM_DATETIMEOFFSET, NULLABLE);
-
-    public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, ParserUtils.getTreeNodeDeserializer(), ParserUtils.getTreeNodeSerializer());
-
-    public static final TypeComplex STA_TIMEINTERVAL = new TypeComplex(STA_TIMEINTERVAL_NAME, "An ISO time interval.", false, t -> new TimeInterval(), TypeReferencesHelper.TYPE_REFERENCE_TIMEINTERVAL)
-            .registerProperty(EP_START_TIME)
-            .registerProperty(EP_INTERVAL_END_TIME);
-    public static final TypeComplex STA_TIMEVALUE = new TypeComplex(STA_TIMEVALUE_NAME, "An ISO time instant or time interval.", false, t -> new TimeValue(), TypeReferencesHelper.TYPE_REFERENCE_TIMEVALUE)
-            .registerProperty(EP_START_TIME)
-            .registerProperty(EP_VALUE_END_TIME);
-    public static final TypeComplex TYPE_UOM = new TypeComplex("UnitOfMeasurement", "The Unit Of Measurement Type", false)
-            .registerProperty(UnitOfMeasurement.EP_NAME)
-            .registerProperty(UnitOfMeasurement.EP_DEFINITION)
-            .registerProperty(UnitOfMeasurement.EP_SYMBOL);
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TypeComplex.class.getName());
-    private static final Map<String, TypeComplex> TYPES = new HashMap<>();
-
-    static {
-        for (Field field : FieldUtils.getAllFields(TypeComplex.class)) {
-            if (!Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            try {
-                final TypeComplex type = (TypeComplex) FieldUtils.readStaticField(field, false);
-                final String name = type.getName();
-                TYPES.put(name, type);
-                LOGGER.debug("Registered type: {}", name);
-            } catch (IllegalArgumentException ex) {
-                LOGGER.error("Failed to initialise: {}", field, ex);
-            } catch (IllegalAccessException ex) {
-                LOGGER.trace("Failed to initialise: {}", field, ex);
-            } catch (ClassCastException ex) {
-                // It's not a TypeSimplePrimitive
-            }
-        }
-        TYPES.put(STA_TIMEINTERVAL_ALIAS, TYPES.get(STA_TIMEINTERVAL_NAME));
-        TYPES.put(STA_TIMEVALUE_ALIAS, TYPES.get(STA_TIMEVALUE_NAME));
-        TYPES.put(STA_TIMEVALUE_ALIAS2, TYPES.get(STA_TIMEVALUE_NAME));
-
-    }
-
-    public static TypeComplex getType(String name) {
-        return TYPES.get(name);
-    }
 
     /**
      * The Set of PROPERTIES that Elements of this type have.

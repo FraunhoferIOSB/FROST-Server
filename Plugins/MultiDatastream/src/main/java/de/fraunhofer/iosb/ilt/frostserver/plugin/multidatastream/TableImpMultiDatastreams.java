@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.Ho
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
@@ -48,8 +47,8 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpObservations;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpThingsLocations;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.ParserUtils;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
@@ -291,7 +290,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                 table -> table.colResultTimeStart,
                 table -> table.colResultTimeEnd);
 
-        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryMap(StandardProperties.EP_PROPERTIES, table -> table.colProperties);
 
         pfReg.addEntry(pluginMultiDatastream.epUnitOfMeasurements,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
@@ -300,7 +299,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             dataSize.increase(fieldJsonValue.getStringLength());
 
                             try {
-                                List<ComplexValue> units = ParserUtils.parseComplexValueList(SimpleJsonMapper.getSimpleObjectMapper(), TypeComplex.TYPE_UOM, fieldJsonValue.getStringValue());
+                                List<ComplexValue> units = ParserUtils.parseComplexValueList(SimpleJsonMapper.getSimpleObjectMapper(), StandardProperties.TYPE_UOM, fieldJsonValue.getStringValue());
                                 entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, units);
                             } catch (IOException ex) {
                                 LOGGER.error("Failed to parse stored UnitOfMeasure List.", ex.getMessage());

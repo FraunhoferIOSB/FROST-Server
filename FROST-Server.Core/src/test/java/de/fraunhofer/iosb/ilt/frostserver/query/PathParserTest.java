@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
@@ -153,7 +154,7 @@ class PathParserTest {
         expResult.addPathElement(espe, false, false);
         PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
         expResult.addPathElement(epe, true, true);
-        PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
+        PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
         expResult.setValue(true);
 
@@ -170,7 +171,7 @@ class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -184,7 +185,7 @@ class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("name_two", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -198,7 +199,7 @@ class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -214,7 +215,7 @@ class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);
@@ -232,7 +233,7 @@ class PathParserTest {
             expResult.addPathElement(espe, false, false);
             PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
             expResult.addPathElement(epe, true, true);
-            PathElementProperty ppe = new PathElementProperty(ModelRegistry.EP_PROPERTIES, epe);
+            PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
             PathElementCustomProperty cppe = new PathElementCustomProperty("property1", ppe);
             expResult.addPathElement(cppe, false, false);

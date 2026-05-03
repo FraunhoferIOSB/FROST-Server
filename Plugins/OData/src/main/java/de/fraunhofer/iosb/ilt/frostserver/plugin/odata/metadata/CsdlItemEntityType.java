@@ -21,11 +21,11 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             key.add(keyName);
         }
         for (EntityPropertyMain ep : et.getEntityProperties()) {
-            if (ep == ModelRegistry.EP_SELFLINK) {
+            if (ep == StandardProperties.EP_SELFLINK) {
                 continue;
             }
             String propertyName = ep.getJsonName();

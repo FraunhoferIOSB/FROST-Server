@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.NAME_INTERVAL_START;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;

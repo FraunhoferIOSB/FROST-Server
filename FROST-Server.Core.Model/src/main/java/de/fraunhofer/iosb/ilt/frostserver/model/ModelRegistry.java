@@ -17,17 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.CUSTOM_PROPS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
-import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
-
 import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +27,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.TreeNode;
 
 /**
  * A registry for a data model.
@@ -43,19 +34,6 @@ import tools.jackson.core.TreeNode;
 public class ModelRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelRegistry.class.getName());
-
-    /**
-     * The global EntityProperty SelfLink.
-     */
-    public static final EntityPropertyMain<String> EP_SELFLINK = new EntityPropertyMain<String>(AT_IOT_SELF_LINK, EDM_STRING).setAliases("selfLink");
-    /**
-     * The global EntityProperty properties.
-     */
-    public static final EntityPropertyMain<TreeNode> EP_PROPERTIES = new EntityPropertyMain<>("properties", TypeComplex.STA_MAP, NULLABLE, CUSTOM_PROPS);
-    /**
-     * The global EntityProperty encodingType.
-     */
-    public static final EntityPropertyMain<String> EP_ENCODINGTYPE = new EntityPropertyMain<>("encodingType", EDM_STRING, REQUIRED);
 
     /**
      * All entity types, by their entityName (both singular and plural).
@@ -167,13 +145,7 @@ public class ModelRegistry {
         if (type != null) {
             return type;
         }
-        type = TypeSimpleCustom.getType(name);
-        if (type != null) {
-            // This provided custom type was not registered yet, do it now.
-            registerPropertyType(type);
-            return type;
-        }
-        type = TypeComplex.getType(name);
+        type = StandardProperties.getType(name);
         if (type != null) {
             // This provided custom type was not registered yet, do it now.
             registerPropertyType(type);

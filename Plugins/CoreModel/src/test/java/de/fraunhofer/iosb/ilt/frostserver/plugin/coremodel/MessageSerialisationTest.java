@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
@@ -79,7 +80,7 @@ class MessageSerialisationTest {
                 .setPrimaryKeyValues(PkValue.of(123456L))
                 .setProperty(pluginCoreModel.epName, "testThing")
                 .setProperty(pluginCoreModel.epDescription, "A Thing for testing")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.jsonPoint(-117.123, 54.123));
         entity.setQuery(modelRegistry.getMessageQueryGenerator().getQueryFor(entity.getType()));
         message.setEntity(entity);

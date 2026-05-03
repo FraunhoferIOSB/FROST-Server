@@ -24,13 +24,13 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SE
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
@@ -75,7 +75,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         this.navLinkField = navLinkField;
         this.nextLinkField = nextLinkField;
         this.odata = odata;
-        propertySerializers.put(ModelRegistry.EP_SELFLINK, (ep, target, gen) -> {
+        propertySerializers.put(StandardProperties.EP_SELFLINK, (ep, target, gen) -> {
             Entity entity = (Entity) target;
             if (entity.getQuery().getMetadata() == Metadata.FULL) {
                 final String value = entity.getSelfLink();

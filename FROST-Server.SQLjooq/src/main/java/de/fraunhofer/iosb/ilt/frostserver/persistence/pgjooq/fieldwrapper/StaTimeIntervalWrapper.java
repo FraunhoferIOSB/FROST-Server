@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils.INTERVAL_PARAM;
 
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.MomentBinding;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import java.util.Map;
 import net.time4j.Moment;
 import org.jooq.Condition;
@@ -37,8 +37,8 @@ public class StaTimeIntervalWrapper implements TimeFieldWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaTimeIntervalWrapper.class.getName());
 
-    public static final String KEY_TIME_INTERVAL_START = TypeComplex.NAME_INTERVAL_START;
-    public static final String KEY_TIME_INTERVAL_END = TypeComplex.NAME_INTERVAL_END;
+    public static final String KEY_TIME_INTERVAL_START = StandardProperties.NAME_INTERVAL_START;
+    public static final String KEY_TIME_INTERVAL_END = StandardProperties.NAME_INTERVAL_END;
     private static final String INCOMPATIBLE_OP = "Incompatible operator: Interval '";
     /**
      * Flag indicating that the original time given was in UTC.

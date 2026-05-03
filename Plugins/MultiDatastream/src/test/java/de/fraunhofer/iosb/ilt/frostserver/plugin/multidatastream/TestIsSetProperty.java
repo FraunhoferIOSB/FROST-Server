@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
@@ -119,7 +120,7 @@ public class TestIsSetProperty {
         }
         entity.setEntityPropertiesSet(false, false);
         for (Property p : collectedProperties) {
-            if (p == ModelRegistry.EP_SELFLINK) {
+            if (p == StandardProperties.EP_SELFLINK) {
                 continue;
             }
             isSetPropertyOnObject(entity, p, false);
@@ -156,7 +157,7 @@ public class TestIsSetProperty {
     private void testPropertiesChanged(EntityChangedMessage message, Set<Property> collectedProperties, Entity entity, boolean shouldBeChanged) {
         Set<Property> changedFields = message.getFields();
         for (Property p : collectedProperties) {
-            if (p == ModelRegistry.EP_SELFLINK) {
+            if (p == StandardProperties.EP_SELFLINK) {
                 continue;
             }
             if (p instanceof NavigationPropertyMain) {
@@ -236,7 +237,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_ENCODINGTYPE);
+        testIsSetProperty(shouldBeSet, entity, StandardProperties.EP_ENCODINGTYPE);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epFeature);
     }
 
@@ -278,7 +279,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_ENCODINGTYPE);
+        testIsSetProperty(shouldBeSet, entity, StandardProperties.EP_ENCODINGTYPE);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epLocation);
     }
 
@@ -375,7 +376,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity entity) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, entity);
-        testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_ENCODINGTYPE);
+        testIsSetProperty(shouldBeSet, entity, StandardProperties.EP_ENCODINGTYPE);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epMetadata);
     }
 
@@ -402,12 +403,12 @@ public class TestIsSetProperty {
         testIsSetPropertyAbstractEntity(shouldIdBeSet, entity);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epDescription);
         testIsSetProperty(shouldBeSet, entity, pluginCoreModel.epName);
-        testIsSetProperty(shouldBeSet, entity, ModelRegistry.EP_PROPERTIES);
+        testIsSetProperty(shouldBeSet, entity, StandardProperties.EP_PROPERTIES);
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldIdBeSet, Entity entity) {
         testIsSetProperty(shouldIdBeSet, entity, entity.getType().getPrimaryKey().getKeyProperty(0));
-        testIsSetProperty(true, entity, ModelRegistry.EP_SELFLINK);
+        testIsSetProperty(true, entity, StandardProperties.EP_SELFLINK);
     }
 
     private void testIsSetProperty(boolean shouldBeSet, Entity entity, Property property) {

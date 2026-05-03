@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -29,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
 import java.util.List;
@@ -121,7 +121,7 @@ public class TableImpSensors extends StaTableAbstract<TableImpSensors> {
         pfReg.addEntryId(TableImpSensors::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
-        pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntryString(StandardProperties.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(pluginCoreModel.epMetadata,
                 true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
@@ -143,7 +143,7 @@ public class TableImpSensors extends StaTableAbstract<TableImpSensors> {
                             message.addField(pluginCoreModel.epMetadata);
                         }),
                 new PropertyFieldRegistry.NFP<>("j", table -> table.colMetadata));
-        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryMap(StandardProperties.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npDatastreamsSensor, TableImpSensors::getId);
     }
 

@@ -21,7 +21,7 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ValueDeserializer;
 
 /**
- * A Simple type extend a single primitive type.
+ * A Simple type extends a single primitive type.
  */
 public abstract class TypeSimple extends PropertyType {
 

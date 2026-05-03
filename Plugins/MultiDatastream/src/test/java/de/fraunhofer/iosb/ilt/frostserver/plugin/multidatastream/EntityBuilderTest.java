@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
@@ -108,7 +109,7 @@ class EntityBuilderTest {
             Entity entity = new DefaultEntity(type);
             Entity entity2 = new DefaultEntity(type);
             for (Property p : collectedProperties) {
-                if (p == ModelRegistry.EP_SELFLINK) {
+                if (p == StandardProperties.EP_SELFLINK) {
                     continue;
                 }
                 pName = p.toString();

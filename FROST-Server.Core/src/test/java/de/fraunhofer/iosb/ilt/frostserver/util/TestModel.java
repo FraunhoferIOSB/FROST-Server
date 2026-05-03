@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -70,14 +71,14 @@ public class TestModel implements PluginService {
         ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
                 .registerProperty(EP_NAME)
                 .registerProperty(EP_VALUE)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(StandardProperties.EP_PROPERTIES)
                 .registerProperty(NP_HOUSE_ROOMS);
         modelRegistry.registerEntityType(ET_ROOM);
         ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
                 .registerProperty(EP_NAME)
                 .registerProperty(EP_VALUE)
                 .registerProperty(EP_TIME)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(StandardProperties.EP_PROPERTIES)
                 .registerProperty(NP_HOUSE_ROOMS)
                 .registerProperty(NP_ROOM_HOUSE);
     }
@@ -117,10 +118,10 @@ public class TestModel implements PluginService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
         parameters.put("key2", 2);
-        propertyValuesHouse.put(ModelRegistry.EP_PROPERTIES, parameters);
-        propertyValuesRoom.put(ModelRegistry.EP_PROPERTIES, parameters);
-        propertyValuesHouse.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
-        propertyValuesRoom.put(ModelRegistry.EP_SELFLINK, "http://my.self/link");
+        propertyValuesHouse.put(StandardProperties.EP_PROPERTIES, parameters);
+        propertyValuesRoom.put(StandardProperties.EP_PROPERTIES, parameters);
+        propertyValuesHouse.put(StandardProperties.EP_SELFLINK, "http://my.self/link");
+        propertyValuesRoom.put(StandardProperties.EP_SELFLINK, "http://my.self/link");
 
         long nextId = 100;
         propertyValuesRoom.put(NP_ROOM_HOUSE, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));

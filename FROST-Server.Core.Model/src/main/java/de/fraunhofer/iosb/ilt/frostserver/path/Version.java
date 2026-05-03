@@ -23,8 +23,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NA
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_NEXT_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -42,7 +42,7 @@ public class Version {
             .setNavLinkName(AT_IOT_NAVIGATION_LINK)
             .setCreateFeatures(EditFeatures.NONE)
             .setUpdateFeatures(EditFeatures.NONE)
-            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .registerSytheticProperty(StandardProperties.EP_SELFLINK)
             .build();
 
     public final String urlPart;

@@ -36,13 +36,13 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETUR
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.MetaDataGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument.ODataVersion;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.Constant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Operator;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -89,7 +89,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             .setNavLinkName(JsonWriterOdata401.AT_NAVIGATION_LINK)
             .setCreateFeatures(INSERT_STA_20)
             .setUpdateFeatures(UPDATE_STA_20)
-            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .registerSytheticProperty(StandardProperties.EP_SELFLINK)
             .build();
 
     public static final String SETTINGS_NAMESPACE = "coreServiceV2.";

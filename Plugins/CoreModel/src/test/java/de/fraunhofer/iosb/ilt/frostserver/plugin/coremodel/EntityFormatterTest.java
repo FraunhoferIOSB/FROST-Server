@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -92,7 +93,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -121,7 +122,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -142,7 +143,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -175,7 +176,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -196,7 +197,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode())
@@ -267,7 +268,7 @@ class EntityFormatterTest {
                                 .setProperty(pluginCoreModel.epResultTimeDs, TestHelper.createTimeInterval(2014, 03, 01, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -308,7 +309,7 @@ class EntityFormatterTest {
                                 .setPrimaryKeyValues(PkValue.of(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -336,7 +337,7 @@ class EntityFormatterTest {
                                 .setPrimaryKeyValues(PkValue.of(123)))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -366,7 +367,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -390,7 +391,7 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.npHistoricalLocationsThing, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
                 .setProperty(pluginCoreModel.epName, "This thing is an oven.")
                 .setProperty(pluginCoreModel.epDescription, "This thing is an oven.")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("owner", "John Doe")
                         .addProperty("color", "Silver")
                         .buildTreeNode());
@@ -415,7 +416,7 @@ class EntityFormatterTest {
                     .setPrimaryKeyValues(PkValue.of(1L))
                     .setProperty(pluginCoreModel.npThingsLocation, new EntitySetImpl(pluginCoreModel.etThing))
                     .setProperty(pluginCoreModel.npHistoricalLocationsLocation, new EntitySetImpl(pluginCoreModel.etHistoricalLocation))
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json");
+                    .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/vnd.geo+json");
             compareJson(expResult, JsonWriter.writeEntity(entity));
         }
         {
@@ -432,7 +433,7 @@ class EntityFormatterTest {
             DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
                     .setQuery(query)
                     .setPrimaryKeyValues(PkValue.of(1L))
-                    .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
+                    .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/geo+json");
             compareJson(expResult, JsonWriter.writeEntity(entity));
         }
     }
@@ -463,7 +464,7 @@ class EntityFormatterTest {
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etLocation)
                 .setQuery(query)
                 .setPrimaryKeyValues(PkValue.of(1L))
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/geo+json")
                 .setProperty(pluginCoreModel.epLocation, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
@@ -630,7 +631,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "TMP36 - Analog Temperature sensor")
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/pdf")
                 .setProperty(pluginCoreModel.epMetadata, "http://example.org/TMP35_36_37.pdf");
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
@@ -653,7 +654,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "TMP36 - Analog Temperature sensor")
                 .setProperty(pluginCoreModel.epDescription, "TMP36 - Analog Temperature sensor")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/pdf")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/pdf")
                 .setProperty(pluginCoreModel.epMetadata, "http://example.org/TMP35_36_37.pdf");
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
@@ -774,7 +775,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This is a weather station.")
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/geo+json");
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/geo+json");
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }
 
@@ -807,7 +808,7 @@ class EntityFormatterTest {
                 .setPrimaryKeyValues(PkValue.of(1L))
                 .setProperty(pluginCoreModel.epName, "This is a weather station.")
                 .setProperty(pluginCoreModel.epDescription, "This is a weather station.")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/vnd.geo+json")
                 .setProperty(pluginCoreModel.epFeature, TestHelper.getFeatureWithPoint(-114.06, 51.05));
         compareJson(expResult, JsonWriter.writeEntity(entity));
     }

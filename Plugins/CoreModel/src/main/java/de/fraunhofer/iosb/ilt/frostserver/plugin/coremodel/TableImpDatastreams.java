@@ -18,8 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -34,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyField
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.FieldFetcher;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
@@ -224,7 +223,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
         pfReg.addEntryString(pluginCoreModel.epObservationType, table -> table.colObservationType);
-        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryMap(StandardProperties.EP_PROPERTIES, table -> table.colProperties);
 
         pfReg.addEntry(pluginCoreModel.epObservedArea, true,
                 new PropertyFieldRegistry.ConverterRecordDeflt<>(
@@ -257,9 +256,9 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         final FieldFetcher<TableImpDatastreams> efUomDefinition = table -> table.colUnitDefinition;
         final FieldFetcher<TableImpDatastreams> efUomSymbol = table -> table.colUnitSymbol;
         pfReg.addEntry(pluginCoreModel.epUnitOfMeasurement, new ConverterRecordDeflt<>())
-                .addSubProperty(pfReg.createEntryString(UnitOfMeasurement.EP_NAME, efUomName))
-                .addSubProperty(pfReg.createEntryString(UnitOfMeasurement.EP_DEFINITION, efUomDefinition))
-                .addSubProperty(pfReg.createEntryString(UnitOfMeasurement.EP_SYMBOL, efUomSymbol));
+                .addSubProperty(pfReg.createEntryString(StandardProperties.EP_NAME, efUomName))
+                .addSubProperty(pfReg.createEntryString(StandardProperties.EP_DEFINITION, efUomDefinition))
+                .addSubProperty(pfReg.createEntryString(StandardProperties.EP_SYMBOL, efUomSymbol));
 
         pfReg.addEntry(pluginCoreModel.npSensorDatastream, TableImpDatastreams::getSensorId);
         pfReg.addEntry(pluginCoreModel.npObservedPropertyDatastream, TableImpDatastreams::getObsPropertyId);

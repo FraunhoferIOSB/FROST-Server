@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
@@ -32,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomLink;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustomSelect;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -286,7 +286,7 @@ class QueryParserTest {
             expResult.setFilter(
                     new Equal(
                             new Path(
-                                    modelRegistry.EP_PROPERTIES,
+                                    StandardProperties.EP_PROPERTIES,
                                     new EntityPropertyCustomLink("building.Thing", pluginCoreModel.etThing),
                                     pluginCoreModel.epName),
                             new StringConstant("Main")));
@@ -304,7 +304,7 @@ class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    ModelRegistry.EP_PROPERTIES,
+                                    StandardProperties.EP_PROPERTIES,
                                     new EntityPropertyCustom("array"),
                                     new EntityPropertyCustom("[1]")),
                             new IntegerConstant(3)));
@@ -318,7 +318,7 @@ class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    ModelRegistry.EP_PROPERTIES,
+                                    StandardProperties.EP_PROPERTIES,
                                     new EntityPropertyCustom("test_name")),
                             new IntegerConstant(3)));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
@@ -331,7 +331,7 @@ class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    ModelRegistry.EP_PROPERTIES,
+                                    StandardProperties.EP_PROPERTIES,
                                     new EntityPropertyCustom("array"),
                                     new EntityPropertyCustom("[1]"),
                                     new EntityPropertyCustom("[2]")),
@@ -346,7 +346,7 @@ class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    ModelRegistry.EP_PROPERTIES,
+                                    StandardProperties.EP_PROPERTIES,
                                     new EntityPropertyCustom("array"),
                                     new EntityPropertyCustom("[1]"),
                                     new EntityPropertyCustom("deeper"),
@@ -362,7 +362,7 @@ class QueryParserTest {
             expResult.setFilter(
                     new GreaterThan(
                             new Path(
-                                    ModelRegistry.EP_PROPERTIES,
+                                    StandardProperties.EP_PROPERTIES,
                                     new EntityPropertyCustom("array"),
                                     new EntityPropertyCustom("[1]"),
                                     new EntityPropertyCustom("deeper"),
@@ -425,7 +425,7 @@ class QueryParserTest {
                     new Equal(
                             new Path(
                                     pluginCoreModel.epUnitOfMeasurement,
-                                    UnitOfMeasurement.EP_NAME),
+                                    StandardProperties.EP_NAME),
                             new StringConstant("metre")));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
             result.validate(pluginCoreModel.etDatastream);
@@ -559,7 +559,7 @@ class QueryParserTest {
         expResult.getOrderBy().add(
                 new OrderBy(
                         new Path(
-                                modelRegistry.EP_PROPERTIES,
+                                StandardProperties.EP_PROPERTIES,
                                 new EntityPropertyCustom("subprop"),
                                 new EntityPropertyCustom("name"))));
         result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
@@ -602,7 +602,7 @@ class QueryParserTest {
             String query = "$select=properties/my/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
+                    new EntityPropertyCustomSelect(StandardProperties.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("type"));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
@@ -613,7 +613,7 @@ class QueryParserTest {
             String query = "$select=properties/my[5]/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
+                    new EntityPropertyCustomSelect(StandardProperties.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -625,7 +625,7 @@ class QueryParserTest {
             String query = "$select=properties/my/5/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
+                    new EntityPropertyCustomSelect(StandardProperties.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -643,7 +643,7 @@ class QueryParserTest {
             expResult
                     .addSelect(pluginCoreModel.etThing.getPrimaryKey().getKeyProperties())
                     .addSelect(pluginCoreModel.epName)
-                    .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
+                    .addSelect(new EntityPropertyCustomSelect(StandardProperties.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("type"));
             expResult.setSelectDistinct(true);
@@ -656,7 +656,7 @@ class QueryParserTest {
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult
                     .addSelect(pluginCoreModel.epName)
-                    .addSelect(new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
+                    .addSelect(new EntityPropertyCustomSelect(StandardProperties.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -669,7 +669,7 @@ class QueryParserTest {
             String query = "$select=distinct:properties/my/5/type";
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path);
             expResult.getSelect().add(
-                    new EntityPropertyCustomSelect(ModelRegistry.EP_PROPERTIES)
+                    new EntityPropertyCustomSelect(StandardProperties.EP_PROPERTIES)
                             .addToSubPath("my")
                             .addToSubPath("5")
                             .addToSubPath("type"));
@@ -732,7 +732,7 @@ class QueryParserTest {
         Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                 .addExpand(
                         new Expand(
-                                new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
+                                new NavigationPropertyCustom(modelRegistry, StandardProperties.EP_PROPERTIES)
                                         .addToSubPath("sub")
                                         .addToSubPath("link.Thing")));
         Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
@@ -754,7 +754,7 @@ class QueryParserTest {
                     .addExpand(new Expand(pluginCoreModel.npThingsLocation))
                     .addExpand(
                             new Expand(
-                                    new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
+                                    new NavigationPropertyCustom(modelRegistry, StandardProperties.EP_PROPERTIES)
                                             .addToSubPath("link.Thing")));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);
             result.validate(pluginCoreModel.etLocation);
@@ -765,7 +765,7 @@ class QueryParserTest {
             Query expResult = new Query(modelRegistry, coreSettings.getQueryDefaults(), path)
                     .addExpand(
                             new Expand(
-                                    new NavigationPropertyCustom(modelRegistry, ModelRegistry.EP_PROPERTIES)
+                                    new NavigationPropertyCustom(modelRegistry, StandardProperties.EP_PROPERTIES)
                                             .addToSubPath("link.Thing")))
                     .addExpand(new Expand(pluginCoreModel.npThingsLocation));
             Query result = QueryParser.parseQuery(query, coreSettings.getQueryDefaults(), coreSettings, path);

@@ -35,9 +35,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
@@ -80,7 +80,7 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
             .setNavLinkName(AT_IOT_NAVIGATION_LINK)
             .setCreateFeatures(INSERT_STA_11)
             .setUpdateFeatures(UPDATE_STA_11)
-            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .registerSytheticProperty(StandardProperties.EP_SELFLINK)
             .build();
     public static final Version V_1_1 = builder()
             .setUrlPart(VERSION_STA_V11_NAME)
@@ -91,7 +91,7 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
             .setNavLinkName(AT_IOT_NAVIGATION_LINK)
             .setCreateFeatures(INSERT_STA_11)
             .setUpdateFeatures(UPDATE_STA_11)
-            .registerSytheticProperty(ModelRegistry.EP_SELFLINK)
+            .registerSytheticProperty(StandardProperties.EP_SELFLINK)
             .build();
 
     @DefaultValueBoolean(true)

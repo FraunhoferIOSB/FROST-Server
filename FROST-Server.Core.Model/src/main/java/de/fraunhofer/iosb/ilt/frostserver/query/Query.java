@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -58,7 +59,7 @@ public class Query {
 
     private static final String ERROR_ADD_PLACEHOLDER_OR_PROPERTY = "Either add PropertyPlaceholder or Property instances, not both.";
 
-    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ModelRegistry.EP_SELFLINK)));
+    private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(StandardProperties.EP_SELFLINK)));
 
     private final QueryDefaults queryDefaults;
     private final ModelRegistry modelRegistry;
@@ -391,7 +392,7 @@ public class Query {
                 validate();
             }
             if (getMetadata() == Metadata.FULL) {
-                selectedEntityPropMain.add(ModelRegistry.EP_SELFLINK);
+                selectedEntityPropMain.add(StandardProperties.EP_SELFLINK);
             }
             selectedEntityPropMain.addAll(entityType.getEntityProperties());
             if (!inExpand) {

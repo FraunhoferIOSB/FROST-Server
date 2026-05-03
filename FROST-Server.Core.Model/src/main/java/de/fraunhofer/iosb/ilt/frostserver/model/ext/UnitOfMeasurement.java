@@ -17,32 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SERIALISE_NULLS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_DEFINITION;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_SYMBOL;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.TYPE_UOM;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
-import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 
 /**
  * Model class for UnitOfMeasurement. This is not a first class entity in STA.
  */
 public class UnitOfMeasurement {
 
-    public static final String NAME_DEFINITION = "definition";
-    public static final String NAME_NAME = "name";
-    public static final String NAME_SYMBOL = "symbol";
-
-    public static final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>(NAME_NAME, EDM_STRING, NULLABLE, SERIALISE_NULLS);
-    public static final EntityPropertyMain<String> EP_DEFINITION = new EntityPropertyMain<>(NAME_DEFINITION, EDM_STRING, NULLABLE, SERIALISE_NULLS);
-    public static final EntityPropertyMain<String> EP_SYMBOL = new EntityPropertyMain<>(NAME_SYMBOL, EDM_STRING, NULLABLE, SERIALISE_NULLS);
-
     public static ComplexValueImpl UnitOfMeasurement(
             String name,
             String symbol,
             String definition) {
-        return new ComplexValueImpl(TypeComplex.TYPE_UOM)
+        return new ComplexValueImpl(TYPE_UOM)
                 .setProperty(EP_NAME, name)
                 .setProperty(EP_DEFINITION, definition)
                 .setProperty(EP_SYMBOL, symbol);

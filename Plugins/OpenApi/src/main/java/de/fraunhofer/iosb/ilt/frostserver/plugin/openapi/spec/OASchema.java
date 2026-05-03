@@ -19,10 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi.spec;
 
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService.VERSION_STA_V10_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService.VERSION_STA_V11_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_MAP_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_TIMEINTERVAL_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.STA_TIMEVALUE_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom.STA_GEOJSON_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_GEOJSON_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_MAP_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_TIMEINTERVAL_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_TIMEVALUE_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_BINARY_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_BOOLEAN_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET_NAME;

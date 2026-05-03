@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
@@ -204,7 +205,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyFeatureOfInterest(boolean shouldBeSet, boolean shouldIdBeSet, Entity featureOfInterest) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, featureOfInterest);
-        assertEquals(shouldBeSet, featureOfInterest.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
+        assertEquals(shouldBeSet, featureOfInterest.isSetProperty(StandardProperties.EP_ENCODINGTYPE));
         assertEquals(shouldBeSet, featureOfInterest.isSetProperty(pluginCoreModel.epFeature));
     }
 
@@ -246,7 +247,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertyLocation(boolean shouldBeSet, boolean shouldIdBeSet, Entity location) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, location);
-        assertEquals(shouldBeSet, location.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
+        assertEquals(shouldBeSet, location.isSetProperty(StandardProperties.EP_ENCODINGTYPE));
         assertEquals(shouldBeSet, location.isSetProperty(pluginCoreModel.epLocation));
     }
 
@@ -321,7 +322,7 @@ public class TestIsSetProperty {
 
     private void testIsSetPropertySensor(boolean shouldBeSet, boolean shouldIdBeSet, Entity sensor) {
         testIsSetPropertyNamedEntity(shouldBeSet, shouldIdBeSet, sensor);
-        assertEquals(shouldBeSet, sensor.isSetProperty(ModelRegistry.EP_ENCODINGTYPE));
+        assertEquals(shouldBeSet, sensor.isSetProperty(StandardProperties.EP_ENCODINGTYPE));
         assertEquals(shouldBeSet, sensor.isSetProperty(pluginCoreModel.epMetadata));
     }
 
@@ -348,11 +349,11 @@ public class TestIsSetProperty {
         testIsSetPropertyAbstractEntity(shouldIdBeSet, entity);
         assertEquals(shouldBeSet, entity.isSetProperty(pluginCoreModel.epDescription));
         assertEquals(shouldBeSet, entity.isSetProperty(pluginCoreModel.epName));
-        assertEquals(shouldBeSet, entity.isSetProperty(ModelRegistry.EP_PROPERTIES));
+        assertEquals(shouldBeSet, entity.isSetProperty(StandardProperties.EP_PROPERTIES));
     }
 
     private void testIsSetPropertyAbstractEntity(boolean shouldIdBeSet, Entity entity) {
         assertEquals(shouldIdBeSet, entity.isSetProperty(entity.getType().getPrimaryKey().getKeyProperty(0)), "Failed isSet for ID");
-        assertEquals(true, entity.isSetProperty(ModelRegistry.EP_SELFLINK), "Failed isSet for SelfLink");
+        assertEquals(true, entity.isSetProperty(StandardProperties.EP_SELFLINK), "Failed isSet for SelfLink");
     }
 }

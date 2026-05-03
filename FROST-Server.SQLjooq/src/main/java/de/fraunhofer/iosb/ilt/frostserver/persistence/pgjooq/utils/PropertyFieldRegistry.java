@@ -23,7 +23,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkSingle;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
@@ -44,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -315,7 +315,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         final var converterId = new ConverterSimple<>(keyProperty, factory, true, false);
         addEntry(keyProperty, converterId, new NFP<>("", factory));
         final ConverterSimple<T> converterSelfLink = new ConverterSimple<>(keyProperty, factory, false, false);
-        addEntry(ModelRegistry.EP_SELFLINK, converterSelfLink, new NFP<>("", factory));
+        addEntry(StandardProperties.EP_SELFLINK, converterSelfLink, new NFP<>("", factory));
     }
 
     public PropertyFields<T> addEntrySimple(EntityProperty property, FieldFetcher<T> factory) {

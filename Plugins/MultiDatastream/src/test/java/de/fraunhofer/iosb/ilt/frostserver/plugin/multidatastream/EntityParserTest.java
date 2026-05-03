@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
@@ -194,7 +195,7 @@ class EntityParserTest {
                         .setProperty(pluginCoreModel.epDescription, "Wind Speed"))
                 .setProperty(npSensorMds, new DefaultEntity(pluginCoreModel.etSensor)
                         .setProperty(pluginCoreModel.epDescription, "Wind Sensor 101")
-                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                        .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://schema.org/description")
                         .setProperty(pluginCoreModel.epMetadata, "Calibration date:  2011-11-11"));
         assertEquals(expectedResult, entityParser.parseEntity(etMultiDatastream, json));
     }
@@ -309,7 +310,7 @@ class EntityParserTest {
                 .setProperty(pluginCoreModel.npFeatureOfInterestObservation, new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                         .setProperty(pluginCoreModel.epName, "Turn 5, track surface temperature")
                         .setProperty(pluginCoreModel.epDescription, "Turn 5, track surface temperature")
-                        .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
+                        .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://example.org/measurement_types#Measure")
                         .setProperty(pluginCoreModel.epFeature, new StringNode("tarmac")))
                 .setProperty(
                         pluginCoreModel.npDatastreamObservation,
@@ -425,7 +426,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014");
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
     }
@@ -444,7 +445,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsSensor,
@@ -465,7 +466,7 @@ class EntityParserTest {
         expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsSensor,
@@ -489,7 +490,7 @@ class EntityParserTest {
         expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
                         npMultiDatastreamsSensor,
@@ -512,7 +513,7 @@ class EntityParserTest {
         expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "http://schema.org/description")
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, "http://schema.org/description")
                 .setProperty(pluginCoreModel.epMetadata, "Calibration date:  Jan 1, 2014")
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsSensor,
@@ -536,7 +537,7 @@ class EntityParserTest {
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
         assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epName)
-                && result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
+                && result.isSetProperty(StandardProperties.EP_ENCODINGTYPE)
                 && result.isSetProperty(pluginCoreModel.epMetadata));
     }
 
@@ -546,7 +547,7 @@ class EntityParserTest {
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
                 && !result.isSetProperty(pluginCoreModel.epName)
-                && !result.isSetProperty(ModelRegistry.EP_ENCODINGTYPE)
+                && !result.isSetProperty(StandardProperties.EP_ENCODINGTYPE)
                 && !result.isSetProperty(pluginCoreModel.epMetadata));
     }
 
@@ -564,7 +565,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
@@ -586,7 +587,7 @@ class EntityParserTest {
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
-                && result.isSetProperty(ModelRegistry.EP_PROPERTIES));
+                && result.isSetProperty(StandardProperties.EP_PROPERTIES));
     }
 
     @Test
@@ -595,7 +596,7 @@ class EntityParserTest {
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epName)
                 && !result.isSetProperty(pluginCoreModel.epDescription)
-                && !result.isSetProperty(ModelRegistry.EP_PROPERTIES));
+                && !result.isSetProperty(StandardProperties.EP_PROPERTIES));
     }
 
     @Test
@@ -618,7 +619,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", property3)
@@ -652,7 +653,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
@@ -662,7 +663,7 @@ class EntityParserTest {
                         new DefaultEntity(pluginCoreModel.etLocation)
                                 .setProperty(pluginCoreModel.epName, "my backyard")
                                 .setProperty(pluginCoreModel.epDescription, "my backyard")
-                                .setProperty(ModelRegistry.EP_ENCODINGTYPE, "application/vnd.geo+json")
+                                .setProperty(StandardProperties.EP_ENCODINGTYPE, "application/vnd.geo+json")
                                 .setProperty(pluginCoreModel.epLocation, TestHelper.jsonPoint(-117.123, 54.123)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etThing, json));
     }
@@ -684,7 +685,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
@@ -713,7 +714,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
@@ -742,7 +743,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")
@@ -774,7 +775,7 @@ class EntityParserTest {
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
-                .setProperty(ModelRegistry.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
+                .setProperty(StandardProperties.EP_PROPERTIES, CollectionsHelper.propertiesBuilder()
                         .addProperty("property1", "it’s waterproof")
                         .addProperty("property2", "it glows in the dark")
                         .addProperty("property3", "it repels insects")

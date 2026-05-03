@@ -24,7 +24,15 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SER
 import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
 import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_ENCODINGTYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_LOCATION;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_MAP;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_TIMEINTERVAL;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.STA_TIMEVALUE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.TYPE_UOM;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
+import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_UNTYPED;
 import static de.fraunhofer.iosb.ilt.frostserver.service.Service.KEY_SERVER_SETTINGS;
@@ -43,9 +51,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -139,22 +145,22 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
     public final EntityPropertyMain<TimeInstant> epCreationTime = new EntityPropertyMain<>(NAME_EP_CREATIONTIME, EDM_DATETIMEOFFSET);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>(NAME_EP_DESCRIPTION, EDM_STRING, REQUIRED);
     public final EntityPropertyMain<String> epDefinition = new EntityPropertyMain<>(NAME_EP_DEFINITION, EDM_STRING, REQUIRED);
-    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, TypeSimpleCustom.STA_LOCATION, REQUIRED, CUSTOM_PROPS);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, TypeSimpleCustom.STA_LOCATION, REQUIRED, CUSTOM_PROPS);
+    public final EntityPropertyMain<Object> epFeature = new EntityPropertyMain<>(NAME_EP_FEATURE, STA_LOCATION, REQUIRED, CUSTOM_PROPS);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>(NAME_EP_LOCATION, STA_LOCATION, REQUIRED, CUSTOM_PROPS);
     public final EntityPropertyMain<Object> epMetadata = new EntityPropertyMain<>(NAME_EP_METADATA, EDM_UNTYPED, REQUIRED, CUSTOM_PROPS);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>(NAME_EP_NAME, EDM_STRING, REQUIRED);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>(NAME_EP_OBSERVATIONTYPE, EDM_STRING, REQUIRED);
-    public final EntityPropertyMain<Object> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, TypeSimplePrimitive.EDM_GEOMETRY, NULLABLE, CUSTOM_PROPS);
-    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEVALUE);
-    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, TypeComplex.STA_TIMEINTERVAL, NULLABLE);
-    public final EntityPropertyMain<TreeNode> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, TypeComplex.STA_MAP, NULLABLE, CUSTOM_PROPS);
+    public final EntityPropertyMain<Object> epObservedArea = new EntityPropertyMain<>(NAME_EP_OBSERVEDAREA, EDM_GEOMETRY, NULLABLE, CUSTOM_PROPS);
+    public final EntityPropertyMain<TimeValue> epPhenomenonTime = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, STA_TIMEVALUE);
+    public final EntityPropertyMain<TimeInterval> epPhenomenonTimeDs = new EntityPropertyMain<>(NAME_EP_PHENOMENONTIME, STA_TIMEINTERVAL, NULLABLE);
+    public final EntityPropertyMain<TreeNode> epParameters = new EntityPropertyMain<>(NAME_EP_PARAMETERS, STA_MAP, NULLABLE, CUSTOM_PROPS);
     public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>(NAME_EP_RESULT, EDM_UNTYPED, REQUIRED, NULLABLE, CUSTOM_PROPS, SERIALISE_NULLS);
     public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>(NAME_EP_RESULTTIME, EDM_DATETIMEOFFSET, NULLABLE, SERIALISE_NULLS);
-    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, TypeComplex.STA_TIMEINTERVAL, NULLABLE);
-    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, TypeSimplePrimitive.EDM_UNTYPED, NULLABLE, CUSTOM_PROPS);
+    public final EntityPropertyMain<TimeInterval> epResultTimeDs = new EntityPropertyMain<>(NAME_EP_RESULTTIME, STA_TIMEINTERVAL, NULLABLE);
+    public final EntityPropertyMain<Object> epResultQuality = new EntityPropertyMain<>(NAME_EP_RESULTQUALITY, EDM_UNTYPED, NULLABLE, CUSTOM_PROPS);
     public final EntityPropertyMain<TimeInstant> epTime = new EntityPropertyMain<>(NAME_EP_TIME, EDM_DATETIMEOFFSET, REQUIRED);
-    public final EntityPropertyMain<ComplexValueImpl> epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, TypeComplex.TYPE_UOM, REQUIRED);
-    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, TypeComplex.STA_TIMEINTERVAL);
+    public final EntityPropertyMain<ComplexValueImpl> epUnitOfMeasurement = new EntityPropertyMain<>(NAME_EP_UNITOFMEASUREMENT, TYPE_UOM, REQUIRED);
+    public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>(NAME_EP_VALIDTIME, STA_TIMEINTERVAL);
 
     private EntityPropertyMain<?> epIdDatastream;
     private EntityPropertyMain<?> epIdFeature;
@@ -248,11 +254,11 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         LOGGER.info("Initialising Core Model Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
-        mr.registerPropertyType(TypeComplex.TYPE_UOM)
-                .registerPropertyType(TypeSimpleCustom.STA_LOCATION)
-                .registerPropertyType(TypeComplex.STA_MAP)
-                .registerPropertyType(TypeComplex.STA_TIMEINTERVAL)
-                .registerPropertyType(TypeComplex.STA_TIMEVALUE)
+        mr.registerPropertyType(StandardProperties.TYPE_UOM)
+                .registerPropertyType(STA_LOCATION)
+                .registerPropertyType(STA_MAP)
+                .registerPropertyType(STA_TIMEINTERVAL)
+                .registerPropertyType(STA_TIMEVALUE)
                 .registerEntityType(etDatastream)
                 .registerEntityType(etFeatureOfInterest)
                 .registerEntityType(etHistoricalLocation)
@@ -282,7 +288,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(epUnitOfMeasurement)
                 .registerProperty(epObservedArea)
                 .registerProperty(epPhenomenonTimeDs)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(EP_PROPERTIES)
                 .registerProperty(epResultTimeDs)
                 .registerProperty(npObservedPropertyDatastream)
                 .registerProperty(npSensorDatastream)
@@ -292,9 +298,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(epIdFeature)
                 .registerProperty(epName)
                 .registerProperty(epDescription)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(EP_ENCODINGTYPE)
                 .registerProperty(epFeature)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(EP_PROPERTIES)
                 .registerProperty(npObservationsFeature);
         etHistoricalLocation
                 .registerProperty(epIdHistLocation)
@@ -305,9 +311,9 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(epIdLocation)
                 .registerProperty(epName)
                 .registerProperty(epDescription)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(EP_ENCODINGTYPE)
                 .registerProperty(epLocation)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(EP_PROPERTIES)
                 .registerProperty(npHistoricalLocationsLocation)
                 .registerProperty(npThingsLocation);
         etObservation
@@ -326,21 +332,21 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
                 .registerProperty(epName)
                 .registerProperty(epDefinition)
                 .registerProperty(epDescription)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(EP_PROPERTIES)
                 .registerProperty(npDatastreamsObsProp);
         etSensor
                 .registerProperty(epIdSensor)
                 .registerProperty(epName)
                 .registerProperty(epDescription)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(EP_ENCODINGTYPE)
                 .registerProperty(epMetadata)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(EP_PROPERTIES)
                 .registerProperty(npDatastreamsSensor);
         etThing
                 .registerProperty(epIdThing)
                 .registerProperty(epName)
                 .registerProperty(epDescription)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(EP_PROPERTIES)
                 .registerProperty(npLocationsThing)
                 .registerProperty(npHistoricalLocationsThing)
                 .registerProperty(npDatastreamsThing);

@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -445,9 +446,9 @@ public class OpenApiGenerator {
                 }
 
                 OASchema propSchema;
-                if (ModelRegistry.EP_PROPERTIES.equals(epm)) {
+                if (StandardProperties.EP_PROPERTIES.equals(epm)) {
                     propSchema = new OASchema("#/components/schemas/properties");
-                } else if (ModelRegistry.EP_SELFLINK.equals(epm)) {
+                } else if (StandardProperties.EP_SELFLINK.equals(epm)) {
                     propSchema = new OASchema("#/components/schemas/selfLink");
                 } else {
                     propSchema = new OASchema(context.getVersion(), epm.getType());
@@ -497,9 +498,9 @@ public class OpenApiGenerator {
             }
 
             OASchema propSchema;
-            if (ModelRegistry.EP_PROPERTIES.equals(epm)) {
+            if (StandardProperties.EP_PROPERTIES.equals(epm)) {
                 propSchema = new OASchema("#/components/schemas/properties");
-            } else if (ModelRegistry.EP_SELFLINK.equals(epm)) {
+            } else if (StandardProperties.EP_SELFLINK.equals(epm)) {
                 propSchema = new OASchema("#/components/schemas/selfLink");
             } else {
                 propSchema = new OASchema(context.getVersion(), epm.getType());
@@ -552,7 +553,7 @@ public class OpenApiGenerator {
         for (Property entityProperty : entityType.getProperties()) {
             if (entityProperty instanceof NavigationProperty) {
                 // Ignore NavProps here
-            } else if (ModelRegistry.EP_SELFLINK.equals(entityProperty)) {
+            } else if (StandardProperties.EP_SELFLINK.equals(entityProperty)) {
                 // Ignore SelfLinks here
             } else {
                 OAPath pathProperty = new OAPath()

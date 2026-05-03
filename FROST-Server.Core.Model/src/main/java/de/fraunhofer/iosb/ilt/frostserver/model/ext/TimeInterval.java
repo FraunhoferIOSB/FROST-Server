@@ -17,14 +17,14 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.ext;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_END;
-import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex.NAME_INTERVAL_START;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.NAME_INTERVAL_END;
+import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.NAME_INTERVAL_START;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.ContainerType;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.text.ParseException;
 import java.time.Instant;
@@ -37,8 +37,8 @@ import net.time4j.range.MomentInterval;
  */
 public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
 
-    public static EntityPropertyMain<TimeInstant> EP_START_TIME = TypeComplex.EP_START_TIME;
-    public static EntityPropertyMain<TimeInstant> EP_END_TIME = TypeComplex.EP_INTERVAL_END_TIME;
+    public static EntityPropertyMain<TimeInstant> EP_START_TIME = StandardProperties.EP_START_TIME;
+    public static EntityPropertyMain<TimeInstant> EP_END_TIME = StandardProperties.EP_INTERVAL_END_TIME;
 
     private MomentInterval interval;
 
@@ -55,7 +55,7 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
 
     @Override
     public ContainerType getType() {
-        return TypeComplex.STA_TIMEINTERVAL;
+        return StandardProperties.STA_TIMEINTERVAL;
     }
 
     @Override

@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -474,9 +475,9 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         Entity foi = new DefaultEntity(pluginCoreModel.etFeatureOfInterest)
                 .setProperty(pluginCoreModel.epName, name)
                 .setProperty(pluginCoreModel.epDescription, description)
-                .setProperty(ModelRegistry.EP_ENCODINGTYPE, encoding)
+                .setProperty(StandardProperties.EP_ENCODINGTYPE, encoding)
                 .setProperty(pluginCoreModel.epFeature, locObject)
-                .setProperty(ModelRegistry.EP_PROPERTIES, properties.getTreeValue());
+                .setProperty(StandardProperties.EP_PROPERTIES, properties.getTreeValue());
         if (fRestricted != null && epRestricted != null) {
             foi.setProperty(epRestricted, getFieldOrNull(tuple, fRestricted));
         }

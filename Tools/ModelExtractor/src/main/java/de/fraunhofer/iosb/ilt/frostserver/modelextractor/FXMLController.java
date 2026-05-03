@@ -41,7 +41,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeInterval;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.io.File;
 import java.io.IOException;
@@ -527,7 +527,7 @@ public class FXMLController implements Initializable {
             case "jsonb":
                 defEp.addHandler(new FieldMapperJson().setField(fieldData.name)
                         .setIsMap(false))
-                        .setType(TypeComplex.STA_MAP_NAME);
+                        .setType(StandardProperties.STA_MAP_NAME);
                 return true;
 
             case "timestamp with time zone":

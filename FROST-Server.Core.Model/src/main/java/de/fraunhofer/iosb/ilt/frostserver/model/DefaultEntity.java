@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import java.util.HashMap;
@@ -146,7 +147,7 @@ public class DefaultEntity implements Entity {
 
     @Override
     public boolean isSetProperty(Property property) {
-        if (property == ModelRegistry.EP_SELFLINK) {
+        if (property == StandardProperties.EP_SELFLINK) {
             return true;
         }
         return setProperties.contains(property);
@@ -154,7 +155,7 @@ public class DefaultEntity implements Entity {
 
     @Override
     public <P> P getProperty(Property<P> property) {
-        if (property == ModelRegistry.EP_SELFLINK) {
+        if (property == StandardProperties.EP_SELFLINK) {
             return (P) getSelfLink();
         } else if (property instanceof EntityPropertyMain entityPropertyMain) {
             return (P) entityProperties.get(entityPropertyMain);
@@ -189,7 +190,7 @@ public class DefaultEntity implements Entity {
 
     @Override
     public <P> DefaultEntity setProperty(Property<P> property, P value) {
-        if (property == ModelRegistry.EP_SELFLINK) {
+        if (property == StandardProperties.EP_SELFLINK) {
             setSelfLink(String.valueOf(value));
         } else if (property instanceof EntityPropertyMain entityPropertyMain) {
             entityProperties.put(entityPropertyMain, value);

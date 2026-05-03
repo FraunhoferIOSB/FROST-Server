@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderODa
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument.ODataVersion;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
@@ -85,7 +86,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
             .setNavLinkName(JsonWriterOdata40.AT_NAVIGATION_LINK)
             .setCreateFeatures(INSERT_ODATA_40)
             .setUpdateFeatures(UPDATE_ODATA_40)
-            .registerSytheticProperty(JsonWriterOdata40.AT_ID, ModelRegistry.EP_SELFLINK)
+            .registerSytheticProperty(JsonWriterOdata40.AT_ID, StandardProperties.EP_SELFLINK)
             .addResponse(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"))
             .build();
     public static final Version VERSION_ODATA_401 = Version.builder()
@@ -97,7 +98,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
             .setNavLinkName(JsonWriterOdata401.AT_NAVIGATION_LINK)
             .setCreateFeatures(INSERT_ODATA_401)
             .setUpdateFeatures(UPDATE_ODATA_401)
-            .registerSytheticProperty(JsonWriterOdata401.AT_ID, ModelRegistry.EP_SELFLINK)
+            .registerSytheticProperty(JsonWriterOdata401.AT_ID, StandardProperties.EP_SELFLINK)
             .addResponse(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"))
             .build();
 

@@ -36,7 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
@@ -80,7 +80,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginActuation.class.getName());
 
-    public final EntityPropertyMain<TreeNode> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", TypeComplex.STA_MAP, REQUIRED);
+    public final EntityPropertyMain<TreeNode> epTaskingParameters = new EntityPropertyMain<>("taskingParameters", StandardProperties.STA_MAP, REQUIRED);
     private EntityPropertyMain<?> epIdActuator;
     private EntityPropertyMain<?> epIdTask;
     private EntityPropertyMain<?> epIdTaskingCap;
@@ -203,9 +203,9 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epIdActuator)
                 .registerProperty(pluginCoreModel.epName)
                 .registerProperty(pluginCoreModel.epDescription)
-                .registerProperty(ModelRegistry.EP_ENCODINGTYPE)
+                .registerProperty(StandardProperties.EP_ENCODINGTYPE)
                 .registerProperty(pluginCoreModel.epMetadata)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(StandardProperties.EP_PROPERTIES)
                 .registerProperty(npTaskingCapabilitiesActuator);
         etTask
                 .registerProperty(epIdTask)
@@ -217,7 +217,7 @@ public class PluginActuation implements PluginRootDocument, PluginModel, ConfigD
                 .registerProperty(epIdTaskingCap)
                 .registerProperty(pluginCoreModel.epName)
                 .registerProperty(pluginCoreModel.epDescription)
-                .registerProperty(ModelRegistry.EP_PROPERTIES)
+                .registerProperty(StandardProperties.EP_PROPERTIES)
                 .registerProperty(epTaskingParameters)
                 .registerProperty(npActuatorTaskCap)
                 .registerProperty(npTasksTaskCap)

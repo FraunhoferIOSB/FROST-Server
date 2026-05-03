@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
@@ -30,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.ConverterRecordDeflt;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.NFP;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityTableWrapper;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.Arrays;
@@ -150,7 +150,7 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
         pfReg.addEntryId(TableImpLocations::getId);
         pfReg.addEntryString(pluginCoreModel.epName, table -> table.colName);
         pfReg.addEntryString(pluginCoreModel.epDescription, table -> table.colDescription);
-        pfReg.addEntryString(ModelRegistry.EP_ENCODINGTYPE, table -> table.colEncodingType);
+        pfReg.addEntryString(StandardProperties.EP_ENCODINGTYPE, table -> table.colEncodingType);
         pfReg.addEntry(pluginCoreModel.epLocation,
                 true,
                 new ConverterRecordDeflt<>(
@@ -161,19 +161,19 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
                         },
                         (table, entity, insertFields) -> {
                             Object feature = entity.getProperty(pluginCoreModel.epLocation);
-                            String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
+                            String encodingType = entity.getProperty(StandardProperties.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(insertFields, table.colLocation, table.colGeom, encodingType, feature);
                         },
                         (table, entity, updateFields, message) -> {
                             Object feature = entity.getProperty(pluginCoreModel.epLocation);
-                            String encodingType = entity.getProperty(ModelRegistry.EP_ENCODINGTYPE);
+                            String encodingType = entity.getProperty(StandardProperties.EP_ENCODINGTYPE);
                             EntityFactories.insertGeometry(updateFields, table.colLocation, table.colGeom, encodingType, feature);
                             message.addField(pluginCoreModel.epLocation);
                         }),
                 new NFP<>("j", table -> table.colLocation),
                 new NFP<>("g", table -> table.colGeom, false));
 
-        pfReg.addEntryMap(ModelRegistry.EP_PROPERTIES, table -> table.colProperties);
+        pfReg.addEntryMap(StandardProperties.EP_PROPERTIES, table -> table.colProperties);
         pfReg.addEntry(pluginCoreModel.npThingsLocation, TableImpLocations::getId);
         pfReg.addEntry(pluginCoreModel.npHistoricalLocationsLocation, TableImpLocations::getId);
         registerHookPostDelete(0, new HookPostDeleteLocation());

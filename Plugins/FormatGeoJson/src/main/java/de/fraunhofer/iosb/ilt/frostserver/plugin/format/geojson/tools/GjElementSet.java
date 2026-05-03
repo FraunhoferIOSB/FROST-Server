@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
@@ -27,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
+import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
@@ -107,8 +107,8 @@ public class GjElementSet {
                         topLevel,
                         SpecialNames.AT_IOT_ID.equals(propName) ? "id" : propName,
                         property));
-            } else if (property == ModelRegistry.EP_SELFLINK) {
-                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, ModelRegistry.EP_SELFLINK.getName()));
+            } else if (property == StandardProperties.EP_SELFLINK) {
+                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, StandardProperties.EP_SELFLINK.getName()));
             } else if (property instanceof EntityPropertyMain epm) {
                 initFrom(epm);
             } else if (property instanceof EntityPropertyCustomSelect epcs) {
@@ -119,9 +119,9 @@ public class GjElementSet {
 
     private void initFrom(EntityPropertyMain property) {
         PropertyType type = property.getType();
-        if (type == TypeComplex.STA_TIMEVALUE) {
+        if (type == StandardProperties.STA_TIMEVALUE) {
             elements.add(new GjEntityProperty(property.getName(), property));
-        } else if (type == TypeComplex.STA_TIMEINTERVAL) {
+        } else if (type == StandardProperties.STA_TIMEINTERVAL) {
             elements.add(new GjEntityProperty(property.getName(), property));
         } else if (type instanceof TypeComplex tc && !tc.isOpenType()) {
             elements.add(new GjComplexProperty(property.getName(), property));
