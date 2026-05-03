@@ -121,6 +121,7 @@ public class JsonReaderOData implements JsonReader {
                 .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                .addModule(module)
                 .build();
 
         return mapper;
