@@ -1,0 +1,314 @@
+{
+    "post_to": "v1.1/$batch",
+    "using_content_type": "application/json",
+    "requests": [
+        {
+            "id": "op_Methane",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "ObservedProperties?$select=id&$filter=name eq 'Methane'"
+        },
+        {
+            "id": "op_Methane",
+            "if": "not $op_Methane",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "ObservedProperties",
+            "body": {
+                "name": "Methane",
+                "description": "Methane",
+                "definition": "http://someUrl",
+                "properties": {
+                }
+            }
+        },
+        {
+            "id": "s_UnknownMethane",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Sensors?$select=id&$filter=name eq 'UnknownMethaneSensor'"
+        },
+        {
+            "id": "s_UnknownMethane",
+            "if": "not $s_UnknownMethane",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Sensors",
+            "body": {
+                "name": "UnknownMethaneSensor",
+                "description": "A temperature sensor of which no details are known",
+                "encodingType": "application/text",
+                "metadata": "No details are known."
+            }
+        },
+
+        {
+            "id": "l_iosb_ka",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Locations?$select=id&$filter=name eq 'Fraunhofer IOSB'"
+        },
+        {
+            "id": "l_iosb_ka",
+            "if": "not $l_iosb_ka",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Locations",
+            "body": {
+                "name": "Fraunhofer IOSB",
+                "description": "Location of Fraunhofer IOSB in Karlsruhe",
+                "encodingType": "application/geo+json",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [
+                        8.425655,
+                        49.015447
+                    ]
+                }
+            }
+        },
+
+        {
+            "id": "ft_valve",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "FeatureTypes?$select=id&$filter=name eq 'Valve'"
+        },
+        {
+            "id": "ft_valve",
+            "if": "not $ft_valve",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "FeatureTypes",
+            "body": {
+                "name": "Valve"
+            }
+        },
+
+        {
+            "id": "f_valve1",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Features?$select=id&$filter=name eq 'Valve 1'"
+        },
+        {
+            "id": "f_valve1",
+            "if": "not $f_valve1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Features",
+            "body": {
+                "name": "Valve 1",
+                "description": "Valve 1",
+                "encodingType": "application/geo+json",
+                "feature": {
+                    "type": "Point",
+                    "coordinates": [
+                        8.42565,
+                        49.01544
+                    ]
+                },
+                "FeatureTypes": [
+                    {
+                        "id": "$ft_valve"
+                    }
+                ]
+            }
+        },
+
+        {
+            "id": "t_MethaneDetector_One",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Things?$select=id&$filter=name eq 'MethaneDetector One'"
+        },
+        {
+            "id": "t_MethaneDetector_One",
+            "if": "not $t_MethaneDetector_One",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Things",
+            "body": {
+                "name": "MethaneDetector One",
+                "description": "The first MethaneDetector",
+                "properties": {
+                },
+                "Locations": [
+                    {
+                        "id": "$l_iosb_ka"
+                    }
+                ],
+                "Datastreams": [
+                    {
+                        "name": "Methane at MethaneDetector One",
+                        "description": "Methane detected by MethaneDetector One",
+                        "resultType": {
+                            "type": "Quantity",
+                            "label": "Methane",
+                            "definition": "ObservedProperties($op_Methane)",
+                            "uom": {
+                                "code": "PPM",
+                                "label": "Parts Per Million",
+                                "symbol": "ppm"
+                            }
+                        },
+                        "properties": {
+                        },
+                        "Sensor": {
+                            "id": "$s_UnknownMethane"
+                        },
+                        "UltimateFeaturesOfInterest": [
+                            {
+                                "id": "$f_valve1"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+
+        {
+            "id": "d_MethaneDetector_One",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Datastreams?$select=id&$filter=name eq 'Methane at MethaneDetector One'"
+        },
+        {
+            "id": "o1",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Observations?$select=id&$filter=phenomenonTime eq 2021-12-13T12:00:00Z and result eq 3.2"
+        },
+        {
+            "id": "o2",
+            "if": "not $o1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "$d_MethaneDetector_One/Observations",
+            "body": {
+                "result": 4.1,
+                "phenomenonTime": {
+                    "start": "2021-12-14T12:00:00Z"
+                }
+            }
+        },
+        {
+            "id": "o3",
+            "if": "not $o1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "$d_MethaneDetector_One/Observations",
+            "body": {
+                "result": 0,
+                "phenomenonTime": {
+                    "start": "2021-12-15T12:00:00Z"
+                }
+            }
+        },
+        {
+            "id": "o1",
+            "if": "not $o1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "$d_MethaneDetector_One/Observations",
+            "body": {
+                "result": 3.2,
+                "phenomenonTime": {
+                    "start": "2021-12-13T12:00:00Z"
+                }
+            }
+        },
+
+        {
+            "id": "m_defect",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "Mechanisms?$select=id&$filter=label eq 'Defect'"
+        },
+        {
+            "id": "m_defect",
+            "if": "not $m_defect",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "Mechanisms",
+            "body": {
+                "label": "Defect",
+                "description": "Something is broken.",
+                "intent": "unintentional"
+            }
+        },
+
+        {
+            "id": "dm_manual",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "DeterminationMethods?$select=id&$filter=label eq 'Manual'"
+        },
+        {
+            "id": "dm_manual",
+            "if": "not $dm_manual",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "DeterminationMethods",
+            "body": {
+                "label": "Manual",
+                "description": "Someone looked at the Observations and made a decision."
+            }
+        },
+
+        {
+            "id": "ee_one",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "EmissionEvents?$select=id&$filter=pollutantType eq 'CH4' and quantity/value eq 7.3"
+        },
+        {
+            "id": "ee_one",
+            "if": "not $ee_one",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "EmissionEvents",
+            "body": {
+                "pollutantType": "CH4",
+                "Source": {"id": "$f_valve1"},
+                "quantity": {
+                    "value": 7.3,
+                    "unit": {
+                        "label": "PPM",
+                        "symbol": "ppm",
+                        "definition": "https://SomeURL"
+                    },
+                    "quality": {
+                        "bla": "blub"
+                    }
+                },
+                "Mechanism":  {"id": "$m_defect"},
+                "QuantityBasis": {"id": "$dm_manual"},
+                "QuantityEvidence": [
+                    {"id": "$o1"},
+                    {"id": "$o2"}
+                ],
+                "startTime": {
+                    "time": "2021-12-13T12:00:00Z",
+                    "quality": {
+                        "bla": "blubdiblub!"
+                    }
+                },
+                "StartTimeBasis": {"id": "$dm_manual"},
+                "StartTimeEvidence": [
+                    {"id": "$o1"}
+                ],
+                "endTime": {
+                    "time": "2021-12-15T12:00:00Z",
+                    "quality": {
+                        "bla": "bladiblub?"
+                    }
+                },
+                "EndTimeBasis": {"id": "$dm_manual"},
+                "EndTimeEvidence": [
+                    {"id": "$o3"}
+                ]
+            }
+        }
+    ]
+}

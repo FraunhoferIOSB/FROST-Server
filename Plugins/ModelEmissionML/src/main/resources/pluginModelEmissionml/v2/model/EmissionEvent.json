@@ -1,0 +1,287 @@
+{
+    "conformance": [
+        "http://www.opengis.net/spec/emissionml/1.0/req/datamodel"
+    ],
+    "simplePropertyTypes": [],
+    "entityTypes": [
+        {
+            "name": "EmissionEvent",
+            "plural": "EmissionEvents",
+            "adminOnly": false,
+            "table": "emissionevents",
+            "orderByDflt": [],
+            "entityProperties": [
+                {
+                    "name": "id",
+                    "aliases": [
+                        "@iot.id"
+                    ],
+                    "type": "Id",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
+                            "field": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "pollutantType",
+                    "type": "Edm.String",
+                    "required": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
+                            "field": "pollutant_type"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "quantity",
+                    "type": "EmissionQuantity",
+                    "required": true,
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.modelemissionml.FieldMapperEmissionQuantity",
+                            "fieldValue": "value",
+                            "fieldQuality": "quality",
+                            "fieldUnitLabel": "unitlabel",
+                            "fieldUnitSymbol": "unitsymbol",
+                            "fieldUnitDefinition": "unitdef"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "startTime",
+                    "type": "TemporalBound",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.modelemissionml.FieldMapperEmissionTempBound",
+                            "fieldTime": "start_time",
+                            "fieldQuality": "start_quality"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "endTime",
+                    "type": "TemporalBound",
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.modelemissionml.FieldMapperEmissionTempBound",
+                            "fieldTime": "end_time",
+                            "fieldQuality": "end_quality"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "navigationProperties": [
+                {
+                    "name": "Source",
+                    "entitySet": false,
+                    "entityType": "Feature",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "EmissionEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "feature_id",
+                            "otherTable": "features",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "Mechanism",
+                    "entitySet": false,
+                    "entityType": "Mechanism",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "EmissionEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "mechanism_id",
+                            "otherTable": "mechanisms",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "StartTimeBasis",
+                    "entitySet": false,
+                    "entityType": "DeterminationMethod",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "StartBasisForEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "start_time_basis_id",
+                            "otherTable": "determination_methods",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "EndTimeBasis",
+                    "entitySet": false,
+                    "entityType": "DeterminationMethod",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "EndBasisForEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "end_time_basis_id",
+                            "otherTable": "determination_methods",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "QuantityBasis",
+                    "entitySet": false,
+                    "entityType": "DeterminationMethod",
+                    "required": true,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QuantityBasisForEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
+                            "field": "quantity_basis_id",
+                            "otherTable": "determination_methods",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "StartTimeEvidence",
+                    "entitySet": true,
+                    "entityType": "Observation",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "StartTimeEvidenceForEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "event_start_observations",
+                            "linkOurField": "event_id",
+                            "linkOtherField": "observation_id",
+                            "otherTable": "observations",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "EndTimeEvidence",
+                    "entitySet": true,
+                    "entityType": "Observation",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "EndTimeEvidenceForEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "event_end_observations",
+                            "linkOurField": "event_id",
+                            "linkOtherField": "observation_id",
+                            "otherTable": "observations",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                },
+                {
+                    "name": "QuantityEvidence",
+                    "entitySet": true,
+                    "entityType": "Observation",
+                    "required": false,
+                    "symmetrical": false,
+                    "priority": 0,
+                    "inverse": {
+                        "name": "QuantityEvidenceForEvents",
+                        "entitySet": true,
+                        "required": false,
+                        "priority": 0,
+                        "annotations": []
+                    },
+                    "handlers": [
+                        {
+                            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+                            "field": "id",
+                            "linkTable": "event_quantity_observations",
+                            "linkOurField": "event_id",
+                            "linkOtherField": "observation_id",
+                            "otherTable": "observations",
+                            "otherField": "id"
+                        }
+                    ],
+                    "annotations": []
+                }
+            ],
+            "annotations": []
+        }
+    ]
+}

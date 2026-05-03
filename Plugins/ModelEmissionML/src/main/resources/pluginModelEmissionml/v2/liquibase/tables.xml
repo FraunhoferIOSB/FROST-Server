@@ -1,0 +1,40 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <property name="id-DeterminationMethod" value="LONG" />
+    <property name="idType-DeterminationMethod" value="BIGINT" />
+    <property name="id-EmissionEvent" value="LONG" />
+    <property name="idType-EmissionEvent" value="BIGINT" />
+    <property name="id-Mechanism" value="LONG" />
+    <property name="idType-Mechanism" value="BIGINT" />
+
+    <include relativeToChangelogFile="true" file="tableDeterminationMethods.xml" />
+    <include relativeToChangelogFile="true" file="tableEmissionEvents.xml" />
+    <include relativeToChangelogFile="true" file="tableMechanisms.xml" />
+    <include relativeToChangelogFile="true" file="tableEventStartObservations.xml" />
+    <include relativeToChangelogFile="true" file="tableEventEndObservations.xml" />
+    <include relativeToChangelogFile="true" file="tableEventQuantityObservations.xml" />
+    <include relativeToChangelogFile="true" file="foreignKeys.xml" />
+
+</databaseChangeLog>
+
