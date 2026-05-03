@@ -73,8 +73,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -300,18 +298,6 @@ public class Service implements AutoCloseable {
 
     private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
         final Map<String, Object> result = new LinkedHashMap<>();
-        final Version version = request.getVersion();
-        final String serviceRootUrl = request.getQueryDefaults().getServiceRootUrl();
-        final String path = URI.create(serviceRootUrl + '/' + request.getVersion().urlPart + '/')
-                .normalize()
-                .toString();
-
-        final List<Map<String, String>> capList = new ArrayList<>();
-        result.put("value", capList);
-        for (EntityType entityType : modelRegistry.getEntityTypes(request.getUserPrincipal().isAdmin())) {
-            String collectionUri = path + entityType.plural;
-            capList.add(createCapability(entityType.plural, collectionUri));
-        }
 
         settings.getPluginManager().modifyServiceDocument(request, result);
 
@@ -341,13 +327,6 @@ public class Service implements AutoCloseable {
             return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to format");
         }
         return response;
-    }
-
-    private Map<String, String> createCapability(String name, String url) {
-        Map<String, String> val = new HashMap<>();
-        val.put("name", name);
-        val.put("url", url);
-        return Collections.unmodifiableMap(val);
     }
 
     private ServiceResponse executeGet(ServiceRequest request, ServiceResponse response) {

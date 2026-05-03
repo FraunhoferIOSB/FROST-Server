@@ -107,7 +107,6 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                         }),
                 sourcePfr,
                 new NFP<>("g", t -> t.field(idxGeom), false));
-        // TODO: Make the g non-selectable again.
     }
 
     /**

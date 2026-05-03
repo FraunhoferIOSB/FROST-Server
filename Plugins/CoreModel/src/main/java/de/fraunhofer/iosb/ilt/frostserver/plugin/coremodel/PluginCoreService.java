@@ -35,6 +35,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
@@ -52,8 +54,10 @@ import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -145,6 +149,21 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
     @Override
     public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
         Version version = request.getVersion();
+        if (version != PluginCoreService.V_1_0 && version != PluginCoreService.V_1_1) {
+            return;
+        }
+
+        String path = request.getQueryDefaults().getServiceRootUrl()
+                + '/' + request.getVersion().urlPart
+                + '/';
+        final List<Map<String, String>> entitySets = new ArrayList<>();
+        result.put("value", entitySets);
+        final ModelRegistry mr = request.getCoreSettings().getModelRegistry();
+        for (EntityType entityType : mr.getEntityTypes(request.getUserPrincipal().isAdmin())) {
+            String collectionUri = path + entityType.plural;
+            entitySets.add(createCapability(entityType.plural, collectionUri));
+        }
+
         if (version != PluginCoreService.V_1_1) {
             return;
         }
@@ -162,6 +181,13 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
             }
         }
         addMqttData(serverSettings);
+    }
+
+    private Map<String, String> createCapability(String name, String url) {
+        Map<String, String> val = new HashMap<>();
+        val.put("name", name);
+        val.put("url", url);
+        return Collections.unmodifiableMap(val);
     }
 
     private void addMqttData(Map<String, Object> target) {

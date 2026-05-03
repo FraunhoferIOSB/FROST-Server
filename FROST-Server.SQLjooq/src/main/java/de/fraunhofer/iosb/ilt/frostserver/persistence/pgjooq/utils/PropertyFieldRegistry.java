@@ -394,19 +394,19 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         return pf;
     }
 
-    private PropertyFields<T> createEntryMap(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
+    public PropertyFields<T> createEntryMap(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
         PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterMap<>(property, factory));
         pf.addField(null, factory);
         return pf;
     }
 
-    private PropertyFields<T> createEntryJson(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
+    public PropertyFields<T> createEntryJson(EntityProperty<TreeNode> property, FieldFetcher<T> factory) {
         PropertyFields<T> pf = new PropertyFieldsSimple<>(property, true, new ConverterJson<>(property, factory));
         pf.addField(null, factory);
         return pf;
     }
 
-    public PropertyFields<T> createEntryTimeInstant(EntityProperty property, FieldFetcher<T> factory) {
+    public PropertyFields<T> createEntryTimeInstant(EntityProperty<TimeInstant> property, FieldFetcher<T> factory) {
         PropertyFields<T> pf = new PropertyFieldsSimple<>(property, new ConverterTimeInstant<>(property, factory));
         pf.addField(null, factory);
         return pf;

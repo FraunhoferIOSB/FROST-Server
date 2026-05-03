@@ -36,6 +36,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETUR
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.MetaDataGenerator;
@@ -257,6 +259,13 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
                 + '/' + request.getVersion().urlPart
                 + '/';
         result.put(JsonWriterOdata401.AT_CONTEXT, path + PARAM_METADATA);
+        final List<Map<String, String>> entitySets = new ArrayList<>();
+        result.put("value", entitySets);
+        final ModelRegistry mr = request.getCoreSettings().getModelRegistry();
+        for (EntityType entityType : mr.getEntityTypes(request.getUserPrincipal().isAdmin())) {
+            String collectionUri = path + entityType.plural;
+            entitySets.add(createCapability(entityType.plural, collectionUri));
+        }
 
         Map<String, Object> serverSettings = (Map<String, Object>) result.computeIfAbsent(KEY_SERVER_SETTINGS, t -> new LinkedHashMap<>());
 
@@ -288,6 +297,13 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
 
         addHttpEndpoint(serverSettings);
         addMqttEndpoint(serverSettings);
+    }
+
+    private Map<String, String> createCapability(String name, String url) {
+        Map<String, String> val = new HashMap<>();
+        val.put("name", name);
+        val.put("url", url);
+        return Collections.unmodifiableMap(val);
     }
 
     private void addHttpEndpoint(Map<String, Object> target) {
