@@ -157,8 +157,10 @@ public class MxGraphGenerator {
         for (EntityPropertyMain ep : entityProperties) {
             addEntityProperty(listItemY, typeCell, et, ep, root);
             listItemY += BOX_HEIGHT_ITEM;
-            if (ep.getType() instanceof TypeComplex) {
-                complexTypes.add(ep.getType().getName());
+            final PropertyType type = ep.getType();
+            if (type instanceof TypeComplex tc) {
+                complexTypes.add(type.getName());
+                recurseComplexType(tc, complexTypes);
             }
         }
         for (NavigationProperty np : et.getNavigationEntities()) {
@@ -166,6 +168,17 @@ public class MxGraphGenerator {
         }
         for (NavigationProperty np : et.getNavigationSets()) {
             addNavLink(np, et, typeCell, cellOne, root);
+        }
+    }
+
+    private void recurseComplexType(TypeComplex tc, Set<String> complexTypes) {
+        for (EntityPropertyMain ep : tc.getEntityProperties()) {
+            final PropertyType type = ep.getType();
+            if (type instanceof TypeComplex subTc) {
+                if (complexTypes.add(type.getName())) {
+                    recurseComplexType(subTc, complexTypes);
+                }
+            }
         }
     }
 

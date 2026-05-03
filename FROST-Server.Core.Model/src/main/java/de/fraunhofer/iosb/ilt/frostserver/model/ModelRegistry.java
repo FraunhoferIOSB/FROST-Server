@@ -132,7 +132,10 @@ public class ModelRegistry {
     }
 
     public ModelRegistry registerPropertyType(PropertyType type) {
-        propertyTypes.put(type.getName(), type);
+        PropertyType old = propertyTypes.put(type.getName(), type);
+        if (old != null) {
+            LOGGER.warn("Overwritten the property type {}", type);
+        }
         return this;
     }
 
