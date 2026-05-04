@@ -99,7 +99,6 @@
         <version.jakartaee-web-api>11.0.0</version.jakartaee-web-api>
         <version.jetty>12.1.7</version.jetty>
         <version.jooq>3.20.11</version.jooq>
-        <version.joy-classic>2.1.0</version.joy-classic>
         <version.junit>6.0.3</version.junit>
         <version.junit-platform-suite>6.0.3</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
@@ -130,6 +129,7 @@
         <version.moquette>0.18.3</version.moquette>
         <version.openjfx>23.0.2</version.openjfx>
         <version.paho>1.2.5</version.paho>
+        <version.parsson>1.1.7</version.parsson>
         <version.postgis>2025.1.1</version.postgis>
         <version.postgres>42.7.11</version.postgres>
         <version.prometheus>1.5.0</version.prometheus>
@@ -249,6 +249,11 @@
                 <groupId>org.eclipse.paho</groupId>
                 <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
                 <version>${version.paho}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.parsson</groupId>
+                <artifactId>parsson</artifactId>
+                <version>${version.parsson}</version>
             </dependency>
             <dependency>
                 <groupId>org.geolatte</groupId>
