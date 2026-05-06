@@ -138,6 +138,7 @@ public class ServiceResponseDefault implements ServiceResponse {
     public ServiceResponse setStatus(int code, String message) {
         this.code = code;
         this.message = message;
+        getWriter().append(message);
         return this;
     }
 

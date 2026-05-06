@@ -453,7 +453,7 @@ public abstract class BatchTests extends AbstractTestClass {
                         {"id":"0","status":200,"body":{"name":"Patched"}},
                         {"id":"1","status":201,"location":"$serviceUrl/Things($newThingId)"},
                         {"id":"2","status":200},
-                        {"id":"3","status":200},
+                        {"id":"3","status":200, "body":{"code": 200,"type": "success","message": "JSON-Patch applied."}},
                         {"id":"4","status":404,"body":{"code":404,"type":"error","message":"Not a valid id: Path is not valid."}}
                     ]}""";
             expResponse = Strings.CS.replace(expResponse, "$serviceUrl", serverSettings.getServiceUrl(version));
