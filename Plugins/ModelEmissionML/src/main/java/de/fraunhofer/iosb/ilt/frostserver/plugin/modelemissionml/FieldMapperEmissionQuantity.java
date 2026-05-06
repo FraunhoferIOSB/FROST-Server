@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.BigDecimalBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -79,7 +80,7 @@ public class FieldMapperEmissionQuantity extends FieldMapperAbstractEp {
     public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
         final Table<?> dbTable = ppm.getDbTable(tableName);
-        fieldIdxValue = getOrRegisterField(fieldValue, dbTable, staTable);
+        fieldIdxValue = getOrRegisterField(fieldValue, dbTable, staTable, BigDecimalBinding.dataType(), BigDecimalBinding.instance());
         fieldIdxQuality = getOrRegisterField(fieldQuality, dbTable, staTable, JsonBinding.instance());
         fieldIdxUnitDefinition = getOrRegisterField(fieldUnitDefinition, dbTable, staTable);
         fieldIdxUnitLabel = getOrRegisterField(fieldUnitLabel, dbTable, staTable);

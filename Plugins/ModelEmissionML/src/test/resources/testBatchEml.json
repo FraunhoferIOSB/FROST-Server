@@ -110,7 +110,7 @@
                 },
                 "FeatureTypes": [
                     {
-                        "id": "$ft_valve"
+                        "@id": "$ft_valve"
                     }
                 ]
             }
@@ -135,7 +135,7 @@
                 },
                 "Locations": [
                     {
-                        "id": "$l_iosb_ka"
+                        "@id": "$l_iosb_ka"
                     }
                 ],
                 "Datastreams": [
@@ -145,7 +145,7 @@
                         "resultType": {
                             "type": "Quantity",
                             "label": "Methane",
-                            "definition": "ObservedProperties($op_Methane)",
+                            "definition": "$op_Methane",
                             "uom": {
                                 "code": "PPM",
                                 "label": "Parts Per Million",
@@ -155,11 +155,11 @@
                         "properties": {
                         },
                         "Sensor": {
-                            "id": "$s_UnknownMethane"
+                            "@id": "$s_UnknownMethane"
                         },
                         "UltimateFeaturesOfInterest": [
                             {
-                                "id": "$f_valve1"
+                                "@id": "$f_valve1"
                             }
                         ]
                     }
@@ -177,11 +177,30 @@
             "id": "o1",
             "atomicityGroup": "group1",
             "method": "get",
-            "url": "Observations?$select=id&$filter=phenomenonTime eq 2021-12-13T12:00:00Z and result eq 3.2"
+            "url": "$d_MethaneDetector_One/Observations?$select=id&$filter=phenomenonTime eq 2021-12-13T12:00:00Z and result eq 3.2"
+        },
+        {
+            "id": "o1",
+            "if": "not $o1",
+            "atomicityGroup": "group1",
+            "method": "post",
+            "url": "$d_MethaneDetector_One/Observations",
+            "body": {
+                "result": 3.2,
+                "phenomenonTime": {
+                    "start": "2021-12-13T12:00:00Z"
+                }
+            }
         },
         {
             "id": "o2",
-            "if": "not $o1",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "$d_MethaneDetector_One/Observations?$select=id&$filter=phenomenonTime eq 2021-12-14T12:00:00Z and result eq 4.1"
+        },
+        {
+            "id": "o2",
+            "if": "not $o2",
             "atomicityGroup": "group1",
             "method": "post",
             "url": "$d_MethaneDetector_One/Observations",
@@ -194,7 +213,13 @@
         },
         {
             "id": "o3",
-            "if": "not $o1",
+            "atomicityGroup": "group1",
+            "method": "get",
+            "url": "$d_MethaneDetector_One/Observations?$select=id&$filter=phenomenonTime eq 2021-12-15T12:00:00Z and result eq 0"
+        },
+        {
+            "id": "o3",
+            "if": "not $o3",
             "atomicityGroup": "group1",
             "method": "post",
             "url": "$d_MethaneDetector_One/Observations",
@@ -202,19 +227,6 @@
                 "result": 0,
                 "phenomenonTime": {
                     "start": "2021-12-15T12:00:00Z"
-                }
-            }
-        },
-        {
-            "id": "o1",
-            "if": "not $o1",
-            "atomicityGroup": "group1",
-            "method": "post",
-            "url": "$d_MethaneDetector_One/Observations",
-            "body": {
-                "result": 3.2,
-                "phenomenonTime": {
-                    "start": "2021-12-13T12:00:00Z"
                 }
             }
         },
@@ -270,9 +282,9 @@
             "url": "EmissionEvents",
             "body": {
                 "pollutantType": "CH4",
-                "Source": {"id": "$f_valve1"},
+                "Source": {"@id": "$f_valve1"},
                 "quantity": {
-                    "value": 7.3,
+                    "value": 7.300,
                     "unit": {
                         "label": "PPM",
                         "symbol": "ppm",
@@ -282,11 +294,11 @@
                         "bla": "blub"
                     }
                 },
-                "Mechanism":  {"id": "$m_defect"},
-                "QuantityBasis": {"id": "$dm_manual"},
+                "Mechanism":  {"@id": "$m_defect"},
+                "QuantityBasis": {"@id": "$dm_manual"},
                 "QuantityEvidence": [
-                    {"id": "$o1"},
-                    {"id": "$o2"}
+                    {"@id": "$o1"},
+                    {"@id": "$o2"}
                 ],
                 "startTime": {
                     "time": "2021-12-13T12:00:00Z",
@@ -294,9 +306,9 @@
                         "bla": "blubdiblub!"
                     }
                 },
-                "StartTimeBasis": {"id": "$dm_manual"},
+                "StartTimeBasis": {"@id": "$dm_manual"},
                 "StartTimeEvidence": [
-                    {"id": "$o1"}
+                    {"@id": "$o1"}
                 ],
                 "endTime": {
                     "time": "2021-12-15T12:00:00Z",
@@ -304,9 +316,9 @@
                         "bla": "bladiblub?"
                     }
                 },
-                "EndTimeBasis": {"id": "$dm_manual"},
+                "EndTimeBasis": {"@id": "$dm_manual"},
                 "EndTimeEvidence": [
-                    {"id": "$o3"}
+                    {"@id": "$o3"}
                 ]
             }
         }

@@ -43,6 +43,10 @@ public abstract class FieldMapperAbstract implements FieldMapper, AnnotatedConfi
     }
 
     public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable, Binding binding) {
+        return getOrRegisterField(fieldName, dbTable, staTable, null, binding);
+    }
+
+    public static int getOrRegisterField(final String fieldName, Table dbTable, StaTable staTable, DataType<?> dataType, Binding binding) {
         int idx = staTable.indexOf(fieldName);
         if (idx >= 0) {
             return idx;
@@ -52,7 +56,9 @@ public abstract class FieldMapperAbstract implements FieldMapper, AnnotatedConfi
             LOGGER.error("Could not find field {} on table {}.", fieldName, dbTable.getName());
             throw new IllegalArgumentException("Could not find field " + fieldName + " on table " + dbTable.getName());
         }
-        DataType<?> dataType = dbField.getDataType();
+        if (dataType == null) {
+            dataType = dbField.getDataType();
+        }
         LOGGER.debug("  Registering {} -> {}.{} ({})", staTable.getName(), dbTable.getName(), fieldName, dataType);
         return staTable.registerField(fieldName, dataType, binding);
     }
