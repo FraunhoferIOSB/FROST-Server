@@ -9,7 +9,7 @@
     <artifactId>FROST-Server.Plugin.OpenCitySense</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.Plugin.OpenCitySense</name>
+    <name>FROST-Server.Plugin.ModelOpenCitySense</name>
     <description>The OpenCitySense extension for FROST.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 

@@ -9,7 +9,7 @@
     <artifactId>FROST-Server.Plugin.Projects</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.Plugin.Projects</name>
+    <name>FROST-Server.Plugin.ModelProjects</name>
     <description>A Projects Plugin for the SensorThings API</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 

@@ -9,7 +9,7 @@
     <artifactId>FROST-Server.Plugin.MultiDatastream</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.Plugin.MultiDatastream</name>
+    <name>FROST-Server.Plugin.ModelMultiDatastream</name>
     <description>The MultiDatastream extension plugin.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 

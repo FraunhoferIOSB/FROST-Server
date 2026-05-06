@@ -9,7 +9,7 @@
     <artifactId>FROST-Server.Plugin.Actuation</artifactId>
     <packaging>jar</packaging>
 
-    <name>FROST-Server.Plugin.Actuation</name>
+    <name>FROST-Server.Plugin.ModelActuation</name>
     <description>The Actuation extension plugin.</description>
     <url>https://github.com/FraunhoferIOSB/FROST-Server</url>
 
