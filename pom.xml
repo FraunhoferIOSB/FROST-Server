@@ -132,7 +132,7 @@
         <version.openjfx>23.0.2</version.openjfx>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2025.1.1</version.postgis>
-        <version.postgres>42.7.10</version.postgres>
+        <version.postgres>42.7.11</version.postgres>
         <version.prometheus>1.5.0</version.prometheus>
         <version.slf4j-api>2.0.17</version.slf4j-api>
         <version.testcontainers>2.0.3</version.testcontainers>
