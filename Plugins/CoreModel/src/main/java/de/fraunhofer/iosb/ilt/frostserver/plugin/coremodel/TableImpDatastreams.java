@@ -50,12 +50,8 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpDatastreams.class.getName());
 
     public static final String NAME_TABLE = "DATASTREAMS";
     public static final String NAME_COL_DESCRIPTION = "DESCRIPTION";

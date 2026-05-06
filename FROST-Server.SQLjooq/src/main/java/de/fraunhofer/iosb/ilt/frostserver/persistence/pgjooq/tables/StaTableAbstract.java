@@ -343,7 +343,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
                         .set(insertFields)
                         .returningResult(selectFields),
                 thisTable.getEntityType().entityName);
-        LOGGER.debug("Inserted {} with id = {}.", entityType, result);
+        LOGGER.debug("Inserted {}:\n{}.", entityType, result);
         if (result == null) {
             return null;
         }

@@ -28,7 +28,7 @@
                 {
                     "name": "phenomenonTime",
                     "type": "TM_Object",
-                    "required": true,
+                    "required": false,
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
