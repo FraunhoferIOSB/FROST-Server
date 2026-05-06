@@ -252,6 +252,25 @@ public class UrlHelper {
         return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getType(), entity.getPrimaryKeyValues());
     }
 
+    public static record TypeAndKey(EntityType entityType, PkValue pkValue) {
+
+        // Empty by design.
+    }
+
+    public static TypeAndKey parseSelfLinkToTypeAndKey(String selfLink, ModelRegistry mr, boolean isAdmin) {
+        int idxType = selfLink.lastIndexOf('/');
+        String lastPart = idxType >= 0 ? selfLink.substring(idxType + 1) : selfLink;
+        int idxPk = lastPart.indexOf('(');
+        if (idxPk < 0) {
+            throw new IllegalArgumentException("SelfLink must contain a primary key in brackets.");
+        }
+        String entityTypeName = lastPart.substring(0, idxPk);
+        String pk = lastPart.substring(idxPk + 1, lastPart.length() - 1);
+        EntityType entityType = mr.getEntityTypeForName(entityTypeName, isAdmin);
+        PkValue pkValue = entityType.getPrimaryKey().parsePrimaryKey(pk);
+        return new TypeAndKey(entityType, pkValue);
+    }
+
     public static Entity parseSelfLink(String selfLink, ModelRegistry mr, boolean isAdmin) {
         int idxType = selfLink.lastIndexOf('/');
         String lastPart = idxType >= 0 ? selfLink.substring(idxType + 1) : selfLink;

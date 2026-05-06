@@ -52,7 +52,7 @@ class MessageSerialisationTest {
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
-        entityParser = new JsonReaderDefault(modelRegistry);
+        entityParser = new JsonReaderDefault(modelRegistry, PluginCoreService.V_1_1);
     }
 
     @Test

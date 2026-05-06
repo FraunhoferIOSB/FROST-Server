@@ -204,7 +204,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
             version = ODataVersion.V4_01;
         }
         response.addHeader("OData-Version", version.name);
-        request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getUserPrincipal()));
+        request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(settings)

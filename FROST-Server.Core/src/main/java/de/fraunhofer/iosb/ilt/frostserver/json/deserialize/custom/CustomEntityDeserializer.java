@@ -23,6 +23,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
@@ -48,24 +50,29 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomEntityDeserializer.class.getName());
     private static final String BUT_FOUND = " but found: ";
 
-    private static final Map<ModelRegistry, Map<EntityType, CustomEntityDeserializer>> instancePerModelAndType = new HashMap<>();
+    private static final Map<ModelRegistry, Map<EntityType, Map<Version, CustomEntityDeserializer>>> instancePerModelAndType = new HashMap<>();
 
-    public static CustomEntityDeserializer getInstance(final ModelRegistry modelRegistry, final EntityType entityType) {
+    public static CustomEntityDeserializer getInstance(final ModelRegistry modelRegistry, final EntityType entityType, final Version version) {
         return instancePerModelAndType
                 .computeIfAbsent(
                         modelRegistry,
-                        t -> new HashMap<>())
+                        m -> new HashMap<>())
                 .computeIfAbsent(
                         entityType,
-                        t -> new CustomEntityDeserializer(modelRegistry, t));
+                        t -> new HashMap<>())
+                .computeIfAbsent(
+                        version,
+                        v -> new CustomEntityDeserializer(modelRegistry, entityType, v));
     }
 
+    private final Version version;
     private final EntityType entityType;
     private final ModelRegistry modelRegistry;
 
-    public CustomEntityDeserializer(ModelRegistry modelRegistry, EntityType entityType) {
+    public CustomEntityDeserializer(ModelRegistry modelRegistry, EntityType entityType, Version version) {
         this.modelRegistry = modelRegistry;
         this.entityType = entityType;
+        this.version = version;
     }
 
     /**
@@ -92,22 +99,44 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
         JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.PROPERTY_NAME) {
             String fieldName = parser.currentName();
-            Property property = entityType.getProperty(fieldName);
-            if (property == null) {
-                if (failOnUnknown) {
-                    final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + entityType.getProperties();
-                    throw new UnrecognizedPropertyException(parser, message, parser.currentLocation(), DefaultEntity.class, fieldName, null);
-                } else {
-                    parser.nextValue();
-                    parser.readValueAsTree();
-                }
+            if (version.getSelfLinkName().equals(fieldName)) {
+                deserializeSelfLink(parser, ctxt, target);
             } else {
-                deserializeProperty(parser, ctxt, property, target);
+                deserializeProperty(parser, ctxt, target, fieldName, failOnUnknown);
             }
             currentToken = parser.nextToken();
         }
 
         return target;
+    }
+
+    private void deserializeSelfLink(JsonParser parser, DeserializationContext ctxt, Entity target) {
+        String selfLink = parser.nextStringValue();
+        if (selfLink == null) {
+            final String message = "Failed to parse selflink " + version.getSelfLinkName() + ". Expected a string, got " + parser.currentToken();
+            throw MismatchedInputException.from(parser, DefaultEntity.class, message);
+        }
+        UrlHelper.TypeAndKey typeAndKey = UrlHelper.parseSelfLinkToTypeAndKey(selfLink, modelRegistry, true);
+        if (!typeAndKey.entityType().equals(target.getType())) {
+            final String message = "Selflink is for a " + typeAndKey.entityType() + ". Expected " + target.getType();
+            throw MismatchedInputException.from(parser, DefaultEntity.class, message);
+        }
+        target.setPrimaryKeyValues(typeAndKey.pkValue());
+    }
+
+    private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Entity target, String fieldName, boolean failOnUnknown) throws JacksonException {
+        final Property property = entityType.getProperty(fieldName);
+        if (property == null) {
+            if (failOnUnknown) {
+                final String message = "Unknown field: " + fieldName + " on " + entityType.entityName + " expected one of: " + entityType.getProperties();
+                throw new UnrecognizedPropertyException(parser, message, parser.currentLocation(), DefaultEntity.class, fieldName, null);
+            } else {
+                parser.nextValue();
+                parser.readValueAsTree();
+            }
+        } else {
+            deserializeProperty(parser, ctxt, property, target);
+        }
     }
 
     private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Property property, Entity target) throws JacksonException {
@@ -123,7 +152,7 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
     private void deserializeNavigationProperty(JsonParser parser, DeserializationContext ctxt, NavigationPropertyEntitySet npes, Entity result) throws JacksonException {
         final EntityType setType = npes.getEntityType();
         EntitySet entitySet = new EntitySetImpl(npes);
-        CustomEntityDeserializer setEntityDeser = getInstance(modelRegistry, setType);
+        CustomEntityDeserializer setEntityDeser = getInstance(modelRegistry, setType, version);
         result.setProperty(npes, entitySet);
         JsonToken curToken = parser.nextToken();
         if (curToken != JsonToken.START_ARRAY) {
@@ -148,7 +177,7 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
             final String message = "Expected start of object for: " + npe.getName() + " on " + entityType.entityName + BUT_FOUND + nextToken;
             throw MismatchedInputException.from(parser, DefaultEntity.class, message);
         }
-        Entity value = getInstance(modelRegistry, targetEntityType)
+        Entity value = getInstance(modelRegistry, targetEntityType, version)
                 .deserialize(parser, ctxt);
         npe.setOn(target, value);
     }

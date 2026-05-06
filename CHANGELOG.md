@@ -5,6 +5,7 @@
 **New Features**
 
 **Internal changes & Bugfixes**
+* Implemented V2 API with HTTP bindings.
 * Updated V2 model to latest spec version.
 * Improved model editor:
   * Ensure main tables are generated before link tables.

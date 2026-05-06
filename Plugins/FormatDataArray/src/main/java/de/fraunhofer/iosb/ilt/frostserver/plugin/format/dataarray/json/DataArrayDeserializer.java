@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -39,8 +40,7 @@ import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.deser.DeserializationContextExt;
 
 /**
- *
- * @author scf
+ * DeSerializer for DataArray JSON documents.
  */
 public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue>> {
 
@@ -52,8 +52,10 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
     private final ModelRegistry modelRegistry;
     private final PluginCoreModel pluginCoreModel;
     private final EntityType etMultiDatastream;
+    private final Version version;
 
-    public DataArrayDeserializer(CoreSettings settings) {
+    public DataArrayDeserializer(CoreSettings settings, Version version) {
+        this.version = version;
         modelRegistry = settings.getModelRegistry();
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
@@ -63,7 +65,7 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
-            return new DataArrayDeserializer(settings).deserialize(parser, dsc);
+            return new DataArrayDeserializer(settings, reader.getVersion()).deserialize(parser, dsc);
         }
     }
 
@@ -71,7 +73,7 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
-            return new DataArrayDeserializer(settings).deserialize(parser, dsc);
+            return new DataArrayDeserializer(settings, reader.getVersion()).deserialize(parser, dsc);
         }
     }
 
@@ -97,7 +99,7 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
                 case "Datastream":
                     parser.nextToken();
                     result.setDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, pluginCoreModel.etDatastream)
+                            CustomEntityDeserializer.getInstance(modelRegistry, pluginCoreModel.etDatastream, version)
                                     .deserialize(parser, ctxt));
                     break;
 
@@ -107,7 +109,7 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
                     }
                     parser.nextToken();
                     result.setMultiDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, etMultiDatastream)
+                            CustomEntityDeserializer.getInstance(modelRegistry, etMultiDatastream, version)
                                     .deserialize(parser, ctxt));
                     break;
 

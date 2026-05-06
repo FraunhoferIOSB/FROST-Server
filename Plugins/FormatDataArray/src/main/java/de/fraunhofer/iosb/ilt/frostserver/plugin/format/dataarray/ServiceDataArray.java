@@ -50,8 +50,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles the service requests for the DataArray plugin. This is the request to
  * /CreateObservations.
- *
- * @author scf
  */
 public class ServiceDataArray {
 
@@ -91,7 +89,7 @@ public class ServiceDataArray {
             final ModelRegistry modelRegistry = settings.getModelRegistry();
             final QueryDefaults queryDefaults = request.getQueryDefaults();
             Query query = QueryParser.parseQuery(request.getUrlQuery(), queryDefaults, settings, null, request.getUserPrincipal());
-            JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getUserPrincipal());
+            JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getVersion(), request.getUserPrincipal());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
             for (DataArrayValue daValue : postData) {

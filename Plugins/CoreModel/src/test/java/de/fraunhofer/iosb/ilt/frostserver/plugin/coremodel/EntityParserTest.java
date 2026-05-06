@@ -66,7 +66,7 @@ class EntityParserTest {
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
-        entityParser = new JsonReaderDefault(modelRegistry);
+        entityParser = new JsonReaderDefault(modelRegistry, PluginCoreService.V_1_1);
     }
 
     @Test
@@ -1028,7 +1028,7 @@ class EntityParserTest {
             PluginCoreModel pluginCoreModelString = new PluginCoreModel();
             pluginCoreModelString.init(coreSettingsString);
             coreSettingsString.getPluginManager().initPlugins(null);
-            JsonReaderDefault entityParserString = new JsonReaderDefault(modelRegistryString);
+            JsonReaderDefault entityParserString = new JsonReaderDefault(modelRegistryString, PluginCoreService.V_1_1);
             String id = UUID.randomUUID().toString();
             String json = "{\"@iot.id\": \"" + id + "\"}";
             Entity expectedResult = new DefaultEntity(pluginCoreModelString.etThing)

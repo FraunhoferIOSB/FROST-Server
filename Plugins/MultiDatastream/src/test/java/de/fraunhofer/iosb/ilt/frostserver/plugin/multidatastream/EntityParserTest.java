@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
@@ -80,7 +81,7 @@ class EntityParserTest {
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
             coreSettings.getPluginManager().initPlugins(null);
-            entityParser = new JsonReaderDefault(modelRegistry);
+            entityParser = new JsonReaderDefault(modelRegistry, PluginCoreService.V_1_1);
             etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
             epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
             epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");

@@ -59,6 +59,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import java.util.ArrayList;
@@ -226,7 +227,9 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
         response.addHeader("OData-Version", "4.01");
-        request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getUserPrincipal()));
+        final ModelRegistry mr = request.getCoreSettings().getModelRegistry();
+        final PrincipalExtended userPrincipal = request.getUserPrincipal();
+        request.setJsonReader(new JsonReaderOData(mr, VERSION_STA_2_0, userPrincipal));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(coreSettings)

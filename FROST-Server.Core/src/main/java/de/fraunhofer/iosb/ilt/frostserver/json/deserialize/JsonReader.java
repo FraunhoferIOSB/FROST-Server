@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.io.IOException;
 import java.io.Reader;
 import tools.jackson.databind.ObjectMapper;
@@ -34,6 +35,13 @@ public interface JsonReader {
      * @return the ObjectMapper used by this JsonReader.
      */
     public ObjectMapper getMapper();
+
+    /**
+     * Get the API version that this JsonReader works on.
+     *
+     * @return the API version.
+     */
+    public Version getVersion();
 
     /**
      * Parse an entity of the given type from the given String.

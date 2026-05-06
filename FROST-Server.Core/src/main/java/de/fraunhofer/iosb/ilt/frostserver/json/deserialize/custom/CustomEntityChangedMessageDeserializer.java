@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnknownEntityTypeException;
@@ -146,7 +147,7 @@ public class CustomEntityChangedMessageDeserializer extends ValueDeserializer<En
         if (type == null) {
             throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
         }
-        Entity entity = CustomEntityDeserializer.getInstance(modelRegistry, type)
+        Entity entity = CustomEntityDeserializer.getInstance(modelRegistry, type, Version.INTERNAL)
                 .deserialize(parser, ctxt);
         entity.setQuery(queryGenerator.getQueryFor(type));
         message.setEntity(entity);

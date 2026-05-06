@@ -24,8 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 
 /**
- *
- * @author scf
+ * A combination of a key with a EntityType and Primary key.
  */
 public final class ContentIdPair {
 
@@ -52,7 +51,7 @@ public final class ContentIdPair {
     }
 
     public String selfLink() {
-        return '/' + type.plural + '(' + quoteForUrl(type.getPrimaryKey(), value) + ')';
+        return type.plural + '(' + quoteForUrl(type.getPrimaryKey(), value) + ')';
     }
 
     public String keyToUrl() {

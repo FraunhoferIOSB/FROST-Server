@@ -266,7 +266,7 @@ public class ServiceRequest {
 
     public JsonReader getJsonReader() {
         if (jsonReader == null) {
-            jsonReader = new JsonReaderDefault(coreSettings.getModelRegistry(), userPrincipal);
+            jsonReader = new JsonReaderDefault(coreSettings.getModelRegistry(), version, userPrincipal);
         }
         return jsonReader;
     }

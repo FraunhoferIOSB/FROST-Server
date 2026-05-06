@@ -530,9 +530,12 @@ public class Service implements AutoCloseable {
             }
             type.validateCreate(entity);
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
-        } catch (IncompleteEntityException | IllegalStateException | IOException ex) {
+        } catch (IncompleteEntityException | IllegalStateException | JacksonException ex) {
             LOGGER.trace("Post failed.", ex);
-            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, ex.getMessage());
+            return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON + " " + ex.getMessage());
+        } catch (IOException ex) {
+            LOGGER.info("Post failed.", ex);
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, ex.getMessage());
         }
 
         try {
@@ -849,10 +852,12 @@ public class Service implements AutoCloseable {
         JsonReader entityParser = request.getJsonReader();
         try {
             entity = entityParser.parseEntity(mainElement.getEntityType(), request.getContentReader());
-        } catch (IOException exc) {
+        } catch (JacksonException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
-
+        } catch (IOException ex) {
+            LOGGER.info("Put failed.", ex);
+            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Internal Error.");
         }
 
         try {

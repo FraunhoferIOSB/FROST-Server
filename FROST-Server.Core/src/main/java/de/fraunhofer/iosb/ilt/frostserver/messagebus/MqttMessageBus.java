@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
@@ -164,7 +165,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
 
         formatter = JsonWriter.getObjectMapper();
         final ModelRegistry modelRegistry = settings.getModelRegistry();
-        parser = new JsonReaderDefault(modelRegistry, true);
+        parser = new JsonReaderDefault(modelRegistry, Version.INTERNAL, true);
 
         long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
         if (queueLoggingInterval > 0) {

@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Reader;
@@ -72,7 +73,7 @@ public class JsonReaderOData implements JsonReader {
      * mapper for.
      * @return The cached or created object mapper.
      */
-    private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
+    private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         ObjectMapper mapper;
         if (isAdmin) {
             mapper = mappersAdmin.get(modelRegistry);
@@ -81,16 +82,16 @@ public class JsonReaderOData implements JsonReader {
         }
         if (mapper == null) {
             // computeIfAbsent is not thread-safe, and we don't want this method to be synchronised.
-            mapper = initObjectMapper(modelRegistry, isAdmin);
+            mapper = initObjectMapper(modelRegistry, version, isAdmin);
         }
         return mapper;
     }
 
-    private static synchronized ObjectMapper initObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
+    private static synchronized ObjectMapper initObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         if (isAdmin) {
-            return mappersAdmin.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, isAdmin));
+            return mappersAdmin.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, version, isAdmin));
         } else {
-            return mappers.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, isAdmin));
+            return mappers.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, version, isAdmin));
         }
     }
 
@@ -101,7 +102,7 @@ public class JsonReaderOData implements JsonReader {
      * mapper for.
      * @return The created object mapper.
      */
-    private static synchronized ObjectMapper createObjectMapper(ModelRegistry modelRegistry, boolean isAdmin) {
+    private static synchronized ObjectMapper createObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
         for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomDeserializationManager.registerDeserializer(encodingType, geoJsonDeserializier);
@@ -109,7 +110,7 @@ public class JsonReaderOData implements JsonReader {
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(EntitySet.class, EntitySetImpl.class);
         for (EntityType entityType : modelRegistry.getEntityTypes(isAdmin)) {
-            CustomEntityDeserializer.getInstance(modelRegistry, entityType);
+            CustomEntityDeserializer.getInstance(modelRegistry, entityType, version);
         }
         module.addDeserializer(EntityChangedMessage.class, new CustomEntityChangedMessageDeserializer(modelRegistry));
         module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
@@ -132,35 +133,40 @@ public class JsonReaderOData implements JsonReader {
      */
     private final ObjectMapper mapper;
     private final ModelRegistry modelRegistry;
+    private final Version version;
 
     /**
      * Create a non-admin JsonReader.
      *
-     * @param modelRegistry the model registry to create the json reader for.
+     * @param modelRegistry the model registry to create the JSON reader for.
+     * @param version The API version to create the JSON reader for.
      */
-    public JsonReaderOData(ModelRegistry modelRegistry) {
-        this(modelRegistry, false);
+    public JsonReaderOData(ModelRegistry modelRegistry, Version version) {
+        this(modelRegistry, version, false);
     }
 
     /**
      * Create a JsonReader.
      *
      * @param modelRegistry the model registry to create the json reader for.
+     * @param version The API version to create the JSON reader for.
      * @param user the user to create the reader for.
      */
-    public JsonReaderOData(ModelRegistry modelRegistry, PrincipalExtended user) {
-        this(modelRegistry, user.isAdmin());
+    public JsonReaderOData(ModelRegistry modelRegistry, Version version, PrincipalExtended user) {
+        this(modelRegistry, version, user.isAdmin());
     }
 
     /**
      * Create a JsonReader.
      *
-     * @param modelRegistry the model registry to create the json reader for.
+     * @param modelRegistry the model registry to create the JSON reader for.
+     * @param version The API version to create the JSON reader for.
      * @param isAdmin flag indicating if the user is an admin.
      */
-    public JsonReaderOData(ModelRegistry modelRegistry, boolean isAdmin) {
+    public JsonReaderOData(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         this.modelRegistry = modelRegistry;
-        mapper = getObjectMapper(modelRegistry, isAdmin);
+        this.version = version;
+        this.mapper = getObjectMapper(modelRegistry, version, isAdmin);
     }
 
     @Override
@@ -169,10 +175,15 @@ public class JsonReaderOData implements JsonReader {
     }
 
     @Override
+    public Version getVersion() {
+        return version;
+    }
+
+    @Override
     public Entity parseEntity(EntityType entityType, String value) throws IOException {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
-            return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
+            return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
             throw new IOException("Json is too deeply nested.");
@@ -183,7 +194,7 @@ public class JsonReaderOData implements JsonReader {
     public Entity parseEntity(EntityType entityType, Reader value) throws IOException {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
-            return CustomEntityDeserializer.getInstance(modelRegistry, entityType)
+            return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
             throw new IOException("Json is too deeply nested.");

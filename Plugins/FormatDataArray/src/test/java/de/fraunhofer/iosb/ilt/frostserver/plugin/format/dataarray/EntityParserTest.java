@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
@@ -39,10 +40,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author jab
- */
 class EntityParserTest {
 
     private static CoreSettings coreSettings;
@@ -73,7 +70,7 @@ class EntityParserTest {
 
     @BeforeEach
     public void setUp() {
-        entityParser = new JsonReaderDefault(modelRegistry);
+        entityParser = new JsonReaderDefault(modelRegistry, PluginCoreService.V_1_1);
     }
 
     @Test

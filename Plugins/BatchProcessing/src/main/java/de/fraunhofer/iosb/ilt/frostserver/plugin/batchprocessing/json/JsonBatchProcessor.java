@@ -27,6 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPairHandler;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
@@ -48,6 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
@@ -76,6 +79,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
     private final Service service;
     private final ServiceRequest request;
     private final ServiceResponse response;
+    private final ContentIdPairHandler cipHandler;
 
     private Path tempFile;
     private JsonParser parser;
@@ -89,6 +93,28 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         this.service = service;
         this.request = request;
         this.response = response;
+        final Version version = request.getVersion();
+        if (version == PluginCoreService.V_1_0 || version == PluginCoreService.V_1_1) {
+            cipHandler = (pair, brackets) -> {
+                if (brackets) {
+                    String value = UrlHelper.quoteForJson(pair.value.get(0));
+                    return '(' + StringEscapeUtils.escapeJson(value) + ')';
+                } else {
+                    String value = UrlHelper.quoteForJson(pair.value.get(0));
+                    return value;
+                }
+            };
+        } else {
+            cipHandler = (pair, brackets) -> {
+                if (brackets) {
+                    String value = UrlHelper.quoteForJson(pair.value.get(0));
+                    return '(' + StringEscapeUtils.escapeJson(value) + ')';
+                } else {
+                    String value = StringEscapeUtils.escapeJson(pair.selfLink());
+                    return '"' + value + '"';
+                }
+            };
+        }
     }
 
     public JsonBatchResponse processRequest(boolean stream) {
@@ -197,13 +223,13 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             ContentIdPair pair = ids.get(name);
             if (pair == null) {
                 LOGGER.debug("Not a match: {}", matcher.group(0));
-                return '/' + url;
+                return url;
             } else {
                 String value = pair.selfLink();
                 return value + url.substring(matcher.end(0));
             }
         }
-        return '/' + url;
+        return url;
     }
 
     private String replaceIdsJson(String body) {
@@ -226,12 +252,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                 LOGGER.debug("Not a match: {}", matcher.group(0));
                 result.append(matcher.group(0));
             } else {
-                String value = UrlHelper.quoteForJson(pair.value.get(0));
-                if (brackets) {
-                    result.append('(').append(value).append(')');
-                } else {
-                    result.append(value);
-                }
+                result.append(cipHandler.transform(pair, brackets));
             }
             idx = matcher.end(0);
         }
@@ -245,6 +266,9 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         final String requestId = requestItem.getId();
         String path = requestItem.getUrl();
         path = replaceIdsUrl(path);
+        if (!path.startsWith("/")) {
+            path = '/' + path;
+        }
         if (!requestItem.matchesIfCondition(ids)) {
             return new JsonBatchResultItem()
                     .setId(requestId)

@@ -47,6 +47,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.AbstractPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
@@ -444,7 +445,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         Entity newEntity;
         final ModelRegistry modelRegistry = settings.getModelRegistry();
         try {
-            JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, PrincipalExtended.getLocalPrincipal());
+            JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, Version.INTERNAL, PrincipalExtended.getLocalPrincipal());
             newEntity = entityParser.parseEntity(original.getType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setPrimaryKeyValues(id);
