@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,15 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
      * The properties to order entities of this type by.
      */
     @ConfigurableField(editor = EditorList.class,
+            label = "Key", description = "The attributes that make up the primary key.")
+    @EditorList.EdOptsList(editor = EditorString.class)
+    @EditorString.EdOptsString()
+    private List<String> key;
+
+    /**
+     * The properties to order entities of this type by.
+     */
+    @ConfigurableField(editor = EditorList.class, optional = true,
             label = "OrderBy", description = "The default way to order this entity type.")
     @EditorList.EdOptsList(editor = EditorString.class)
     @EditorString.EdOptsString()
@@ -128,7 +138,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     /**
      * The (OData)annotations for this Element.
      */
-    @ConfigurableField(editor = EditorList.class,
+    @ConfigurableField(editor = EditorList.class, optional = true,
             label = "Annotations", description = "The (OData)annotations for this Element.")
     @EditorList.EdOptsList(editor = EditorSubclass.class)
     @EditorSubclass.EdOptsSubclass(iface = Annotation.class, merge = true, nameField = "@class", shortenClassNames = true)
@@ -136,8 +146,11 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
 
     @JsonIgnore
     private EntityType entityType;
+    @JsonIgnore
+    private String namespace;
 
-    public void init() {
+    public void init(String namespace) {
+        this.namespace = namespace;
         int idx = 0;
         int keyIdx = -1;
         for (DefEntityProperty property : getEntityProperties()) {
@@ -280,6 +293,14 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     }
 
     public DefEntityProperty getPrimaryKey() {
+        if (key != null) {
+            for (DefEntityProperty property : getEntityProperties()) {
+                if (key.contains(property.getName())) {
+                    return property;
+                }
+            }
+        }
+        LOGGER.info("Primary key not explicitly set for {}", getName());
         for (DefEntityProperty property : getEntityProperties()) {
             if ("id".equalsIgnoreCase(property.getType())) {
                 return property;
@@ -315,6 +336,17 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     public DefEntityType addNavigationProperty(DefNavigationProperty navigationProperty) {
         getNavigationProperties().add(navigationProperty);
         return this;
+    }
+
+    public List<String> getKey() {
+        if (key == null) {
+            return Collections.emptyList();
+        }
+        return key;
+    }
+
+    public void setKey(List<String> key) {
+        this.key = key;
     }
 
     /**

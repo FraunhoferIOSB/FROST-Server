@@ -1,5 +1,6 @@
 {
     "conformance": [],
+    "namespace": "org.OGC.STA",
     "simplePropertyTypes": [],
     "entityTypes": [
         {
@@ -7,6 +8,9 @@
             "plural": "Locations",
             "adminOnly": false,
             "table": "locations",
+            "key": [
+                "id"
+            ],
             "orderByDflt": [],
             "entityProperties": [
                 {
@@ -103,7 +107,7 @@
                 {
                     "name": "HistoricalLocations",
                     "entitySet": true,
-                    "entityType": "HistoricalLocation",
+                    "entityType": "org.OGC.STA.HistoricalLocation",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,

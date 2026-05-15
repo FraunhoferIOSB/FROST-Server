@@ -41,6 +41,14 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
     @EditorString.EdOptsString()
     private List<String> conformance;
 
+    /**
+     * The namespace of this model.
+     */
+    @ConfigurableField(editor = EditorString.class,
+            label = "Namespace", description = "The namespace of the model.")
+    @EditorString.EdOptsString()
+    private String namespace;
+
     @ConfigurableField(editor = EditorList.class,
             label = "Property Types", description = "Custom property types.")
     @EditorList.EdOptsList(editor = EditorClass.class)
@@ -55,7 +63,7 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
 
     public void init() {
         for (DefEntityType type : entityTypes) {
-            type.init();
+            type.init(namespace);
         }
     }
 
@@ -122,5 +130,14 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
 
     public void addConformance(String conformanceClass) {
         getConformance().add(conformanceClass);
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public DefModel setNamespace(String namespace) {
+        this.namespace = namespace;
+        return this;
     }
 }

@@ -1,5 +1,6 @@
 {
     "conformance": [],
+    "namespace": "org.OGC.STA",
     "simplePropertyTypes": [],
     "entityTypes": [
         {
@@ -7,6 +8,9 @@
             "plural": "ObservedProperties",
             "adminOnly": false,
             "table": "observed_properties",
+            "key": [
+                "id"
+            ],
             "orderByDflt": [],
             "entityProperties": [
                 {
@@ -78,7 +82,7 @@
                 {
                     "name": "Datastreams",
                     "entitySet": true,
-                    "entityType": "Datastream",
+                    "entityType": "org.OGC.STA.Datastream",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,

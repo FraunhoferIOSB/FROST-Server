@@ -1,5 +1,8 @@
 {
-    "conformance": ["http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core"],
+    "conformance": [
+        "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core"
+    ],
+    "namespace": "org.OGC.STA",
     "simplePropertyTypes": [],
     "entityTypes": [
         {
@@ -7,6 +10,9 @@
             "plural": "Things",
             "adminOnly": false,
             "table": "things",
+            "key": [
+                "id"
+            ],
             "orderByDflt": [],
             "entityProperties": [
                 {
@@ -76,7 +82,7 @@
                 {
                     "name": "Locations",
                     "entitySet": true,
-                    "entityType": "Location",
+                    "entityType": "org.OGC.STA.Location",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,
