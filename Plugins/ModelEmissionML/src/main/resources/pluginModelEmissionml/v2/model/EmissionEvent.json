@@ -2,6 +2,7 @@
     "conformance": [
         "http://www.opengis.net/spec/emissionml/1.0/req/datamodel"
     ],
+    "namespace": "org.OGC.EML",
     "simplePropertyTypes": [],
     "entityTypes": [
         {
@@ -9,6 +10,9 @@
             "plural": "EmissionEvents",
             "adminOnly": false,
             "table": "emissionevents",
+            "key": [
+                "id"
+            ],
             "orderByDflt": [],
             "entityProperties": [
                 {
@@ -82,7 +86,7 @@
                 {
                     "name": "Source",
                     "entitySet": false,
-                    "entityType": "Feature",
+                    "entityType": "org.OGC.STA.Feature",
                     "required": true,
                     "symmetrical": false,
                     "priority": 0,
@@ -202,7 +206,7 @@
                 {
                     "name": "StartTimeEvidence",
                     "entitySet": true,
-                    "entityType": "Observation",
+                    "entityType": "org.OGC.STA.Observation",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,
@@ -229,7 +233,7 @@
                 {
                     "name": "EndTimeEvidence",
                     "entitySet": true,
-                    "entityType": "Observation",
+                    "entityType": "org.OGC.STA.Observation",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,
@@ -256,7 +260,7 @@
                 {
                     "name": "QuantityEvidence",
                     "entitySet": true,
-                    "entityType": "Observation",
+                    "entityType": "org.OGC.STA.Observation",
                     "required": false,
                     "symmetrical": false,
                     "priority": 0,

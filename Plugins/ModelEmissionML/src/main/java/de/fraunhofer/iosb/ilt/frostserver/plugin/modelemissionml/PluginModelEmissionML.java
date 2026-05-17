@@ -106,7 +106,9 @@ public class PluginModelEmissionML extends ConfigProvider<PluginModelEmissionML>
             .registerProperty(EM_EP_TIME)
             .registerProperty(EM_EP_QUALITY);
 
-    public static final String EM_NAMESPACE = "modelEmissionML.";
+    public static final String EM_NAMESPACE = "org.OGC.EML";
+    public static final String EM_SETTINGS_NAMESPACE = "modelEmissionML.";
+
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_EMML = "enable";
 
@@ -115,7 +117,7 @@ public class PluginModelEmissionML extends ConfigProvider<PluginModelEmissionML>
     @Override
     public InitResult init(CoreSettings settings) {
         Settings pluginSettings = settings.getPluginSettings();
-        setSettings(pluginSettings.getSubSettings(EM_NAMESPACE));
+        setSettings(pluginSettings.getSubSettings(EM_SETTINGS_NAMESPACE));
 
         enabled = getBoolean(TAG_ENABLE_EMML);
         if (enabled) {
@@ -133,9 +135,9 @@ public class PluginModelEmissionML extends ConfigProvider<PluginModelEmissionML>
                 return INIT_DELAY;
             }
             if (modelV2) {
-                mr.registerPropertyType(EM_TYPE_UOM);
-                mr.registerPropertyType(EM_TYPE_TEMPORALBOUND);
-                mr.registerPropertyType(EM_TYPE_EMISSION_QUANTITY);
+                mr.registerPropertyType(EM_TYPE_UOM.setNamespace(EM_NAMESPACE));
+                mr.registerPropertyType(EM_TYPE_TEMPORALBOUND.setNamespace(EM_NAMESPACE));
+                mr.registerPropertyType(EM_TYPE_EMISSION_QUANTITY.setNamespace(EM_NAMESPACE));
                 pml.addLiquibaseFile("pluginModelEmissionml/v2/liquibase/tables.xml");
                 pml.addModelFile("pluginModelEmissionml/v2/model/Mechanism.json");
                 pml.addModelFile("pluginModelEmissionml/v2/model/DeterminationMethod.json");

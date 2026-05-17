@@ -1,5 +1,6 @@
 {
     "conformance": [],
+    "namespace": "org.OGC.EML",
     "simplePropertyTypes": [],
     "entityTypes": [
         {
@@ -7,6 +8,9 @@
             "plural": "DeterminationMethods",
             "adminOnly": false,
             "table": "determination_methods",
+            "key": [
+                "id"
+            ],
             "orderByDflt": [],
             "entityProperties": [
                 {
