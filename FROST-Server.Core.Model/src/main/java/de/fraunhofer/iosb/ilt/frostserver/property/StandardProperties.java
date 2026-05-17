@@ -49,6 +49,8 @@ import tools.jackson.core.TreeNode;
  */
 public class StandardProperties {
 
+    public static final String NAMESPACE = "org.OGC.STA";
+
     public static final String STA_GEOJSON_NAME = "Geometry";
     public static final String STA_MAP_NAME = "Object";
 
@@ -119,6 +121,7 @@ public class StandardProperties {
             try {
                 Object fieldInstance = FieldUtils.readStaticField(field, false);
                 if (fieldInstance instanceof PropertyType pt) {
+                    pt.setNamespace(NAMESPACE);
                     final String name = pt.getName();
                     TYPES.put(name, pt);
                     LOGGER.debug("Registered type: {}", name);

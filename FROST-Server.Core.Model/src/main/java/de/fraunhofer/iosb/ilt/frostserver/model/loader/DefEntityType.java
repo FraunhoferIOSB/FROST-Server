@@ -153,12 +153,27 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         this.namespace = namespace;
         int idx = 0;
         int keyIdx = -1;
-        for (DefEntityProperty property : getEntityProperties()) {
-            property.init();
-            if ("id".equalsIgnoreCase(property.getType())) {
-                keyIdx = idx;
+        final String keyName;
+        if (StringHelper.isNullOrEmpty(key)) {
+            for (DefEntityProperty property : getEntityProperties()) {
+                property.init();
+                if ("id".equalsIgnoreCase(property.getType())) {
+                    keyIdx = idx;
+                }
+                idx++;
             }
-            idx++;
+        } else {
+            if (key.size() > 1) {
+                LOGGER.error("Multi-column keys are currently not supported!");
+            }
+            keyName = key.get(0);
+            for (DefEntityProperty property : getEntityProperties()) {
+                property.init();
+                if (keyName.equalsIgnoreCase(property.getName())) {
+                    keyIdx = idx;
+                }
+                idx++;
+            }
         }
         if (keyIdx > 0) {
             LOGGER.debug("Moving Id column from {} to the front.", keyIdx);
@@ -178,9 +193,11 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
 
     public EntityType getEntityType(ModelRegistry modelRegistry, Settings settings) {
         if (entityType == null) {
-            entityType = modelRegistry.getEntityTypeForName(name, true);
+            String fullName = ModelRegistry.fullName(namespace, name);
+            entityType = modelRegistry.getEntityTypeForName(fullName, true);
             if (entityType == null) {
-                entityType = new EntityType(name, plural, adminOnly);
+                entityType = new EntityType(name, plural, adminOnly)
+                        .setNamespace(namespace);
             } else if (adminOnly && !entityType.isAdminOnly()) {
                 entityType.setAdminOnly(adminOnly);
             }

@@ -18,7 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleCustom;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -34,13 +36,14 @@ public class CsdlItemTypeDefinition implements CsdlSchemaItem {
     public String description;
 
     public CsdlItemTypeDefinition generateFrom(TypeSimpleCustom tc) {
-        underlyingType = tc.getUnderlyingType().getName();
+        final TypeSimplePrimitive ut = tc.getUnderlyingType();
+        underlyingType = ModelRegistry.fullName(ut.getNamespace(), ut.getName());
         description = tc.getDescription();
         return this;
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         writer.write("<TypeDefinition Name=\"" + name + "\" UnderlyingType=\"" + underlyingType + "\" />");
     }
 

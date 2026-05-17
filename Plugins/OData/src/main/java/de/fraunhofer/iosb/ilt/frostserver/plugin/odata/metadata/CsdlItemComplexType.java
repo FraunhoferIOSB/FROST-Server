@@ -58,12 +58,12 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         writer.write("<ComplexType Name=\"" + name + "\" OpenType=\"" + Boolean.toString(openType) + "\">");
         for (Entry<String, CsdlProperty> entry : properties.entrySet()) {
             String propName = entry.getKey();
             CsdlProperty property = entry.getValue();
-            property.writeXml(nameSpace, propName, writer);
+            property.writeXml(propName, writer);
         }
         writer.write("</ComplexType>");
     }

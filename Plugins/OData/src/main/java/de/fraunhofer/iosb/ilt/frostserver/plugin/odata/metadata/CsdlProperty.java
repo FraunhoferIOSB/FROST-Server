@@ -22,10 +22,8 @@ import java.io.Writer;
 
 /**
  * A property in an entity type.
- *
- * @author hylke
  */
 public interface CsdlProperty {
 
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException;
+    public void writeXml(String name, Writer writer) throws IOException;
 }

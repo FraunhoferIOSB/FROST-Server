@@ -22,8 +22,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Writer;
@@ -40,15 +40,15 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, ContainerItem> properties = new LinkedHashMap<>();
 
-    public CsdlItemEntityContainer generateFrom(String nameSpace, CoreSettings settings) {
-        for (EntityType et : settings.getModelRegistry().getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
-            properties.put(et.plural, new ContainerItem().generateFrom(nameSpace, et));
+    public CsdlItemEntityContainer generateFrom(String nameSpace, ModelRegistry mr) {
+        for (EntityType et : mr.getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
+            properties.put(et.plural, new ContainerItem().generateFrom(et));
         }
         return this;
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         writer.write("<EntityContainer Name=\"" + name + "\">");
         for (Map.Entry<String, ContainerItem> entry : properties.entrySet()) {
             String propName = entry.getKey();
@@ -71,9 +71,9 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
         @JsonProperty("$NavigationPropertyBinding")
         public Map<String, String> navPropBinding = new HashMap<>();
 
-        public ContainerItem generateFrom(String nameSpace, EntityType et) {
+        public ContainerItem generateFrom(EntityType et) {
             collection = true;
-            type = nameSpace + "." + et.entityName;
+            type = ModelRegistry.fullName(et.getNamespace(), et.getName());
             for (NavigationPropertyMain np : et.getNavigationProperties()) {
                 if (!np.isAdminOnly() || PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     navPropBinding.put(np.getName(), np.getEntityType().plural);

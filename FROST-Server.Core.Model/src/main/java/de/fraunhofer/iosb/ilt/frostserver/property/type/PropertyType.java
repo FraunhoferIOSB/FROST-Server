@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.util.ArrayList;
 import java.util.List;
 import tools.jackson.databind.ValueDeserializer;
@@ -30,6 +31,7 @@ import tools.jackson.databind.ValueSerializer;
  */
 public class PropertyType implements Annotatable {
 
+    private String namespace;
     private final String name;
     private final String description;
     private String mediaType = Constants.CONTENT_TYPE_TEXT_PLAIN;
@@ -38,6 +40,10 @@ public class PropertyType implements Annotatable {
     private final List<Annotation> annotations = new ArrayList<>();
 
     public PropertyType(String name, String description, ValueDeserializer deserializer, ValueSerializer serializer) {
+        if (name.startsWith("Edm.")) {
+            namespace = "Edm";
+            name = name.substring(4);
+        }
         this.name = name;
         this.description = description;
         this.deserializer = deserializer;
@@ -54,6 +60,16 @@ public class PropertyType implements Annotatable {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public PropertyType setNamespace(String namespace) {
+        Exceptions.illegalArgumentIf(this.namespace != null, "Changing namespace on PropertyType {} is not allowed", name);
+        this.namespace = namespace;
+        return this;
     }
 
     public ValueDeserializer getDeserializer() {

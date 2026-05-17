@@ -49,7 +49,7 @@ public class CsdlItemEnumType implements CsdlSchemaItem {
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         writer.write("<EnumType Name=\"" + name + "\" UnderlyingType=\"Edm.Int32\">");
         for (Map.Entry<String, Number> entry : values.entrySet()) {
             String memberName = entry.getKey();

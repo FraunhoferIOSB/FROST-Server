@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,10 +64,16 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
      * The entityName of this entity type as used in URLs.
      */
     public final String entityName;
+
     /**
      * The entityName of collections of this entity type as used in URLs.
      */
     public final String plural;
+
+    /**
+     * The namespace for this EntityType.
+     */
+    private String namespace;
 
     /**
      * Flag indicating only admin users are allowed to see this entity type.
@@ -155,6 +162,20 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
                 primaryKey = new PkSingle(epm);
             }
         }
+        return this;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public String getName() {
+        return entityName;
+    }
+
+    public EntityType setNamespace(String namespace) {
+        Exceptions.illegalArgumentIf(this.namespace != null, "Changing namespace on EntityType {} is not allowed", entityName);
+        this.namespace = namespace;
         return this;
     }
 

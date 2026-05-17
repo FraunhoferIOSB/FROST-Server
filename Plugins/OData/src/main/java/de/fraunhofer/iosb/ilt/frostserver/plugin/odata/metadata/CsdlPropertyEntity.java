@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
@@ -52,17 +53,17 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, String nameSpace, EntityType et, EntityPropertyMain<?> ep) {
-        final PropertyType propertyType = ep.getType();
-        type = propertyType.getName();
-        collection = propertyType.isCollection();
-        if (!type.startsWith("Edm.")) {
-            type = nameSpace + "." + type;
-        }
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, String namespaceSchema, EntityType et, EntityPropertyMain<?> ep) {
+        final PropertyType pt = ep.getType();
+        String namespace = pt.getNamespace();
+        final String name = pt.getName();
+        String fullName = ModelRegistry.fullName(namespace, name);
+        type = fullName;
+        collection = pt.isCollection();
         if (TYPE_DEFAULT.equals(type)) {
             type = null;
         }
-        if (TypeSimplePrimitive.EDM_UNTYPED == propertyType && version == CsdlDocument.ODataVersion.V4_0) {
+        if (TypeSimplePrimitive.EDM_UNTYPED == pt && version == CsdlDocument.ODataVersion.V4_0) {
             type = TypeSimplePrimitive.EDM_STRING.getName();
         }
         if (!et.getPrimaryKey().getKeyProperties().contains(ep)) {
@@ -77,16 +78,16 @@ public class CsdlPropertyEntity implements CsdlProperty {
         return this;
     }
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, String nameSpace, PropertyType value, boolean nullable) {
-        type = value.getName();
-        if (!type.startsWith("Edm.")) {
-            type = nameSpace + "." + type;
-        }
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, String namespaceSchema, PropertyType pt, boolean nullable) {
+        String namespace = pt.getNamespace();
+        final String name = pt.getName();
+        String fullName = ModelRegistry.fullName(namespace, name);
+        type = fullName;
         if (TYPE_DEFAULT.equals(type)) {
             type = null;
         }
         this.nullable = nullable;
-        for (Annotation an : value.getAnnotations()) {
+        for (Annotation an : pt.getAnnotations()) {
             annotations.add(new CsdlAnnotation().generateFrom(doc, an));
         }
         return this;
@@ -102,7 +103,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         String typeString = type == null ? TYPE_DEFAULT : type;
         if (collection) {
             typeString = "Collection(" + typeString + ")";

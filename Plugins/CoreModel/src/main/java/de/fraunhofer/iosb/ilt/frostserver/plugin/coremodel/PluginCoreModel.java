@@ -51,7 +51,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollect
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
-import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
@@ -80,6 +79,8 @@ import tools.jackson.core.TreeNode;
  * The core SensorThings v1.1 data model plugin.
  */
 public class PluginCoreModel implements PluginRootDocument, PluginModel, LiquibaseUser {
+
+    public static final String STA_NAMESPACE = "org.OGC.STA";
 
     public static final String NAME_ET_DATASTREAM = "Datastream";
     public static final String NAME_NP_DATASTREAM = "Datastream";
@@ -254,7 +255,7 @@ public class PluginCoreModel implements PluginRootDocument, PluginModel, Liquiba
         LOGGER.info("Initialising Core Model Types...");
         ModelRegistry mr = settings.getModelRegistry();
 
-        mr.registerPropertyType(StandardProperties.TYPE_UOM)
+        mr.registerPropertyType(TYPE_UOM)
                 .registerPropertyType(STA_LOCATION)
                 .registerPropertyType(STA_MAP)
                 .registerPropertyType(STA_TIMEINTERVAL)

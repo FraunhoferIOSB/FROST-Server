@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public class CsdlDocument {
     public String version = "4.01";
 
     @JsonProperty("$EntityContainer")
-    public String entityContainer = "de.FROST.FrostService";
+    public String entityContainer;
 
     @JsonAnyGetter
     @JsonAnySetter
@@ -165,14 +165,29 @@ public class CsdlDocument {
      * Fill the document using the given Settings, and return itself.
      *
      * @param version the OData version to generate the document for.
-     * @param settings the CoreSettings to use.
+     * @param mr the ModelRegistry to use.
      * @return this.
      */
-    public CsdlDocument generateFrom(ODataVersion version, CoreSettings settings) {
+    public CsdlDocument generateFrom(ODataVersion version, ModelRegistry mr) {
         this.version = version.name;
-        String nameSpace = "de.FROST";
-        nameSpaces.put(nameSpace, new CsdlSchema().generateFrom(this, version, nameSpace, settings));
+        CsdlSchema schema = null;
+        String lastNamespace = "";
+        if (mr.getNamespaces().isEmpty()) {
+            // Nothing to do!
+            return this;
+        }
+        for (var namespace : mr.getNamespaces()) {
+            schema = new CsdlSchema().generateFrom(this, version, namespace, mr);
+            nameSpaces.put(namespace, schema);
+            lastNamespace = namespace;
+        }
+        schema.addSchemaItem("FrostService", new CsdlItemEntityContainer().generateFrom(lastNamespace, mr));
+        entityContainer = ModelRegistry.fullName(lastNamespace, "FrostService");
         return this;
+    }
+
+    public CsdlSchema getSchemaFor(String namespace) {
+        return nameSpaces.computeIfAbsent(namespace, n -> new CsdlSchema());
     }
 
     public void registerAnnotation(String baseUrl, CsdlAnnotation annotation) {
@@ -186,9 +201,8 @@ public class CsdlDocument {
         }
         writer.write("<edmx:DataServices>");
         for (Entry<String, CsdlSchema> entry : nameSpaces.entrySet()) {
-            String name = entry.getKey();
             CsdlSchema schema = entry.getValue();
-            schema.writeXml(name, writer);
+            schema.writeXml(writer);
         }
 
         writer.write("</edmx:DataServices></edmx:Edmx>");

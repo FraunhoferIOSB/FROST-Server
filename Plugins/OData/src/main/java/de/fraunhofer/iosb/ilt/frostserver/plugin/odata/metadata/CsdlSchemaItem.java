@@ -26,5 +26,5 @@ import java.io.Writer;
  */
 public interface CsdlSchemaItem {
 
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException;
+    public void writeXml(String name, Writer writer) throws IOException;
 }

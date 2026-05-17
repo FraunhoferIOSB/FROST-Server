@@ -59,7 +59,7 @@ public class MetaDataGenerator {
 
     public ServiceResponse generateMetaData(ServiceRequest request, ServiceResponse response) {
         try {
-            final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings);
+            final CsdlDocument doc = new CsdlDocument().generateFrom(version, settings.getModelRegistry());
             String format = request.getParameter(REQUEST_PARAM_FORMAT, "");
             String accept = request.getParameter(HEADER_ACCEPT, "");
             int idxXml = accept.indexOf(CONTENT_TYPE_APPLICATION_XML);

@@ -75,6 +75,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -977,7 +978,10 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                 throw new NotImplementedException(NOT_IMPLEMENTED_MULTI_VALUE_PK);
             }
             LOGGER.debug("  Registering StaTable {} ({})", tableName, entityType);
-            final DataType<?> pkDataType = getDataTypeFor(primaryKey.getKeyProperty(0).getType().getName());
+
+            final PropertyType type = primaryKey.getKeyProperty(0).getType();
+            final String typeName = ModelRegistry.fullName(type.getNamespace(), type.getName());
+            final DataType<?> pkDataType = getDataTypeFor(typeName);
             StaTableDynamic newTable = new StaTableDynamic(DSL.name(tableName), entityType, pkDataType);
             tableCollection.registerTable(entityType, newTable);
             table = newTable;

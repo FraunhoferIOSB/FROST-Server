@@ -21,6 +21,9 @@ import de.fraunhofer.iosb.ilt.frostserver.path.CustomLinksHelper;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -34,6 +37,10 @@ import org.slf4j.LoggerFactory;
 public class ModelRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModelRegistry.class.getName());
+
+    public static final String DEFAULT_NAMESPACE = "de.FROST";
+
+    private final Set<String> namespaces = new LinkedHashSet<>();
 
     /**
      * All entity types, by their entityName (both singular and plural).
@@ -62,6 +69,34 @@ public class ModelRegistry {
      */
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
 
+    private String ensureNamespace(EntityType type) {
+        String namespace = type.getNamespace();
+        if (StringHelper.isNullOrEmpty(namespace)) {
+            namespace = maybeAddNamespace(namespace);
+            type.setNamespace(namespace);
+            return namespace;
+        }
+        return maybeAddNamespace(namespace);
+    }
+
+    private String maybeAddNamespace(String namespace) {
+        if (StringHelper.isNullOrEmpty(namespace)) {
+            namespace = DEFAULT_NAMESPACE;
+        }
+        if (namespaces.add(namespace)) {
+            LOGGER.info("Registered namespace {}", namespace);
+        }
+        return namespace;
+    }
+
+    private boolean hasNamespace(String name) {
+        return name.contains(".");
+    }
+
+    public Set<String> getNamespaces() {
+        return namespaces;
+    }
+
     /**
      * Register a new entity type. Registering the same type twice is a no-op,
      * registering a new entity type with a name that already exists causes an
@@ -71,17 +106,19 @@ public class ModelRegistry {
      * @return this ModelRegistry.
      */
     public final ModelRegistry registerEntityType(EntityType type) {
-        EntityType existing = entityTypesByName.get(type.entityName);
+        String namespace = ensureNamespace(type);
+        final String fullName = namespace + '.' + type.entityName;
+        final String fullPlural = namespace + '.' + type.plural;
+
+        EntityType existing = entityTypesByName.get(fullName);
         if (existing == type) {
-            LOGGER.info("Entity type {} already registered.", type.entityName);
+            LOGGER.info("Entity type {} already registered.", fullName);
             return this;
         }
-        if (existing != null) {
-            LOGGER.error("Duplicate entity type name: {}", type.entityName);
-            throw new IllegalArgumentException("An entity type named " + type.entityName + " is already registered");
-        }
-        entityTypesByName.put(type.entityName, type);
-        entityTypesByName.put(type.plural, type);
+        Exceptions.illegalArgumentIf(existing != null, "Duplicate entity type name: {}", fullName);
+
+        entityTypesByName.put(fullName, type);
+        entityTypesByName.put(fullPlural, type);
         entityTypesAll.add(type);
         if (!type.isAdminOnly()) {
             entityTypesNonAdmin.add(type);
@@ -110,11 +147,30 @@ public class ModelRegistry {
      * @return the entity type with the given name, or null.
      */
     public final EntityType getEntityTypeForName(String typeName, boolean isAdmin) {
-        final EntityType type = entityTypesByName.get(typeName);
-        if (type == null) {
+        EntityType type = entityTypesByName.get(typeName);
+        if (type != null) {
+            return checkAdmin(type, isAdmin);
+        }
+
+        if (hasNamespace(typeName)) {
+            LOGGER.info("No entity type found for name {}", typeName);
             return null;
         }
-        if (!isAdmin && type.isAdminOnly()) {
+
+        for (String namespace : namespaces) {
+            final String fullName = namespace + '.' + typeName;
+            type = entityTypesByName.get(fullName);
+            if (type != null) {
+                LOGGER.info("Resolved entity type {} to {}", typeName, fullName);
+                return checkAdmin(type, isAdmin);
+            }
+        }
+        LOGGER.info("No entity type found for name {}", typeName);
+        return null;
+    }
+
+    private EntityType checkAdmin(EntityType type, boolean isAdmin) {
+        if (type.isAdminOnly() && !isAdmin) {
             return null;
         }
         return type;
@@ -177,5 +233,9 @@ public class ModelRegistry {
             customLinksHelper = new CustomLinksHelper(this, false, 0);
         }
         return customLinksHelper;
+    }
+
+    public static final String fullName(String namespace, String name) {
+        return namespace == null ? name : namespace + '.' + name;
     }
 }

@@ -89,7 +89,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         writer.write("<EntityType Name=\"" + name + "\">");
         writer.write("<Key>");
         for (String keyName : key) {
@@ -99,7 +99,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
         for (Entry<String, CsdlProperty> entry : properties.entrySet()) {
             String propName = entry.getKey();
             CsdlProperty property = entry.getValue();
-            property.writeXml(nameSpace, propName, writer);
+            property.writeXml(propName, writer);
         }
         for (CsdlAnnotation an : annotations) {
             an.writeXml(writer);

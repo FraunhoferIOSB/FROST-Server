@@ -21,8 +21,10 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.IOException;
 import java.io.Writer;
@@ -56,7 +58,8 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
     public CsdlPropertyNavigation generateFrom(CsdlDocument doc, String nameSpace, NavigationPropertyMain<?> np) {
-        type = nameSpace + "." + np.getType().getName();
+        final PropertyType targetType = np.getType();
+        type = ModelRegistry.fullName(targetType.getNamespace(), targetType.getName());
         final NavigationPropertyMain inverse = np.getInverse();
         if (inverse != null) {
             partner = inverse.getName();
@@ -85,7 +88,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     }
 
     @Override
-    public void writeXml(String nameSpace, String name, Writer writer) throws IOException {
+    public void writeXml(String name, Writer writer) throws IOException {
         String finalType = type;
         if (collection) {
             finalType = "Collection(" + type + ")";

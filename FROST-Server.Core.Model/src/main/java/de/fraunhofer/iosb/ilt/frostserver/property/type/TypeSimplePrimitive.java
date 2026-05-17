@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property.type;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import java.lang.reflect.Field;
@@ -126,8 +127,10 @@ public class TypeSimplePrimitive extends TypeSimple {
             }
             try {
                 final TypeSimplePrimitive primitive = (TypeSimplePrimitive) FieldUtils.readStaticField(field, false);
+                final String namespace = primitive.getNamespace();
                 final String name = primitive.getName();
-                TYPES.put(name, primitive);
+                final String fullName = ModelRegistry.fullName(namespace, name);
+                TYPES.put(fullName, primitive);
                 LOGGER.debug("Registered type: {}", name);
             } catch (IllegalArgumentException ex) {
                 LOGGER.error("Failed to initialise: {}", field, ex);

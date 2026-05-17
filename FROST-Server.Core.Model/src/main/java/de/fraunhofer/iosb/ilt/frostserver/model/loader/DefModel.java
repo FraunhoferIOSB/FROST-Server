@@ -24,13 +24,13 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorClass;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author hylke
+ * The PoJo for the Model definition.
  */
 @ConfigurableClass
 public class DefModel implements AnnotatedConfigurable<Void, Void> {
@@ -69,8 +69,10 @@ public class DefModel implements AnnotatedConfigurable<Void, Void> {
 
     public void registerPropertyTypes(ModelRegistry modelRegistry) {
         if (simplePropertyTypes != null) {
-            for (DefPropertyTypeSimple propertyType : simplePropertyTypes) {
-                modelRegistry.registerPropertyType(propertyType.getPropertyType());
+            for (DefPropertyTypeSimple propertyTypeDef : simplePropertyTypes) {
+                final PropertyType propertyType = propertyTypeDef.getPropertyType();
+                propertyType.setNamespace(namespace);
+                modelRegistry.registerPropertyType(propertyType);
             }
         }
     }

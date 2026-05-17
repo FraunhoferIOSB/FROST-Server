@@ -20,15 +20,16 @@ package de.fraunhofer.iosb.ilt.frostserver.property.type;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 
 /**
- *
- * @author hylke
+ * The ComplexType that represents a NavigationProperty to an Entity.
  */
 public class TypeEntity extends TypeComplex {
 
-    private EntityType entityType;
+    private final EntityType entityType;
 
     public TypeEntity(EntityType entityType) {
         super(entityType.entityName, "Entity Type " + entityType.entityName, false, null, null, null);
+        this.entityType = entityType;
+        setNamespace(entityType.getNamespace());
     }
 
     public EntityType getEntityType() {

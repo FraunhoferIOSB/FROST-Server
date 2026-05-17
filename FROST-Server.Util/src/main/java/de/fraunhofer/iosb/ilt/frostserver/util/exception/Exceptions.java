@@ -1,0 +1,69 @@
+/*
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package de.fraunhofer.iosb.ilt.frostserver.util.exception;
+
+import java.util.function.Supplier;
+import org.apache.commons.lang3.Strings;
+
+/**
+ * A collection of helper methods for throwing exceptions.
+ */
+public class Exceptions {
+
+    public static final void illegalArgumentIf(boolean predicate, String message, Object param1) {
+        if (predicate) {
+            throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1}));
+        }
+    }
+
+    public static final void illegalArgumentIf(boolean predicate, String message, Object param1, Object param2) {
+        if (predicate) {
+            throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1, param2}));
+        }
+    }
+
+    public static final void illegalArgumentIf(boolean predicate, String message, Object... params) {
+        if (predicate) {
+            throw new IllegalArgumentException(replacePlaceholders(message, params));
+        }
+    }
+
+    public static final void illegalArgumentIf(boolean predicate, Supplier<String> message) {
+        if (predicate) {
+            throw new IllegalArgumentException(message == null ? "Expected false." : message.get());
+        }
+    }
+
+    public static final String replacePlaceholders(String line, Object... params) {
+        StringBuilder replaced = new StringBuilder();
+        int idx = 0;
+        for (var param : params) {
+            int found = Strings.CS.indexOf(line, "{}", idx);
+            if (found == -1) {
+                break;
+            }
+            replaced.append(line.substring(idx, found))
+                    .append(param);
+            idx = found + 2;
+        }
+        if (idx < line.length()) {
+            replaced.append(line.substring(idx));
+        }
+        return replaced.toString();
+    }
+}
