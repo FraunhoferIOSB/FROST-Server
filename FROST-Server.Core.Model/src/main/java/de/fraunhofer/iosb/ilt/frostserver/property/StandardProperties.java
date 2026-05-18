@@ -26,6 +26,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimiti
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
@@ -122,7 +123,10 @@ public class StandardProperties {
                 Object fieldInstance = FieldUtils.readStaticField(field, false);
                 if (fieldInstance instanceof PropertyType pt) {
                     pt.setNamespace(NAMESPACE);
+                    final String namespace = pt.getNamespace();
                     final String name = pt.getName();
+                    final String fullName = ModelRegistry.fullName(namespace, name);
+                    TYPES.put(fullName, pt);
                     TYPES.put(name, pt);
                     LOGGER.debug("Registered type: {}", name);
                 }

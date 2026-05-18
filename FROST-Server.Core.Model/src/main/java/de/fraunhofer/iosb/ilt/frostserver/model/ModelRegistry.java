@@ -153,7 +153,7 @@ public class ModelRegistry {
         }
 
         if (hasNamespace(typeName)) {
-            LOGGER.info("No entity type found for name {}", typeName);
+            LOGGER.debug("No entity type found for name {}", typeName);
             return null;
         }
 
@@ -165,7 +165,7 @@ public class ModelRegistry {
                 return checkAdmin(type, isAdmin);
             }
         }
-        LOGGER.info("No entity type found for name {}", typeName);
+        LOGGER.debug("No entity type found for name {}", typeName);
         return null;
     }
 
@@ -190,7 +190,7 @@ public class ModelRegistry {
     public ModelRegistry registerPropertyType(PropertyType type) {
         String fullName = fullName(type.getNamespace(), type.getName());
         PropertyType old = propertyTypes.put(fullName, type);
-        if (old != null) {
+        if (old != null && old != type) {
             LOGGER.warn("Overwritten the property type {}", type);
         }
         return this;
