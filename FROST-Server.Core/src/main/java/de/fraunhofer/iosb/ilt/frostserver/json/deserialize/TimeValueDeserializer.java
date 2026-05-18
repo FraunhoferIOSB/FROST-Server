@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.NAM
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import net.time4j.Moment;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
@@ -72,9 +73,7 @@ public class TimeValueDeserializer extends StdDeserializer<TimeValue> {
         while (currentToken == JsonToken.PROPERTY_NAME) {
             final String fieldName = jp.currentName();
             currentToken = jp.nextToken();
-            if (currentToken != JsonToken.VALUE_STRING) {
-                throw new IllegalArgumentException("Found " + currentToken + " for " + fieldName + " expected a string");
-            }
+            Exceptions.illegalArgumentIf(currentToken != JsonToken.VALUE_STRING, "Found {} for {}, expected a string", currentToken, fieldName);
             final String valueAsString = jp.getValueAsString();
             switch (fieldName) {
                 case NAME_INTERVAL_START:
