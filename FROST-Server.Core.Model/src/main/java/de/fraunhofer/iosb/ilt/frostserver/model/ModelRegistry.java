@@ -188,29 +188,28 @@ public class ModelRegistry {
     }
 
     public ModelRegistry registerPropertyType(PropertyType type) {
-        PropertyType old = propertyTypes.put(type.getName(), type);
+        String fullName = fullName(type.getNamespace(), type.getName());
+        PropertyType old = propertyTypes.put(fullName, type);
         if (old != null) {
             LOGGER.warn("Overwritten the property type {}", type);
         }
         return this;
     }
 
-    public final PropertyType getPropertyType(String name) {
-        PropertyType type = propertyTypes.get(name);
+    public final PropertyType getPropertyType(String fullName) {
+        PropertyType type = propertyTypes.get(fullName);
         if (type != null) {
             return type;
         }
-        type = TypeSimplePrimitive.getType(name);
+        type = TypeSimplePrimitive.getType(fullName);
         if (type != null) {
             return type;
         }
-        type = StandardProperties.getType(name);
-        if (type != null) {
-            // This provided custom type was not registered yet, do it now.
-            registerPropertyType(type);
-            return type;
-        }
-        throw new IllegalArgumentException("unknown property type: " + name);
+        type = StandardProperties.getType(fullName);
+        Exceptions.illegalArgumentIf(type == null, "Unknown property type {}", fullName);
+        // This provided custom type was not registered yet, do it now.
+        registerPropertyType(type);
+        return type;
     }
 
     public Map<String, PropertyType> getPropertyTypes() {
