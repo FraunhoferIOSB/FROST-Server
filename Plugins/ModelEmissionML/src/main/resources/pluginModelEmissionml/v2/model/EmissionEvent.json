@@ -43,7 +43,7 @@
                 },
                 {
                     "name": "quantity",
-                    "type": "EmissionQuantity",
+                    "type": "org.OGC.EML.EmissionQuantity",
                     "required": true,
                     "handlers": [
                         {
@@ -59,7 +59,7 @@
                 },
                 {
                     "name": "startTime",
-                    "type": "TemporalBound",
+                    "type": "org.OGC.EML.TemporalBound",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.modelemissionml.FieldMapperEmissionTempBound",
@@ -71,7 +71,7 @@
                 },
                 {
                     "name": "endTime",
-                    "type": "TemporalBound",
+                    "type": "org.OGC.EML.TemporalBound",
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.modelemissionml.FieldMapperEmissionTempBound",
@@ -110,7 +110,7 @@
                 {
                     "name": "Mechanism",
                     "entitySet": false,
-                    "entityType": "Mechanism",
+                    "entityType": "org.OGC.EML.Mechanism",
                     "required": true,
                     "symmetrical": false,
                     "priority": 0,
@@ -134,7 +134,7 @@
                 {
                     "name": "StartTimeBasis",
                     "entitySet": false,
-                    "entityType": "DeterminationMethod",
+                    "entityType": "org.OGC.EML.DeterminationMethod",
                     "required": true,
                     "symmetrical": false,
                     "priority": 0,
@@ -158,7 +158,7 @@
                 {
                     "name": "EndTimeBasis",
                     "entitySet": false,
-                    "entityType": "DeterminationMethod",
+                    "entityType": "org.OGC.EML.DeterminationMethod",
                     "required": true,
                     "symmetrical": false,
                     "priority": 0,
@@ -182,7 +182,7 @@
                 {
                     "name": "QuantityBasis",
                     "entitySet": false,
-                    "entityType": "DeterminationMethod",
+                    "entityType": "org.OGC.EML.DeterminationMethod",
                     "required": true,
                     "symmetrical": false,
                     "priority": 0,
