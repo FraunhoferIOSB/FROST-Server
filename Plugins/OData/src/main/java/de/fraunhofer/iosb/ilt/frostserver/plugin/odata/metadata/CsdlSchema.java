@@ -54,11 +54,11 @@ public class CsdlSchema {
             }
         }
         for (Entry<String, PropertyType> entry : mr.getPropertyTypes().entrySet()) {
-            String name = entry.getKey();
             PropertyType value = entry.getValue();
             if (!namespace.equals(value.getNamespace())) {
                 continue;
             }
+            String name = value.getName();
             if (value instanceof TypeComplex tc) {
                 schemaItems.put(name, new CsdlItemComplexType().generateFrom(doc, namespace, tc));
             } else if (value instanceof TypeSimpleCustom tc) {
