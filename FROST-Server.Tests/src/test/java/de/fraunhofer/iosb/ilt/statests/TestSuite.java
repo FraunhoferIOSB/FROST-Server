@@ -99,6 +99,7 @@ import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.v2cud.GeoTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.ReferenceTests20;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -195,6 +196,7 @@ import tools.jackson.databind.JsonNode;
     ProjectAuthTestsBasicAnon11.class,
     TestSuite.SuiteFinaliser.class,
     ReferenceTests20.class,
+    GeoTests20.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite
