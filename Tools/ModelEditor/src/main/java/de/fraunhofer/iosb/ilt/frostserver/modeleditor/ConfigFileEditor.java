@@ -48,6 +48,7 @@ public class ConfigFileEditor {
     private final FileChooser fileChooser = new FileChooser();
     private final Class<?> editorClass;
     private File currentFile;
+    private String indent;
 
     public ConfigFileEditor(Class<?> editorClass) {
         this.editorClass = editorClass;
@@ -63,6 +64,14 @@ public class ConfigFileEditor {
             fileChooser.setInitialDirectory(currentFile.getParentFile());
             fileChooser.setInitialFileName(currentFile.getName());
         }
+    }
+
+    public String getIndent() {
+        return indent;
+    }
+
+    public void setIndent(String indent) {
+        this.indent = indent;
     }
 
     public void loadFromFileWithChooser(String title, Window window) {
@@ -109,17 +118,16 @@ public class ConfigFileEditor {
     }
 
     public void saveToFileWithChooser(JsonElement json, String title, Window window) {
-        String config = new GsonBuilder().setPrettyPrinting().create().toJson(json) + '\n';
         fileChooser.setTitle(title);
         File file = fileChooser.showSaveDialog(window);
         if (file == null) {
             return;
         }
         setCurrentFile(file);
-        saveStringToCurrentFile(config);
+        saveConfigToCurrentFile();
     }
 
-    public String saveConfigToCurrentFile(String indent) {
+    public String saveConfigToCurrentFile() {
         JsonElement json = configEditorModel.getConfig();
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (final StringWriter sw = new StringWriter()) {

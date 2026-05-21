@@ -108,8 +108,10 @@ public class FXMLController implements Initializable {
 
     @FXML
     private void actionSave(ActionEvent event) {
+        final String indentText = StringUtils.defaultString(textFieldIndent.getText());
         FileData fd = listViewEntityTypes.getSelectionModel().getSelectedItem();
         ConfigFileEditor cfe = fd.getEditor();
+        cfe.setIndent(indentText);
         cfe.saveModelWithChooser("Save Data Model", getWindow());
         fd.updateFileName();
     }
@@ -121,7 +123,8 @@ public class FXMLController implements Initializable {
         for (FileData fd : listViewEntityTypes.getItems()) {
             ConfigFileEditor cfe = fd.getEditor();
             try {
-                String data = cfe.saveConfigToCurrentFile(indentText);
+                cfe.setIndent(indentText);
+                String data = cfe.saveConfigToCurrentFile();
                 DefModel value = JsonWriter.getObjectMapper().readValue(data, DefModel.class);
                 models.add(value);
             } catch (JacksonException ex) {
