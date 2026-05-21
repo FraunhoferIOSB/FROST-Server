@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
@@ -70,9 +71,9 @@ import org.slf4j.LoggerFactory;
  * Tests for GET/POST/PUT/PATCH on $ref urls. Works on the V2 data model.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class ReferenceTests11 extends AbstractTestClass {
+public class ReferenceTests20 extends AbstractTestClass {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceTests11.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceTests20.class);
 
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> FEATURES = new ArrayList<>();
@@ -94,8 +95,8 @@ public class ReferenceTests11 extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.coreModelV2.enable", "true");
     }
 
-    public ReferenceTests11() {
-        super(ServerVersion.v_1_1, SERVER_PROPERTIES);
+    public ReferenceTests20() {
+        super(ServerVersion.v_2_0, SERVER_PROPERTIES);
     }
 
     @Override
@@ -397,7 +398,7 @@ public class ReferenceTests11 extends AbstractTestClass {
 
     public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, TimeInterval validTime, List<Entity> registry) throws ServiceFailureException {
         int idx = registry.size();
-        MapValue properties = new MapValue();
+        MapValue properties = new MapValue(TypeComplex.STA_MAP);
         properties.put("idx", idx);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
                 .setProperty(EP_VALIDTIME, validTime)
