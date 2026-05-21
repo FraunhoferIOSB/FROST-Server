@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
@@ -110,7 +111,7 @@ public abstract class MetadataTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException, URISyntaxException {
         Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
-        MapValue properties = new MapValue();
+        MapValue properties = new MapValue(TypeComplex.STA_MAP);
         thing1.setProperty(EP_PROPERTIES, properties);
         sSrvc.create(thing1);
         THINGS.add(thing1);

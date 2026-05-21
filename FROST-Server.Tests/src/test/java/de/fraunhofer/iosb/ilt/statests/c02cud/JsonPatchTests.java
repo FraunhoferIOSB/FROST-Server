@@ -43,6 +43,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.node.LongNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * @author Hylke van der Schaaf
@@ -165,9 +167,9 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals(1L, (Long) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
+        assertEquals(LongNode.valueOf(1), updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
         message = "properties/key0 was changed.";
-        assertEquals("zero", updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
+        assertEquals(StringNode.valueOf("zero"), updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
 
         patch = Json.createPatchBuilder()
                 .copy("/properties/keyCopy1", "/properties/key1")
@@ -178,13 +180,13 @@ public abstract class JsonPatchTests extends AbstractTestClass {
 
         final MapValue updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
         message = "properties/key0 was changed.";
-        assertEquals("zero", updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
+        assertEquals(StringNode.valueOf("zero"), updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
         message = "properties/keyCopy1 does not exist after copy.";
-        assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
+        assertEquals(LongNode.valueOf(1), updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
         assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        assertEquals(1L, (Long) updatedProperties.get("key2"), message);
+        assertEquals(LongNode.valueOf(1), updatedProperties.get("key2"), message);
     }
 
     @Test
@@ -198,7 +200,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals(2L, (Long) updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
+        assertEquals(new LongNode(2), updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
 
         // This patch should result in no change.
         patch = Json.createPatchBuilder()
@@ -209,7 +211,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
 
         final MapValue updatedProperties = updatedThing.getProperty(EP_PROPERTIES);
         message = "properties/key1 does not have the correct value.";
-        assertEquals(2L, updatedProperties.get("key1"), message);
+        assertEquals(LongNode.valueOf(2), updatedProperties.get("key1"), message);
     }
 
     /**
@@ -230,7 +232,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
 
         String message = "properties/key1 was not added correctly.";
-        assertEquals(1L, (Long) updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
+        assertEquals(LongNode.valueOf(1), updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
 
         patch = Json.createPatchBuilder()
                 .copy("/properties/keyCopy1", "/properties/key1")
@@ -241,11 +243,11 @@ public abstract class JsonPatchTests extends AbstractTestClass {
 
         final MapValue updatedProperties = updatedDs.getProperty(EP_PROPERTIES);
         message = "properties/keyCopy1 does not exist after copy.";
-        assertEquals(1L, (Long) updatedProperties.get("keyCopy1"), message);
+        assertEquals(LongNode.valueOf(1), updatedProperties.get("keyCopy1"), message);
         message = "properties/key1 still exists after move.";
         assertEquals(null, updatedProperties.get("key1"), message);
         message = "properties/key2 does not exist after move.";
-        assertEquals(1L, (Long) updatedProperties.get("key2"), message);
+        assertEquals(LongNode.valueOf(1), updatedProperties.get("key2"), message);
     }
 
 }

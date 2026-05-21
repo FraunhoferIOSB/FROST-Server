@@ -51,6 +51,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Includes various tests of "A.4. SensorThings API Batch Request Extension
@@ -464,7 +465,7 @@ public abstract class BatchTests extends AbstractTestClass {
 
             Entity updatedThing1 = sSrvc.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
             assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
-            assertEquals("Changes", updatedThing1.getProperty(EP_PROPERTIES).get("new"));
+            assertEquals(new StringNode("Changes"), updatedThing1.getProperty(EP_PROPERTIES).get("new"));
         } catch (JsonProcessingException ex) {
             fail("Failed to parse response as json.", ex);
         }

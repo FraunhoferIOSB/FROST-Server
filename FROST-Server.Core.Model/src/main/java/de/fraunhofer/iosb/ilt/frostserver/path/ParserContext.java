@@ -90,7 +90,7 @@ public class ParserContext {
             } else if (epm.hasCustomProperties()) {
                 return parseCustomProperty(decodedName);
             }
-            throw new IllegalArgumentException("Could not place " + propertyName + " under type " + type + " after " + previous + ": not an open type.");
+            throw new IllegalArgumentException("Could not place '" + propertyName + "' under type '" + type + "' after '" + previous + "': not an open type.");
         } else if (previous instanceof EntityPropertyCustom) {
             return parseCustomProperty(decodedName);
         }
@@ -102,7 +102,7 @@ public class ParserContext {
         if (entityProp != null) {
             return entityProp;
         }
-        throw new IllegalArgumentException("Could not place " + propertyName + " under type " + type + " after " + previous);
+        throw new IllegalArgumentException("Could not place '" + propertyName + "' under type '" + type + "' after '" + previous + "'");
     }
 
     private Property parseCustomProperty(String decodedName) {

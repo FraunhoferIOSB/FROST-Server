@@ -363,7 +363,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
 
             sSrvc.create(thing);
 
-            Entity tempThing = sSrvc.dao(thing.getEntityType()).find(thing.getPrimaryKeyValues());
+            Entity tempThing = sSrvc.dao(thing.getType()).find(thing.getPrimaryKeyValues());
             Entity tempDs = thing.query(sMdl.npThingDatastreams).first();
 
             futureThing.complete(eh2.getEntity(thing));
@@ -429,7 +429,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
 
             sSrvc.create(observation);
 
-            Entity tempObs = sSrvc.dao(observation.getEntityType()).find(observation.getPrimaryKeyValues());
+            Entity tempObs = sSrvc.dao(observation.getType()).find(observation.getPrimaryKeyValues());
             Entity tempFeature = tempObs.getProperty(sMdl.npObservationFeatureofinterest);
             Entity tempDs = tempObs.getProperty(sMdl.npObservationDatastream);
             Entity tempThing = tempDs.getProperty(sMdl.npDatastreamThing);
@@ -741,7 +741,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
      * @return a new entity of the given type.
      */
     private Entity newEntity(EntityType et) {
-        switch (et.entityName) {
+        switch (et.getName()) {
             case NAME_THING:
                 return eh2.newThing();
 

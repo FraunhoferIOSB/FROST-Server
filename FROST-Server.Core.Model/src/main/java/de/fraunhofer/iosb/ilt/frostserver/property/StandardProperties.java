@@ -71,7 +71,8 @@ public class StandardProperties {
     public static final String NAME_NAME = "name";
     public static final String NAME_SYMBOL = "symbol";
 
-    public static final PropertyType STA_LOCATION = new TypeSimpleCustom(STA_GEOJSON_NAME, "A Free Location object", EDM_GEOMETRY).setDeserializer(ParserUtils.getLocationDeserializer());
+    public static final PropertyType STA_LOCATION = new TypeSimpleCustom(STA_GEOJSON_NAME, "A Free Location object", EDM_GEOMETRY)
+            .setDeserializer(ParserUtils.getLocationDeserializer());
     public static final PropertyType STA_TM_INSTANT = new TypeSimpleCustom(STA_TM_INSTANT_NAME, "A Time Instant", EDM_DATETIMEOFFSET);
 
     public static final TypeComplex STA_MAP = new TypeComplex(STA_MAP_NAME, "A free object that can contain anything", true, MapValue::new, ParserUtils.getTreeNodeDeserializer(), ParserUtils.getTreeNodeSerializer());

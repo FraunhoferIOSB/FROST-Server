@@ -108,7 +108,7 @@ public class EntityHelper2 {
      * @param entity the entity to add to the cache.
      */
     public void cache(Entity entity) {
-        getCache(entity.getEntityType()).add(entity);
+        getCache(entity.getType()).add(entity);
     }
 
     /**
@@ -172,23 +172,23 @@ public class EntityHelper2 {
      * on the server.
      */
     public JsonNode getEntity(Entity entity) {
-        return getEntity(entity.getEntityType(), entity.getPrimaryKeyValues());
+        return getEntity(entity.getType(), entity.getPrimaryKeyValues());
     }
 
     public JsonNode getEntity(Entity entity, List<String> select) {
-        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), null, select, null, null);
+        return EntityHelper2.this.getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), null, select, null, null);
     }
 
     public JsonNode getEntity(Entity entity, List<String> select, String expand) {
-        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), null, select, expand, null);
+        return EntityHelper2.this.getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), null, select, expand, null);
     }
 
     public JsonNode getEntity(Entity entity, NavigationProperty np) {
-        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), np, null, null, null);
+        return EntityHelper2.this.getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), np, null, null, null);
     }
 
     public JsonNode getEntity(Entity entity, NavigationProperty np, List<String> select, String expand, String orderby) {
-        return EntityHelper2.this.getEntityJson(entity.getEntityType(), entity.getPrimaryKeyValues(), np, select, expand, orderby);
+        return EntityHelper2.this.getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), np, select, expand, orderby);
     }
 
     public JsonNode getEntity(EntityType entityType) {
@@ -227,7 +227,7 @@ public class EntityHelper2 {
 
     public String createUrl(Entity target) {
         return sSrvc.getVersion().getUrlPart()
-                + '/' + target.getEntityType().getMainSetName()
+                + '/' + target.getType().getMainSetName()
                 + '(' + Utils.quoteForUrl(target.getPrimaryKeyValues().get(0)) + ')';
     }
 
@@ -527,7 +527,7 @@ public class EntityHelper2 {
     }
 
     public List<String> changeEntity(Entity original) throws IllegalArgumentException {
-        switch (original.getEntityType().entityName) {
+        switch (original.getType().getName()) {
             case NAME_THING:
                 original.setProperty(EP_NAME, "UpdatedName")
                         .setProperty(EP_DESCRIPTION, "Updated Description");
@@ -607,7 +607,7 @@ public class EntityHelper2 {
                         EP_TIME.getName());
 
             default:
-                throw new IllegalArgumentException("Don't know how to patch a " + original.getEntityType());
+                throw new IllegalArgumentException("Don't know how to patch a " + original.getType());
 
         }
     }
@@ -619,16 +619,16 @@ public class EntityHelper2 {
     }
 
     public JsonNode sendHttpPutEntity(Entity entity) {
-        EntityType entityType = entity.getEntityType();
+        EntityType entityType = entity.getType();
         PkValue pk = entity.getPrimaryKeyValues();
         String urlString = sSrvc.getBaseUrl().toString()
                 + '/' + entityType.mainSet
                 + '(' + Utils.quoteForUrl(pk.get(0)) + ')';
         try {
-            String data = JsonWriter.writeEntity(entity);
+            String data = JsonWriter.writeEntity(sSrvc.getVersion(), entity);
             HTTPMethods.HttpResponse responseMap = HTTPMethods.doPut(urlString, data);
             int responseCode = responseMap.code;
-            String message = "Error during updating(PUT) of entity " + entityType.entityName + ": " + responseMap.response;
+            String message = "Error during updating(PUT) of entity " + entityType.getName() + ": " + responseMap.response;
             assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
             JsonNode result = Utils.MAPPER.readTree(responseMap.response);

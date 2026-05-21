@@ -105,6 +105,7 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
             }
             return new SensorThingsService(baseService.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                    .setVersion(baseService.getVersion())
                     .init();
         } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);

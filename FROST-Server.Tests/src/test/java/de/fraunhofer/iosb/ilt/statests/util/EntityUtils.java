@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
@@ -65,8 +66,6 @@ import tools.jackson.databind.JsonNode;
 
 /**
  * Utility methods for comparing results and cleaning the service.
- *
- * @author Hylke van der Schaaf
  */
 public class EntityUtils {
 
@@ -121,7 +120,7 @@ public class EntityUtils {
         }
         if (!testExpectedList.isEmpty()) {
             LOGGER.info("Expected entity {} not found in result.", testExpectedList.get(0));
-            return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result.");
+            return new ResultTestResult(false, testExpectedList.size() + " expected entities not in result. First: " + testExpectedList.get(0));
         }
         return new ResultTestResult(true, "Check ok.");
     }
@@ -163,7 +162,7 @@ public class EntityUtils {
     }
 
     private static ResultTestResult compareNavprops(Entity nextResult, Entity inExpectedList) throws ServiceFailureException {
-        for (NavigationPropertyEntity np : nextResult.getEntityType().getNavigationEntities()) {
+        for (NavigationPropertyEntity np : nextResult.getType().getNavigationEntities()) {
             Entity resultChild = nextResult.getProperty(np, false);
             Entity expectedChild = inExpectedList.getProperty(np, false);
             if (resultChild != null && expectedChild == null) {
@@ -180,7 +179,7 @@ public class EntityUtils {
                 }
             }
         }
-        for (NavigationPropertyEntitySet np : nextResult.getEntityType().getNavigationSets()) {
+        for (NavigationPropertyEntitySet np : nextResult.getType().getNavigationSets()) {
             EntitySet resultChild = nextResult.getProperty(np, false);
             EntitySet expectedChild = inExpectedList.getProperty(np, false);
             if (resultChild == null || resultChild.isEmpty()) {
@@ -228,7 +227,7 @@ public class EntityUtils {
             deleteAll(service.dao(mr.getEntityTypeForName("Thing")));
         }
         for (de.fraunhofer.iosb.ilt.frostclient.model.EntityType et : mr.getEntityTypes()) {
-            if ("user".equalsIgnoreCase(et.entityName)) {
+            if ("user".equalsIgnoreCase(et.getName())) {
                 // Can't usually delete users.
                 continue;
             }
@@ -521,7 +520,7 @@ public class EntityUtils {
 
     public static void compareEntityWithRemote(SensorThingsService service, Entity expected, List<EntityPropertyMain> properties) {
         try {
-            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getEntityType();
+            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getType();
             final Entity found = service.dao(entityType).find(expected.getPrimaryKeyValues());
             final List<EntityPropertyMain> toCheck = new ArrayList<>(properties);
             if (toCheck.isEmpty()) {
@@ -543,7 +542,7 @@ public class EntityUtils {
 
     public static void compareEntityWithRemote(SensorThingsService service, Entity expected, NavigationPropertyEntity property) {
         try {
-            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getEntityType();
+            final de.fraunhofer.iosb.ilt.frostclient.model.EntityType entityType = expected.getType();
             final Entity found = service.dao(entityType).find(expected.getPrimaryKeyValues());
             final Entity linkedExpected = expected.getProperty(property);
             final Entity linkedFound = found.getProperty(property);
@@ -712,7 +711,7 @@ public class EntityUtils {
 
     public static Entity createObservation(SensorThingsService srvc, Entity datastream, long result, ZonedDateTime phenomenonTime, TimeInterval validTime, List<Entity> registry) throws ServiceFailureException {
         int idx = registry.size();
-        MapValue parameters = new MapValue();
+        MapValue parameters = new MapValue(TypeComplex.STA_MAP);
         parameters.put("idx", idx);
         SensorThingsV11Sensing sMdl = srvc.getModel(SensorThingsV11Sensing.class);
         Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)

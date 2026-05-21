@@ -85,11 +85,11 @@ public class AuthTestHelper {
         try {
             service.create(entity);
         } catch (StatusCodeException ex) {
-            String failMessage = "User " + user + " should be able to create " + entity.getEntityType() + ". Response:\n" + ex.getReturnedContent();
+            String failMessage = "User " + user + " should be able to create " + entity.getType() + ". Response:\n" + ex.getReturnedContent();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to create " + entity.getEntityType();
+            String failMessage = "User " + user + " should be able to create " + entity.getType();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
@@ -97,7 +97,7 @@ public class AuthTestHelper {
     }
 
     public void createForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
-        String failMessage = "User " + user + " should NOT be able to create " + entity.getEntityType();
+        String failMessage = "User " + user + " should NOT be able to create " + entity.getType();
         try {
             service.create(entity);
             fail(failMessage);
@@ -111,7 +111,7 @@ public class AuthTestHelper {
         try {
             service.update(entity);
         } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to update " + entity.getEntityType() + " got " + ex.getMessage();
+            String failMessage = "User " + user + " should be able to update " + entity.getType() + " got " + ex.getMessage();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
@@ -122,7 +122,7 @@ public class AuthTestHelper {
         try {
             service.update(entity);
         } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to update " + entity.getEntityType() + " got " + ex.getMessage();
+            String failMessage = "User " + user + " should be able to update " + entity.getType() + " got " + ex.getMessage();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
@@ -130,7 +130,7 @@ public class AuthTestHelper {
     }
 
     public void updateForFail(String user, SensorThingsService service, Entity entity, SensorThingsService validator, Entity original, int... expectedCodes) {
-        String failMessage = "User " + user + " should NOT be able to update " + entity.getEntityType();
+        String failMessage = "User " + user + " should NOT be able to update " + entity.getType();
         try {
             service.update(entity);
             fail(failMessage);
@@ -144,7 +144,7 @@ public class AuthTestHelper {
         try {
             service.delete(entity);
         } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to delete " + entity.getEntityType();
+            String failMessage = "User " + user + " should be able to delete " + entity.getType();
             LOGGER.error(failMessage, ex);
             fail(failMessage);
         }
@@ -152,7 +152,7 @@ public class AuthTestHelper {
     }
 
     public void deleteForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
-        String failMessage = "User " + user + " should NOT be able to delete " + entity.getEntityType();
+        String failMessage = "User " + user + " should NOT be able to delete " + entity.getType();
         try {
             service.delete(entity);
             fail(failMessage);

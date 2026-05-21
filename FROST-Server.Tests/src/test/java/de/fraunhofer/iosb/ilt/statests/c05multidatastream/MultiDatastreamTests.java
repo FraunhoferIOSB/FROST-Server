@@ -168,7 +168,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
 
     private static void createObservation(Entity ds, double result) throws ServiceFailureException {
         Entity o;
-        if (sMdl.etDatastream.equals(ds.getEntityType())) {
+        if (sMdl.etDatastream.equals(ds.getType())) {
             o = sMdl.newObservation(result, ds);
         } else {
             createObservationMds(ds, result);
@@ -180,7 +180,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
 
     private static void createObservationMds(Entity ds, double... result) throws ServiceFailureException {
         Entity o;
-        if (sMdl.etDatastream.equals(ds.getEntityType())) {
+        if (sMdl.etDatastream.equals(ds.getType())) {
             o = sMdl.newObservation(result, ds);
         } else {
             o = mMdl.newObservation(result, ds);

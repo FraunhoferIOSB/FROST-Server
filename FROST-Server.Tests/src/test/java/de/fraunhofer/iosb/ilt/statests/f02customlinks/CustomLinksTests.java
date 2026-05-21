@@ -51,6 +51,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.node.LongNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Tests custom entity links.
@@ -183,12 +186,12 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         String expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Things("
                 + Utils.quoteForUrl(THINGS.get(0).getPrimaryKeyValues().get(0)) + ")";
-        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
+        assertEquals(new StringNode(expected), navLink, "Custom link does not have (correct) navigationLink.");
         navLink = thing.getProperty(EP_PROPERTIES).get("alternate.Location@iot.navigationLink");
         expected = getServerSettings().getServiceRootUrl()
                 + "/" + version.urlPart + "/Locations("
                 + Utils.quoteForUrl(LOCATIONS.get(0).getPrimaryKeyValues().get(0)) + ")";
-        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
+        assertEquals(new StringNode(expected), navLink, "Custom link does not have (correct) navigationLink.");
     }
 
     @Test
@@ -203,15 +206,15 @@ public abstract class CustomLinksTests extends AbstractTestClass {
                 + "/" + version.urlPart + "/Things("
                 + Utils.quoteForUrl(THINGS.get(0).getPrimaryKeyValues().get(0)) + ")";
         Object navLink = thing.getProperty(EP_PROPERTIES).get("parent.Thing@iot.navigationLink");
-        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
+        assertEquals(new StringNode(expected), navLink, "Custom link does not have (correct) navigationLink.");
 
         expected = THINGS.get(0).getProperty(EP_NAME);
         Object parent = thing.getProperty(EP_PROPERTIES).get("parent.Thing");
-        if (!(parent instanceof Map)) {
+        if (!(parent instanceof ObjectNode)) {
             fail("parent.Thing did not expand.");
         }
-        Object name = ((Map) parent).get("name");
-        assertEquals(expected, name, "Custom link does not have (correct) navigationLink.");
+        Object name = ((ObjectNode) parent).get("name");
+        assertEquals(new StringNode(expected), name, "Custom link does not have (correct) navigationLink.");
     }
 
     @Test
@@ -226,15 +229,16 @@ public abstract class CustomLinksTests extends AbstractTestClass {
                 + "/" + version.urlPart + "/Things("
                 + Utils.quoteForUrl(THINGS.get(0).getPrimaryKeyValues().get(0)) + ")";
         Object navLink = thing.getProperty(EP_PROPERTIES).get("parent.Thing@iot.navigationLink");
-        assertEquals(expected, navLink, "Custom link does not have (correct) navigationLink.");
+        assertEquals(new StringNode(expected), navLink, "Custom link does not have (correct) navigationLink.");
 
         Object parent = thing.getProperty(EP_PROPERTIES).get("parent.Thing");
-        if (!(parent instanceof Map)) {
+        if (!(parent instanceof ObjectNode)) {
             fail("parent.Thing did not expand.");
         }
-        Map<String, Object> properties = (Map<String, Object>) parent;
-        assertFalse(properties.containsKey("name"), "Name should not have been expanded.");
-        assertEquals(THINGS.get(0).getProperty(EP_ID), properties.get("@iot.id"), "id not correctly expanded.");
+        ObjectNode properties = (ObjectNode) parent;
+        assertFalse(properties.has("name"), "Name should not have been expanded.");
+        final Long expectedId = (Long) THINGS.get(0).getProperty(EP_ID);
+        assertEquals(LongNode.valueOf(expectedId), properties.get("@iot.id"), "id not correctly expanded.");
     }
 
     @Test
@@ -247,8 +251,8 @@ public abstract class CustomLinksTests extends AbstractTestClass {
                 .list()
                 .toList();
         String expected = LOCATIONS.get(0).getProperty(EP_NAME);
-        Map<String, Object> alternateLocation = (Map<String, Object>) things.get(0).getProperty(EP_PROPERTIES).get("alternate.Location");
-        assertEquals(expected, alternateLocation.get("name"), "Expanded custom Location does not have correct name.");
+        ObjectNode alternateLocation = (ObjectNode) things.get(0).getProperty(EP_PROPERTIES).get("alternate.Location");
+        assertEquals(new StringNode(expected), alternateLocation.get("name"), "Expanded custom Location does not have correct name.");
     }
 
     @Test

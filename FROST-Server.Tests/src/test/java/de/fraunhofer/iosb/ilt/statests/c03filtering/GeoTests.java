@@ -514,6 +514,15 @@ public abstract class GeoTests extends AbstractTestClass {
         testFilterResults(sSrvc.dao(sMdl.etDatastream),
                 "observedArea/type eq 'LineString'",
                 getFromList(DATASTREAMS, 0));
+        testFilterResults(sSrvc.dao(sMdl.etLocation),
+                "location/type eq 'Point'",
+                getFromList(LOCATIONS, 0, 1, 2));
+        testFilterResults(sSrvc.dao(sMdl.etLocation),
+                "location/geometry/type eq 'Point'",
+                getFromList(LOCATIONS, 3));
+        testFilterResults(sSrvc.dao(sMdl.etLocation),
+                "location/type eq 'LineString'",
+                getFromList(LOCATIONS, 5, 6, 7));
     }
 
     /**

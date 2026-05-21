@@ -756,7 +756,7 @@ public class MqttHelper2 {
             try {
                 message = "Started for " + name;
                 Entity entity = entityCreator.create(name);
-                String json = JsonWriter.writeEntity(entity);
+                String json = JsonWriter.writeEntity(mh.sSrvc.getVersion(), entity);
                 LOGGER.debug("Publising for {}", name);
                 mh.publish(topic, json, expectedExceptions);
                 LOGGER.debug("  Checking creation for {}", name);
