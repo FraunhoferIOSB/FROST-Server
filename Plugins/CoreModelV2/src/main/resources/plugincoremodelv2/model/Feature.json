@@ -80,6 +80,7 @@
                     "type": "Geometry",
                     "required": true,
                     "nullable": false,
+                    "hasCustomProperties": true,
                     "handlers": [
                         {
                             "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperGeometry",
