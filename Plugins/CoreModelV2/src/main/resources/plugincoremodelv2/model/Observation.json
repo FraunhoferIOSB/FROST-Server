@@ -121,7 +121,7 @@
                     "annotations": []
                 },
                 {
-                    "name": "proximateFeatureOfInterest",
+                    "name": "ProximateFeatureOfInterest",
                     "entitySet": false,
                     "entityType": "org.OGC.STA.Feature",
                     "required": false,
