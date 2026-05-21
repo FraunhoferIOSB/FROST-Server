@@ -32,8 +32,7 @@ import org.jooq.Name;
 import org.jooq.Table;
 
 /**
- *
- * @author hylke
+ * Maps time intervals to database fields.
  */
 public class FieldMapperTimeInterval extends FieldMapperAbstractEp {
 

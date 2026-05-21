@@ -44,9 +44,7 @@ public class TimeIntervalSerializer extends ValueSerializer<TimeInterval> {
             final Moment start = interval.getStartAsMoment();
             final Moment end = interval.getEndAsMoment();
             gen.writePOJOProperty(NAME_INTERVAL_START, FORMAT_MOMENT.print(start));
-            if (!start.equals(end)) {
-                gen.writePOJOProperty(NAME_INTERVAL_END, FORMAT_MOMENT.print(end));
-            }
+            gen.writePOJOProperty(NAME_INTERVAL_END, FORMAT_MOMENT.print(end));
             gen.writeEndObject();
         }
     }
