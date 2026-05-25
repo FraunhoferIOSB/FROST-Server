@@ -162,6 +162,7 @@ public class ModelRegistry {
             type = entityTypesByName.get(fullName);
             if (type != null) {
                 LOGGER.info("Resolved entity type {} to {}", typeName, fullName);
+                entityTypesByName.put(typeName, type);
                 return checkAdmin(type, isAdmin);
             }
         }
