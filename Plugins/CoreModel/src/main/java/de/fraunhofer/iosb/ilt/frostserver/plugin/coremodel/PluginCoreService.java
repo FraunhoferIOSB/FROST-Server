@@ -267,7 +267,7 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
             case UPDATE_ALL:
             case UPDATE_CHANGES:
             case UPDATE_CHANGESET:
-                request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 return mainService.execute(request, response);
 
             default:

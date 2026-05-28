@@ -37,11 +37,11 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.SequencedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +142,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         final String requestType = PluginManager.decodeRequestType(plugin, version, path, method, request.getContentType());
         final boolean head = method == HttpMethod.HEAD;
 
-        final Map<String, List<String>> parameterMap = UrlHelper.splitQuery(request.getQueryString());
+        final Map<String, SequencedSet<String>> parameterMap = UrlHelper.splitQuery(request.getQueryString());
         decodeAccepHeader(request, parameterMap);
         decodePreferHeader(request, parameterMap);
 
@@ -165,7 +165,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         Enumeration<String> attributeNames = request.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             String name = attributeNames.nextElement();
-            serviceRequest.setAttribute(name, request.getAttribute(name));
+            serviceRequest.setParameter(name, Objects.toString(request.getAttribute(name)));
         }
 
         logServiceRequest(request, serviceRequest);
@@ -228,20 +228,16 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         }
     }
 
-    private static void decodeAccepHeader(HttpServletRequest request, final Map<String, List<String>> parameterMap) {
+    private static void decodeAccepHeader(HttpServletRequest request, final Map<String, SequencedSet<String>> parameterMap) {
         String accept = request.getHeader(HEADER_ACCEPT);
         if (accept != null) {
-            parameterMap.putIfAbsent(HEADER_ACCEPT, Arrays.asList(accept));
+            parameterMap.computeIfAbsent(HEADER_ACCEPT, t -> new LinkedHashSet<>()).add(accept);
         }
     }
 
-    private static void decodePreferHeader(HttpServletRequest request, final Map<String, List<String>> parameterMap) {
-        LinkedHashMap<String, String> prefer = new LinkedHashMap<>();
+    private static void decodePreferHeader(HttpServletRequest request, final Map<String, SequencedSet<String>> parameterMap) {
         for (Enumeration<String> en = request.getHeaders(HEADER_PREFER); en.hasMoreElements();) {
-            UrlHelper.decodePrefer(en.nextElement(), prefer);
-        }
-        for (Map.Entry<String, String> entry : prefer.entrySet()) {
-            parameterMap.putIfAbsent(entry.getKey(), Arrays.asList(entry.getValue()));
+            UrlHelper.decodePrefer(en.nextElement(), parameterMap);
         }
     }
 

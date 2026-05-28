@@ -216,7 +216,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
             case CREATE:
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
-                    request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                    request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
                 request.setUpdateMode(isOdata401 ? INSERT_ODATA_401 : INSERT_ODATA_40);
                 return mainService.execute(request, response);
@@ -225,7 +225,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
             case UPDATE_CHANGES:
             case UPDATE_CHANGESET:
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
-                    request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                    request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
                 request.setUpdateMode(isOdata401 ? UPDATE_ODATA_401 : UPDATE_ODATA_40);
                 return mainService.execute(request, response);

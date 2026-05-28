@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_ACCEPT;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
@@ -44,8 +46,10 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
@@ -400,7 +404,7 @@ public class UrlHelper {
         return '"' + StringEscapeUtils.escapeJson(in.toString()) + '"';
     }
 
-    public static Map<String, List<String>> splitQuery(String queryString) {
+    public static Map<String, SequencedSet<String>> splitQuery(String queryString) {
         if (StringHelper.isNullOrEmpty(queryString)) {
             return new LinkedHashMap<>();
         }
@@ -409,7 +413,7 @@ public class UrlHelper {
                 .collect(Collectors.groupingBy(
                         AbstractMap.SimpleImmutableEntry::getKey,
                         LinkedHashMap::new,
-                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toCollection(LinkedHashSet::new))));
     }
 
     private static AbstractMap.SimpleImmutableEntry<String, String> splitQueryParameter(String it) {
@@ -421,7 +425,30 @@ public class UrlHelper {
                 value == null ? null : URLDecoder.decode(value, StringHelper.UTF8));
     }
 
-    public static Map<String, String> decodePrefer(String input, Map<String, String> output) {
+    public static Map<String, SequencedSet<String>> decodeHeaders(Map<String, List<String>> input, Map<String, SequencedSet<String>> output) {
+        if (output == null) {
+            output = new HashMap<>();
+        }
+        if (input == null || input.isEmpty()) {
+            return output;
+        }
+        for (var entry : input.entrySet()) {
+            String key = entry.getKey();
+            if (HEADER_PREFER.equalsIgnoreCase(key)) {
+                for (String value : entry.getValue()) {
+                    decodePrefer(value, output);
+                }
+            } else if (HEADER_ACCEPT.equalsIgnoreCase(key)) {
+                for (String value : entry.getValue()) {
+                    output.computeIfAbsent(HEADER_ACCEPT, t -> new LinkedHashSet<>())
+                            .add(value);
+                }
+            }
+        }
+        return output;
+    }
+
+    public static Map<String, SequencedSet<String>> decodePrefer(String input, Map<String, SequencedSet<String>> output) {
         if (output == null) {
             output = new HashMap<>();
         }
@@ -436,11 +463,13 @@ public class UrlHelper {
             String[] subParts = StringUtils.split(part, "=", 2);
             switch (subParts.length) {
                 case 2 -> {
-                    output.put(subParts[0].trim(), subParts[1].trim());
+                    output.computeIfAbsent(subParts[0].trim(), t -> new LinkedHashSet<>())
+                            .add(subParts[1].trim());
                 }
 
                 case 1 -> {
-                    output.put(subParts[0].trim(), "");
+                    output.computeIfAbsent(subParts[0].trim(), t -> new LinkedHashSet<>())
+                            .add("");
                 }
 
                 default -> {

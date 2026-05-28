@@ -29,7 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import java.io.IOException;
-import java.util.List;
+import java.util.SequencedSet;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 
@@ -77,11 +77,11 @@ public class ServiceOpenApi {
     }
 
     public static boolean paramValueAsBool(ServiceRequest request, String name, boolean dflt) {
-        List<String> values = request.getParameterMap().get(name);
+        SequencedSet<String> values = request.getParameterMap().get(name);
         if (values == null || values.isEmpty()) {
             return dflt;
         }
-        String value = values.get(0);
+        String value = values.getFirst();
         if (value == null) {
             return dflt;
         }
@@ -89,11 +89,11 @@ public class ServiceOpenApi {
     }
 
     public static int paramValueAsInt(ServiceRequest request, String name, int dflt) {
-        List<String> values = request.getParameterMap().get(name);
+        SequencedSet<String> values = request.getParameterMap().get(name);
         if (values == null || values.isEmpty()) {
             return dflt;
         }
-        String value = values.get(0);
+        String value = values.getFirst();
         if (value == null) {
             return dflt;
         }

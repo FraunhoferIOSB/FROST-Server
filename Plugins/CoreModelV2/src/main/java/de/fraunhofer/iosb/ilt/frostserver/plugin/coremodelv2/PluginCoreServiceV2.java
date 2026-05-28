@@ -242,7 +242,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             case UPDATE_CHANGES:
             case UPDATE_CHANGESET:
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
-                    request.addParameterIfAbsent(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
+                    request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
                 return mainService.execute(request, response);
 

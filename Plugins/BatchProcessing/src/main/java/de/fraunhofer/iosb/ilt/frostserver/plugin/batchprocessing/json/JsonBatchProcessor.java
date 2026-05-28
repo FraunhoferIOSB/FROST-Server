@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
@@ -295,6 +296,10 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                 .setUrl(path)
                 .setContent(requestBody)
                 .setUserPrincipal(request.getUserPrincipal());
+        final Map<String, List<String>> headers = requestItem.getHeaders();
+        if (headers != null) {
+            UrlHelper.decodeHeaders(headers, serviceRequest.getParameterMap());
+        }
 
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
         plugin.execute(service, serviceRequest, serviceResponse);

@@ -35,10 +35,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.SequencedSet;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,27 +59,12 @@ public class ServiceRequest {
     private InputStream contentBinary;
     private Version version;
     private String contentType;
-    private Map<String, List<String>> parameterMap;
-    private Map<String, Object> attributeMap = new HashMap<>();
+    private Map<String, SequencedSet<String>> parameterMap;
     private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
     private CoreSettings coreSettings;
     private QueryDefaults queryDefaults;
     private EditFeatures updateMode;
     private JsonReader jsonReader;
-
-    public Map<String, Object> getAttributeMap() {
-        return attributeMap;
-    }
-
-    public ServiceRequest setAttributeMap(Map<String, Object> attributeMap) {
-        this.attributeMap = attributeMap;
-        return this;
-    }
-
-    public ServiceRequest setAttribute(String key, Object value) {
-        attributeMap.put(key, value);
-        return this;
-    }
 
     public CoreSettings getCoreSettings() {
         return coreSettings;
@@ -187,14 +172,14 @@ public class ServiceRequest {
         return this;
     }
 
-    public Map<String, List<String>> getParameterMap() {
+    public Map<String, SequencedSet<String>> getParameterMap() {
         if (parameterMap == null) {
             parameterMap = new HashMap<>();
         }
         return parameterMap;
     }
 
-    public ServiceRequest setParameterMap(Map<String, List<String>> parameterMap) {
+    public ServiceRequest setParameterMap(Map<String, SequencedSet<String>> parameterMap) {
         this.parameterMap = parameterMap;
         return this;
     }
@@ -207,15 +192,23 @@ public class ServiceRequest {
         if (parameterMap == null) {
             return dflt;
         }
-        List<String> list = parameterMap.get(parameter);
+        SequencedSet<String> list = parameterMap.get(parameter);
         if (list == null || list.isEmpty()) {
             return dflt;
         }
-        return list.get(0);
+        return list.getFirst();
     }
 
-    public ServiceRequest addParameterIfAbsent(String name, String value) {
-        getParameterMap().putIfAbsent(name, Arrays.asList(value));
+    public ServiceRequest setParameter(String name, String value) {
+        final LinkedHashSet<String> newSet = new LinkedHashSet<>();
+        newSet.add(value);
+        getParameterMap().put(name, newSet);
+        return this;
+    }
+
+    public ServiceRequest addParameter(String name, String value) {
+        getParameterMap().computeIfAbsent(name, t -> new LinkedHashSet<>())
+                .add(value);
         return this;
     }
 

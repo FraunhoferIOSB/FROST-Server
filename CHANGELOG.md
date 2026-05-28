@@ -3,9 +3,11 @@
 ## Version 2.8.0-SNAPSHOT
 
 **New Features**
+* Implemented V2 API with HTTP bindings.
+* Implemented handling of nested complex properties.
 
 **Internal changes & Bugfixes**
-* Implemented V2 API with HTTP bindings.
+* Fixed prefer-header not working in batch requests.
 * Updated V2 model to latest spec version.
 * Improved model editor:
   * Ensure main tables are generated before link tables.
