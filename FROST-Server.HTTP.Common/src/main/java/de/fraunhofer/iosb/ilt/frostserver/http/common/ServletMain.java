@@ -104,6 +104,8 @@ public class ServletMain extends HttpServlet {
         } catch (IllegalArgumentException exc) {
             sendResponse(new ServiceResponseHttpServlet(response, 400, exc.getMessage()), response);
         } catch (IOException exc) {
+            LOGGER.info("Failed to execute request: {}", exc.getMessage());
+            LOGGER.debug("Exception:", exc);
             sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);
         }
     }

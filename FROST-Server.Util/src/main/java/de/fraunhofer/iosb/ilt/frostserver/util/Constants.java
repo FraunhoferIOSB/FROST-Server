@@ -22,6 +22,11 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
  */
 public class Constants {
 
+    public static final String CONTENT_ENCODING = "Content-Encoding";
+    public static final String CONTENT_ENCODING_DEFLATE = "deflate";
+    public static final String CONTENT_ENCODING_GZIP = "gzip";
+    public static final String CONTENT_ENCODING_XGZIP = "x-gzip";
+
     public static final String CONTENT_TYPE = "content-type";
     public static final String CONTENT_TYPE_MULTIPART_MIXED = "multipart/mixed";
     public static final String CONTENT_TYPE_APPLICATION_GEOJSON = "application/geo+json";

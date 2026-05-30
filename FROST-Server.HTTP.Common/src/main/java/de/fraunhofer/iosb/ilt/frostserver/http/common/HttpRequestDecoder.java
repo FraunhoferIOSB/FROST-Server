@@ -17,6 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.http.common;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_ENCODING;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_ENCODING_DEFLATE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_ENCODING_GZIP;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_ENCODING_XGZIP;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_ACCEPT;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
 
@@ -36,12 +40,15 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SequencedSet;
+import java.util.zip.GZIPInputStream;
+import org.apache.http.client.entity.DeflateInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,6 +153,18 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         decodeAccepHeader(request, parameterMap);
         decodePreferHeader(request, parameterMap);
 
+        final String contentEncoding = request.getHeader(CONTENT_ENCODING);
+        InputStream is = request.getInputStream();
+        if (!StringHelper.isNullOrEmpty(contentEncoding)) {
+            if (contentEncoding.startsWith(CONTENT_ENCODING_GZIP) || contentEncoding.startsWith(CONTENT_ENCODING_XGZIP)) {
+                is = new GZIPInputStream(is);
+            } else if (contentEncoding.startsWith(CONTENT_ENCODING_DEFLATE)) {
+                is = new DeflateInputStream(is);
+            } else {
+                LOGGER.info("Unknown Content-Encoding: {}", contentEncoding);
+            }
+        }
+
         final ServiceRequest serviceRequest = new ServiceRequest()
                 .setCoreSettings(coreSettings)
                 .setQueryDefaults(queryDefaults)
@@ -156,7 +175,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
                 .setUrlQuery(request.getQueryString() != null
                         ? StringHelper.urlDecode(request.getQueryString())
                         : null)
-                .setContent(request.getInputStream())
+                .setContent(is)
                 .setContentType(request.getContentType())
                 .setParameterMap(parameterMap)
                 .setUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? version.createFeatures : version.updateFeatures)

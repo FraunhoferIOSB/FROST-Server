@@ -3,6 +3,7 @@
 ## Version 2.8.0-SNAPSHOT
 
 **New Features**
+* Implemented #2318: Added support for GZip and deflate compression on HTTP Uploads.
 * Implemented V2 API with HTTP bindings.
 * Implemented handling of nested complex properties.
 
