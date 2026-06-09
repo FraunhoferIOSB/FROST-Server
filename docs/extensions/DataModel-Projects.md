@@ -9,6 +9,13 @@ order: 1
 
 A fine-grained security definition for FROST-Server, based on Projects.
 
+## Data Model
+
+The image below shows the core STA data model in blue, with the security extension in yellow.
+
+![Data Model](../images/Datamodel-SensorThingsApi-Projects.drawio.png)
+
+
 ## Users, Projects, Roles, UserProjectRoles
 
 **Users** are actors that can log in. Users are stored in the `USERS` table. Test users are:
@@ -132,13 +139,6 @@ The OData specification explains how to do this in the section [Addressing Refer
 In short, these two requests unlink a given Location from a given Project:
 - DELETE https://example.org/FROST-Server/v1.1/Projects(21)/Locations(85)/$ref 
 - DELETE https://example.org/FROST-Server/v1.1/Projects(21)/Locations/$ref?$id=../../Locations(85) 
-
-
-## Data Model
-
-The image below shows the core STA data model in blue, with the security extension in yellow.
-
-![Data Model](../images/Datamodel-SensorThingsApi-Projects.drawio.png)
 
 
 ## Example Data
