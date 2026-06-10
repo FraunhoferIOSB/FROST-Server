@@ -4,6 +4,13 @@ title: Data Model OpenCitySense
 category: extensions
 order: 2
 ---
+<script type="module">
+	import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+	mermaid.initialize({
+		startOnLoad: true,
+		theme: 'default'
+	});
+</script>
 
 # OpenCitySense Data Model Plugin
 
@@ -97,7 +104,7 @@ The configDefinition of a DeviceModel may thus have three sections:
 
 From the point of view of the User Interface the workflow for onboarding a sensor is as follows:
 
-```mermaid
+<pre class="mermaid">
 sequenceDiagram
   participant SensorManager as Sensor Manager
   participant FROST as FROST-Server
@@ -114,12 +121,12 @@ sequenceDiagram
   FROST -->> -SensorManager: @id
   Connector -->> Connector: Onboard Device
   Connector -->> -FROST: Update Task: Done
-```
+</pre>
 
 Assuming a suitable DeviceModel already exists for the device to be onboarded, the user interface only needs to create a Thing for the device and then create a Task for the connector to onboard the device.
 Most of the work is done by the Connector, as can be seen in the workflow focusing on what the Connector does after the onboarding Task is created:
 
-```mermaid
+<pre class="mermaid">
 sequenceDiagram
   participant SensorManager as Sensor Manager
   participant FROST as FROST-Server
@@ -149,5 +156,5 @@ sequenceDiagram
   FROST -->> -Connector: Data
   Connector ->> Connector: Set Up Decoder
   Connector ->> FROST: PATCH Sensor(x)/Configuration<br>Active
-```
+</pre>
 
