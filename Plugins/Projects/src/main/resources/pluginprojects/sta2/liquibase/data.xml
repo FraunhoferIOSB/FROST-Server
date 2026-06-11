@@ -1,0 +1,108 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <!--
+     Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+     Karlsruhe, Germany.
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU Lesser General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU Lesser General Public License for more details.
+
+     You should have received a copy of the GNU Lesser General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    -->
+
+    <changeSet author="scf" id="2024-07-29-ROLES-data-1" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles" />
+            <tableIsEmpty tableName="roles" />
+            <tableExists tableName="user_roles" />
+            <not>
+                <tableIsEmpty tableName="user_roles" />
+            </not>
+        </preConditions>
+
+        <sql>insert into "roles" ("role_name","description") select distinct "role_name" rn, "role_name" ds from "user_roles"</sql>
+    </changeSet>
+
+    <changeSet author="scf" id="2024-07-29-ROLES-data-2" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles" />
+            <tableIsEmpty tableName="roles" />
+        </preConditions>
+
+        <insert tableName="roles">
+            <column name="role_name" value="read" />
+            <column name="description" value="Read data" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="create" />
+            <column name="description" value="Create (POST) Entities" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="update" />
+            <column name="description" value="Update (PUT/PATCH) Entities" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="delete" />
+            <column name="description" value="Delete Entities" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="admin" />
+            <column name="description" value="All actions" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="scf" id="2025-06-01-ROLES-data-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles" />
+            <sqlCheck expectedResult="0">select count("role_name") from "roles" where "role_name"='obscreate'</sqlCheck>
+        </preConditions>
+
+        <insert tableName="roles">
+            <column name="role_name" value="obscreate" />
+            <column name="description" value="Can create Observations" />
+        </insert>
+    </changeSet>
+    <changeSet author="scf" id="2025-06-01-ROLES-data-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="roles" />
+            <sqlCheck expectedResult="0">select count("role_name") from "roles" where "role_name"='obsupdate'</sqlCheck>
+        </preConditions>
+
+        <insert tableName="roles">
+            <column name="role_name" value="obsupdate" />
+            <column name="description" value="Can update Observations" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="obsdelete" />
+            <column name="description" value="Can delete Observations" />
+        </insert>
+
+        <insert tableName="roles">
+            <column name="role_name" value="obspropcreate" />
+            <column name="description" value="Can create ObservedProperties" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="obspropupdate" />
+            <column name="description" value="Can update ObservedProperties" />
+        </insert>
+        <insert tableName="roles">
+            <column name="role_name" value="obspropdelete" />
+            <column name="description" value="Can delete ObservedProperties" />
+        </insert>
+    </changeSet>
+
+
+
+</databaseChangeLog>
+

@@ -1,0 +1,44 @@
+{
+  "conformance": [],
+  "namespace": "",
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Actuator",
+      "plural": "Actuators",
+      "adminOnly": false,
+      "table": "actuators",
+      "key": [],
+      "entityProperties": [],
+      "navigationProperties": [
+        {
+          "name": "Projects",
+          "entitySet": true,
+          "entityType": "Project",
+          "required": false,
+          "symmetrical": false,
+          "priority": 0,
+          "inverse": {
+            "name": "Actuators",
+            "entitySet": true,
+            "required": false,
+            "priority": 0,
+            "annotations": []
+          },
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
+              "field": "id",
+              "linkTable": "actuator_projects",
+              "linkOurField": "actuator_id",
+              "linkOtherField": "project_id",
+              "otherTable": "projects",
+              "otherField": "id"
+            }
+          ],
+          "annotations": []
+        }
+      ]
+    }
+  ]
+}

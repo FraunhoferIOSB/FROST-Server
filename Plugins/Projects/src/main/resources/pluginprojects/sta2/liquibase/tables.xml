@@ -23,18 +23,18 @@
 
     <property name="id-Project" value="LONG" />
     <property name="idType-Project" value="BIGINT" />
+    <property name="id-Actuator" value="LONG" />
+    <property name="idType-Actuator" value="BIGINT" />
     <property name="id-Thing" value="LONG" />
     <property name="idType-Thing" value="BIGINT" />
     <property name="id-Location" value="LONG" />
     <property name="idType-Location" value="BIGINT" />
     <property name="id-Datastream" value="LONG" />
     <property name="idType-Datastream" value="BIGINT" />
-    <property name="id-FeatureOfInterest" value="LONG" />
-    <property name="idType-FeatureOfInterest" value="BIGINT" />
+    <property name="id-Feature" value="LONG" />
+    <property name="idType-Feature" value="BIGINT" />
     <property name="id-TaskingCapability" value="LONG" />
     <property name="idType-TaskingCapability" value="BIGINT" />
-    <property name="id-MultiDatastream" value="LONG" />
-    <property name="idType-MultiDatastream" value="BIGINT" />
     <property name="id-Role" value="LONG" />
     <property name="idType-Role" value="BIGINT" />
     <property name="id-User" value="LONG" />
@@ -43,21 +43,21 @@
     <property name="idType-UserProjectRole" value="BIGINT" />
 
     <include relativeToChangelogFile="true" file="tableProjects.xml" />
+    <include relativeToChangelogFile="true" file="tableActuators.xml" />
+    <include relativeToChangelogFile="true" file="tableThings.xml" />
+    <include relativeToChangelogFile="true" file="tableLocations.xml" />
+    <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
+    <include relativeToChangelogFile="true" file="tableFeatures.xml" />
+    <include relativeToChangelogFile="true" file="tableTaskingCapabilities.xml" />
+    <include relativeToChangelogFile="true" file="tableRoles.xml" />
+    <include relativeToChangelogFile="true" file="tableUsers.xml" />
+    <include relativeToChangelogFile="true" file="tableUserProjectRoles.xml" />
     <include relativeToChangelogFile="true" file="tableSensorProjects.xml" />
     <include relativeToChangelogFile="true" file="tableLocationProjects.xml" />
     <include relativeToChangelogFile="true" file="tableThingProjects.xml" />
     <include relativeToChangelogFile="true" file="tableFeatureProjects.xml" />
     <include relativeToChangelogFile="true" file="tableActuatorProjects.xml" />
-    <include relativeToChangelogFile="true" file="tableThings.xml" />
-    <include relativeToChangelogFile="true" file="tableLocations.xml" />
-    <include relativeToChangelogFile="true" file="tableDatastreams.xml" />
-    <include relativeToChangelogFile="true" file="tableFeaturesOfInterest.xml" />
-    <include relativeToChangelogFile="true" file="tableTaskingCapabilities.xml" />
-    <include relativeToChangelogFile="true" file="tableMultiDatastreams.xml" />
-    <include relativeToChangelogFile="true" file="tableRoles.xml" />
-    <include relativeToChangelogFile="true" file="tableUsers.xml" />
     <include relativeToChangelogFile="true" file="tableUserRoles.xml" />
-    <include relativeToChangelogFile="true" file="tableUserProjectRoles.xml" />
     <include relativeToChangelogFile="true" file="foreignKeys.xml" />
     <include relativeToChangelogFile="true" file="data.xml" />
 

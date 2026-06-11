@@ -1,16 +1,14 @@
 {
   "conformance": [],
-  "namespace": "de.FROST",
+  "namespace": "",
   "simplePropertyTypes": [],
   "entityTypes": [
     {
       "name": "Role",
       "plural": "Roles",
       "adminOnly": false,
-      "table": "ROLES",
-      "key": [
-        "rolename"
-      ],
+      "table": "roles",
+      "key": [],
       "orderByDflt": [],
       "entityProperties": [
         {
@@ -19,7 +17,7 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
-              "field": "ROLE_NAME"
+              "field": "role_name"
             }
           ],
           "annotations": []
@@ -30,7 +28,7 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperString",
-              "field": "DESCRIPTION"
+              "field": "description"
             }
           ],
           "annotations": []
@@ -41,7 +39,7 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperJson",
-              "field": "PROPERTIES",
+              "field": "properties",
               "isMap": true
             }
           ],

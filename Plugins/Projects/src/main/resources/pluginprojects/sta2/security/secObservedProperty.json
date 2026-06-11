@@ -1,0 +1,39 @@
+{
+  "entries": [
+    {
+      "tableName": "obs_properties",
+      "wrappers": [
+        {
+          "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD",
+          "checkInsert": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+            "checkType": "ANY",
+            "roles": [
+              "admin",
+              "create",
+              "obspropcreate"
+            ]
+          },
+          "checkUpdate": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+            "checkType": "ANY",
+            "roles": [
+              "admin",
+              "update",
+              "obspropupdate"
+            ]
+          },
+          "checkDelete": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
+            "checkType": "ANY",
+            "roles": [
+              "admin",
+              "delete",
+              "obspropdelete"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

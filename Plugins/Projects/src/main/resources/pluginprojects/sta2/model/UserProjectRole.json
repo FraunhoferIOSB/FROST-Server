@@ -1,16 +1,14 @@
 {
   "conformance": [],
-  "namespace": "de.FROST",
+  "namespace": "",
   "simplePropertyTypes": [],
   "entityTypes": [
     {
       "name": "UserProjectRole",
       "plural": "UserProjectRoles",
       "adminOnly": false,
-      "table": "USER_PROJECT_ROLE",
-      "key": [
-        "id"
-      ],
+      "table": "user_project_role",
+      "key": [],
       "orderByDflt": [],
       "entityProperties": [
         {
@@ -22,7 +20,7 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId",
-              "field": "ID"
+              "field": "id"
             }
           ],
           "annotations": []
@@ -46,9 +44,9 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-              "field": "PROJECT_ID",
-              "otherTable": "PROJECTS",
-              "otherField": "ID"
+              "field": "project_id",
+              "otherTable": "projects",
+              "otherField": "id"
             }
           ],
           "annotations": []
@@ -70,9 +68,9 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-              "field": "ROLE_NAME",
-              "otherTable": "ROLES",
-              "otherField": "ROLE_NAME"
+              "field": "role_name",
+              "otherTable": "roles",
+              "otherField": "role_name"
             }
           ],
           "annotations": []
@@ -94,9 +92,9 @@
           "handlers": [
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-              "field": "USER_NAME",
-              "otherTable": "USERS",
-              "otherField": "USER_NAME"
+              "field": "user_name",
+              "otherTable": "users",
+              "otherField": "user_name"
             }
           ],
           "annotations": []

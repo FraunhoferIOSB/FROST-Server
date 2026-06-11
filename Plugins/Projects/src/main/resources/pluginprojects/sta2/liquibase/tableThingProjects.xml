@@ -21,27 +21,30 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="generated" id="2024-07-29-SENSOR_PROJECTS" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="generated" id="2026-06-11-thing_projects" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="CONTINUE">
-            <tableExists tableName="TASKINGCAPABILITIES" />
+            <tableExists tableName="projects" />
+            <tableExists tableName="things" />
             <not>
-                <tableExists tableName="TASKINGCAPABILITIES_PROJECTS" />
+                <tableExists tableName="thing_projects" />
             </not>
+            <changeLogPropertyDefined property="idType-Project" />
+            <changeLogPropertyDefined property="idType-Thing" />
         </preConditions>
-        <createTable tableName="TASKINGCAPABILITIES_PROJECTS">
-            <column name="PROJECT_ID" type="${idType-Project}">
+        <createTable tableName="thing_projects">
+            <column name="project_id" type="${idType-Project}">
                 <constraints nullable="false"/>
             </column>
-            <column name="TASKINGCAPABILITY_ID" type="${idType-TaskingCap}">
+            <column name="thing_id" type="${idType-Thing}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="PROJECT_ID, TASKINGCAPABILITY_ID" constraintName="pk_TASKINGCAPABILITIES_PROJECTS" tableName="TASKINGCAPABILITIES_PROJECTS"/>
-        <createIndex tableName="TASKINGCAPABILITIES_PROJECTS" indexName="TASKINGCAPABILITIES_PROJECTS_PROJECT_ID">
-            <column name="PROJECT_ID" />
+        <addPrimaryKey columnNames="project_id, thing_id" constraintName="pk_thing_projects" tableName="thing_projects"/>
+        <createIndex tableName="thing_projects" indexName="thing_projects_project_id">
+            <column name="project_id" />
         </createIndex>
-        <createIndex tableName="TASKINGCAPABILITIES_PROJECTS" indexName="TASKINGCAPABILITIES_PROJECTS_TASKINGCAPABILITY_ID">
-            <column name="TASKINGCAPABILITY_ID" />
+        <createIndex tableName="thing_projects" indexName="thing_projects_thing_id">
+            <column name="thing_id" />
         </createIndex>
     </changeSet>
 

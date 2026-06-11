@@ -1,0 +1,99 @@
+{
+  "conformance": [],
+  "namespace": "",
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "Thing",
+      "plural": "Things",
+      "adminOnly": false,
+      "table": "things",
+      "key": [],
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "restricted"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    },
+    {
+      "name": "Location",
+      "plural": "Locations",
+      "adminOnly": false,
+      "table": "locations",
+      "key": [],
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "restricted"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    },
+    {
+      "name": "Datastream",
+      "plural": "Datastreams",
+      "adminOnly": false,
+      "table": "datastreams",
+      "key": [],
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "restricted"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    },
+    {
+      "name": "Feature",
+      "plural": "Features",
+      "adminOnly": false,
+      "table": "features",
+      "key": [],
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "restricted"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}

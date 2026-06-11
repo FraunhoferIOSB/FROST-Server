@@ -1,0 +1,30 @@
+{
+  "conformance": [],
+  "namespace": "",
+  "simplePropertyTypes": [],
+  "entityTypes": [
+    {
+      "name": "TaskingCapability",
+      "plural": "TaskingCapabilities",
+      "adminOnly": false,
+      "table": "taskingcapabilities",
+      "key": [],
+      "orderByDflt": [],
+      "entityProperties": [
+        {
+          "name": "restricted",
+          "type": "Edm.Boolean",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperBoolean",
+              "field": "restricted"
+            }
+          ],
+          "annotations": []
+        }
+      ],
+      "navigationProperties": [],
+      "annotations": []
+    }
+  ]
+}
