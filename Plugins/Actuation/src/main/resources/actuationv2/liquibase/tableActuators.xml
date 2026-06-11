@@ -53,7 +53,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-actuators-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="actuators" />
             <not>
                 <columnExists columnName="name" tableName="actuators" />
             </not>

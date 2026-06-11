@@ -22,10 +22,12 @@
     -->
 
     <changeSet author="iosb" id="2025-05-05-fk_tasks_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasks_tasking_capability_id" foreignKeyTableName="tasks" />
             </not>
+            <tableExists tableName="tasks" />
+            <tableExists tableName="tasking_capabilities" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_tasks_tasking_capability_id"
@@ -36,10 +38,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_tasks_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasks_feature_id" foreignKeyTableName="tasks" />
             </not>
+            <tableExists tableName="tasks" />
+            <tableExists tableName="features" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_tasks_feature_id"
@@ -50,10 +54,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_tasking_capabilities_actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_actuator_id" foreignKeyTableName="tasking_capabilities" />
             </not>
+            <tableExists tableName="tasking_capabilities" />
+            <tableExists tableName="actuators" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_tasking_capabilities_actuator_id"
@@ -64,10 +70,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_tasking_capability_observed_property_tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capability_observed_property_tasking_capability_id" foreignKeyTableName="tasking_capability_observed_property" />
             </not>
+            <tableExists tableName="tasking_capability_observed_property" />
+            <tableExists tableName="tasking_capabilities" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_tasking_capability_observed_property_tasking_capability_id"
@@ -78,10 +86,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_tasking_capability_observed_property_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capability_observed_property_observed_property_id" foreignKeyTableName="tasking_capability_observed_property" />
             </not>
+            <tableExists tableName="tasking_capability_observed_property" />
+            <tableExists tableName="observed_properties" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_tasking_capability_observed_property_observed_property_id"
@@ -92,10 +102,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_tasking_capabilities_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_thing_id" foreignKeyTableName="tasking_capabilities" />
             </not>
+            <tableExists tableName="tasking_capabilities" />
+            <tableExists tableName="things" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_tasking_capabilities_thing_id"
@@ -105,15 +117,33 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
-    <changeSet author="iosb" id="2025-05-05-fk_tasking_capabilities_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+    <changeSet author="iosb" id="2025-05-05-fk_taskingcaps_features_ultimate_taskingcap_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
             <not>
-                <foreignKeyConstraintExists foreignKeyName="fk_tasking_capabilities_feature_id" foreignKeyTableName="tasking_capabilities" />
+                <foreignKeyConstraintExists foreignKeyName="fk_taskingcaps_features_ultimate_taskingcap_id" foreignKeyTableName="taskingcaps_features_ultimate" />
             </not>
+            <tableExists tableName="taskingcaps_features_ultimate" />
+            <tableExists tableName="tasking_capabilities" />
         </preConditions>
         <addForeignKeyConstraint
-            constraintName="fk_tasking_capabilities_feature_id"
-            baseTableName="tasking_capabilities" baseColumnNames="feature_id"
+            constraintName="fk_taskingcaps_features_ultimate_taskingcap_id"
+            baseTableName="taskingcaps_features_ultimate" baseColumnNames="taskingcap_id"
+            referencedTableName="tasking_capabilities" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_taskingcaps_features_ultimate_feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_taskingcaps_features_ultimate_feature_id" foreignKeyTableName="taskingcaps_features_ultimate" />
+            </not>
+            <tableExists tableName="taskingcaps_features_ultimate" />
+            <tableExists tableName="features" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_taskingcaps_features_ultimate_feature_id"
+            baseTableName="taskingcaps_features_ultimate" baseColumnNames="feature_id"
             referencedTableName="features" referencedColumnNames="id"
             deferrable="false" initiallyDeferred="false"
             onDelete="CASCADE" onUpdate="CASCADE"/>

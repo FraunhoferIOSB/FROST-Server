@@ -53,7 +53,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-tasks-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="tasks" />
             <not>
                 <columnExists columnName="creation_time" tableName="tasks" />
             </not>
@@ -73,7 +74,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-tasks-idx-tasking_capability_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="tasks" />
             <not>
                 <indexExists tableName="tasks" indexName="tasks_tasking_capability_id" />
             </not>
@@ -84,7 +86,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-tasks-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="tasks" />
             <not>
                 <indexExists tableName="tasks" indexName="tasks_feature_id" />
             </not>

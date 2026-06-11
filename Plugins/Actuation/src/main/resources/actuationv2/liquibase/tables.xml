@@ -32,6 +32,7 @@
     <include relativeToChangelogFile="true" file="tableTasks.xml" />
     <include relativeToChangelogFile="true" file="tableTaskingCapabilities.xml" />
     <include relativeToChangelogFile="true" file="tableTaskingCapabilityObservedProperty.xml" />
+    <include relativeToChangelogFile="true" file="tableTaskingcapsFeaturesUltimate.xml" />
     <include relativeToChangelogFile="true" file="foreignKeys.xml" />
 
 </databaseChangeLog>

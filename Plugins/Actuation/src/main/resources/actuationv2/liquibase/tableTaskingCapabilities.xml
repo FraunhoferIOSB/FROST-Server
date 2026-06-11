@@ -53,7 +53,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-tasking_capabilities-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="tasking_capabilities" />
             <not>
                 <columnExists columnName="name" tableName="tasking_capabilities" />
             </not>
@@ -65,7 +66,6 @@
             <column name="thing_id" type="${idType-Thing}">
                 <constraints nullable="false"/>
             </column>
-            <column name="feature_id" type="${idType-Feature}"/>
             <column name="name" type="TEXT"/>
             <column name="description" type="TEXT"/>
             <column name="definition" type="TEXT"/>
@@ -75,7 +75,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-tasking_capabilities-idx-actuator_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="tasking_capabilities" />
             <not>
                 <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_actuator_id" />
             </not>
@@ -86,24 +87,14 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-tasking_capabilities-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="tasking_capabilities" />
             <not>
                 <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_thing_id" />
             </not>
         </preConditions>
         <createIndex tableName="tasking_capabilities" indexName="tasking_capabilities_thing_id">
             <column name="thing_id" />
-        </createIndex>
-    </changeSet>
-
-    <changeSet author="iosb" id="2025-05-05-tasking_capabilities-idx-feature_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists tableName="tasking_capabilities" indexName="tasking_capabilities_feature_id" />
-            </not>
-        </preConditions>
-        <createIndex tableName="tasking_capabilities" indexName="tasking_capabilities_feature_id">
-            <column name="feature_id" />
         </createIndex>
     </changeSet>
 

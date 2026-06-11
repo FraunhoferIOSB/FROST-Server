@@ -21,30 +21,30 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2025-05-05-tasking_capability_observed_property" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-taskingcaps_features_ultimate" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="CONTINUE">
             <tableExists tableName="tasking_capabilities" />
-            <tableExists tableName="observed_properties" />
+            <tableExists tableName="features" />
             <not>
-                <tableExists tableName="tasking_capability_observed_property" />
+                <tableExists tableName="taskingcaps_features_ultimate" />
             </not>
             <changeLogPropertyDefined property="idType-TaskingCapability" />
-            <changeLogPropertyDefined property="idType-ObservedProperty" />
+            <changeLogPropertyDefined property="idType-Feature" />
         </preConditions>
-        <createTable tableName="tasking_capability_observed_property">
-            <column name="tasking_capability_id" type="${idType-TaskingCapability}">
+        <createTable tableName="taskingcaps_features_ultimate">
+            <column name="taskingcap_id" type="${idType-TaskingCapability}">
                 <constraints nullable="false"/>
             </column>
-            <column name="observed_property_id" type="${idType-ObservedProperty}">
+            <column name="feature_id" type="${idType-Feature}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="tasking_capability_id, observed_property_id" constraintName="pk_tasking_capability_observed_property" tableName="tasking_capability_observed_property"/>
-        <createIndex tableName="tasking_capability_observed_property" indexName="tasking_capability_observed_property_tasking_capability_id">
-            <column name="tasking_capability_id" />
+        <addPrimaryKey columnNames="taskingcap_id, feature_id" constraintName="pk_taskingcaps_features_ultimate" tableName="taskingcaps_features_ultimate"/>
+        <createIndex tableName="taskingcaps_features_ultimate" indexName="taskingcaps_features_ultimate_taskingcap_id">
+            <column name="taskingcap_id" />
         </createIndex>
-        <createIndex tableName="tasking_capability_observed_property" indexName="tasking_capability_observed_property_observed_property_id">
-            <column name="observed_property_id" />
+        <createIndex tableName="taskingcaps_features_ultimate" indexName="taskingcaps_features_ultimate_feature_id">
+            <column name="feature_id" />
         </createIndex>
     </changeSet>
 
