@@ -26,17 +26,17 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
 /**
- * The users table for basic auth.
+ * The roles table for basic auth.
  */
-public class TableUsers extends TableImpl<Record2<String, String>> {
+public class TableV1UsersRoles extends TableImpl<Record2<String, String>> {
 
     private static final long serialVersionUID = 1713698749;
-    private static final String TABLE_NAME = "USERS";
+    private static final String TABLE_NAME = "USER_ROLES";
 
     /**
-     * The reference instance of <code>public.USERS</code>
+     * The reference instance of <code>public.USER_ROLES</code>
      */
-    public static final TableUsers USERS = new TableUsers();
+    public static final TableV1UsersRoles USER_ROLES = new TableV1UsersRoles();
 
     /**
      * The column <code>public.USERS.USER_NAME</code>.
@@ -45,17 +45,17 @@ public class TableUsers extends TableImpl<Record2<String, String>> {
     /**
      * The column <code>public.USERS.USER_PASS</code>.
      */
-    public final TableField<Record2<String, String>, String> userPass = createField(DSL.name("USER_PASS"), org.jooq.impl.SQLDataType.CLOB);
+    public final TableField<Record2<String, String>, String> roleName = createField(DSL.name("ROLE_NAME"), org.jooq.impl.SQLDataType.CLOB);
 
-    public TableUsers() {
+    public TableV1UsersRoles() {
         this(DSL.name(TABLE_NAME), null);
     }
 
-    protected TableUsers(Name alias, TableUsers aliased) {
+    protected TableV1UsersRoles(Name alias, TableV1UsersRoles aliased) {
         this(alias, aliased, null);
     }
 
-    protected TableUsers(Name alias, TableUsers aliased, Field<?>[] parameters) {
+    protected TableV1UsersRoles(Name alias, TableV1UsersRoles aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
 
@@ -63,23 +63,23 @@ public class TableUsers extends TableImpl<Record2<String, String>> {
      * {@inheritDoc}
      */
     @Override
-    public TableUsers as(String alias) {
-        return new TableUsers(DSL.name(alias), this);
+    public TableV1UsersRoles as(String alias) {
+        return new TableV1UsersRoles(DSL.name(alias), this);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public TableUsers as(Name alias) {
-        return new TableUsers(alias, this);
+    public TableV1UsersRoles as(Name alias) {
+        return new TableV1UsersRoles(alias, this);
     }
 
     @Override
     public int hashCode() {
         int hash = super.hashCode();
-        hash = 37 * hash + Objects.hashCode(this.userName);
-        hash = 37 * hash + Objects.hashCode(this.userPass);
+        hash = 89 * hash + Objects.hashCode(this.userName);
+        hash = 89 * hash + Objects.hashCode(this.roleName);
         return hash;
     }
 
@@ -94,11 +94,11 @@ public class TableUsers extends TableImpl<Record2<String, String>> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final TableUsers other = (TableUsers) obj;
+        final TableV1UsersRoles other = (TableV1UsersRoles) obj;
         if (!Objects.equals(this.userName, other.userName)) {
             return false;
         }
-        if (!Objects.equals(this.userPass, other.userPass)) {
+        if (!Objects.equals(this.roleName, other.roleName)) {
             return false;
         }
         return super.equals(obj);

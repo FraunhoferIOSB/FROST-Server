@@ -26,36 +26,36 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
 /**
- * The roles table for basic auth.
+ * The users table for basic auth.
  */
-public class TableUsersRoles extends TableImpl<Record2<String, String>> {
+public class TableV2Users extends TableImpl<Record2<String, String>> {
 
     private static final long serialVersionUID = 1713698749;
-    private static final String TABLE_NAME = "USER_ROLES";
+    private static final String TABLE_NAME = "users";
 
     /**
-     * The reference instance of <code>public.USER_ROLES</code>
+     * The reference instance of <code>public.USERS</code>
      */
-    public static final TableUsersRoles USER_ROLES = new TableUsersRoles();
+    public static final TableV2Users USERS = new TableV2Users();
 
     /**
      * The column <code>public.USERS.USER_NAME</code>.
      */
-    public final TableField<Record2<String, String>, String> userName = createField(DSL.name("USER_NAME"), org.jooq.impl.SQLDataType.CLOB);
+    public final TableField<Record2<String, String>, String> userName = createField(DSL.name("user_name"), org.jooq.impl.SQLDataType.CLOB);
     /**
      * The column <code>public.USERS.USER_PASS</code>.
      */
-    public final TableField<Record2<String, String>, String> roleName = createField(DSL.name("ROLE_NAME"), org.jooq.impl.SQLDataType.CLOB);
+    public final TableField<Record2<String, String>, String> userPass = createField(DSL.name("user_pass"), org.jooq.impl.SQLDataType.CLOB);
 
-    public TableUsersRoles() {
+    public TableV2Users() {
         this(DSL.name(TABLE_NAME), null);
     }
 
-    protected TableUsersRoles(Name alias, TableUsersRoles aliased) {
+    protected TableV2Users(Name alias, TableV2Users aliased) {
         this(alias, aliased, null);
     }
 
-    protected TableUsersRoles(Name alias, TableUsersRoles aliased, Field<?>[] parameters) {
+    protected TableV2Users(Name alias, TableV2Users aliased, Field<?>[] parameters) {
         super(alias, null, aliased, parameters, DSL.comment(""));
     }
 
@@ -63,23 +63,23 @@ public class TableUsersRoles extends TableImpl<Record2<String, String>> {
      * {@inheritDoc}
      */
     @Override
-    public TableUsersRoles as(String alias) {
-        return new TableUsersRoles(DSL.name(alias), this);
+    public TableV2Users as(String alias) {
+        return new TableV2Users(DSL.name(alias), this);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public TableUsersRoles as(Name alias) {
-        return new TableUsersRoles(alias, this);
+    public TableV2Users as(Name alias) {
+        return new TableV2Users(alias, this);
     }
 
     @Override
     public int hashCode() {
         int hash = super.hashCode();
-        hash = 89 * hash + Objects.hashCode(this.userName);
-        hash = 89 * hash + Objects.hashCode(this.roleName);
+        hash = 37 * hash + Objects.hashCode(this.userName);
+        hash = 37 * hash + Objects.hashCode(this.userPass);
         return hash;
     }
 
@@ -94,11 +94,11 @@ public class TableUsersRoles extends TableImpl<Record2<String, String>> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final TableUsersRoles other = (TableUsersRoles) obj;
+        final TableV2Users other = (TableV2Users) obj;
         if (!Objects.equals(this.userName, other.userName)) {
             return false;
         }
-        if (!Objects.equals(this.roleName, other.roleName)) {
+        if (!Objects.equals(this.userPass, other.userPass)) {
             return false;
         }
         return super.equals(obj);

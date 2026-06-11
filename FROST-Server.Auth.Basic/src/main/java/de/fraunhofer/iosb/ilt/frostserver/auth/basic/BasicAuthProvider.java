@@ -52,8 +52,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthProvider.class.getName());
 
-    public static final String LIQUIBASE_CHANGELOG_FILENAME = "liquibase/basicAuthTables.xml";
-
     @DefaultValueBoolean(false)
     public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";
 
@@ -74,6 +72,9 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     @DefaultValue("FROST-Server")
     public static final String TAG_AUTH_REALM_NAME = "realmName";
+
+    @DefaultValueBoolean(false)
+    public static final String TAG_LOWCASE_TABLES = "lowercaseTables";
 
     @DefaultValue(PrincipalExtended.ROLE_READ)
     public static final String TAG_HTTP_ROLE_GET = "roleGet";
