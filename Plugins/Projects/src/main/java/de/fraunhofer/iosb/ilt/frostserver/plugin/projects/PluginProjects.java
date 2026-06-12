@@ -103,7 +103,8 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
             } else if (!pCoreModelV1 && pCoreModelV2) {
                 // Dealing with Model v2.0
                 LOGGER.error("Projects plugin is not ready for V2 yet!");
-                return InitResult.INIT_FAILED;
+                fixSettings(pluginSettings, coreSettings);
+                initForCoreModelV2(pml, multiDatastream, actuation, rules, pluginSettings);
             } else {
                 LOGGER.warn("Either CoreModel or CoreModelV2 must be enabled, delaying initialisation...");
                 return INIT_DELAY;
@@ -165,6 +166,42 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 pml.addSecurityFile("pluginprojects/sta1/security/secActuator.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secTask.json");
                 pml.addSecurityFile("pluginprojects/sta1/security/secTaskingCapability.json");
+            }
+        }
+        autoUpdateFeatures = pluginSettings.getBoolean(TAG_UPDATE_FEATURE_WITH_LOCATION, PluginProjects.class);
+    }
+
+    public void initForCoreModelV2(PluginModelLoader pml, boolean multiDatastream, boolean actuation, boolean rules, Settings pluginSettings) {
+        pml.addLiquibaseFile("pluginprojects/sta2/liquibase/tables.xml");
+
+        pml.addModelFile("pluginprojects/sta2/model/Project.json");
+        pml.addModelFile("pluginprojects/sta2/model/Restricted.json");
+        pml.addModelFile("pluginprojects/sta2/model/Role.json");
+        pml.addModelFile("pluginprojects/sta2/model/User.json");
+        pml.addModelFile("pluginprojects/sta2/model/UserProjectRole.json");
+        if (actuation) {
+            pml.addModelFile("pluginprojects/sta2/model/ProjectActuation.json");
+            pml.addModelFile("pluginprojects/sta2/model/RestrictedActuation.json");
+        }
+
+        if (rules) {
+            pml.addSecurityFile("pluginprojects/sta2/security/secDatastream.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secFeature.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secFeatureType.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secHistoricalLocation.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secLocation.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secObservation.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secObservedProperty.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secProject.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secRole.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secSensor.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secThing.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secUser.json");
+            pml.addSecurityFile("pluginprojects/sta2/security/secUserProjectRole.json");
+            if (actuation) {
+                pml.addSecurityFile("pluginprojects/sta2/security/secActuator.json");
+                pml.addSecurityFile("pluginprojects/sta2/security/secTask.json");
+                pml.addSecurityFile("pluginprojects/sta2/security/secTaskingCapability.json");
             }
         }
         autoUpdateFeatures = pluginSettings.getBoolean(TAG_UPDATE_FEATURE_WITH_LOCATION, PluginProjects.class);

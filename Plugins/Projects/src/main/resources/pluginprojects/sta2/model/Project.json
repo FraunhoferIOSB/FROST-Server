@@ -160,9 +160,9 @@
           "annotations": []
         },
         {
-          "name": "FeaturesOfInterest",
+          "name": "Features",
           "entitySet": true,
-          "entityType": "FeatureOfInterest",
+          "entityType": "Feature",
           "required": false,
           "symmetrical": false,
           "priority": 0,
