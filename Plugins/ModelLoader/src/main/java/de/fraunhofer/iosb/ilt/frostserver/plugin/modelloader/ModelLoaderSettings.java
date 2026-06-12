@@ -17,46 +17,46 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader;
 
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 
 /**
- *
- * @author hylke
+ * The settings, with defaults, for the ModelLoader.
  */
-public final class ModelLoaderSettings implements ConfigDefaults {
+public final class ModelLoaderSettings extends ConfigProvider<ModelLoaderSettings> {
 
-    public static final String PLUGIN_NAME = "modelLoader";
+    public static final String PLUGIN_NAME = "modelLoader.";
 
     @DefaultValueBoolean(false)
-    public static final String TAG_ENABLE_MODELLOADER = PLUGIN_NAME + ".enable";
+    public static final String TAG_ENABLE_MODELLOADER = "enable";
     @DefaultValue("")
-    public static final String TAG_MODEL_PATH = PLUGIN_NAME + ".modelPath";
+    public static final String TAG_MODEL_PATH = "modelPath";
     @DefaultValue("")
-    public static final String TAG_MODEL_FILES = PLUGIN_NAME + ".modelFiles";
+    public static final String TAG_MODEL_FILES = "modelFiles";
     @DefaultValue("")
-    public static final String TAG_LIQUIBASE_PATH = PLUGIN_NAME + ".liquibasePath";
+    public static final String TAG_LIQUIBASE_PATH = "liquibasePath";
     @DefaultValue("")
-    public static final String TAG_LIQUIBASE_FILES = PLUGIN_NAME + ".liquibaseFiles";
+    public static final String TAG_LIQUIBASE_FILES = "liquibaseFiles";
     @DefaultValue("")
-    public static final String TAG_SECURITY_PATH = PLUGIN_NAME + ".securityPath";
+    public static final String TAG_SECURITY_PATH = "securityPath";
     @DefaultValue("")
-    public static final String TAG_SECURITY_FILES = PLUGIN_NAME + ".securityFiles";
+    public static final String TAG_SECURITY_FILES = "securityFiles";
     @DefaultValue("")
-    public static final String TAG_METADATA_DATA = PLUGIN_NAME + ".metadataData";
+    public static final String TAG_METADATA_DATA = "metadataData";
     @DefaultValue("")
-    public static final String TAG_METADATA_PATH = PLUGIN_NAME + ".metadataPath";
+    public static final String TAG_METADATA_PATH = "metadataPath";
     @DefaultValue("")
-    public static final String TAG_METADATA_FILES = PLUGIN_NAME + ".metadataFiles";
+    public static final String TAG_METADATA_FILES = "metadataFiles";
 
-    public final String idTypeDefault;
-
-    public ModelLoaderSettings(CoreSettings settings) {
-        Settings pluginSettings = settings.getPluginSettings();
-        idTypeDefault = pluginSettings.get(CoreModelSettings.TAG_ID_TYPE_DEFAULT, CoreModelSettings.class).toUpperCase();
+    public ModelLoaderSettings(CoreSettings cs) {
+        super(cs.getPluginSettings().getSubSettings(PLUGIN_NAME));
     }
+
+    public ModelLoaderSettings(Settings settings) {
+        super(settings);
+    }
+
 }

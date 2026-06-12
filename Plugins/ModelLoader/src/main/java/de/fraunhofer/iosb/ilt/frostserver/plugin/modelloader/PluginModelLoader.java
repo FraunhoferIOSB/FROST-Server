@@ -20,6 +20,16 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader;
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_MAP;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.PLUGIN_NAME;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_ENABLE_MODELLOADER;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_LIQUIBASE_FILES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_LIQUIBASE_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_METADATA_DATA;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_METADATA_FILES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_METADATA_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_MODEL_FILES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_MODEL_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_SECURITY_FILES;
+import static de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.ModelLoaderSettings.TAG_SECURITY_PATH;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
@@ -96,30 +106,31 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
     public InitResult init(CoreSettings settings) {
         this.settings = settings;
         Settings pluginSettings = settings.getPluginSettings();
-        enabled = pluginSettings.getBoolean(ModelLoaderSettings.TAG_ENABLE_MODELLOADER, ModelLoaderSettings.class);
+        ModelLoaderSettings mls = new ModelLoaderSettings(settings);
+        enabled = mls.getBoolean(TAG_ENABLE_MODELLOADER);
         if (enabled) {
             idTypeDefault = pluginSettings.get(CoreModelSettings.TAG_ID_TYPE_DEFAULT, CoreModelSettings.class).toUpperCase();
             settings.getPluginManager().registerPlugin(this);
 
-            liquibasePath = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_PATH, ModelLoaderSettings.class);
-            String liquibaseString = pluginSettings.get(ModelLoaderSettings.TAG_LIQUIBASE_FILES, ModelLoaderSettings.class);
+            liquibasePath = mls.get(TAG_LIQUIBASE_PATH);
+            String liquibaseString = mls.get(TAG_LIQUIBASE_FILES);
             liquibaseFiles.addAll(Arrays.asList(StringUtils.split(liquibaseString.trim(), ", ")));
 
-            modelPath = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_PATH, ModelLoaderSettings.class);
-            String modelFilesString = pluginSettings.get(ModelLoaderSettings.TAG_MODEL_FILES, ModelLoaderSettings.class);
+            modelPath = mls.get(TAG_MODEL_PATH);
+            String modelFilesString = mls.get(TAG_MODEL_FILES);
             for (var modelFile : StringUtils.split(modelFilesString.trim(), ", ")) {
                 addModelFileWithPath(modelFile);
             }
 
-            securityPath = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_PATH, ModelLoaderSettings.class);
-            String securityFilesString = pluginSettings.get(ModelLoaderSettings.TAG_SECURITY_FILES, ModelLoaderSettings.class);
+            securityPath = mls.get(TAG_SECURITY_PATH);
+            String securityFilesString = mls.get(TAG_SECURITY_FILES);
             for (var securityFile : StringUtils.split(securityFilesString.trim(), ", ")) {
                 addSecurityFileWithPath(securityFile);
             }
 
-            metadataStringData = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_DATA, ModelLoaderSettings.class);
-            metadataPath = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_PATH, ModelLoaderSettings.class);
-            String metadataFilesString = pluginSettings.get(ModelLoaderSettings.TAG_METADATA_FILES, ModelLoaderSettings.class);
+            metadataStringData = mls.get(TAG_METADATA_DATA);
+            metadataPath = mls.get(TAG_METADATA_PATH);
+            String metadataFilesString = mls.get(TAG_METADATA_FILES);
             metadataFiles.addAll(Arrays.asList(StringUtils.split(metadataFilesString.trim(), ", ")));
         }
         return InitResult.INIT_OK;
@@ -352,7 +363,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     public String getTypeFor(CoreSettings settings, String entityTypeName) {
         Settings pluginSettings = settings.getPluginSettings();
-        return pluginSettings.get(PLUGIN_NAME + ".idType." + entityTypeName, idTypeDefault).toUpperCase();
+        return pluginSettings.get(PLUGIN_NAME + "idType." + entityTypeName, idTypeDefault).toUpperCase();
     }
 
     @Override

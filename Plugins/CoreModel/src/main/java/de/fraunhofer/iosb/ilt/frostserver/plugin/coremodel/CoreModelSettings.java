@@ -24,8 +24,7 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 
 /**
- *
- * @author hylke
+ * Settings for the core STA model.
  */
 public final class CoreModelSettings implements ConfigDefaults {
 
