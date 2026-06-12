@@ -48,7 +48,7 @@ public class ConfigFileEditor {
     private final FileChooser fileChooser = new FileChooser();
     private final Class<?> editorClass;
     private File currentFile;
-    private String indent;
+    private String indent = "  ";
 
     public ConfigFileEditor(Class<?> editorClass) {
         this.editorClass = editorClass;
