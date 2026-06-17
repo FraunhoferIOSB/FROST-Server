@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_DEFAULT;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.DELETE;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.READ;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
@@ -180,8 +179,6 @@ public class Service implements AutoCloseable {
         String requestType = request.getRequestType();
         try (Timer timer = REQUEST_DURATION.labelValues(requestType).startTimer()) {
             switch (requestType) {
-                case GET_CAPABILITIES:
-                    return executeGetCapabilities(request, response);
                 case CREATE:
                     return executePost(request, response);
                 case READ:
@@ -296,16 +293,6 @@ public class Service implements AutoCloseable {
         return settings;
     }
 
-    private ServiceResponse executeGetCapabilities(ServiceRequest request, ServiceResponse response) {
-        final Map<String, Object> result = new LinkedHashMap<>();
-
-        settings.getPluginManager().modifyServiceDocument(request, result);
-
-        response.setCode(HttpURLConnection.HTTP_OK);
-        response.setResult(result);
-        return formatResponse(request, response, result);
-    }
-
     private ServiceResponse formatResponse(ServiceRequest request, ServiceResponse response, Object result) {
         ResultFormatter formatter;
         try {
@@ -352,11 +339,15 @@ public class Service implements AutoCloseable {
     private ServiceResponse handleGet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) {
         final ResourcePath path;
         final Version version = request.getVersion();
+        final String urlPath = request.getUrlPath();
+        if (StringHelper.isNullOrEmpty(urlPath) || urlPath.equals("/")) {
+            return handleGetCapabilities(request, response);
+        }
+
         final QueryDefaults queryDefaults = request.getQueryDefaults();
         try {
             path = PathParser.parsePath(modelRegistry,
-                    queryDefaults.getServiceRootUrl(), version,
-                    request.getUrlPath(),
+                    queryDefaults.getServiceRootUrl(), version, urlPath,
                     request.getUserPrincipal());
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, ex.getMessage());
@@ -414,6 +405,16 @@ public class Service implements AutoCloseable {
         } finally {
             maybeCommitAndClose();
         }
+    }
+
+    private ServiceResponse handleGetCapabilities(ServiceRequest request, ServiceResponse response) {
+        final Map<String, Object> result = new LinkedHashMap<>();
+
+        settings.getPluginManager().modifyServiceDocument(request, result);
+
+        response.setCode(HttpURLConnection.HTTP_OK);
+        response.setResult(result);
+        return formatResponse(request, response, result);
     }
 
     private ServiceResponse executePost(ServiceRequest request, ServiceResponse response) {

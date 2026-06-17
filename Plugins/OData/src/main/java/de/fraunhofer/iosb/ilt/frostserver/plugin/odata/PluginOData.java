@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginManager.PATH_WILDCARD;
 import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORMAT_NAME_EMPTY;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.CREATE;
-import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.GET_CAPABILITIES;
+import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.READ;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_ALL;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGES;
 import static de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils.UPDATE_CHANGESET;
@@ -147,7 +147,6 @@ public class PluginOData implements PluginService, ConfigDefaults {
     @Override
     public Collection<String> getRequestTypes() {
         return Arrays.asList(
-                RequestTypeUtils.GET_CAPABILITIES,
                 RequestTypeUtils.CREATE,
                 RequestTypeUtils.DELETE,
                 RequestTypeUtils.READ,
@@ -171,9 +170,6 @@ public class PluginOData implements PluginService, ConfigDefaults {
 
             case HEAD:
             case GET:
-                if (path.isEmpty() || "/".equals(path)) {
-                    return RequestTypeUtils.GET_CAPABILITIES;
-                }
                 return RequestTypeUtils.READ;
 
             case PATCH:
@@ -211,14 +207,10 @@ public class PluginOData implements PluginService, ConfigDefaults {
                         .setVersion(version)
                         .generateMetaData(request, response);
 
-            case GET_CAPABILITIES:
-                return executeGetCapabilities(request, response);
-
             case CREATE:
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
                     request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
-                request.setUpdateMode(isOdata401 ? INSERT_ODATA_401 : INSERT_ODATA_40);
                 return mainService.execute(request, response);
 
             case UPDATE_ALL:
@@ -227,7 +219,13 @@ public class PluginOData implements PluginService, ConfigDefaults {
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
                     request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
-                request.setUpdateMode(isOdata401 ? UPDATE_ODATA_401 : UPDATE_ODATA_40);
+                return mainService.execute(request, response);
+
+            case READ:
+                String path = request.getUrlPath();
+                if (path.isEmpty() || "/".equals(path)) {
+                    return executeGetCapabilities(request, response);
+                }
                 return mainService.execute(request, response);
 
             default:

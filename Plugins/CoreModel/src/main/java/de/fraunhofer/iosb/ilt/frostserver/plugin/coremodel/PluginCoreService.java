@@ -221,7 +221,6 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
     @Override
     public Collection<String> getRequestTypes() {
         return Arrays.asList(
-                RequestTypeUtils.GET_CAPABILITIES,
                 RequestTypeUtils.CREATE,
                 RequestTypeUtils.DELETE,
                 RequestTypeUtils.READ,
@@ -238,9 +237,6 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
 
             case HEAD:
             case GET:
-                if (path.isEmpty() || "/".equals(path)) {
-                    return RequestTypeUtils.GET_CAPABILITIES;
-                }
                 return RequestTypeUtils.READ;
 
             case PATCH:

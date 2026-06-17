@@ -18,16 +18,10 @@
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
 /**
- *
- * @author jab
- * @author scf
+ * Constants and helper functions for dealing with request types.
  */
 public class RequestTypeUtils {
 
-    /**
-     * The request type definition for the service root.
-     */
-    public static final String GET_CAPABILITIES = "getCapabilities";
     /**
      * The request type definition for create/POST.
      */

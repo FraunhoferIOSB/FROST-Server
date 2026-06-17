@@ -178,7 +178,6 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
     @Override
     public Collection<String> getRequestTypes() {
         return Arrays.asList(
-                RequestTypeUtils.GET_CAPABILITIES,
                 RequestTypeUtils.CREATE,
                 RequestTypeUtils.DELETE,
                 RequestTypeUtils.READ,
@@ -202,9 +201,6 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
 
             case HEAD:
             case GET:
-                if (path.isEmpty() || "/".equals(path)) {
-                    return RequestTypeUtils.GET_CAPABILITIES;
-                }
                 return RequestTypeUtils.READ;
 
             case PATCH:
@@ -258,9 +254,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             return;
         }
 
-        String path = request.getQueryDefaults().getServiceRootUrl()
-                + '/' + request.getVersion().urlPart
-                + '/';
+        String path = request.getUrlPrefix();
         result.put(JsonWriterOdata401.AT_CONTEXT, path + PARAM_METADATA);
         final List<Map<String, String>> entitySets = new ArrayList<>();
         result.put("value", entitySets);
