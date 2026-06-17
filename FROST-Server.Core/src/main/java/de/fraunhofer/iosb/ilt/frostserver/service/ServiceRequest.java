@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.service;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
-import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -53,17 +52,16 @@ public class ServiceRequest {
 
     private String requestType;
     private boolean head;
+    private Version version;
     private String urlPath;
     private String urlQuery;
+    private String contentType;
     private String contentString;
     private InputStream contentBinary;
-    private Version version;
-    private String contentType;
     private Map<String, SequencedSet<String>> parameterMap;
     private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
     private CoreSettings coreSettings;
     private QueryDefaults queryDefaults;
-    private EditFeatures updateMode;
     private JsonReader jsonReader;
 
     public CoreSettings getCoreSettings() {
@@ -160,15 +158,6 @@ public class ServiceRequest {
 
     public ServiceRequest setContentType(String contentType) {
         this.contentType = contentType;
-        return this;
-    }
-
-    public EditFeatures getUpdateMode() {
-        return updateMode;
-    }
-
-    public ServiceRequest setUpdateMode(EditFeatures updateMode) {
-        this.updateMode = updateMode;
         return this;
     }
 

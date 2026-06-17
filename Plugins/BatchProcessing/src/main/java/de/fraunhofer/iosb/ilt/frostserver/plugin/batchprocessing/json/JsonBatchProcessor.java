@@ -292,7 +292,6 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                 .setCoreSettings(coreSettings)
                 .setVersion(version)
                 .setRequestType(requestType)
-                .setUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? version.createFeatures : version.updateFeatures)
                 .setUrl(path)
                 .setContent(requestBody)
                 .setUserPrincipal(request.getUserPrincipal());

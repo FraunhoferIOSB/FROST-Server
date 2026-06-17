@@ -29,7 +29,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
-import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
@@ -178,7 +177,6 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
                 .setContent(is)
                 .setContentType(request.getContentType())
                 .setParameterMap(parameterMap)
-                .setUpdateMode(RequestTypeUtils.CREATE.equals(requestType) ? version.createFeatures : version.updateFeatures)
                 .setUserPrincipal(PrincipalExtended.fromPrincipal(request.getUserPrincipal()));
 
         Enumeration<String> attributeNames = request.getAttributeNames();

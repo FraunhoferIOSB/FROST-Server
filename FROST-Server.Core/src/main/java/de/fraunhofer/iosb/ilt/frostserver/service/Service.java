@@ -540,7 +540,7 @@ public class Service implements AutoCloseable {
         }
 
         try {
-            if (!pm.insert(entity, request.getUpdateMode())) {
+            if (!pm.insert(entity, request.getVersion().createFeatures)) {
                 LOGGER.debug("No need to insert entity.");
             }
             maybeCommitAndClose();
@@ -626,7 +626,7 @@ public class Service implements AutoCloseable {
         }
 
         try {
-            if (pm.update(mainElement, entity, request.getUpdateMode())) {
+            if (pm.update(mainElement, entity, request.getVersion().updateFeatures)) {
                 maybeCommitAndClose();
                 response.setCode(HttpURLConnection.HTTP_OK);
                 return response;
@@ -867,7 +867,7 @@ public class Service implements AutoCloseable {
             settings.getCustomLinksHelper().cleanPropertiesMap(entity);
             entity.setEntityPropertiesSet(true, true);
 
-            if (pm.update(mainElement, entity, request.getUpdateMode())) {
+            if (pm.update(mainElement, entity, request.getVersion().updateFeatures)) {
                 maybeCommitAndClose();
                 return successResponse(response, HttpURLConnection.HTTP_OK, "Updated.");
             } else {

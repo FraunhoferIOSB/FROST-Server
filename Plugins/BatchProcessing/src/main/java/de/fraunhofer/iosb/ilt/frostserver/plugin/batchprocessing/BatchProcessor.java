@@ -24,7 +24,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
-import de.fraunhofer.iosb.ilt.frostserver.path.EditFeatures;
 import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
@@ -79,13 +78,10 @@ public class BatchProcessor<C extends Content> {
                 version,
                 httpRequest.getPath(),
                 ct);
-        boolean isCreate = RequestTypeUtils.CREATE.equals(type);
-        final EditFeatures updateMode = isCreate ? version.createFeatures : version.updateFeatures;
         final ServiceRequest serviceRequest = new ServiceRequest()
                 .setCoreSettings(coreSettings)
                 .setVersion(version)
                 .setRequestType(type)
-                .setUpdateMode(updateMode)
                 .setUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .setContent(httpRequest.getData())
                 .setUserPrincipal(PrincipalExtended.fromPrincipal(httpRequest.getUserPrincipal()));
