@@ -39,8 +39,7 @@ import org.geojson.Feature;
 import org.geojson.GeoJsonObject;
 
 /**
- *
- * @author scf
+ * Formats as GeoJSON.
  */
 public class ResultFormatterGeoJson implements ResultFormatter {
 
@@ -97,7 +96,7 @@ public class ResultFormatterGeoJson implements ResultFormatter {
     }
 
     @Override
-    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+    public FormatWriter format(ResourcePath path, Query query, Object result) {
         EntityType type = path.getMainElementType();
         GjElementSet elementSet = new GjElementSet(query, path.getServiceRootUrl(), path.getVersion(), "", true);
         elementSet.initFrom(type);

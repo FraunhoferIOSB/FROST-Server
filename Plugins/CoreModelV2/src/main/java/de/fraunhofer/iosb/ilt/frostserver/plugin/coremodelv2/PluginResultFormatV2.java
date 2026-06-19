@@ -139,10 +139,10 @@ public class PluginResultFormatV2 implements PluginResultFormat {
         }
 
         @Override
-        public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
             if (Entity.class.isAssignableFrom(result.getClass())) {
                 String contextBase = createContextBase(path);
                 return formatAsEntity(result, contextBase);
+        public FormatWriter format(ResourcePath path, Query query, Object result) {
             }
             if (EntitySet.class.isAssignableFrom(result.getClass())) {
                 String contextBase = createContextBase(path);

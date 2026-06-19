@@ -51,9 +51,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- *
- * @author jab
- * @author scf
+ * Represents the Query the user executed.
  */
 public class Query {
 
@@ -84,6 +82,7 @@ public class Query {
 
     private boolean pkOrder = false;
     private String format;
+    private FormatterOptions formatOptions;
     private Metadata metadata;
 
     /**
@@ -441,6 +440,21 @@ public class Query {
 
     public String getFormat() {
         return format;
+    }
+
+    public FormatterOptions getFormatOptions() {
+        if (parentExpand != null) {
+            return parentExpand.getParentQuery().getFormatOptions();
+        }
+        if (formatOptions != null) {
+            return formatOptions;
+        }
+        return FormatterOptions.FALLBACK;
+    }
+
+    public Query setFormatOptions(FormatterOptions formatOptions) {
+        this.formatOptions = formatOptions;
+        return this;
     }
 
     public Metadata getMetadata() {

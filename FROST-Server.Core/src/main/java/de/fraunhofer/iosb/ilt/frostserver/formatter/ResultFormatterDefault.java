@@ -43,7 +43,7 @@ public class ResultFormatterDefault implements ResultFormatter {
     }
 
     @Override
-    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+    public FormatWriter format(ResourcePath path, Query query, Object result) {
         if (result instanceof Entity entity) {
             LOGGER.trace("Formatting as Entity.");
             return target -> JsonWriter.writeEntity(target, entity);

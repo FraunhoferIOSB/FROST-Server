@@ -34,8 +34,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Formatter for CSV.
  */
 public class ResultFormatterCsv implements ResultFormatter {
 
@@ -70,7 +69,7 @@ public class ResultFormatterCsv implements ResultFormatter {
     }
 
     @Override
-    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+    public FormatWriter format(ResourcePath path, Query query, Object result) {
         EntityType type = path.getMainElementType();
         CsvElementSet elementSet = new CsvElementSet("");
         elementSet.initFrom(type, query);

@@ -15,26 +15,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.formatter;
+package de.fraunhofer.iosb.ilt.frostserver.query;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
+public class FormatterOptions {
 
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+    public static final FormatterOptions FALLBACK = FormatterOptions.of(true, false);
+    public final boolean useAbsoluteNavigationLinks;
+    public final boolean mqttContext;
 
-/**
- * A result formatter that returns nothing.
- */
-public class ResultFormatterEmpty implements ResultFormatter {
-
-    @Override
-    public FormatWriter format(ResourcePath path, Query query, Object result) {
-        return new FormatWriterGeneric("");
+    private FormatterOptions(boolean useAbsoluteNavigationLinks, boolean mqttContext) {
+        this.useAbsoluteNavigationLinks = useAbsoluteNavigationLinks;
+        this.mqttContext = mqttContext;
     }
 
-    @Override
-    public String getContentType() {
-        return CONTENT_TYPE_APPLICATION_JSON;
+    public static FormatterOptions of(boolean useAbsoluteNavigationLinks, boolean mqttContext) {
+        return new FormatterOptions(useAbsoluteNavigationLinks, mqttContext);
     }
-
 }

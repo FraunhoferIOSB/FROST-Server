@@ -22,8 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 
 /**
- *
- * @author jab
+ * Interface for Result Formatters.
  */
 public interface ResultFormatter {
 
@@ -45,11 +44,9 @@ public interface ResultFormatter {
      * @param path The path that was requested.
      * @param query The query parameters of the request.
      * @param result The result to format.
-     * @param useAbsoluteNavigationLinks Flag indicating absolute navigation
-     * links should be used.
      * @return The formatted result object.
      */
-    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks);
+    public FormatWriter format(ResourcePath path, Query query, Object result);
 
     /**
      * Get the content type of the result, when formatted by this

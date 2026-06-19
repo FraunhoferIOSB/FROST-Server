@@ -80,7 +80,7 @@ public class ServiceBatchProcessing {
                 final JsonBatchResponse batchResponse = jsonBatchProcessor.processRequest(streaming);
                 try {
                     new ResultFormatterDefault()
-                            .format(null, null, batchResponse, false)
+                            .format(null, null, batchResponse)
                             .writeFormatted(response.getWriter());
                 } catch (IOException ex) {
                     LOGGER.error("Failed to format", ex);

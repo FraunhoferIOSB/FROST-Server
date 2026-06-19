@@ -136,7 +136,7 @@ public class PluginResultFormatOData implements PluginResultFormat {
         }
 
         @Override
-        public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+        public FormatWriter format(ResourcePath path, Query query, Object result) {
             final Version version = path.getVersion();
             final String contextBase = path.getServiceRootUrl()
                     + '/' + version.urlPart

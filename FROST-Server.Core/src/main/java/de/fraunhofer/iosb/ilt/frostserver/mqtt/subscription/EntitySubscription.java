@@ -35,8 +35,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- *
- * @author jab
+ * Subscriptions on direct entities.
  */
 public class EntitySubscription extends AbstractSubscription {
 
@@ -50,7 +49,9 @@ public class EntitySubscription extends AbstractSubscription {
     }
 
     private void init() {
-        emptyQuery = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL).validate();
+        emptyQuery = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
+                .setFormatOptions(MQTT_FORMAT_OPTIONS)
+                .validate();
         if (!SubscriptionFactory.getQueryFromTopic(topic).isEmpty()) {
             throw new IllegalArgumentException("Invalid subscription to: '" + topic + "': query options not allowed for subscription on an entity.");
         }
@@ -75,7 +76,7 @@ public class EntitySubscription extends AbstractSubscription {
     public String doFormatMessage(Entity entity) throws IOException {
         try {
             entity.setQuery(emptyQuery);
-            return settings.getFormatter(emptyQuery.getVersion(), FORMAT_NAME_DEFAULT).format(path, emptyQuery, entity, true).getFormatted();
+            return settings.getFormatter(emptyQuery.getVersion(), FORMAT_NAME_DEFAULT).format(path, emptyQuery, entity).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }

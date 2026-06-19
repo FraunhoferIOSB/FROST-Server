@@ -42,8 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * Formats DataArrays.
  */
 public class ResultFormatterDataArray implements ResultFormatter {
 
@@ -79,7 +78,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
     }
 
     @Override
-    public FormatWriter format(ResourcePath path, Query query, Object result, boolean useAbsoluteNavigationLinks) {
+    public FormatWriter format(ResourcePath path, Query query, Object result) {
         if (EntitySet.class.isAssignableFrom(result.getClass())) {
             EntitySet entitySet = (EntitySet) result;
             if (entitySet.getEntityType() == pluginCoreModel.etObservation) {

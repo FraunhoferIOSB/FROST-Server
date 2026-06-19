@@ -105,7 +105,7 @@ public class ServiceDataArray {
             ResultFormatter formatter = settings.getFormatter(version, FORMAT_NAME_DEFAULT);
             response.setContentType(formatter.getContentType());
             response.setCode(201);
-            formatter.format(null, query, selfLinks, settings.getQueryDefaults().useAbsoluteNavigationLinks())
+            formatter.format(null, query, selfLinks)
                     .writeFormatted(response.getWriter());
 
             return response;

@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.FormatterOptions;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -50,12 +51,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- *
- * @author jab
- * @author scf
+ * Abstract base class for all subscription types.
  */
 public abstract class AbstractSubscription implements Subscription {
 
+    protected static final FormatterOptions MQTT_FORMAT_OPTIONS = FormatterOptions.of(false, true);
     protected final String topic;
     protected EntityType entityType;
 
@@ -167,8 +167,9 @@ public abstract class AbstractSubscription implements Subscription {
             return;
         }
         matchExpression = extraFilter;
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
-        query.setFilter(extraFilter);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
+                .setFormatOptions(MQTT_FORMAT_OPTIONS)
+                .setFilter(extraFilter);
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe, Expression extraFilter) {
@@ -183,8 +184,9 @@ public abstract class AbstractSubscription implements Subscription {
         if (extraFilter != null) {
             matchExpression = new And(matchExpression, extraFilter);
         }
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
-        query.setFilter(matchExpression);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
+                .setFormatOptions(MQTT_FORMAT_OPTIONS)
+                .setFilter(matchExpression);
     }
 
     @Override

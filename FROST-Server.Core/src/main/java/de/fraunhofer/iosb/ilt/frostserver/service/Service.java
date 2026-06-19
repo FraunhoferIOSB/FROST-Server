@@ -307,7 +307,7 @@ public class Service implements AutoCloseable {
     private ServiceResponse formatResponse(ServiceResponse response, ResultFormatter formatter, Query query, ResourcePath path, Object result) {
         response.setContentType(formatter.getContentType());
         try {
-            formatter.format(path, query, result, settings.getQueryDefaults().useAbsoluteNavigationLinks())
+            formatter.format(path, query, result)
                     .writeFormatted(response.getWriter());
         } catch (IOException ex) {
             LOGGER.error("Formatter not available.", ex);

@@ -57,6 +57,7 @@ public class EntitySetSubscription extends AbstractSubscription {
 
         String queryString = SubscriptionFactory.getQueryFromTopic(topic);
         query = parseQuery(queryString);
+        query.setFormatOptions(MQTT_FORMAT_OPTIONS);
         Expression filter = null;
         if (query != null) {
             if (query.getCount().isPresent()
@@ -100,7 +101,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     public String doFormatMessage(Entity entity) {
         try {
             entity.setQuery(query);
-            return settings.getFormatter(query.getVersion(), FORMAT_NAME_DEFAULT).format(path, query, entity, true).getFormatted();
+            return settings.getFormatter(query.getVersion(), FORMAT_NAME_DEFAULT).format(path, query, entity).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
         }
