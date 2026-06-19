@@ -17,8 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.MQTT_TOPIC_REQUEST;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.MQTT_USER_PROPERTY_NAME_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.MQTT_USER_PROPERTY_NAME_URL;
+
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageListener;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage.Type;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -43,6 +48,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.ChangingStatusLogger;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.Processor;
 import de.fraunhofer.iosb.ilt.frostserver.util.ProcessorHelper.ProcessorListStatus;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Gauge;
@@ -61,6 +67,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,17 +205,20 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         Entity entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(settings).create()) {
-            subscriptions.get(entityType).handleEntityChanged(persistenceManager, entity, fields);
+            subscriptions.get(entityType)
+                    .handleEntityChanged(persistenceManager, entity, message.getEventType(), fields);
         } catch (Exception ex) {
             LOGGER.error("error handling MQTT subscriptions", ex);
         }
     }
 
-    public void notifySubscription(Subscription subscription, Entity entity) {
+    public void notifySubscription(Subscription subscription, Entity entity, Type changeType) {
         final String topic = subscription.getTopic();
         try {
             String payload = subscription.formatMessage(entity);
-            server.publish(topic, payload, settings.getMqttSettings().getQosLevel());
+            Map<String, String> userProps = new HashMap<>();
+            userProps.put("type", changeType.label);
+            server.publish(topic, payload, settings.getMqttSettings().getQosLevel(), null, userProps, null);
         } catch (IOException ex) {
             LOGGER.error("publishing to MQTT on topic '{}' failed", topic, ex);
         }
@@ -223,24 +234,64 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             LOGGER.info("received message on topic '{}' which contains no version info.", topic);
             return;
         }
+        final String path = topic.replaceFirst(version.urlPart, "");
 
-        final String url = topic.replaceFirst(version.urlPart, "");
         try (Service service = new Service(settings)) {
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
-            final ServiceRequest serviceRequest = new ServiceRequest()
-                    .setCoreSettings(settings)
-                    .setVersion(version)
-                    .setRequestType(RequestTypeUtils.CREATE)
-                    .setUpdateMode(version.createFeatures)
-                    .setContent(e.getPayload())
-                    .setUrlPath(url)
-                    .setUserPrincipal(e.getPrincipal());
-            ServiceRequest.setLocalRequest(serviceRequest);
-            service.execute(serviceRequest, serviceResponse);
-            ServiceRequest.removeLocalRequest();
-            if (!serviceResponse.isSuccessful()) {
-                LOGGER.info("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
-                        topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
+            if (path.equals(MQTT_TOPIC_REQUEST)) {
+                String url = e.getUserProperty(MQTT_USER_PROPERTY_NAME_URL);
+                LOGGER.info("Original url:  {}", url);
+                url = StringUtils.removeStart(url, '/');
+                url = Strings.CS.removeStart(url, version.urlPart);
+                if (!url.startsWith("/")) {
+                    url = '/' + url;
+                }
+                LOGGER.info("Rewritten url: {}", url);
+                RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE));
+
+                final ServiceRequest serviceRequest = new ServiceRequest()
+                        .setCoreSettings(settings)
+                        .setVersion(version)
+                        .setRequestType(type.requestType)
+                        .setContentType(e.getContentType())
+                        .setContent(e.getPayload())
+                        .setUrlPath(url)
+                        .setUserPrincipal(e.getPrincipal());
+
+                try {
+                    ServiceRequest.setLocalRequest(serviceRequest);
+                    service.execute(serviceRequest, serviceResponse);
+                } finally {
+                    ServiceRequest.removeLocalRequest();
+                }
+                final String responseTopic = e.getResponseTopic();
+                if (!StringHelper.isNullOrEmpty(responseTopic)) {
+                    Map<String, String> responseProps = new HashMap<>();
+                    responseProps.put("status", Integer.toString(serviceResponse.getCode()));
+                    server.publish(responseTopic, serviceResponse.getFormattedResult(), 2, serviceResponse.getContentType(), responseProps, e.getCorrelationData());
+                }
+                if (!serviceResponse.isSuccessful()) {
+                    LOGGER.info("Failed to execute request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
+                            topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
+                }
+            } else {
+                final ServiceRequest serviceRequest = new ServiceRequest()
+                        .setCoreSettings(settings)
+                        .setVersion(version)
+                        .setRequestType(RequestTypeUtils.CREATE)
+                        .setContent(e.getPayload())
+                        .setUrlPath(path)
+                        .setUserPrincipal(e.getPrincipal());
+                try {
+                    ServiceRequest.setLocalRequest(serviceRequest);
+                    service.execute(serviceRequest, serviceResponse);
+                } finally {
+                    ServiceRequest.removeLocalRequest();
+                }
+                if (!serviceResponse.isSuccessful()) {
+                    LOGGER.info("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
+                            topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
+                }
             }
         }
     }

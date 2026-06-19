@@ -60,8 +60,7 @@ import org.slf4j.LoggerFactory;
 import tools.jackson.databind.node.ValueNode;
 
 /**
- *
- * @author jab
+ * Helper functions for dealing with URLs.
  */
 public class UrlHelper {
 

@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import java.util.Map;
 
 /**
  *
@@ -34,6 +35,8 @@ public interface MqttServer {
     public void stop();
 
     public void publish(String topic, String payload, int qos);
+
+    public void publish(String topic, String message, int qos, String contentType, Map<String, String> userProps, byte[] corrData);
 
     public void addSubscriptionListener(SubscriptionListener listener);
 

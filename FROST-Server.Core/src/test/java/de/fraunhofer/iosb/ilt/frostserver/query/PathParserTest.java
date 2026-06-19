@@ -42,8 +42,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- *
- * @author jab
+ * Tests the path parser.
  */
 class PathParserTest {
 
@@ -71,7 +70,6 @@ class PathParserTest {
         ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
-        expResult.setMainElement(espe);
 
         assertEquals(expResult, result);
     }
@@ -84,7 +82,6 @@ class PathParserTest {
         ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
-        expResult.setMainElement(espe);
         expResult.setRef(true);
 
         assertEquals(expResult, result);
@@ -98,7 +95,6 @@ class PathParserTest {
         ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, true, false);
-        expResult.setMainElement(espe);
 
         assertEquals(expResult, result);
     }

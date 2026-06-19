@@ -38,7 +38,7 @@ public class ServiceResponseDefault implements ServiceResponse {
     /**
      * The formatted result.
      */
-    private StringWriter resultFormatted = new StringWriter();
+    private final StringWriter resultFormatted = new StringWriter();
     /**
      * The content type of the formatted result.
      */
@@ -145,6 +145,10 @@ public class ServiceResponseDefault implements ServiceResponse {
     @Override
     public StringWriter getWriter() {
         return resultFormatted;
+    }
+
+    public String getFormattedResult() {
+        return resultFormatted.toString();
     }
 
     @Override

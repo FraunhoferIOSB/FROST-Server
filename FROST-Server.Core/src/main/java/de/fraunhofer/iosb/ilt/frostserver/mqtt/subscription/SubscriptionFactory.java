@@ -43,6 +43,11 @@ public class SubscriptionFactory {
 
     private final CoreSettings settings;
 
+    /**
+     * TODO: Make this configurable in Moquette, and fix it there!
+     */
+    public String responseTopicBase = "/reqresp/response/";
+
     public static String getPathFromTopic(String topic) {
         String pathString = topic.contains("?")
                 ? topic.substring(0, topic.indexOf('?'))
@@ -67,6 +72,10 @@ public class SubscriptionFactory {
         final String errorMsg = "Subscription to topic '" + topic + "' is invalid. Reason: ";
         if (topic == null || topic.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "topic must be non-empty.");
+        }
+        if (topic.startsWith(responseTopicBase)) {
+            // This is not a subscription for us.
+            return null;
         }
         if (topic.startsWith(URI_PATH_SEP)) {
             throw new IllegalArgumentException(errorMsg + "topic must not start with '" + URI_PATH_SEP + "'.");

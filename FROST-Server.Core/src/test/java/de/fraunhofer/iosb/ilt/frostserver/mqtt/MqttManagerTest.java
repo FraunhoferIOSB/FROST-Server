@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -268,6 +269,13 @@ class MqttManagerTest {
 
         @Override
         public void publish(String topic, String payload, int qos) {
+            for (PublishListener listener : publishListeners) {
+                listener.publish(topic);
+            }
+        }
+
+        @Override
+        public void publish(String topic, String message, int qos, String contentType, Map<String, String> userProps, byte[] corrData) {
             for (PublishListener listener : publishListeners) {
                 listener.publish(topic);
             }

@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage.Type;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
@@ -63,14 +64,14 @@ class SubscriptionManager {
         return entityType;
     }
 
-    public void handleEntityChanged(PersistenceManager persistenceManager, Entity entity, Set<Property> fields) {
+    public void handleEntityChanged(PersistenceManager persistenceManager, Entity entity, Type changeType, Set<Property> fields) {
         for (SubscriptionSetDirectParent subSet : parentedSubscriptions.values()) {
-            subSet.handleEntityChanged(persistenceManager, entity, fields);
+            subSet.handleEntityChanged(persistenceManager, entity, changeType, fields);
         }
         for (Subscription subscription : complexSubscriptions.getSubscriptions().keySet()) {
             if (subscription.matches(persistenceManager, entity, fields)) {
                 Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
-                mqttManager.notifySubscription(subscription, newEntity);
+                mqttManager.notifySubscription(subscription, newEntity, changeType);
             }
         }
     }

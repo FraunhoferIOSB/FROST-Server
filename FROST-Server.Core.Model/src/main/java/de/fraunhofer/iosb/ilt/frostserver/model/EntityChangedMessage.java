@@ -48,7 +48,14 @@ public class EntityChangedMessage {
     public enum Type {
         CREATE,
         UPDATE,
-        DELETE
+        DELETE;
+
+        public final String label;
+
+        private Type() {
+            this.label = name().toLowerCase();
+        }
+
     }
 
     /**

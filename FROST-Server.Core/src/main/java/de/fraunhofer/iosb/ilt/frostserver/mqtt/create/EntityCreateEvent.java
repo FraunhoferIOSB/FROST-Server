@@ -17,18 +17,23 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.create;
 
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Event that an entity should be created.
- *
- * @author jab
  */
 public class EntityCreateEvent {
 
     private final String topic;
     private final String payload;
     private final PrincipalExtended principal;
+    private final Map<String, String> userProperties = new LinkedHashMap<>();
+    private String contentType = Constants.CONTENT_TYPE_APPLICATION_JSON;
+    private String responseTopic;
+    private byte[] correlationData;
 
     public EntityCreateEvent(String topic, String payload) {
         this(topic, payload, PrincipalExtended.ANONYMOUS_PRINCIPAL);
@@ -50,6 +55,42 @@ public class EntityCreateEvent {
 
     public PrincipalExtended getPrincipal() {
         return principal;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public byte[] getCorrelationData() {
+        return correlationData;
+    }
+
+    public void setCorrelationData(byte[] correlationData) {
+        this.correlationData = correlationData;
+    }
+
+    public String getResponseTopic() {
+        return responseTopic;
+    }
+
+    public void setResponseTopic(String responseTopic) {
+        this.responseTopic = responseTopic;
+    }
+
+    public String getUserProperty(String name) {
+        return userProperties.get(name);
+    }
+
+    public Map<String, String> getUserProperties() {
+        return userProperties;
+    }
+
+    public void addUserProperty(String name, String value) {
+        userProperties.put(name, value);
     }
 
 }

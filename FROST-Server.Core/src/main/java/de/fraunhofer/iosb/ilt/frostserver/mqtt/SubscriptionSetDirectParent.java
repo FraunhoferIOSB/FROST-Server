@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage.Type;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
@@ -50,7 +51,7 @@ class SubscriptionSetDirectParent {
         this.topicCount = topicCount;
     }
 
-    public void handleEntityChanged(PersistenceManager persistenceManager, Entity entity, Set<Property> fields) {
+    public void handleEntityChanged(PersistenceManager persistenceManager, Entity entity, Type changeType, Set<Property> fields) {
         Entity parent = (Entity) entity.getProperty(relationToParent);
         if (parent == null) {
             return;
@@ -64,7 +65,7 @@ class SubscriptionSetDirectParent {
         for (Subscription subscription : subsForParent.getSubscriptions().keySet()) {
             if (subscription.matches(persistenceManager, entity, fields)) {
                 Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
-                mqttManager.notifySubscription(subscription, newEntity);
+                mqttManager.notifySubscription(subscription, newEntity, changeType);
             }
         }
     }

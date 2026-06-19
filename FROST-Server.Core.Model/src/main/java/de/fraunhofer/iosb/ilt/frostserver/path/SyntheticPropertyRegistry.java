@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- *
- * @author hylke
+ * Properties that are generated on-the-fly.
  */
 public class SyntheticPropertyRegistry {
 

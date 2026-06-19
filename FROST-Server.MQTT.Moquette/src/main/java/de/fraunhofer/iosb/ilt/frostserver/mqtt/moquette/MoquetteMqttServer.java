@@ -48,6 +48,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessageType;
+import io.netty.handler.codec.mqtt.MqttProperties;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
@@ -59,13 +60,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.swing.event.EventListenerList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author jab
+ * Moquette implementation of the FROST MqttServer interface.
  */
 public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
@@ -101,8 +101,8 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     private static final Logger LOGGER = LoggerFactory.getLogger(MoquetteMqttServer.class);
 
     private Server mqttBroker;
-    protected EventListenerList subscriptionListeners = new EventListenerList();
-    protected EventListenerList entityCreateListeners = new EventListenerList();
+    protected List<SubscriptionListener> subscriptionListeners = new CopyOnWriteArrayList<>();
+    protected List<EntityCreateListener> entityCreateListeners = new CopyOnWriteArrayList<>();
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
     private AuthWrapper authWrapper;
@@ -118,15 +118,34 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
     @Override
     public void addEntityCreateListener(EntityCreateListener listener) {
-        entityCreateListeners.add(EntityCreateListener.class, listener);
+        entityCreateListeners.add(listener);
     }
 
     @Override
     public void publish(String topic, String message, int qos) {
+        publish(topic, message, qos, null);
+    }
+
+    @Override
+    public void publish(String topic, String message, int qos, String contentType, Map<String, String> userProps, byte[] corrData) {
+        MqttProperties props = new MqttProperties();
+        if (corrData != null) {
+            props.add(new MqttProperties.BinaryProperty(MqttProperties.MqttPropertyType.CORRELATION_DATA.value(), corrData));
+        }
+        if (!StringHelper.isNullOrEmpty(contentType)) {
+            props.add(new MqttProperties.StringProperty(MqttProperties.MqttPropertyType.CONTENT_TYPE.value(), contentType));
+        }
+        for (var entry : userProps.entrySet()) {
+            props.add(new MqttProperties.UserProperty(entry.getKey(), entry.getValue()));
+        }
+        publish(topic, message, qos, props);
+    }
+
+    public void publish(String topic, String message, int qos, MqttProperties properties) {
         if (mqttBroker != null) {
             final ByteBuf payload = ByteBufUtil.writeUtf8(UnpooledByteBufAllocator.DEFAULT, message);
             MqttFixedHeader fixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, false, MqttQoS.valueOf(qos), false, 0);
-            MqttPublishVariableHeader varHeader = new MqttPublishVariableHeader(topic, 0);
+            MqttPublishVariableHeader varHeader = new MqttPublishVariableHeader(topic, 0, properties);
             MqttPublishMessage mqttPublishMessage = new MqttPublishMessage(fixedHeader, varHeader, payload);
             mqttBroker.internalPublish(mqttPublishMessage, frostClientId);
         }
@@ -134,42 +153,45 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
     @Override
     public void addSubscriptionListener(SubscriptionListener listener) {
-        subscriptionListeners.add(SubscriptionListener.class, listener);
+        subscriptionListeners.add(listener);
     }
 
     @Override
     public void removeEntityCreateListener(EntityCreateListener listener) {
-        entityCreateListeners.remove(EntityCreateListener.class, listener);
+        entityCreateListeners.remove(listener);
     }
 
     @Override
     public void removeSubscriptionListener(SubscriptionListener listener) {
-        subscriptionListeners.remove(SubscriptionListener.class, listener);
+        subscriptionListeners.remove(listener);
     }
 
     protected void fireEntityCreate(EntityCreateEvent e) {
-        Object[] listeners = entityCreateListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == EntityCreateListener.class) {
-                ((EntityCreateListener) listeners[i + 1]).onEntityCreate(e);
+        for (var l : entityCreateListeners) {
+            try {
+                l.onEntityCreate(e);
+            } catch (RuntimeException ex) {
+                LOGGER.debug("Exception handling entity create.", ex);
             }
         }
     }
 
     protected void fireSubscribe(SubscriptionEvent e) {
-        Object[] listeners = subscriptionListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == SubscriptionListener.class) {
-                ((SubscriptionListener) listeners[i + 1]).onSubscribe(e);
+        for (var l : subscriptionListeners) {
+            try {
+                l.onSubscribe(e);
+            } catch (RuntimeException ex) {
+                LOGGER.debug("Exception handling subscribe.", ex);
             }
         }
     }
 
     protected void fireUnsubscribe(SubscriptionEvent e) {
-        Object[] listeners = subscriptionListeners.getListenerList();
-        for (int i = 0; i < listeners.length; i = i + 2) {
-            if (listeners[i] == SubscriptionListener.class) {
-                ((SubscriptionListener) listeners[i + 1]).onUnsubscribe(e);
+        for (var l : subscriptionListeners) {
+            try {
+                l.onUnsubscribe(e);
+            } catch (RuntimeException ex) {
+                LOGGER.debug("Exception handling unSubscribe.", ex);
             }
         }
     }
@@ -269,7 +291,29 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 } else {
                     userPrincipal = authWrapper.getUserPrincipal(msg.getClientID());
                 }
-                fireEntityCreate(new EntityCreateEvent(msg.getTopicName(), payload, userPrincipal));
+                final MqttPublishVariableHeader variableHeader = msg.getMessage().variableHeader();
+                final MqttProperties mqttProps = variableHeader.properties();
+                final EntityCreateEvent event = new EntityCreateEvent(msg.getTopicName(), payload, userPrincipal);
+
+                final List<MqttProperties.UserProperty> userProps = (List<MqttProperties.UserProperty>) mqttProps.getProperties(MqttProperties.MqttPropertyType.USER_PROPERTY.value());
+                for (MqttProperties.UserProperty p : userProps) {
+                    MqttProperties.StringPair v = p.value();
+                    event.addUserProperty(v.key, v.value);
+                }
+                final MqttProperties.StringProperty responseTopicProp = (MqttProperties.StringProperty) mqttProps.getProperty(MqttProperties.MqttPropertyType.RESPONSE_TOPIC.value());
+                if (responseTopicProp != null) {
+                    event.setResponseTopic(responseTopicProp.value());
+                }
+                final MqttProperties.BinaryProperty correlationDataProp = (MqttProperties.BinaryProperty) mqttProps.getProperty(MqttProperties.MqttPropertyType.CORRELATION_DATA.value());
+                if (correlationDataProp != null) {
+                    event.setCorrelationData(correlationDataProp.value());
+                }
+                final MqttProperties.StringProperty contentType = (MqttProperties.StringProperty) mqttProps.getProperty(MqttProperties.MqttPropertyType.CONTENT_TYPE.value());
+                if (contentType != null) {
+                    event.setContentType(contentType.value());
+                }
+
+                fireEntityCreate(event);
             } finally {
                 super.onPublish(msg);
             }
@@ -305,7 +349,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             if (clientId.equalsIgnoreCase(frostClientId)) {
                 return;
             }
-            final String topicFilter = msg.getTopicFilter();
+            final String topicFilter = msg.getTopicFilterInternal();
             LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
             clientSubscriptions
                     .computeIfAbsent(clientId, t -> new ArrayList<>())
@@ -319,7 +363,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             if (frostClientId.equals(clientId)) {
                 return;
             }
-            final String topicFilter = msg.getTopicFilter();
+            final String topicFilter = msg.getTopicFilterInternal();
             LOGGER.trace("      Client {} unsubscribed from {}", clientId, topicFilter);
             boolean removed = clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
                     .remove(topicFilter);

@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Constants and helper functions for dealing with request types.
  */
@@ -46,6 +49,40 @@ public class RequestTypeUtils {
      * The request type definition for delete.
      */
     public static final String DELETE = "delete";
+
+    /**
+     * Request Types as defined in OGC 23-019: SensorThings API version 2.0
+     * https://hylkevds.github.io/23-019/23-019.html#request_types
+     *
+     */
+    public enum Type_23019 {
+        READ(RequestTypeUtils.READ, "Read data from the resource path."),
+        CREATE(RequestTypeUtils.CREATE, "Create a new Entity, or new Entities, at the resource path."),
+        UPDATE(RequestTypeUtils.UPDATE_CHANGES, "Change the Entity or Entities at the resource path. Only the attributes present in the request are updated."),
+        REPLACE(RequestTypeUtils.UPDATE_ALL, "Replace all the data of the resource with different data."),
+        DELETE(RequestTypeUtils.DELETE, "Remove the resource."),
+        EXECUTE("execute", "Execute an function on a resource.");
+
+        private static final Map<String, Type_23019> map = new HashMap<>();
+
+        static {
+            for (var type : Type_23019.values()) {
+                map.put(type.name().toUpperCase(), type);
+            }
+        }
+
+        public final String requestType;
+        public final String description;
+
+        private Type_23019(String requetsType, String description) {
+            this.requestType = requetsType;
+            this.description = description;
+        }
+
+        public static Type_23019 of(String type) {
+            return map.get(type.toUpperCase());
+        }
+    }
 
     private RequestTypeUtils() {
         // Not for instantiation.

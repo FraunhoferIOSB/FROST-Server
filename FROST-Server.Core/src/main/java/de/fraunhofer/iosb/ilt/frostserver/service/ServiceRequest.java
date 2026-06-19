@@ -49,6 +49,7 @@ public class ServiceRequest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRequest.class);
     private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
+    private static final UrlPrefixGenerator PREFIX_GEN_DEFAULT = new UrlPrefixGenertorDefault();
 
     private String requestType;
     private boolean head;
@@ -63,6 +64,7 @@ public class ServiceRequest {
     private CoreSettings coreSettings;
     private QueryDefaults queryDefaults;
     private JsonReader jsonReader;
+    private UrlPrefixGenerator prefixGen = PREFIX_GEN_DEFAULT;
 
     public CoreSettings getCoreSettings() {
         return coreSettings;
@@ -287,6 +289,10 @@ public class ServiceRequest {
         return this;
     }
 
+    public String getUrlPrefix() {
+        return prefixGen.getUrlPrefix(this);
+    }
+
     public static ServiceRequest getLocalRequest() {
         return LOCAL_REQUEST.get();
     }
@@ -318,5 +324,29 @@ public class ServiceRequest {
      */
     public Query newQuery() {
         return new Query(coreSettings.getModelRegistry(), coreSettings.getQueryDefaults(), userPrincipal);
+    }
+
+    /**
+     * Generates the URL Prefix as it should be used for this request.
+     */
+    public static interface UrlPrefixGenerator {
+
+        /**
+         * Generate the prefix for the given request. The result will end with a
+         * slash, or be empty. It may include the version number.
+         *
+         * @param request the request to generate the urlPrefix for.
+         * @return the prefix to use for URLs.
+         */
+        public String getUrlPrefix(ServiceRequest request);
+    }
+
+    public static class UrlPrefixGenertorDefault implements UrlPrefixGenerator {
+
+        @Override
+        public String getUrlPrefix(ServiceRequest request) {
+            return request.getQueryDefaults().getServiceRootUrl() + '/' + request.getVersion().urlPart + '/';
+        }
+
     }
 }

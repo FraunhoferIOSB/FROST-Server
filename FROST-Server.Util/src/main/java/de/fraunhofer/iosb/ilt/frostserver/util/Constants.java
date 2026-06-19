@@ -43,6 +43,10 @@ public class Constants {
     public static final String HEADER_LOCATION = "Location";
     public static final String HEADER_PREFER = "Prefer";
 
+    public static final String MQTT_TOPIC_REQUEST = "/$request";
+    public static final String MQTT_USER_PROPERTY_NAME_TYPE = "type";
+    public static final String MQTT_USER_PROPERTY_NAME_URL = "url";
+
     public static final String TAG_PREFER_RETURN = "return";
 
     public static final String REQUEST_PARAM_FORMAT = "$format";
