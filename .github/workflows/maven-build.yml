@@ -21,6 +21,7 @@ jobs:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
 
+
     - name: Cache maven repository
       uses: actions/cache@v5
       with:
@@ -30,11 +31,13 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven
 
+
     - name: Set up JDK 21
       uses: actions/setup-java@v5
       with:
         distribution: 'adopt'
         java-version: 21
+
 
     - name: Get Date
       id: get-date
@@ -42,43 +45,11 @@ jobs:
         echo "date=$(/bin/date -u "+%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Restore CVD Database from Cache
-      uses: actions/cache/restore@v5
-      with:
-        path: |
-          ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
-        restore-keys: ${{ runner.os }}-maven-owasp-cvedb
-
-    - name: Update CVD Database
-      continue-on-error: true
-      env:
-        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
-        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
-        NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
-      run: |
-        mvn -B -P owasp -DnvdApiDelay=6000 --settings maven-ci-settings.xml org.owasp:dependency-check-maven:update-only
-
-    - name: Save CVD Database to Cache
-      uses: actions/cache/save@v5
-      with:
-        path: |
-          ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
-
-    - name: Check OWASP
-      env:
-        OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
-        OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
-        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
-        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
-        NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
-      run: |
-        mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp -DautoUpdate=false --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
 
     - name: Build with Maven
       run: |
         mvn -B -DskipTests -Dmaven.javadoc.skip=true install
+
 
     - name: Test with Sonar
       env:

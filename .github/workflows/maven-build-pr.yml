@@ -17,6 +17,7 @@ jobs:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
 
+
     - name: Cache maven repository
       uses: actions/cache/restore@v5
       with:
@@ -27,6 +28,7 @@ jobs:
         restore-keys: |
           pr-${{ runner.os }}-maven
           ${{ runner.os }}-maven
+
 
     - name: Set up JDK 21
       uses: actions/setup-java@v5
