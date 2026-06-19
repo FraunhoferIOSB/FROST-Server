@@ -26,8 +26,8 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_U
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResultsExpanded;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.JOIN_TIMEOUT;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_INSERT;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.JOIN_TIMEOUT;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,15 +47,16 @@ import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.c04batch.BatchResponseJson;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelperAbstract;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.EntityCreator;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttCreateTester;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.StringCreator;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.EntityCreator;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttCreateTester;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.StringCreator;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -134,18 +135,18 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     protected static SensorThingsService serviceObsCreaterProject1;
     protected static SensorThingsService serviceObsCreaterProject2;
 
-    protected static EntityHelper2 ehAdmin;
-    protected static EntityHelper2 ehAdminProject1;
-    protected static EntityHelper2 ehAdminProject2;
+    protected static EntityHelperAbstract ehAdmin;
+    protected static EntityHelperAbstract ehAdminProject1;
+    protected static EntityHelperAbstract ehAdminProject2;
 
-    private static MqttHelper2 mqttHelperAdmin;
-    private static MqttHelper2 mqttHelperWrite;
-    private static MqttHelper2 mqttHelperRead;
-    private static MqttHelper2 mqttHelperAnon;
-    private static MqttHelper2 mqttHelperAdminProject1;
-    private static MqttHelper2 mqttHelperAdminProject2;
-    private static MqttHelper2 mqttHelperObsCreaterProject1;
-    private static MqttHelper2 mqttHelperObsCreaterProject2;
+    private static MqttHelper11 mqttHelperAdmin;
+    private static MqttHelper11 mqttHelperWrite;
+    private static MqttHelper11 mqttHelperRead;
+    private static MqttHelper11 mqttHelperAnon;
+    private static MqttHelper11 mqttHelperAdminProject1;
+    private static MqttHelper11 mqttHelperAdminProject2;
+    private static MqttHelper11 mqttHelperObsCreaterProject1;
+    private static MqttHelper11 mqttHelperObsCreaterProject2;
 
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
@@ -172,22 +173,22 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         createServices();
-        ehAdmin = setCaches(new EntityHelper2(serviceAdmin));
-        ehAdminProject1 = setCaches(new EntityHelper2(serviceAdminProject1));
-        ehAdminProject2 = setCaches(new EntityHelper2(serviceAdminProject2));
+        ehAdmin = setCaches(new EntityHelper11(serviceAdmin));
+        ehAdminProject1 = setCaches(new EntityHelper11(serviceAdminProject1));
+        ehAdminProject2 = setCaches(new EntityHelper11(serviceAdminProject2));
 
-        mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN);
-        mqttHelperWrite = new MqttHelper2(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + WRITE);
-        mqttHelperRead = new MqttHelper2(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + READ);
-        mqttHelperAnon = new MqttHelper2(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ANONYMOUS);
-        mqttHelperAdminProject1 = new MqttHelper2(serviceAdminProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P1);
-        mqttHelperAdminProject2 = new MqttHelper2(serviceAdminProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P2);
-        mqttHelperObsCreaterProject1 = new MqttHelper2(serviceObsCreaterProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P1);
-        mqttHelperObsCreaterProject2 = new MqttHelper2(serviceObsCreaterProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P2);
+        mqttHelperAdmin = new MqttHelper11(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN);
+        mqttHelperWrite = new MqttHelper11(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + WRITE);
+        mqttHelperRead = new MqttHelper11(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + READ);
+        mqttHelperAnon = new MqttHelper11(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ANONYMOUS);
+        mqttHelperAdminProject1 = new MqttHelper11(serviceAdminProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P1);
+        mqttHelperAdminProject2 = new MqttHelper11(serviceAdminProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + ADMIN_P2);
+        mqttHelperObsCreaterProject1 = new MqttHelper11(serviceObsCreaterProject1, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P1);
+        mqttHelperObsCreaterProject2 = new MqttHelper11(serviceObsCreaterProject2, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs(), "TC-" + OBS_CREATE_P2);
         createEntities();
     }
 
-    protected EntityHelper2 setCaches(EntityHelper2 eh) {
+    protected EntityHelperAbstract setCaches(EntityHelper11 eh) {
         return eh.setCache(mdlSensing.etThing, THINGS)
                 .setCache(mdlSensing.etDatastream, DATASTREAMS)
                 .setCache(mdlSensing.etObservation, OBSERVATIONS)
@@ -572,7 +573,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         for (var tester : testers) {
             tester.start();
         }
-        MqttHelper2.waitMillis(WAIT_AFTER_INSERT);
+        MqttHelper11.waitMillis(WAIT_AFTER_INSERT);
         for (var tester : testers) {
             tester.join(JOIN_TIMEOUT);
             if (tester.hasCreatedEntity()) {
@@ -801,58 +802,58 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         String relationPathDs2 = ParserUtils.relationPath(ds2, mdlSensing.npDatastreamObservations);
         String dsTopic2 = "v1.1/" + relationPathDs2;
 
-        final TestSubscription test1SubAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
+        final TestSubscription test1SubAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
                 .setName(ADMIN + "-1")
                 .addExpectedEntity(obsFuture0)
                 .addExpectedEntity(obsFuture1)
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test0SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic0)
+        final TestSubscription test0SubDsAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, dsTopic0)
                 .setName(ADMIN + "-2")
                 .addExpectedEntity(obsFuture0)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test1SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic1)
+        final TestSubscription test1SubDsAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, dsTopic1)
                 .setName(ADMIN + "-3")
                 .addExpectedEntity(obsFuture1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test2SubDsAdmin = new MqttHelper2.TestSubscription(mqttHelperAdmin, dsTopic2)
+        final TestSubscription test2SubDsAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, dsTopic2)
                 .setName(ADMIN + "-4")
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test1SubAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
+        final TestSubscription test1SubAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
                 .setName(ADMIN_P1 + "-1")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test0SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic0)
+        final TestSubscription test0SubDsAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, dsTopic0)
                 .setName(ADMIN_P1 + "-2")
                 .addExpectedEntity(obsFuture0)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test1SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic1)
+        final TestSubscription test1SubDsAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, dsTopic1)
                 .setName(ADMIN_P1 + "-3")
                 .addExpectedEntity(obsFuture1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test2SubDsAdminP1 = new MqttHelper2.TestSubscription(mqttHelperAdminProject1, dsTopic2)
+        final TestSubscription test2SubDsAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, dsTopic2)
                 .setName(ADMIN_P1 + "-4")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test1SubAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
+        final TestSubscription test1SubAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
                 .setName(ADMIN_P2 + "-1")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test0SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic0)
+        final TestSubscription test0SubDsAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, dsTopic0)
                 .setName(ADMIN_P2 + "-2")
                 .addExpectedEntity(obsFuture0)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test1SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic1)
+        final TestSubscription test1SubDsAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, dsTopic1)
                 .setName(ADMIN_P2 + "-3")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test2SubDsAdminP2 = new MqttHelper2.TestSubscription(mqttHelperAdminProject2, dsTopic2)
+        final TestSubscription test2SubDsAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, dsTopic2)
                 .setName(ADMIN_P2 + "-4")
                 .addExpectedEntity(obsFuture2)
                 .createReceivedListener(mdlSensing.etObservation);
@@ -861,34 +862,34 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         final TestSubscription test1SubDsAnon;
         final TestSubscription test2SubDsAnon;
         if (anonymousReadAllowed) {
-            test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
+            test0SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic0)
                     .setName(ANONYMOUS + "-1")
                     .addExpectedEntity(obsFuture0)
                     .createReceivedListener(mdlSensing.etObservation);
-            test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
+            test1SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic1)
                     .setName(ANONYMOUS + "-2")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
-            test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
+            test2SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic2)
                     .setName(ANONYMOUS + "-3")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
         } else {
-            test0SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic0)
+            test0SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic0)
                     .setName(ANONYMOUS + "-4")
                     .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
-            test1SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic1)
+            test1SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic1)
                     .setName(ANONYMOUS + "-5")
                     .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
-            test2SubDsAnon = new MqttHelper2.TestSubscription(mqttHelperAnon, dsTopic2)
+            test2SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic2)
                     .setName(ANONYMOUS + "-6")
                     .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
         }
 
-        MqttHelper2.MqttAction mqttAction = new MqttHelper2.MqttAction(insertAction)
+        MqttHelper11.MqttAction mqttAction = new MqttHelper11.MqttAction(insertAction)
                 .add(test0SubDsAdmin)
                 .add(test0SubDsAdminP1)
                 .add(test0SubDsAdminP2)

@@ -26,11 +26,11 @@ import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -49,8 +49,8 @@ public abstract class Capability7Tests extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability7Tests.class);
 
-    private static MqttHelper2 mqttHelper;
-    private static EntityHelper2 entityHelper;
+    private static MqttHelper11 mqttHelper;
+    private static EntityHelper11 entityHelper;
     private static SensorThingsV11Sensing sMdl;
 
     public Capability7Tests(ServerVersion version) {
@@ -63,8 +63,8 @@ public abstract class Capability7Tests extends AbstractTestClass {
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
 
         long mqttTimeout = serverSettings.getMqttTimeOutMs();
-        entityHelper = new EntityHelper2(sSrvc);
-        mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), mqttTimeout);
+        entityHelper = new EntityHelper11(sSrvc);
+        mqttHelper = new MqttHelper11(sSrvc, serverSettings.getMqttUrl(), mqttTimeout);
     }
 
     @AfterAll
@@ -175,7 +175,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
         Entity observedProperty = entityHelper.createObservedProperty();
         Entity sensor = entityHelper.createSensor();
         Entity datastream = entityHelper.createDatastream(thing, observedProperty, sensor);
-        Entity featureOfInterest = entityHelper.createFeatureOfInterest();
+        Entity featureOfInterest = entityHelper.createFeatureOfInterest(1);
         try {
             return Utils.MAPPER.readTree("{\n"
                     + "  \"phenomenonTime\": \"2015-03-01T02:40:00+02:00\",\n"

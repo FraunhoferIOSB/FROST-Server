@@ -31,11 +31,11 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttAction;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -62,8 +62,8 @@ public class MqttExtraTests11 extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttExtraTests11.class.getName());
 
-    private static EntityHelper2 eh;
-    private static MqttHelper2 mqttHelper;
+    private static EntityHelper11 eh;
+    private static MqttHelper11 mqttHelper;
     private static SensorThingsV11Sensing sMdl;
 
     public MqttExtraTests11() {
@@ -74,8 +74,8 @@ public class MqttExtraTests11 extends AbstractTestClass {
     protected void setUpVersion() throws URISyntaxException, ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
-        eh = new EntityHelper2(sSrvc);
-        mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        eh = new EntityHelper11(sSrvc);
+        mqttHelper = new MqttHelper11(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         try {
             createEntities();
         } catch (StatusCodeException ex) {

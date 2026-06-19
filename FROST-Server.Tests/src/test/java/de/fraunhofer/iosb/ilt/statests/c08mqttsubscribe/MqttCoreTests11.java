@@ -25,22 +25,21 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OB
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_OBSERVEDPROPERTY;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_SENSOR;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_THING;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.WAIT_AFTER_CLEANUP;
-import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.waitMillis;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.WAIT_AFTER_CLEANUP;
+import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.waitMillis;
 
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntitySet;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttAction;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,8 +65,8 @@ public class MqttCoreTests11 extends AbstractTestClass {
 
     private static List<EntityType> entityTypesForCreate;
 
-    private static EntityHelper2 eh2;
-    private static MqttHelper2 mqttHelper;
+    private static EntityHelper11 eh2;
+    private static MqttHelper11 mqttHelper;
     private static SensorThingsV11Sensing sMdl;
 
     public MqttCoreTests11() {
@@ -78,8 +77,8 @@ public class MqttCoreTests11 extends AbstractTestClass {
     protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
-        eh2 = new EntityHelper2(sSrvc);
-        mqttHelper = new MqttHelper2(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        eh2 = new EntityHelper11(sSrvc);
+        mqttHelper = new MqttHelper11(sSrvc, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
         entityTypesForCreate = Arrays.asList(
                 sMdl.etThing,
                 sMdl.etLocation,
@@ -310,19 +309,17 @@ public class MqttCoreTests11 extends AbstractTestClass {
         int totalPaths = 0;
         for (var entityType : entityTypesForCreate) {
             LOGGER.info("    {}", entityType);
-
+            final Entity original = eh2.getCache(entityType, 0);
             final QueryJsonFuture future = QueryJsonFuture.build();
             final Callable<Object> updateAction = getPutUpdateAction(entityType, future);
             final List<TestSubscription> subs = new ArrayList<>();
-            final List<List<NavigationProperty>> paths = eh2.findPathsTo(entityType, true, 4);
+            final List<List<String>> paths = eh2.findPathsTo(original, true, 4);
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                var finalNp = path.get(path.size() - 1);
-                String topic = eh2.createUrl(eh2.getCache(finalNp.getEntityType(), 0));
+                String topic = version.urlPart;
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
-                    NavigationProperty nextNp = path.get(idx);
-                    topic = topic + '/' + nextNp.getInverse();
+                    topic = topic + '/' + path.get(idx);
                 }
                 final TestSubscription testSub = new TestSubscription(mqttHelper)
                         .setTopic(topic)
@@ -424,7 +421,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
             Entity location = eh2.newLocation();
             thing.addNavigationEntity(sMdl.npThingLocations, location);
             Entity datastream = eh2.newDatastream(thing, obsProp, sensor);
-            Entity feature = eh2.newFeatureOfInterest();
+            Entity feature = eh2.newFeatureOfInterest(5);
             observation = eh2.newObservation(datastream, feature);
 
             sSrvc.create(observation);
@@ -546,26 +543,24 @@ public class MqttCoreTests11 extends AbstractTestClass {
         int totalPaths = 0;
         for (var entityType : entityTypesForCreate) {
             LOGGER.info("    {}", entityType);
-
+            final Entity original = eh2.getCache(entityType, 0);
             final QueryJsonFuture future = QueryJsonFuture.build();
             final Callable<Object> updateAction = getPutUpdateAction(entityType, future);
             final List<TestSubscription> subs = new ArrayList<>();
-            final List<List<NavigationProperty>> paths = eh2.findPathsTo(entityType, false, 4);
+            final List<List<String>> paths = eh2.findPathsTo(original, false, 4);
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                var finalNp = path.get(path.size() - 1);
-                String topic = eh2.createUrl(eh2.getCache(finalNp.getEntityType(), 0));
+                String topic = version.urlPart;
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
-                    NavigationProperty nextNp = path.get(idx);
-                    topic = topic + '/' + nextNp.getInverse();
+                    topic = topic + '/' + path.get(idx);
                 }
                 final TestSubscription testSub = new TestSubscription(mqttHelper)
                         .setTopic(topic)
                         .addExpectedJson(future.getFuture())
                         .createReceivedListener(entityType);
                 subs.add(testSub);
-                LOGGER.debug("      {}", topic);
+                LOGGER.info("      {}", topic);
             }
             if (!subs.isEmpty()) {
                 final MqttAction mqttAction = new MqttAction(updateAction)
@@ -755,7 +750,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
                 return eh2.newObservedProperty();
 
             case NAME_FEATUREOFINTEREST:
-                return eh2.newFeatureOfInterest();
+                return eh2.newFeatureOfInterest(1);
 
             case NAME_DATASTREAM:
                 return eh2.newDatastream(

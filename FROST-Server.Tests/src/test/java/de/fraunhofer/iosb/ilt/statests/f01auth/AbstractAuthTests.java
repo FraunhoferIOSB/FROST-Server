@@ -30,11 +30,11 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.MqttAction;
-import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2.TestSubscription;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
+import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -77,14 +77,14 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     protected static SensorThingsService serviceWrite;
     protected static SensorThingsService serviceRead;
     protected static SensorThingsService serviceAnon;
-    private static EntityHelper2 ehAdmin;
+    private static EntityHelper11 ehAdmin;
 
     private final boolean anonymousReadAllowed;
     private final AuthTestHelper ath;
-    private static MqttHelper2 mqttHelperAdmin;
-    private static MqttHelper2 mqttHelperWrite;
-    private static MqttHelper2 mqttHelperRead;
-    private static MqttHelper2 mqttHelperAnon;
+    private static MqttHelper11 mqttHelperAdmin;
+    private static MqttHelper11 mqttHelperWrite;
+    private static MqttHelper11 mqttHelperRead;
+    private static MqttHelper11 mqttHelperAnon;
     protected static SensorThingsV11Sensing sMdl;
 
     public AbstractAuthTests(ServerVersion serverVersion, Map<String, String> properties, boolean anonymousReadAllowed) {
@@ -102,11 +102,11 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
         serviceWrite = getServiceWrite();
         serviceRead = getServiceRead();
         serviceAnon = getServiceAnonymous();
-        ehAdmin = new EntityHelper2(serviceAdmin);
-        mqttHelperAdmin = new MqttHelper2(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
-        mqttHelperWrite = new MqttHelper2(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
-        mqttHelperRead = new MqttHelper2(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
-        mqttHelperAnon = new MqttHelper2(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        ehAdmin = new EntityHelper11(serviceAdmin);
+        mqttHelperAdmin = new MqttHelper11(serviceAdmin, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperWrite = new MqttHelper11(serviceWrite, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperRead = new MqttHelper11(serviceRead, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
+        mqttHelperAnon = new MqttHelper11(serviceAnon, serverSettings.getMqttUrl(), serverSettings.getMqttTimeOutMs());
     }
 
     @Override

@@ -174,7 +174,7 @@ public class MqttListener implements Callable<JsonNode> {
                         }
                     });
                     try {
-                        mqttClient.subscribe(topic, MqttHelper2.QOS, null, new IMqttActionListener() {
+                        mqttClient.subscribe(topic, MqttHelper11.QOS, null, new IMqttActionListener() {
                             @Override
                             public void onSuccess(IMqttToken imt) {
                                 if (imt.getGrantedQos()[0] == 128) {

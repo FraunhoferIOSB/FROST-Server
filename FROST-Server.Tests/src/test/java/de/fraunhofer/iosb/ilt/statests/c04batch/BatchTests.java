@@ -32,7 +32,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
@@ -66,7 +66,7 @@ public abstract class BatchTests extends AbstractTestClass {
     private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
     private final ObjectMapper mapper;
 
-    private static EntityHelper2 eh2;
+    private static EntityHelper11 eh2;
     private static SensorThingsV11Sensing sMdl;
 
     public BatchTests(ServerVersion version) {
@@ -78,7 +78,7 @@ public abstract class BatchTests extends AbstractTestClass {
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
-        eh2 = new EntityHelper2(sSrvc);
+        eh2 = new EntityHelper11(sSrvc);
         try {
             createEntities();
         } catch (ServiceFailureException | URISyntaxException ex) {

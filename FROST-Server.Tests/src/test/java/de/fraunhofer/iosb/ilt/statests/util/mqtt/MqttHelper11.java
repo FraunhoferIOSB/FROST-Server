@@ -21,12 +21,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.frostclient.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostclient.utils.MqttConfig;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
-import de.fraunhofer.iosb.ilt.statests.util.EntityHelper2;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelperAbstract;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener.ReceivedListener;
 import java.io.IOException;
@@ -61,7 +62,7 @@ import tools.jackson.databind.node.ObjectNode;
 /**
  * A helper for using MQTT in tests.
  */
-public class MqttHelper2 {
+public class MqttHelper11 {
 
     public static final int MQTT_CONNECT_TIMEOUT = 2000;
     public static final int MQTT_PUBLISH_TIMEOUT = 2000;
@@ -72,7 +73,7 @@ public class MqttHelper2 {
     public static final int QOS = 2;
     public String clientId = "TS";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MqttHelper2.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttHelper11.class);
 
     private final SensorThingsService sSrvc;
     private final String mqttServerUri;
@@ -82,18 +83,18 @@ public class MqttHelper2 {
      */
     private final long mqttTimeoutMs;
 
-    public MqttHelper2(SensorThingsService sSrvc, String mqttServerUri, long mqttTimeoutMs) {
+    public MqttHelper11(SensorThingsService sSrvc, String mqttServerUri, long mqttTimeoutMs) {
         this(sSrvc, mqttServerUri, mqttTimeoutMs, "TS");
     }
 
-    public MqttHelper2(SensorThingsService sSrvc, String mqttServerUri, long mqttTimeoutMs, String clientId) {
+    public MqttHelper11(SensorThingsService sSrvc, String mqttServerUri, long mqttTimeoutMs, String clientId) {
         this.sSrvc = sSrvc;
         this.mqttServerUri = mqttServerUri;
         this.mqttTimeoutMs = mqttTimeoutMs;
         this.clientId = clientId;
     }
 
-    public MqttHelper2 setClientId(String clientId) {
+    public MqttHelper11 setClientId(String clientId) {
         this.clientId = clientId;
         return this;
     }
@@ -194,6 +195,9 @@ public class MqttHelper2 {
             }
             LOGGER.debug("  done waiting for listeners to finish.");
 
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Call failed: {} {}\n{}", ex.getStatusCode(), ex.getUrl(), ex.getReturnedContent());
+            LOGGER.error("Exception:", ex);
         } catch (Exception ex) {
             LOGGER.error("Exception on server {} :", mqttServerUri, ex);
             fail("Topics: " + ma.topics + " Error executing : " + ex.getMessage());
@@ -274,20 +278,27 @@ public class MqttHelper2 {
                 return false;
             }
             JsonNode val1 = entry.getValue();
+            final JsonNode val2 = obj2.get(key);
             if (val1 == null) {
-                return obj2.get(key) == null;
+                return val2 == null;
             } else if (val1 instanceof ObjectNode) {
-                if (!jsonEqualsWithLinkResolving((ObjectNode) val1, (ObjectNode) obj2.get(key), topic)) {
+                if (!(val2 instanceof ObjectNode)) {
+                    return false;
+                }
+                if (!jsonEqualsWithLinkResolving((ObjectNode) val1, (ObjectNode) val2, topic)) {
                     return false;
                 }
             } else if (val1 instanceof ArrayNode) {
+                if (!(val2 instanceof ArrayNode)) {
+                    return false;
+                }
                 ArrayNode arr1 = (ArrayNode) val1;
-                ArrayNode arr2 = (ArrayNode) obj2.get(key);
+                ArrayNode arr2 = (ArrayNode) val2;
                 if (!jsonEqualsWithLinkResolving(arr1, arr2, topic)) {
                     return false;
                 }
             } else if (key.toLowerCase().endsWith("time")) {
-                if (!checkTimeEquals(val1.stringValue(), obj2.get(key).stringValue())) {
+                if (!checkTimeEquals(val1.stringValue(), val2.stringValue())) {
                     return false;
                 }
             } else if (topic != null && !topic.isEmpty() && key.endsWith("@iot.navigationLink")) {
@@ -300,13 +311,13 @@ public class MqttHelper2 {
 
                 String selfLink2 = obj2.get("@iot.selfLink").stringValue();
                 URI baseUri2 = URI.create(selfLink2.substring(0, selfLink2.indexOf(version))).resolve(topic);
-                String navLink2 = obj2.get(key).stringValue();
+                String navLink2 = val2.stringValue();
                 String absoluteUri2 = baseUri2.resolve(navLink2).toString();
                 if (!absoluteUri1.equals(absoluteUri2)) {
                     return false;
                 }
 
-            } else if (!val1.equals(obj2.get(key))) {
+            } else if (!val1.equals(val2)) {
                 return false;
             }
         }
@@ -346,7 +357,7 @@ public class MqttHelper2 {
      */
     public static class TestSubscription {
 
-        private final MqttHelper2 mqttHelper;
+        private final MqttHelper11 mqttHelper;
         /**
          * The topic for the subscription.
          */
@@ -392,11 +403,11 @@ public class MqttHelper2 {
 
         private ReceivedListener mqttReceivedListener;
 
-        public TestSubscription(MqttHelper2 mqttHelper) {
+        public TestSubscription(MqttHelper11 mqttHelper) {
             this(mqttHelper, null);
         }
 
-        public TestSubscription(MqttHelper2 mqttHelper, String topic) {
+        public TestSubscription(MqttHelper11 mqttHelper, String topic) {
             this.mqttHelper = mqttHelper;
             this.topic = topic;
         }
@@ -694,8 +705,8 @@ public class MqttHelper2 {
 
     public static class MqttCreateTester {
 
-        public final MqttHelper2 mh;
-        public final EntityHelper2 eh;
+        public final MqttHelper11 mh;
+        public final EntityHelperAbstract eh;
         public final String name;
         public final EntityCreator entityCreator;
         public final StringCreator filterCreator;
@@ -710,7 +721,7 @@ public class MqttHelper2 {
         private String message;
         private Entity createdEntity;
 
-        public MqttCreateTester(MqttHelper2 mh, EntityHelper2 eh, String name, EntityCreator entityCreator, StringCreator filterCreator, String topic, EntityType et, boolean expectSuccess) {
+        public MqttCreateTester(MqttHelper11 mh, EntityHelperAbstract eh, String name, EntityCreator entityCreator, StringCreator filterCreator, String topic, EntityType et, boolean expectSuccess) {
             this.mh = mh;
             this.eh = eh;
             this.name = name;
