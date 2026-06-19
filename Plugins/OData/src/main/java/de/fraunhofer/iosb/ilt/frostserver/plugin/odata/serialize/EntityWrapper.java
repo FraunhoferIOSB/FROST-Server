@@ -20,8 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 
 /**
- *
- * @author hylke
+ * Wraps an entity and adds a context.
  */
 public class EntityWrapper {
 
@@ -37,6 +36,7 @@ public class EntityWrapper {
 
     /**
      * @param context the context to set
+     * @return this.
      */
     public EntityWrapper setContext(String context) {
         this.context = context;
@@ -52,6 +52,7 @@ public class EntityWrapper {
 
     /**
      * @param entity the entity to set
+     * @return this.
      */
     public EntityWrapper setEntity(Entity entity) {
         this.entity = entity;

@@ -100,6 +100,8 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.v2cud.GeoTests20;
+import de.fraunhofer.iosb.ilt.statests.v2cud.MqttCoreTests20;
+import de.fraunhofer.iosb.ilt.statests.v2cud.MqttRequestResponse20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.ReferenceTests20;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -197,6 +199,8 @@ import tools.jackson.databind.JsonNode;
     TestSuite.SuiteFinaliser.class,
     ReferenceTests20.class,
     GeoTests20.class,
+    MqttCoreTests20.class,
+    MqttRequestResponse20.class,
     TestSuite.SuiteFinaliser.class
 })
 @Suite

@@ -92,7 +92,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             .setNavLinkName(JsonWriterOdata401.AT_NAVIGATION_LINK)
             .setCreateFeatures(INSERT_STA_20)
             .setUpdateFeatures(UPDATE_STA_20)
-            .registerSytheticProperty(StandardProperties.EP_SELFLINK)
+            .registerSytheticProperty(JsonWriterOdata401.AT_ID, StandardProperties.EP_SELFLINK)
             .build();
 
     public static final String SETTINGS_NAMESPACE = "coreServiceV2.";

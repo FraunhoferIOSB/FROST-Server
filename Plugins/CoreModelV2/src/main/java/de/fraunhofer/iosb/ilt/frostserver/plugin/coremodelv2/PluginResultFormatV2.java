@@ -139,14 +139,22 @@ public class PluginResultFormatV2 implements PluginResultFormat {
         }
 
         @Override
-            if (Entity.class.isAssignableFrom(result.getClass())) {
-                String contextBase = createContextBase(path);
-                return formatAsEntity(result, contextBase);
         public FormatWriter format(ResourcePath path, Query query, Object result) {
+            if (result instanceof Entity entity) {
+                if (query.getFormatOptions().mqttContext) {
+                    return writer -> JsonWriterOdata401.getObjectMapper().writeValue(writer, entity);
+                } else {
+                    String contextBase = createContextBase(path);
+                    return formatAsEntity(result, contextBase);
+                }
             }
-            if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                String contextBase = createContextBase(path);
-                return formatAsEntitySet(result, contextBase, query);
+            if (result instanceof EntitySet es) {
+                if (query.getFormatOptions().mqttContext) {
+                    return writer -> JsonWriterOdata401.getObjectMapper().writeValue(writer, es);
+                } else {
+                    String contextBase = createContextBase(path);
+                    return formatAsEntitySet(result, contextBase, query);
+                }
             }
             // Not an Entity nor an EntitySet.
             String entityJsonString;
