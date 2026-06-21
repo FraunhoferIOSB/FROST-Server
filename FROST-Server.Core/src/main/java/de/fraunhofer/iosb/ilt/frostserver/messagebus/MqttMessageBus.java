@@ -19,6 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.messagebus;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_BUS;
 
+import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.lifecycle.MqttClientConnectedContext;
+import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedContext;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
+import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
+import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -41,6 +50,8 @@ import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -55,25 +66,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 /**
  * A message bus implementation for out-of-JVM use. This uses an MQTT broker as
  * message bus.
  */
-public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults {
+public class MqttMessageBus implements MessageBus, ConfigDefaults {
 
     @DefaultValueInt(2)
     public static final String TAG_SEND_WORKER_COUNT = "sendWorkerPoolSize";
@@ -119,10 +120,10 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
     private long lastRecvOverrun = 0;
     private LoggingStatus logStatus;
 
-    private String broker;
-    private MqttClient client;
+    private URI brokerUri;
+    private Mqtt5AsyncClient client;
     private String topicName;
-    private int qosLevel;
+    private MqttQos qosLevel;
     private int maxInFlight;
     private boolean listening = false;
 
@@ -153,13 +154,22 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         recvService = ProcessorHelper.createProcessors(
                 recvPoolSize,
                 recvQueue,
-                this::handleMessageReceived,
+                this::handleReceivedMessage,
                 "mqtt-BusR",
                 recvProcessors);
 
-        broker = customSettings.get(TAG_MQTT_BROKER, getClass());
+        String brokerString = customSettings.get(TAG_MQTT_BROKER, getClass());
+        try {
+            brokerUri = new URI(brokerString);
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException("Failed to convert to URI", ex);
+        }
         topicName = customSettings.get(TAG_TOPIC_NAME, getClass());
-        qosLevel = customSettings.getInt(TAG_QOS_LEVEL, getClass());
+        int qosLevelInt = customSettings.getInt(TAG_QOS_LEVEL, getClass());
+        qosLevel = MqttQos.fromCode(qosLevelInt);
+        if (qosLevel == null) {
+            qosLevel = MqttQos.EXACTLY_ONCE;
+        }
         maxInFlight = customSettings.getInt(TAG_MAX_IN_FLIGHT, getClass());
         connect();
 
@@ -178,31 +188,38 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         maintenanceTimer.scheduleWithFixedDelay(this::connect, 60, 20, TimeUnit.SECONDS);
     }
 
+    public void connectComplete(MqttClientConnectedContext context) {
+        LOGGER.info("Connected to MQTT message bus.");
+    }
+
     private synchronized void connect() {
         if (client == null) {
-            try {
-                LOGGER.info("Creating new paho-client for broker: {} with client-id {}", broker, clientId);
-                client = new MqttClient(broker, clientId, new MemoryPersistence());
-                client.setCallback(this);
-            } catch (MqttException ex) {
-                LOGGER.error("Failed to create MQTT client to connect to broker: {}", broker);
-                LOGGER.error("", ex);
-                return;
-            }
+            LOGGER.info("Creating new hivemq-client for broker: {} with client-id {}", brokerUri, clientId);
+            client = Mqtt5Client.builder()
+                    .identifier(clientId)
+                    .serverHost(brokerUri.getHost())
+                    .serverPort(brokerUri.getPort())
+                    .automaticReconnectWithDefaultConfig()
+                    .addConnectedListener(this::connectComplete)
+                    .addDisconnectedListener(this::connectionLost)
+                    .buildAsync();
+            client.publishes(MqttGlobalPublishFilter.ALL, this::messageArrived);
         }
-        if (!client.isConnected()) {
+        if (!client.getState().isConnected()) {
             try {
-                LOGGER.info("paho-client connecting to broker: {} with client-id {}", broker, clientId);
-                MqttConnectOptions connOpts = new MqttConnectOptions();
-                connOpts.setAutomaticReconnect(true);
-                connOpts.setCleanSession(false);
-                connOpts.setKeepAliveInterval(30);
-                connOpts.setConnectionTimeout(30);
-                connOpts.setMaxInflight(maxInFlight);
-                client.connect(connOpts);
-                LOGGER.info("paho-client connected to broker");
-            } catch (MqttException ex) {
-                LOGGER.error("Failed to connect to broker: {}", broker);
+                LOGGER.info("hivemq-client connecting to broker: {} with client-id {}", brokerUri, clientId);
+                Mqtt5ConnAck ack = client.toBlocking()
+                        .connectWith()
+                        .cleanStart(false)
+                        .keepAlive(30)
+                        .restrictions()
+                        .receiveMaximum(maxInFlight)
+                        .sendMaximum(maxInFlight)
+                        .applyRestrictions()
+                        .send();
+                LOGGER.info("hivemq-client connected to broker");
+            } catch (RuntimeException ex) {
+                LOGGER.error("Failed to connect to broker: {}", brokerUri);
                 LOGGER.error("", ex);
                 return;
             }
@@ -218,49 +235,49 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         if (client == null) {
             return;
         }
-        if (client.isConnected()) {
+        if (client.getState().isConnected()) {
             try {
-                LOGGER.info("paho-client disconnecting from broker: {}", broker);
-                client.disconnect(1000);
-            } catch (MqttException ex) {
+                LOGGER.info("hivemq-client disconnecting from broker: {}", brokerUri);
+                client.toBlocking()
+                        .disconnectWith()
+                        .send();
+            } catch (RuntimeException ex) {
                 LOGGER.error("Exception disconnecting client.", ex);
             }
-        }
-        try {
-            LOGGER.info("paho-client closing");
-            client.close();
-        } catch (MqttException ex) {
-            LOGGER.error("Exception closing client.", ex);
         }
         client = null;
     }
 
     private synchronized void startListening() {
         try {
-            LOGGER.info("paho-client subscribing to topic: {}", topicName);
-            if (client == null || !client.isConnected()) {
+            LOGGER.info("hivemq-client subscribing to topic: {}", topicName);
+            if (client == null || !client.getState().isConnected()) {
                 connect();
             }
             if (!listening) {
-                client.subscribeWithResponse(topicName, qosLevel).setActionCallback(new IMqttActionListener() {
-                    @Override
-                    public void onSuccess(IMqttToken asyncActionToken) {
+                Mqtt5SubAck ack = client.toBlocking()
+                        .subscribeWith()
+                        .topicFilter(topicName)
+                        .qos(qosLevel)
+                        .send();
+                switch (ack.getReasonCodes().getFirst()) {
+                    case GRANTED_QOS_0:
+                    case GRANTED_QOS_1:
+                    case GRANTED_QOS_2:
                         listening = true;
-                    }
+                        break;
 
-                    @Override
-                    public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    default:
                         listening = false;
-                    }
-                });
+                }
             }
-        } catch (MqttException ex) {
+        } catch (RuntimeException ex) {
             LOGGER.error("Failed to start listening, removing client.", ex);
-            MqttClient tempclient = client;
+            Mqtt5AsyncClient tempclient = client;
             client = null;
             try {
-                tempclient.close(true);
-            } catch (MqttException | RuntimeException ex1) {
+                tempclient.disconnect();
+            } catch (RuntimeException ex1) {
                 // nothing further to do.
             }
         }
@@ -271,10 +288,13 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             return;
         }
         try {
-            LOGGER.info("paho-client unsubscribing from topic: {}", topicName);
-            client.unsubscribe(topicName);
+            LOGGER.info("hivemq-client unsubscribing from topic: {}", topicName);
+            client.toBlocking()
+                    .unsubscribeWith()
+                    .topicFilter(topicName)
+                    .send();
             listening = false;
-        } catch (MqttException ex) {
+        } catch (RuntimeException ex) {
             LOGGER.error("Failed to stop listening.", ex);
         }
     }
@@ -330,27 +350,30 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         try {
             String serialisedMessage = formatter.writeValueAsString(message);
             byte[] bytes = serialisedMessage.getBytes(StringHelper.UTF8);
-            if (!client.isConnected()) {
+            if (!client.getState().isConnected()) {
                 connect();
             }
-            client.publish(topicName, bytes, qosLevel, false);
-        } catch (MqttException | JacksonException ex) {
+            client.publishWith()
+                    .topic(topicName)
+                    .payload(bytes)
+                    .qos(qosLevel)
+                    .retain(false)
+                    .send();
+        } catch (RuntimeException ex) {
             LOGGER.error("Failed to publish message to bus.", ex);
         }
     }
 
-    @Override
-    public void connectionLost(Throwable cause) {
+    public void connectionLost(MqttClientDisconnectedContext context) {
         if (listening) {
-            LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", cause.getMessage());
-            LOGGER.debug("", cause);
+            LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", context.getCause().getMessage());
+            LOGGER.debug("", context.getCause());
             listening = false;
         }
     }
 
-    @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage) throws IOException {
-        String serialisedEcMessage = new String(mqttMessage.getPayload(), StringHelper.UTF8);
+    public void messageArrived(Mqtt5Publish mqttMessage) {
+        String serialisedEcMessage = new String(mqttMessage.getPayloadAsBytes(), StringHelper.UTF8);
         LOGGER.trace("Received: {}", serialisedEcMessage);
         EntityChangedMessage ecMessage;
         try {
@@ -362,7 +385,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
             LOGGER.error("Failed to decode message from bus. Details in DEBUG.");
             LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);
             return;
-        } catch (RuntimeException ex) {
+        } catch (IOException | RuntimeException ex) {
             LOGGER.warn("Non-JSON received on bus.", ex);
             return;
         }
@@ -380,12 +403,7 @@ public class MqttMessageBus implements MessageBus, MqttCallback, ConfigDefaults 
         }
     }
 
-    @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {
-        // Nothing to do...
-    }
-
-    private void handleMessageReceived(EntityChangedMessage message) {
+    private void handleReceivedMessage(EntityChangedMessage message) {
         logStatus.setRecvQueueCount(recvQueueCount.decrementAndGet());
         for (MessageListener listener : listeners) {
             try {
