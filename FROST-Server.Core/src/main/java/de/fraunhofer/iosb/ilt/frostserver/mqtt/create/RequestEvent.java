@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Event that an entity should be created.
  */
-public class EntityCreateEvent {
+public class RequestEvent {
 
     private final String topic;
     private final String payload;
@@ -35,11 +35,11 @@ public class EntityCreateEvent {
     private String responseTopic;
     private byte[] correlationData;
 
-    public EntityCreateEvent(String topic, String payload) {
+    public RequestEvent(String topic, String payload) {
         this(topic, payload, PrincipalExtended.ANONYMOUS_PRINCIPAL);
     }
 
-    public EntityCreateEvent(String topic, String payload, PrincipalExtended principal) {
+    public RequestEvent(String topic, String payload, PrincipalExtended principal) {
         this.topic = topic;
         this.payload = payload;
         this.principal = principal;

@@ -27,8 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage.Type;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEvent;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEventListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionFactory;
@@ -75,9 +75,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles the matching of data changes to MQTT subscriptions.
  */
-public class MqttManager implements SubscriptionListener, MessageListener, EntityCreateListener {
+public class MqttManager implements SubscriptionListener, MessageListener, RequestEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
+
+    private static final ServiceRequest.UrlPrefixGenerator MQTT_URL_PREFIX_GEN = r -> r.getVersion().urlPart + '/';
 
     /**
      * Listeners for integration-test use only. Not thread safe.
@@ -97,9 +99,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     private ExecutorService entityChangedExecutorService;
     private final List<Processor<EntityChangedMessage>> entityChangedProcessors = new ArrayList<>();
 
-    private BlockingQueue<EntityCreateEvent> entityCreateEventQueue;
+    private BlockingQueue<RequestEvent> entityCreateEventQueue;
     private ExecutorService entityCreateExecutorService;
-    private final List<Processor<EntityCreateEvent>> entityCreateProcessors = new ArrayList<>();
+    private final List<Processor<RequestEvent>> entityCreateProcessors = new ArrayList<>();
 
     private final ChangingStatusLogger statusLogger = new ChangingStatusLogger(LOGGER);
     private final AtomicInteger topicCount = new AtomicInteger();
@@ -153,7 +155,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
             entityCreateExecutorService = ProcessorHelper.createProcessors(
                     entityCreatePoolSize,
                     entityCreateEventQueue,
-                    this::handleEntityCreateEvent,
+                    this::handleRequestEvent,
                     "Mqtt-EntityCreateProcessor",
                     entityCreateProcessors);
             // start MQTT server
@@ -224,7 +226,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
         }
     }
 
-    private void handleEntityCreateEvent(EntityCreateEvent e) {
+    private void handleRequestEvent(RequestEvent e) {
         logStatus.setEntityCreateQueueCount(entityCreateQueueCount.decrementAndGet());
         final String topic = e.getTopic();
         final Version version;
@@ -250,6 +252,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
                 RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE));
 
                 final ServiceRequest serviceRequest = new ServiceRequest()
+                        .setPrefixGen(MQTT_URL_PREFIX_GEN)
                         .setCoreSettings(settings)
                         .setVersion(version)
                         .setRequestType(type.requestType)
@@ -346,7 +349,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Entit
     }
 
     @Override
-    public void onEntityCreate(EntityCreateEvent e) {
+    public void onRequestReceived(RequestEvent e) {
         if (shutdown || !enabledMqtt) {
             return;
         }

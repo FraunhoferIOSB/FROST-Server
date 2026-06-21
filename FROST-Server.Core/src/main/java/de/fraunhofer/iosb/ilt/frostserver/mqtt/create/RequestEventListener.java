@@ -20,11 +20,10 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.create;
 import java.util.EventListener;
 
 /**
- *
- * @author jab
+ * Event listener for incoming Requests.
  */
-public interface EntityCreateListener extends EventListener {
+public interface RequestEventListener extends EventListener {
 
-    public void onEntityCreate(EntityCreateEvent e);
+    public void onRequestReceived(RequestEvent e);
 
 }

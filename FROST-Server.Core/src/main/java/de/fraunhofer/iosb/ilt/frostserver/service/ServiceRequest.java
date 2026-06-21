@@ -49,7 +49,7 @@ public class ServiceRequest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRequest.class);
     private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
-    private static final UrlPrefixGenerator PREFIX_GEN_DEFAULT = new UrlPrefixGenertorDefault();
+    private static final UrlPrefixGenerator PREFIX_GEN_DEFAULT = r -> r.getQueryDefaults().getServiceRootUrl() + '/' + r.getVersion().urlPart + '/';
 
     private String requestType;
     private boolean head;
@@ -203,6 +203,15 @@ public class ServiceRequest {
         return this;
     }
 
+    public UrlPrefixGenerator getPrefixGen() {
+        return prefixGen;
+    }
+
+    public ServiceRequest setPrefixGen(UrlPrefixGenerator prefixGen) {
+        this.prefixGen = prefixGen;
+        return this;
+    }
+
     public QueryDefaults getQueryDefaults() {
         return queryDefaults;
     }
@@ -339,14 +348,5 @@ public class ServiceRequest {
          * @return the prefix to use for URLs.
          */
         public String getUrlPrefix(ServiceRequest request);
-    }
-
-    public static class UrlPrefixGenertorDefault implements UrlPrefixGenerator {
-
-        @Override
-        public String getUrlPrefix(ServiceRequest request) {
-            return request.getQueryDefaults().getServiceRootUrl() + '/' + request.getVersion().urlPart + '/';
-        }
-
     }
 }

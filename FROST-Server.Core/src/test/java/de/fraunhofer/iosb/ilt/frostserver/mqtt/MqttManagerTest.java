@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEventListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.FunctionRegistry;
@@ -223,7 +223,7 @@ class MqttManagerTest {
     public static final class TestMqttServer implements MqttServer {
 
         private final List<SubscriptionListener> subscriptionListeners = new CopyOnWriteArrayList<>();
-        private final List<EntityCreateListener> entityCreateListeners = new CopyOnWriteArrayList<>();
+        private final List<RequestEventListener> entityCreateListeners = new CopyOnWriteArrayList<>();
         private final List<PublishListener> publishListeners = new CopyOnWriteArrayList<>();
         private final List<String> topics = new ArrayList<>();
 
@@ -292,12 +292,12 @@ class MqttManagerTest {
         }
 
         @Override
-        public void addEntityCreateListener(EntityCreateListener listener) {
+        public void addEntityCreateListener(RequestEventListener listener) {
             entityCreateListeners.add(listener);
         }
 
         @Override
-        public void removeEntityCreateListener(EntityCreateListener listener) {
+        public void removeEntityCreateListener(RequestEventListener listener) {
             entityCreateListeners.remove(listener);
         }
 

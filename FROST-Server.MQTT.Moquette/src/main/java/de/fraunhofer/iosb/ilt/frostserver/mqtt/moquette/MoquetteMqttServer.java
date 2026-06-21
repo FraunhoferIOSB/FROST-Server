@@ -20,8 +20,8 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateEvent;
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEvent;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEventListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -102,7 +102,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
     private Server mqttBroker;
     protected List<SubscriptionListener> subscriptionListeners = new CopyOnWriteArrayList<>();
-    protected List<EntityCreateListener> entityCreateListeners = new CopyOnWriteArrayList<>();
+    protected List<RequestEventListener> entityCreateListeners = new CopyOnWriteArrayList<>();
     private CoreSettings settings;
     private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
     private AuthWrapper authWrapper;
@@ -117,7 +117,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     }
 
     @Override
-    public void addEntityCreateListener(EntityCreateListener listener) {
+    public void addEntityCreateListener(RequestEventListener listener) {
         entityCreateListeners.add(listener);
     }
 
@@ -157,7 +157,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     }
 
     @Override
-    public void removeEntityCreateListener(EntityCreateListener listener) {
+    public void removeEntityCreateListener(RequestEventListener listener) {
         entityCreateListeners.remove(listener);
     }
 
@@ -166,10 +166,10 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         subscriptionListeners.remove(listener);
     }
 
-    protected void fireEntityCreate(EntityCreateEvent e) {
+    protected void fireEntityCreate(RequestEvent e) {
         for (var l : entityCreateListeners) {
             try {
-                l.onEntityCreate(e);
+                l.onRequestReceived(e);
             } catch (RuntimeException ex) {
                 LOGGER.debug("Exception handling entity create.", ex);
             }
@@ -293,7 +293,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 }
                 final MqttPublishVariableHeader variableHeader = msg.getMessage().variableHeader();
                 final MqttProperties mqttProps = variableHeader.properties();
-                final EntityCreateEvent event = new EntityCreateEvent(msg.getTopicName(), payload, userPrincipal);
+                final RequestEvent event = new RequestEvent(msg.getTopicName(), payload, userPrincipal);
 
                 final List<MqttProperties.UserProperty> userProps = (List<MqttProperties.UserProperty>) mqttProps.getProperties(MqttProperties.MqttPropertyType.USER_PROPERTY.value());
                 for (MqttProperties.UserProperty p : userProps) {

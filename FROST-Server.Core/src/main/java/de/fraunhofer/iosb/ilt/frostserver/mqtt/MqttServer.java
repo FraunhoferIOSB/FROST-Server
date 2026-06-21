@@ -17,14 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
-import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.EntityCreateListener;
+import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEventListener;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.Map;
 
 /**
- *
- * @author jab
+ * Interface for the Mqtt Server implementation of FROST.
  */
 public interface MqttServer {
 
@@ -42,7 +41,7 @@ public interface MqttServer {
 
     public void removeSubscriptionListener(SubscriptionListener listener);
 
-    public void addEntityCreateListener(EntityCreateListener listener);
+    public void addEntityCreateListener(RequestEventListener listener);
 
-    public void removeEntityCreateListener(EntityCreateListener listener);
+    public void removeEntityCreateListener(RequestEventListener listener);
 }
