@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

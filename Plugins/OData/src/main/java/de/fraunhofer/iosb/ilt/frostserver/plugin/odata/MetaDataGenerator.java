@@ -24,7 +24,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FO
 
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.MxGraphGenerator;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;

@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.settings;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQTT;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;

@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.io.BufferedReader;

@@ -17,8 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.security.Principal;
 import java.util.ArrayList;

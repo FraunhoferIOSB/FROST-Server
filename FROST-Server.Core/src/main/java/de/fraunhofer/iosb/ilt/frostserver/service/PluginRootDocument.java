@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import java.util.Map;
 
 /**

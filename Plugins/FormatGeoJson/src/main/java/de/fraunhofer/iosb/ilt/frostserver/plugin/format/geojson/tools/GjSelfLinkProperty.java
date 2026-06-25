@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 
 /**
  *

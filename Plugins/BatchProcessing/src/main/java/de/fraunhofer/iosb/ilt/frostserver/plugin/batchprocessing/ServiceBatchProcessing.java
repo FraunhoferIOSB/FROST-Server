@@ -27,8 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFact
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchProcessor;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchResponse;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartFactory;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;

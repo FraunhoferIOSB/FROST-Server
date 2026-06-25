@@ -20,7 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.security.Principal;
 import java.util.ArrayList;

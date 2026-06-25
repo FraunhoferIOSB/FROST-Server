@@ -17,7 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import java.util.Collection;
 import java.util.Collections;

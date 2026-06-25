@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
+package de.fraunhofer.iosb.ilt.frostserver.request;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import java.io.IOException;
 import java.io.Reader;
 import tools.jackson.databind.ObjectMapper;

@@ -38,10 +38,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimiti
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimpleSet;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import java.util.Map;
 import java.util.TreeMap;
 

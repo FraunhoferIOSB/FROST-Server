@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 
 public class MultipartFactory implements BatchFactory<MultipartContent> {

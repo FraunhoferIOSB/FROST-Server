@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_HTTP;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.multipart.MultipartContent.IsFinished;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.util.regex.Matcher;

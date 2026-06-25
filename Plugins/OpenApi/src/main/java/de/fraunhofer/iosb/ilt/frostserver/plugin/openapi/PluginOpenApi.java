@@ -20,15 +20,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.openapi;
 import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.GET;
 import static de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod.HEAD;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreServiceV2;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
-import de.fraunhofer.iosb.ilt.frostserver.service.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;

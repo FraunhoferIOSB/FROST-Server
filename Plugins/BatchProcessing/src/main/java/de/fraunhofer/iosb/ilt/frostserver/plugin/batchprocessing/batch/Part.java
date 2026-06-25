@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.util.HashMap;
 import java.util.Map;

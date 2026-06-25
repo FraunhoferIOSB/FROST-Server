@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize;
 
-import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.TimeInstantDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.TimeIntervalDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.TimeValueDeserializer;
@@ -34,7 +33,8 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.request.JsonReader;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.io.Reader;

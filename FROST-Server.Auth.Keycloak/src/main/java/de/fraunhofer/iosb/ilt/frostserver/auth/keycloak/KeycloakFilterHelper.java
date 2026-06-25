@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.Version;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterRegistration;

@@ -40,6 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.net.URLDecoder;
 import java.util.AbstractMap;
