@@ -22,7 +22,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APPLICATION_JSON;
 
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -110,22 +109,17 @@ public class ServletMain extends HttpServlet {
         }
     }
 
-    private void executeService(final ServiceRequest serviceRequest, HttpServletRequest request, HttpServletResponse response) {
-        CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-        PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
-        if (plugin == null) {
-            sendResponse(Service.errorResponse(null, 500, "Illegal request type."), response);
-            return;
-        }
+    private void executeService(CoreSettings coreSettings, ServiceRequest serviceRequest, HttpServletResponse response) {
         try (Service service = new Service(coreSettings)) {
             ServiceRequest.setLocalRequest(serviceRequest);
             final ServiceResponseHttpServlet serviceResponse = new ServiceResponseHttpServlet(response);
-            plugin.execute(service, serviceRequest, serviceResponse);
+            service.distributeRequest(serviceRequest, serviceResponse);
             sendResponse(serviceResponse, response);
-            ServiceRequest.removeLocalRequest();
         } catch (Exception exc) {
             LOGGER.error("", exc);
             sendResponse(new ServiceResponseHttpServlet(response, 500, exc.getMessage()), response);
+        } finally {
+            ServiceRequest.removeLocalRequest();
         }
     }
 

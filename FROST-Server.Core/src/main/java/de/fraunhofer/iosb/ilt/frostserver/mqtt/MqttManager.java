@@ -266,7 +266,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
 
                 try {
                     ServiceRequest.setLocalRequest(serviceRequest);
-                    service.execute(serviceRequest, serviceResponse);
+                    service.distributeRequest(serviceRequest, serviceResponse);
                 } finally {
                     ServiceRequest.removeLocalRequest();
                 }
@@ -294,7 +294,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                         .setUserPrincipal(e.getPrincipal());
                 try {
                     ServiceRequest.setLocalRequest(serviceRequest);
-                    service.execute(serviceRequest, serviceResponse);
+                    service.distributeRequest(serviceRequest, serviceResponse);
                 } finally {
                     ServiceRequest.removeLocalRequest();
                 }

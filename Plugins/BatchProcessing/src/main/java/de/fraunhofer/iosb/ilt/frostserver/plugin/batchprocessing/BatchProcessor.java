@@ -91,14 +91,9 @@ public class BatchProcessor<C extends Content> {
                 .setUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
                 .setContent(httpRequest.getData())
                 .setUserPrincipal(PrincipalExtended.fromPrincipal(httpRequest.getUserPrincipal()));
-        PluginService plugin = coreSettings.getPluginManager().getServiceForRequestType(serviceRequest.getVersion(), serviceRequest.getRequestType());
+
         final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
-        if (plugin == null) {
-            serviceResponse.setCode(500)
-                    .setMessage("No plugin to handle requests of type " + serviceRequest.getRequestType() + " for version " + serviceRequest.getVersion());
-        } else {
-            plugin.execute(service, serviceRequest, serviceResponse);
-        }
+        service.distributeRequest(serviceRequest, serviceResponse);
 
         if (RequestTypeUtils.CREATE.equals(type)) {
             Object createdObject = serviceResponse.getResult();

@@ -156,8 +156,25 @@ public class Service implements AutoCloseable {
     }
 
     /**
-     * Execute the given request, and put the result in the given response
-     * object.
+     * Distribute the given request to the most fitting plugin, and put the
+     * result in the given response object.
+     *
+     * @param request the request to execute.
+     * @param response the response object to put the result in. If null, a new
+     * {@link ServiceResponseDefault} is created.
+     * @return the service response passed, or a new one.
+     */
+    public ServiceResponse distributeRequest(ServiceRequest request, ServiceResponse response) {
+        PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), request.getRequestType());
+        if (plugin == null) {
+            return errorResponse(response, 500, "Illegal request type.");
+        }
+        return plugin.execute(this, request, response);
+    }
+
+    /**
+     * Execute the given request directly in this service, and put the result in
+     * the given response object.
      *
      * @param request the request to execute.
      * @param response the response object to put the result in. If null, a new
