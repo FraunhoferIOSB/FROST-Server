@@ -30,10 +30,11 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Content;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.ContentIdPair;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Part;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Request;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.UrlPrefixGenerator;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
-import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
@@ -60,6 +61,7 @@ public class BatchProcessor<C extends Content> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchProcessor.class);
 
     private final BatchFactory<C> batchFactory;
+    private UrlPrefixGenerator prefixGen;
 
     public BatchProcessor(BatchFactory<C> batchFactory) {
         this.batchFactory = batchFactory;
@@ -79,7 +81,11 @@ public class BatchProcessor<C extends Content> {
                 httpRequest.getPath(),
                 ct);
         final ServiceRequest serviceRequest = new ServiceRequest()
-                .setCoreSettings(coreSettings)
+                .setContext(new ServiceContext()
+                        .setFunctionRegistry(coreSettings.getFunctionRegistry())
+                        .setModelRegistry(coreSettings.getModelRegistry())
+                        .setQueryDefaults(coreSettings.getQueryDefaults())
+                        .setPrefixGen(prefixGen))
                 .setVersion(version)
                 .setRequestType(type)
                 .setUrl(httpRequest.getPath() == null ? null : StringHelper.urlDecode(httpRequest.getPath()))
@@ -171,6 +177,7 @@ public class BatchProcessor<C extends Content> {
     }
 
     public Batch<C> processBatch(ServiceRequest batchRequest, Service service, Batch<C> batch) {
+        prefixGen = batchRequest.getContext().getPrefixGen();
         Version batchVersion = batchRequest.getVersion();
         Batch<C> batchResponse = batchFactory.createBatch(batchVersion, service.getSettings(), false);
         for (Part<C> part : batch.getParts()) {

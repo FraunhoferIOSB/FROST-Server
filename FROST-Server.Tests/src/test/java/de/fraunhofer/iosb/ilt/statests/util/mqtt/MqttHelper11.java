@@ -601,20 +601,21 @@ public class MqttHelper11 {
             while (it.hasNext()) {
                 Future<JsonNode> entityFuture = it.next();
                 try {
-                    LOGGER.debug("    Getting expected for JSON {}", received);
+                    LOGGER.debug("    Waiting for future on JSON {}", received);
                     JsonNode expected = entityFuture.get(timeoutMs, TimeUnit.MILLISECONDS);
-                    LOGGER.debug("    Comparing received JSON {} against expected {}", received, expected);
                     if (jsonEqualsWithLinkResolving(expected, received, topic)) {
                         it.remove();
-                        LOGGER.debug("    Received JSON {} matches expected {}", received, expected);
+                        LOGGER.debug("    Match: received {} expected {}", received, expected);
                         return true;
+                    } else {
+                        LOGGER.debug("    No Match: received {} expected {}", received, expected);
                     }
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {
                     LOGGER.warn("Exeption waiting for future for {}.", name, ex);
                     return false;
                 }
             }
-            LOGGER.debug("    Received JSON {} matches nothing", received);
+            LOGGER.debug("    Nothing matched received JSON: {}", received);
             return false;
         }
 

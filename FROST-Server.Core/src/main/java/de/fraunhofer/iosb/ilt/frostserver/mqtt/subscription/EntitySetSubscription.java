@@ -57,7 +57,6 @@ public class EntitySetSubscription extends AbstractSubscription {
 
         String queryString = SubscriptionFactory.getQueryFromTopic(topic);
         query = parseQuery(queryString);
-        query.setFormatOptions(MQTT_FORMAT_OPTIONS);
         Expression filter = null;
         if (query != null) {
             if (query.getCount().isPresent()
@@ -77,7 +76,7 @@ public class EntitySetSubscription extends AbstractSubscription {
                 Query queryCopy = parseQuery(queryString);
                 if (queryCopy != null) {
                     List<Expand> expandList = queryCopy.getExpand();
-                    expandQuery = new Query(modelRegistry, queryDefaults, queryCopy.getPath())
+                    expandQuery = new Query(queryCopy.getContext(), queryCopy.getPath(), ANONYMOUS_PRINCIPAL)
                             .setExpand(expandList)
                             .addSelect(query.getSelect().toArray(Property[]::new));
                 }
@@ -90,10 +89,10 @@ public class EntitySetSubscription extends AbstractSubscription {
         String queryString;
         queryString = URLDecoder.decode(topic, StringHelper.UTF8);
         try {
-            return QueryParser.parseQuery(queryString, queryDefaults, settings, path).validate();
+            return QueryParser.parseQuery(queryString, context, path, ANONYMOUS_PRINCIPAL).validate();
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid query: {} ERROR: {}", queryString, e.getMessage());
-            return new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL).validate();
+            return new Query(context, path, ANONYMOUS_PRINCIPAL).validate();
         }
     }
 
@@ -111,8 +110,7 @@ public class EntitySetSubscription extends AbstractSubscription {
     public Entity fetchExpand(PersistenceManager persistenceManager, Entity newEntity) {
         if (expandQuery != null) {
             ResourcePath resourcePath = newEntity.getPath()
-                    .setVersion(expandQuery.getVersion())
-                    .setServiceRootUrl(expandQuery.getServiceRootUrl());
+                    .setVersion(expandQuery.getVersion());
             Object expandEntity = persistenceManager.get(resourcePath, expandQuery);
 
             if (expandEntity instanceof Entity entity) {

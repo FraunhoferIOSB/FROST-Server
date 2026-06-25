@@ -98,7 +98,8 @@ public class ResultFormatterGeoJson implements ResultFormatter {
     @Override
     public FormatWriter format(ResourcePath path, Query query, Object result) {
         EntityType type = path.getMainElementType();
-        GjElementSet elementSet = new GjElementSet(query, path.getServiceRootUrl(), path.getVersion(), "", true);
+        final String urlPrefix = query.getContext().getPrefixGen().getUrlPrefix();
+        GjElementSet elementSet = new GjElementSet(query, urlPrefix, path.getVersion(), "", true);
         elementSet.initFrom(type);
 
         GjRowCollector rowCollector = new GjRowCollector();

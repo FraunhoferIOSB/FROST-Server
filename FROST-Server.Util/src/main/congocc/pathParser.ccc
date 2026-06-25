@@ -41,7 +41,7 @@ SKIP : " " | "\t" | "\n" | "\r" ;
 
 
 Start Start :
-  <T_PATH_SEPARATOR> P_PathElement (<T_PATH_SEPARATOR> P_PathElement)* ( <T_REF> | <T_VALUE> )? <EOF> { return jjtThis; }
+  (<T_PATH_SEPARATOR>)? P_PathElement (<T_PATH_SEPARATOR> P_PathElement)* ( <T_REF> | <T_VALUE> )? <EOF> { return jjtThis; }
 ;
 
 P_PathElement:

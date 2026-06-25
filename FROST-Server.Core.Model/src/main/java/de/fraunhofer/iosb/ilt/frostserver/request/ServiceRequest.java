@@ -17,8 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.request;
 
-import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.BufferedReader;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.SequencedSet;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,6 @@ public class ServiceRequest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceRequest.class);
     private static final ThreadLocal<ServiceRequest> LOCAL_REQUEST = new ThreadLocal<>();
-    private static final UrlPrefixGenerator PREFIX_GEN_DEFAULT = r -> r.getQueryDefaults().getServiceRootUrl() + '/' + r.getVersion().urlPart + '/';
 
     private String requestType;
     private boolean head;
@@ -55,21 +54,20 @@ public class ServiceRequest {
     private InputStream contentBinary;
     private Map<String, SequencedSet<String>> parameterMap;
     private PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
-    private CoreSettings coreSettings;
-    private QueryDefaults queryDefaults;
-    private JsonReader jsonReader;
-    private UrlPrefixGenerator prefixGen = PREFIX_GEN_DEFAULT;
 
-    public CoreSettings getCoreSettings() {
-        return coreSettings;
+    private ServiceContext context;
+
+    public ServiceContext getContext() {
+        return context;
     }
 
-    public ServiceRequest setCoreSettings(CoreSettings coreSettings) {
-        this.coreSettings = coreSettings;
-        if (queryDefaults == null) {
-            queryDefaults = coreSettings.getQueryDefaults();
-        }
+    public ServiceRequest setContext(ServiceContext context) {
+        this.context = context;
         return this;
+    }
+
+    public ModelRegistry getModelRegistry() {
+        return context.getModelRegistry();
     }
 
     public String getRequestType() {
@@ -198,21 +196,11 @@ public class ServiceRequest {
     }
 
     public UrlPrefixGenerator getPrefixGen() {
-        return prefixGen;
-    }
-
-    public ServiceRequest setPrefixGen(UrlPrefixGenerator prefixGen) {
-        this.prefixGen = prefixGen;
-        return this;
+        return context.getPrefixGen();
     }
 
     public QueryDefaults getQueryDefaults() {
-        return queryDefaults;
-    }
-
-    public ServiceRequest setQueryDefaults(QueryDefaults queryDefaults) {
-        this.queryDefaults = queryDefaults;
-        return this;
+        return context.getQueryDefaults();
     }
 
     public String getUrlPath() {
@@ -252,15 +240,7 @@ public class ServiceRequest {
     }
 
     public JsonReader getJsonReader() {
-        if (jsonReader == null) {
-            jsonReader = new JsonReaderDefault(coreSettings.getModelRegistry(), version, userPrincipal);
-        }
-        return jsonReader;
-    }
-
-    public ServiceRequest setJsonReader(JsonReader jsonReader) {
-        this.jsonReader = jsonReader;
-        return this;
+        return context.getJsonReader();
     }
 
     public PrincipalExtended getUserPrincipal() {
@@ -293,7 +273,7 @@ public class ServiceRequest {
     }
 
     public String getUrlPrefix() {
-        return prefixGen.getUrlPrefix(this);
+        return context.getPrefixGen().getUrlPrefix();
     }
 
     public static ServiceRequest getLocalRequest() {
@@ -310,37 +290,4 @@ public class ServiceRequest {
         PrincipalExtended.removeLocalPrincipal();
     }
 
-    /**
-     * Create a new Path with the settings of this request.
-     *
-     * @param path The path-string to create the path with.
-     * @return a new ResourcePath.
-     */
-    public ResourcePath newPath(String path) {
-        return PathParser.parsePath(coreSettings.getModelRegistry(), queryDefaults.getServiceRootUrl(), version, path);
-    }
-
-    /**
-     * Create a new Query with the settings and user of this request.
-     *
-     * @return a new Query.
-     */
-    public Query newQuery() {
-        return new Query(coreSettings.getModelRegistry(), coreSettings.getQueryDefaults(), userPrincipal);
-    }
-
-    /**
-     * Generates the URL Prefix as it should be used for this request.
-     */
-    public static interface UrlPrefixGenerator {
-
-        /**
-         * Generate the prefix for the given request. The result will end with a
-         * slash, or be empty. It may include the version number.
-         *
-         * @param request the request to generate the urlPrefix for.
-         * @return the prefix to use for URLs.
-         */
-        public String getUrlPrefix(ServiceRequest request);
-    }
 }

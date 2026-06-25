@@ -564,7 +564,7 @@ public class TestSuite {
             } else {
                 implemented = "not";
             }
-            LOGGER.info("Version {} {} implemented.", version.urlPart, implemented);
+            LOGGER.debug("Version {} {} implemented.", version.urlPart, implemented);
         }
     }
 

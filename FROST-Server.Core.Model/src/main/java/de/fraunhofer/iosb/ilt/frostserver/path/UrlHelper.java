@@ -40,7 +40,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.G
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.LessThan;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
-import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.net.URLDecoder;
 import java.util.AbstractMap;
@@ -79,7 +78,8 @@ public class UrlHelper {
         int oldSkip = query.getSkip(0);
         int newSkip = oldSkip + resultCount;
         query.setSkip(newSkip);
-        String nextLink = path.toString() + "?" + query.toString(false);
+        String prefix = query.getContext().getPrefixGen().getUrlPrefix();
+        String nextLink = prefix + path.toString() + "?" + query.toString(false);
         query.setSkip(oldSkip);
         return nextLink;
     }
@@ -214,11 +214,8 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, PkValue pkValues) {
-        return new StringBuilder(serviceRootUrl)
-                .append('/')
-                .append(version.urlPart)
-                .append('/')
+    public static String generateSelfLink(String urlPrefix, EntityType entityType, PkValue pkValues) {
+        return new StringBuilder(urlPrefix)
                 .append(entityType.plural)
                 .append('(')
                 .append(quoteForUrl(entityType.getPrimaryKey(), pkValues))
@@ -226,21 +223,18 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, ValueNode id) {
+    public static String generateSelfLink(String urlPrefix, EntityType entityType, ValueNode id) {
         if (id.isIntegralNumber()) {
-            return generateSelfLink(serviceRootUrl, version, entityType, id.asBigInteger());
+            return generateSelfLink(urlPrefix, entityType, id.asBigInteger());
         }
         if (id.isNumber()) {
-            return generateSelfLink(serviceRootUrl, version, entityType, id.asDecimal());
+            return generateSelfLink(urlPrefix, entityType, id.asDecimal());
         }
-        return generateSelfLink(serviceRootUrl, version, entityType, id.asString());
+        return generateSelfLink(urlPrefix, entityType, id.asString());
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, EntityType entityType, Object id) {
-        return new StringBuilder(serviceRootUrl)
-                .append('/')
-                .append(version.urlPart)
-                .append('/')
+    public static String generateSelfLink(String urlPrefix, EntityType entityType, Object id) {
+        return new StringBuilder(urlPrefix)
                 .append(entityType.plural)
                 .append('(')
                 .append(quoteForUrl(id))
@@ -248,12 +242,12 @@ public class UrlHelper {
                 .toString();
     }
 
-    public static String generateSelfLink(String serviceRootUrl, Version version, Entity entity) {
-        return generateSelfLink(serviceRootUrl, version, entity.getType(), entity.getPrimaryKeyValues());
+    public static String generateSelfLink(String urlPrefix, Entity entity) {
+        return generateSelfLink(urlPrefix, entity.getType(), entity.getPrimaryKeyValues());
     }
 
     public static String generateSelfLink(ResourcePath path, Entity entity) {
-        return generateSelfLink(path.getServiceRootUrl(), path.getVersion(), entity.getType(), entity.getPrimaryKeyValues());
+        return generateSelfLink(entity.getQuery().getContext().getPrefixGen().getUrlPrefix(), entity.getType(), entity.getPrimaryKeyValues());
     }
 
     public static record TypeAndKey(EntityType entityType, PkValue pkValue) {
@@ -301,9 +295,10 @@ public class UrlHelper {
      * @return A navigation link or null depending on query responseMetadata.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + entity.getType().entityName;
+        String urlPrefix = parent.getQuery().getContext().getPrefixGen().getUrlPrefix();
+        String result = urlPrefix + generateSelfLink(path, parent) + "/" + entity.getType().entityName;
         if (!absolute) {
-            String curPath = path.getServiceRootUrl() + path.getPath();
+            String curPath = urlPrefix + path.getPath();
             result = getRelativePath(result, curPath);
         }
         return result;
@@ -323,7 +318,8 @@ public class UrlHelper {
     public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
         String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
         if (!absolute) {
-            String curPath = path.getServiceRootUrl() + path.getPath();
+            String urlPrefix = parent.getQuery().getContext().getPrefixGen().getUrlPrefix();
+            String curPath = urlPrefix + path.getPath();
             result = getRelativePath(result, curPath);
         }
         return result;

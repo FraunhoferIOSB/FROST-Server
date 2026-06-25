@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_MUL
 
 import de.fraunhofer.iosb.ilt.frostserver.formatter.FormatWriterGeneric;
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatterDefault;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.Batch;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.batch.BatchFactory;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.batchprocessing.json.JsonBatchProcessor;
@@ -76,6 +77,7 @@ public class ServiceBatchProcessing {
                 return sendResponse(resultContent, response);
 
             case CONTENT_TYPE_APPLICATION_JSON:
+                request.getContext().setJsonReader(new JsonReaderDefault(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
                 final JsonBatchProcessor jsonBatchProcessor = new JsonBatchProcessor(service, request, response);
                 final JsonBatchResponse batchResponse = jsonBatchProcessor.processRequest(streaming);
                 try {

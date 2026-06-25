@@ -93,6 +93,8 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             .setCreateFeatures(INSERT_STA_20)
             .setUpdateFeatures(UPDATE_STA_20)
             .registerSytheticProperty(JsonWriterOdata401.AT_ID, StandardProperties.EP_SELFLINK)
+            .setMqttNotifyDelete(true)
+            .setMqttFullUrls(false)
             .build();
 
     public static final String SETTINGS_NAMESPACE = "coreServiceV2.";
@@ -223,9 +225,9 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
         response.addHeader("OData-Version", "4.01");
-        final ModelRegistry mr = request.getCoreSettings().getModelRegistry();
+        final ModelRegistry mr = request.getContext().getModelRegistry();
         final PrincipalExtended userPrincipal = request.getUserPrincipal();
-        request.setJsonReader(new JsonReaderOData(mr, VERSION_STA_2_0, userPrincipal));
+        request.getContext().setJsonReader(new JsonReaderOData(mr, VERSION_STA_2_0, userPrincipal));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(coreSettings)
@@ -258,7 +260,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         result.put(JsonWriterOdata401.AT_CONTEXT, path + PARAM_METADATA);
         final List<Map<String, String>> entitySets = new ArrayList<>();
         result.put("value", entitySets);
-        final ModelRegistry mr = request.getCoreSettings().getModelRegistry();
+        final ModelRegistry mr = request.getModelRegistry();
         for (EntityType entityType : mr.getEntityTypes(request.getUserPrincipal().isAdmin())) {
             String collectionUri = path + entityType.plural;
             entitySets.add(createCapability(entityType.plural, collectionUri));

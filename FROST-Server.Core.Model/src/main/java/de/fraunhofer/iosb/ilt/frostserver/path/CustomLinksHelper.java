@@ -38,8 +38,7 @@ import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.databind.node.ValueNode;
 
 /**
- *
- * @author hylke
+ * Helper functions for dealing with custom navigation properties.
  */
 public class CustomLinksHelper {
 
@@ -118,7 +117,8 @@ public class CustomLinksHelper {
                     String name = matcher.group(1);
                     EntityType type = modelRegistry.getEntityTypeForName(matcher.group(2));
                     String navLinkName = name + "." + type.entityName + AT_IOT_NAVIGATION_LINK;
-                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(path.getServiceRootUrl(), path.getVersion(), type, vn));
+                    String urlPrefix = query.getContext().getPrefixGen().getUrlPrefix();
+                    toAdd.put(navLinkName, UrlHelper.generateSelfLink(urlPrefix, type, vn));
                 }
             } else {
                 if (recurseDepth > 0) {

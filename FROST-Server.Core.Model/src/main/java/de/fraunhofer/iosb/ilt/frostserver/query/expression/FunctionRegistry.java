@@ -39,6 +39,10 @@ public class FunctionRegistry {
     // Cached path, since it is much used.
     private Path rootPath;
 
+    public FunctionRegistry() {
+        LOGGER.info("Initialising a new FunctionRegistry.");
+    }
+
     public void registerExpression(Expression<?> function) {
         expressionsByClass.put(function.getClass(), function);
         String name = function.getName().toLowerCase(Locale.ROOT);

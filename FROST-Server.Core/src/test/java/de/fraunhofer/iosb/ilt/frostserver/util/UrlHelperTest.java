@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
@@ -29,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import org.junit.jupiter.api.Assertions;
@@ -46,33 +45,35 @@ class UrlHelperTest {
     }
 
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
-    private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + Version.INTERNAL.urlPart;
 
     private static CoreSettings coreSettings;
-    private static QueryDefaults queryDefaults;
-    private static ModelRegistry modelRegistry;
+    private static ServiceContext context;
     private static TestModel testModel;
 
     @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
         DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
-        modelRegistry = coreSettings.getModelRegistry();
-        testModel = new TestModel();
-        testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
-        modelRegistry.initFinalise();
-        queryDefaults = coreSettings.getQueryDefaults()
+        coreSettings.getQueryDefaults()
                 .setAlwaysOrder(true)
                 .setUseAbsoluteNavigationLinks(false)
                 .setServiceRootUrl(SERVICE_ROOT_URL);
+        context = new ServiceContext()
+                .setModelRegistry(coreSettings.getModelRegistry())
+                .setFunctionRegistry(coreSettings.getFunctionRegistry())
+                .setQueryDefaults(coreSettings.getQueryDefaults())
+                .setPrefixGen(() -> "");
+        testModel = new TestModel();
+        testModel.initModel(context.getModelRegistry(), Constants.VALUE_ID_TYPE_LONG);
+        context.getModelRegistry().initFinalise();
     }
 
     @Test
     void testPathsetThings() {
         String path = "/Rooms";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+        ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
+        ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -84,16 +85,16 @@ class UrlHelperTest {
     void testPathThing() {
         assertThrows(IllegalArgumentException.class, () -> {
             String path = "/Room";
-            PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+            PathParser.parsePath(context, Version.INTERNAL, path);
         });
     }
 
     @Test
     void testPathsetThingsRef() {
         String path = "/Houses/$ref";
-        ResourcePath result = PathParser.parsePath(modelRegistry, "", Version.INTERNAL, path);
+        ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
-        ResourcePath expResult = new ResourcePath("", Version.INTERNAL, path);
+        ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
         PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
@@ -103,17 +104,43 @@ class UrlHelperTest {
     }
 
     @Test
+    void testSelfLink() {
+        ResourcePath path = new ResourcePath(Version.INTERNAL, "Houses");
+        path.addPathElement(new PathElementEntitySet(testModel.ET_HOUSE), true, false);
+
+        Query query = new Query(context, path);
+        Entity house1 = testModel.createHouse(1, "House 1", 1.0);
+        house1.setQuery(query);
+
+        String selfLink = house1.getSelfLink();
+        assertEquals("Houses(1)", selfLink);
+    }
+
+    @Test
+    void testNextLink() {
+        ResourcePath path = new ResourcePath(Version.INTERNAL, "Houses");
+        path.addPathElement(new PathElementEntitySet(testModel.ET_HOUSE), true, false);
+
+        Query query = new Query(context, path);
+        Entity house1 = testModel.createHouse(1, "House 1", 1.0);
+        Entity house2 = testModel.createHouse(2, "House 2", 2.0);
+
+        String nextLink = UrlHelper.generateNextLink(path, query, 10, house1, house2);
+        assertEquals("Houses?$skip=10", nextLink);
+    }
+
+    @Test
     void testNextLinkDiffOrderIdAuto() {
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
         Entity house2 = testModel.createHouse(2, "House 2", 2.0);
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$top=2",
-                "/Houses?$top=2&$skip=2&$skipFilter=(id gt 1)");
+                "Houses?$top=2",
+                "Houses?$top=2&$skip=2&$skipFilter=(id gt 1)");
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses(5)/Rooms?$top=2",
-                "/Houses(5)/Rooms?$top=2&$skip=2&$skipFilter=(id gt 1)");
+                "Houses(5)/Rooms?$top=2",
+                "Houses(5)/Rooms?$top=2&$skip=2&$skipFilter=(id gt 1)");
     }
 
     @Test
@@ -122,12 +149,12 @@ class UrlHelperTest {
         Entity house2 = testModel.createHouse(2, "House 2", 2.0);
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=id&$top=2",
-                "/Houses?$orderby=id&$top=2&$skip=2&$skipFilter=(id gt 1)");
+                "Houses?$orderby=id&$top=2",
+                "Houses?$orderby=id&$top=2&$skip=2&$skipFilter=(id gt 1)");
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=id desc&$top=2",
-                "/Houses?$orderby=id desc&$top=2&$skip=2&$skipFilter=(id lt 1)");
+                "Houses?$orderby=id desc&$top=2",
+                "Houses?$orderby=id desc&$top=2&$skip=2&$skipFilter=(id lt 1)");
     }
 
     @Test
@@ -136,12 +163,12 @@ class UrlHelperTest {
         Entity house2 = testModel.createHouse(2, "House 2", 2.0);
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=name&$top=2",
-                "/Houses?$orderby=name&$top=2&$skip=2&$skipFilter=(name gt 'House 1')");
+                "Houses?$orderby=name&$top=2",
+                "Houses?$orderby=name&$top=2&$skip=2&$skipFilter=(name gt 'House 1')");
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=name desc&$top=2",
-                "/Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1')");
+                "Houses?$orderby=name desc&$top=2",
+                "Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1')");
     }
 
     @Test
@@ -150,12 +177,12 @@ class UrlHelperTest {
         Entity house2 = testModel.createHouse(2, "House 1", 2.0);
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=name&$top=2",
-                "/Houses?$orderby=name&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and id gt 1))");
+                "Houses?$orderby=name&$top=2",
+                "Houses?$orderby=name&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and id gt 1))");
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=name desc&$top=2",
-                "/Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and id gt 1))");
+                "Houses?$orderby=name desc&$top=2",
+                "Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and id gt 1))");
     }
 
     @Test
@@ -164,24 +191,24 @@ class UrlHelperTest {
         Entity house2 = testModel.createHouse(2, "House 1", 1.0);
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=name,value&$top=2",
-                "/Houses?$orderby=name,value&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
+                "Houses?$orderby=name,value&$top=2",
+                "Houses?$orderby=name,value&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
         testNextLink(
                 coreSettings, house1, house2,
-                "/Houses?$orderby=name desc,value&$top=2",
-                "/Houses?$orderby=name desc,value&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
+                "Houses?$orderby=name desc,value&$top=2",
+                "Houses?$orderby=name desc,value&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
     }
 
     private static void testNextLink(CoreSettings settings, Entity last, Entity next, String baseUrl, String expectedNextUrl) {
         Query queryBase = null;
         Query queryExpected = null;
         try {
-            queryBase = PathParser.parsePathAndQuery(Version.INTERNAL, baseUrl, settings, settings.getQueryDefaults());
+            queryBase = PathParser.parsePathAndQuery(Version.INTERNAL, baseUrl, context);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse base url: " + baseUrl, e);
         }
         try {
-            queryExpected = PathParser.parsePathAndQuery(Version.INTERNAL, expectedNextUrl, settings, settings.getQueryDefaults());
+            queryExpected = PathParser.parsePathAndQuery(Version.INTERNAL, expectedNextUrl, context);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse expexted url: " + expectedNextUrl, e);
         }
@@ -189,10 +216,10 @@ class UrlHelperTest {
         probeQuery(queryBase);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.getPath(), queryBase, queryBase.getTopOrDefault(), last, next);
-        nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
+        nextLink = StringHelper.urlDecode(nextLink);
         Query nextQuery = null;
         try {
-            nextQuery = PathParser.parsePathAndQuery(Version.INTERNAL, nextLink, settings, settings.getQueryDefaults());
+            nextQuery = PathParser.parsePathAndQuery(Version.INTERNAL, nextLink, context);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed for base url {}", baseUrl);
             LOGGER.error("Expected nextLink   {}", expectedNextUrl);

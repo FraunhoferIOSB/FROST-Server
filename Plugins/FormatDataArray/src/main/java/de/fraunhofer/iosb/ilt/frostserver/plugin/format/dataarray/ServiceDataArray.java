@@ -32,7 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArray
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
@@ -69,12 +69,17 @@ public class ServiceDataArray {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDataArray.class);
 
     private final CoreSettings settings;
+    private final ServiceContext context;
     private final PluginCoreModel pluginCoreModel;
     private final ArrayValueHandlers arrayValueHandlers;
     private final NavigationPropertyEntity npMultiDatastream;
 
     public ServiceDataArray(CoreSettings settings) {
         this.settings = settings;
+        this.context = new ServiceContext()
+                .setFunctionRegistry(settings.getFunctionRegistry())
+                .setModelRegistry(settings.getModelRegistry())
+                .setQueryDefaults(settings.getQueryDefaults());
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         npMultiDatastream = (NavigationPropertyEntity) settings.getModelRegistry()
                 .getEntityTypeForName("Observation")
@@ -86,9 +91,8 @@ public class ServiceDataArray {
         final Version version = request.getVersion();
         final PersistenceManager pm = service.getPm();
         try {
-            final ModelRegistry modelRegistry = settings.getModelRegistry();
-            final QueryDefaults queryDefaults = request.getQueryDefaults();
-            Query query = QueryParser.parseQuery(request.getUrlQuery(), queryDefaults, settings, null, request.getUserPrincipal());
+            final ModelRegistry modelRegistry = context.getModelRegistry();
+            Query query = QueryParser.parseQuery(request.getUrlQuery(), context, null, request.getUserPrincipal());
             JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getVersion(), request.getUserPrincipal());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
@@ -125,7 +129,6 @@ public class ServiceDataArray {
     }
 
     private void handleDataArrayItems(Query query, Version version, List<ArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Entity datastream, Entity multiDatastream, PersistenceManager pm, List<String> selfLinks) {
-        final String serviceRootUrl = settings.getQueryDefaults().getServiceRootUrl();
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
@@ -145,7 +148,8 @@ public class ServiceDataArray {
                 if (query.getMetadata() == Metadata.OFF) {
                     selfLinks.add("");
                 } else {
-                    String selfLink = UrlHelper.generateSelfLink(serviceRootUrl, version, observation);
+                    final String urlPrefix = query.getContext().getPrefixGen().getUrlPrefix();
+                    String selfLink = UrlHelper.generateSelfLink(urlPrefix, observation);
                     selfLinks.add(selfLink);
                 }
             } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {

@@ -50,7 +50,7 @@ import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +150,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             }
         } catch (IOException | RuntimeException ex) {
             close();
-            throw new IllegalArgumentException("Failed to read input");
+            throw new IllegalArgumentException("Failed to read input", ex);
         }
         throw new IllegalArgumentException("No requests found in input");
     }
@@ -182,7 +182,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             if (parser.nextToken() == JsonToken.START_OBJECT) {
                 JsonBatchRequestItem item = parser.readValueAs(JsonBatchRequestItem.class);
                 final String itemGroup = item.getAtomicityGroup();
-                if (itemGroup == null || !StringUtils.equals(currentGroup, itemGroup)) {
+                if (itemGroup == null || !Strings.CS.equals(currentGroup, itemGroup)) {
                     service.commitTransaction();
                     service.startTransaction(request.getUserPrincipal());
                     currentGroup = itemGroup;
@@ -289,7 +289,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
         final String requestBody = replaceIdsJson(requestItem.getBody());
 
         final ServiceRequest serviceRequest = new ServiceRequest()
-                .setCoreSettings(coreSettings)
+                .setContext(request.getContext())
                 .setVersion(version)
                 .setRequestType(requestType)
                 .setUrl(path)

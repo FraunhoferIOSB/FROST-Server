@@ -130,29 +130,27 @@ public class PluginResultFormatV2 implements PluginResultFormat {
             this.settings = settings;
         }
 
-        private String createContextBase(ResourcePath path) {
-            final Version version = path.getVersion();
-            final String contextBase = path.getServiceRootUrl()
-                    + '/' + version.urlPart
-                    + "/$metadata";
+        private String createContextBase(Query query) {
+            final String contextBase = query.getContext().getPrefixGen().getUrlPrefix()
+                    + "$metadata";
             return contextBase;
         }
 
         @Override
         public FormatWriter format(ResourcePath path, Query query, Object result) {
             if (result instanceof Entity entity) {
-                if (query.getFormatOptions().mqttContext) {
+                if (query.getContext().isMqttContext()) {
                     return writer -> JsonWriterOdata401.getObjectMapper().writeValue(writer, entity);
                 } else {
-                    String contextBase = createContextBase(path);
+                    String contextBase = createContextBase(query);
                     return formatAsEntity(result, contextBase);
                 }
             }
             if (result instanceof EntitySet es) {
-                if (query.getFormatOptions().mqttContext) {
+                if (query.getContext().isMqttContext()) {
                     return writer -> JsonWriterOdata401.getObjectMapper().writeValue(writer, es);
                 } else {
-                    String contextBase = createContextBase(path);
+                    String contextBase = createContextBase(query);
                     return formatAsEntitySet(result, contextBase, query);
                 }
             }

@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -59,8 +60,7 @@ public class Query {
 
     private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(StandardProperties.EP_SELFLINK)));
 
-    private final QueryDefaults queryDefaults;
-    private final ModelRegistry modelRegistry;
+    private final ServiceContext serviceContext;
     private final PrincipalExtended principal;
     private ResourcePath path;
     private Expand parentExpand;
@@ -82,54 +82,42 @@ public class Query {
 
     private boolean pkOrder = false;
     private String format;
-    private FormatterOptions formatOptions;
     private Metadata metadata;
 
     /**
-     * Create a Query for an anonymous user, with the given model registry,
-     * settings and path.
+     * Create a new Query bound to the ServiceRequest, Path and Principal form
+     * the given parent expand.
      *
-     * @param modelRegistry the model registry to use.
-     * @param settings the setting to use.
-     * @param path the path the query is for.
-     */
-    public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path) {
-        this(modelRegistry, settings, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
-    }
-
-    /**
-     * Create a new Query using the modelRegistry, Settings, Path and Principal
-     * form the given query.
-     *
-     * @param expandParent The parent query to use as a basis.
+     * @param expandParent The parent expand to use as a basis.
      */
     public Query(Query expandParent) {
-        this(expandParent.getModelRegistry(), expandParent.getSettings(), expandParent.getPath(), expandParent.getPrincipal());
+        this(expandParent.getContext(), expandParent.getPath(), expandParent.getPrincipal());
+    }
+
+    public Query(ServiceContext context, ResourcePath path) {
+        this(context, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
     }
 
     /**
-     * Create a Query with the given model registry, settings, path and user.
+     * Create a Query bound to the given ServiceRequest, path and user.
      *
-     * @param modelRegistry the model registry to use.
-     * @param settings the setting to use.
+     * @param context the service Context this Query is part of.
      * @param path the path the query is for.
      * @param principal the user principal.
      */
-    public Query(ModelRegistry modelRegistry, QueryDefaults settings, ResourcePath path, PrincipalExtended principal) {
-        this(modelRegistry, settings, principal);
+    public Query(ServiceContext context, ResourcePath path, PrincipalExtended principal) {
+        this(context, principal);
         setPath(path);
     }
 
     /**
-     * Create a Query with the given model registry, settings, path and user.
+     * Create a Query bound to the given ServiceRequest and user.
      *
-     * @param modelRegistry the model registry to use.
-     * @param settings the setting to use.
+     * @param context the service serviceCcontext this Query is part of.
      * @param principal the user principal.
      */
-    public Query(ModelRegistry modelRegistry, QueryDefaults settings, PrincipalExtended principal) {
-        this.modelRegistry = modelRegistry;
-        this.queryDefaults = settings;
+    public Query(ServiceContext context, PrincipalExtended principal) {
+        this.serviceContext = context;
         this.principal = principal;
         this.top = Optional.empty();
         this.skip = Optional.empty();
@@ -163,7 +151,7 @@ public class Query {
 
     public Query validate(ParserContext context, EntityType entityType) {
         if (context == null) {
-            context = new ParserContext(modelRegistry);
+            context = new ParserContext(serviceContext.getModelRegistry());
         }
         if (this.entityType == null) {
             this.entityType = entityType;
@@ -211,7 +199,7 @@ public class Query {
             }
         }
         pkOrder = pkCount >= primaryKey.getKeyProperties().size();
-        if (queryDefaults.isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
+        if (serviceContext.getQueryDefaults().isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
             for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
                 boolean found = false;
                 for (OrderBy order : orderBy) {
@@ -229,12 +217,16 @@ public class Query {
         return this;
     }
 
+    public ServiceContext getContext() {
+        return serviceContext;
+    }
+
     public Version getVersion() {
         return path.getVersion();
     }
 
     public ModelRegistry getModelRegistry() {
-        return modelRegistry;
+        return serviceContext.getModelRegistry();
     }
 
     public EntityType getEntityType() {
@@ -242,7 +234,7 @@ public class Query {
     }
 
     public QueryDefaults getSettings() {
-        return queryDefaults;
+        return serviceContext.getQueryDefaults();
     }
 
     public ResourcePath getPath() {
@@ -252,10 +244,6 @@ public class Query {
     public final Query setPath(ResourcePath path) {
         this.path = path;
         return this;
-    }
-
-    public String getServiceRootUrl() {
-        return path.getServiceRootUrl();
     }
 
     public boolean hasParentExpand() {
@@ -278,7 +266,7 @@ public class Query {
         if (top.isPresent()) {
             return top.get();
         }
-        return queryDefaults.getTopDefault();
+        return serviceContext.getQueryDefaults().getTopDefault();
     }
 
     public Optional<Integer> getSkip() {
@@ -300,7 +288,7 @@ public class Query {
         if (count.isPresent()) {
             return count.get();
         }
-        return queryDefaults.isCountDefault();
+        return serviceContext.getQueryDefaults().isCountDefault();
     }
 
     public Query clearSelect() {
@@ -442,21 +430,6 @@ public class Query {
         return format;
     }
 
-    public FormatterOptions getFormatOptions() {
-        if (parentExpand != null) {
-            return parentExpand.getParentQuery().getFormatOptions();
-        }
-        if (formatOptions != null) {
-            return formatOptions;
-        }
-        return FormatterOptions.FALLBACK;
-    }
-
-    public Query setFormatOptions(FormatterOptions formatOptions) {
-        this.formatOptions = formatOptions;
-        return this;
-    }
-
     public Metadata getMetadata() {
         if (metadata == null) {
             return Metadata.DEFAULT;
@@ -486,10 +459,11 @@ public class Query {
     }
 
     public Query setTop(int top) {
-        if (top <= queryDefaults.getTopMax()) {
+        final int topMax = serviceContext.getQueryDefaults().getTopMax();
+        if (top <= topMax) {
             this.top = Optional.of(top);
         } else {
-            this.top = Optional.of(queryDefaults.getTopMax());
+            this.top = Optional.of(topMax);
         }
         return this;
     }

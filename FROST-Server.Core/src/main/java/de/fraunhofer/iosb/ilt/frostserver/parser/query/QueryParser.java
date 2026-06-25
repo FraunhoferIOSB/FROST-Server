@@ -17,18 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.parser.query;
 
-import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
-
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.Node.Visitor;
@@ -72,7 +69,7 @@ public class QueryParser extends Visitor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryParser.class);
 
-    private final CoreSettings settings;
+    private final ServiceContext serviceContext;
     private final ResourcePath path;
     private final PrincipalExtended user;
     private final DynamicContext context;
@@ -80,19 +77,19 @@ public class QueryParser extends Visitor {
     private Query currentQuery;
     private P_Option currentOption;
 
-    public QueryParser(CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
-        this.settings = settings;
+    public QueryParser(ServiceContext serviceContext, ResourcePath path, PrincipalExtended user, DynamicContext context) {
+        this.serviceContext = serviceContext;
         this.path = path;
         this.user = user;
         this.context = context;
     }
 
-    public CoreSettings getSettings() {
-        return settings;
+    public ServiceContext getServiceContext() {
+        return serviceContext;
     }
 
     private Query handle(Start node) {
-        Query query = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path, user);
+        Query query = new Query(serviceContext, path, user);
         for (P_Ref child : node.childrenOfType(P_Ref.class)) {
             handle(child, query);
         }
@@ -276,7 +273,7 @@ public class QueryParser extends Visitor {
         }
         List<P_Option> subOptions = expandItem.childrenOfType(P_Option.class);
         if (!subOptions.isEmpty()) {
-            Query subQuery = new Query(settings.getModelRegistry(), settings.getQueryDefaults(), path, user);
+            Query subQuery = new Query(serviceContext, path, user);
             for (P_Option subOption : subOptions) {
                 handle(subOption, subQuery);
             }
@@ -292,31 +289,27 @@ public class QueryParser extends Visitor {
         return expressionParser;
     }
 
-    public static Query parseQuery(String query, QueryDefaults qd, CoreSettings settings, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, qd, settings, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
+    public static Query parseQuery(String query, ServiceContext serviceContext, ResourcePath path) {
+        return parseQuery(query, StringHelper.UTF8, serviceContext, path, PrincipalExtended.ANONYMOUS_PRINCIPAL, new DynamicContext());
     }
 
-    public static Query parseQuery(String query, QueryDefaults qd, CoreSettings settings, ResourcePath path, PrincipalExtended user) {
-        return parseQuery(query, StringHelper.UTF8, qd, settings, path, user, new DynamicContext());
+    public static Query parseQuery(String query, ServiceContext serviceContext, ResourcePath path, PrincipalExtended user) {
+        return parseQuery(query, StringHelper.UTF8, serviceContext, path, user, new DynamicContext());
     }
 
-    public static Query parseQuery(String query, QueryDefaults qd, CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
-        return parseQuery(query, StringHelper.UTF8, qd, settings, path, user, context);
+    public static Query parseQuery(String query, ServiceContext serviceContext, ResourcePath path, PrincipalExtended user, DynamicContext context) {
+        return parseQuery(query, StringHelper.UTF8, serviceContext, path, user, context);
     }
 
-    public static Query parseQuery(String query, Charset encoding, QueryDefaults qd, CoreSettings settings, ResourcePath path) {
-        return parseQuery(query, encoding, qd, settings, path, ANONYMOUS_PRINCIPAL, new DynamicContext());
-    }
-
-    public static Query parseQuery(String query, Charset encoding, QueryDefaults qd, CoreSettings settings, ResourcePath path, PrincipalExtended user, DynamicContext context) {
+    public static Query parseQuery(String query, Charset encoding, ServiceContext serviceContext, ResourcePath path, PrincipalExtended user, DynamicContext context) {
         if (query == null || query.isEmpty()) {
-            return new Query(settings.getModelRegistry(), qd, path, user);
+            return new Query(serviceContext, path, user);
         }
         LOGGER.debug("Parsing: {}", query);
         QParser t = new QParser(query);
         try {
             Start start = t.Start();
-            QueryParser v = new QueryParser(settings, path, user, context);
+            QueryParser v = new QueryParser(serviceContext, path, user, context);
             return v.handle(start);
         } catch (ParseException | IllegalArgumentException ex) {
             LOGGER.error("Exception parsing: {}", StringHelper.cleanForLogging(query));

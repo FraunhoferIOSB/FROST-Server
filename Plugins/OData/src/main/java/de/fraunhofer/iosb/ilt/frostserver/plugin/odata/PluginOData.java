@@ -88,6 +88,8 @@ public class PluginOData implements PluginService, ConfigDefaults {
             .setUpdateFeatures(UPDATE_ODATA_40)
             .registerSytheticProperty(JsonWriterOdata40.AT_ID, StandardProperties.EP_SELFLINK)
             .addResponse(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"))
+            .setMqttNotifyDelete(true)
+            .setMqttFullUrls(false)
             .build();
     public static final Version VERSION_ODATA_401 = Version.builder()
             .setUrlPart(VERSION_ODATA_401_NAME)
@@ -100,6 +102,8 @@ public class PluginOData implements PluginService, ConfigDefaults {
             .setUpdateFeatures(UPDATE_ODATA_401)
             .registerSytheticProperty(JsonWriterOdata401.AT_ID, StandardProperties.EP_SELFLINK)
             .addResponse(Version.CannedResponseType.NOTHING_FOUND, new Version.CannedResponse(204, "No Content"))
+            .setMqttNotifyDelete(true)
+            .setMqttFullUrls(false)
             .build();
 
     public static final String PARAM_METADATA = "$metadata";
@@ -200,7 +204,8 @@ public class PluginOData implements PluginService, ConfigDefaults {
             version = ODataVersion.V4_01;
         }
         response.addHeader("OData-Version", version.name);
-        request.setJsonReader(new JsonReaderOData(request.getCoreSettings().getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
+        request.getContext()
+                .setJsonReader(new JsonReaderOData(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(settings)

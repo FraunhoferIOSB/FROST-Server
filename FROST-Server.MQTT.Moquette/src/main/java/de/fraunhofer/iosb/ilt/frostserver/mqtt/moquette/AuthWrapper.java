@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -107,6 +108,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     };
 
     private final CoreSettings coreSettings;
+    private final ServiceContext context;
     private final AuthProvider authProvider;
     private final boolean anonymousRead;
     private final String roleAdmin;
@@ -119,6 +121,10 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     public AuthWrapper(CoreSettings coreSettings, String authProviderClassName, String frostClientId) {
         LOGGER.info("Initialising authentication.");
         this.coreSettings = coreSettings;
+        this.context = new ServiceContext()
+                .setModelRegistry(coreSettings.getModelRegistry())
+                .setFunctionRegistry(coreSettings.getFunctionRegistry())
+                .setQueryDefaults(coreSettings.getQueryDefaults());
         this.frostClientId = frostClientId;
         Settings authSettings = coreSettings.getAuthSettings();
         anonymousRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
@@ -228,8 +234,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         try {
             String internalTopic = URLDecoder.decode(topic, StringHelper.UTF8.name());
             ResourcePath path = PathParser.parsePath(
-                    coreSettings.getModelRegistry(),
-                    coreSettings.getQueryDefaults().getServiceRootUrl(),
+                    context,
                     version,
                     internalTopic,
                     userPrincipal);

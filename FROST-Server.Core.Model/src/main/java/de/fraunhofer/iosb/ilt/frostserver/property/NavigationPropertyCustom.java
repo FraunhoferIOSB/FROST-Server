@@ -173,7 +173,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         if (!parent.getQuery().getSettings().useAbsoluteNavigationLinks()) {
             Query query = parent.getQuery();
             ResourcePath path = query.getPath();
-            String curPath = path.getServiceRootUrl() + path.getPath();
+            String curPath = query.getContext().getPrefixGen().getUrlPrefix() + path.getPath();
             link = UrlHelper.getRelativePath(link, curPath);
         }
         return link;

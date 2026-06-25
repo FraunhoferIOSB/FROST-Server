@@ -214,7 +214,7 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
         Query query = parent.getQuery();
         if (query != null && !query.getSettings().useAbsoluteNavigationLinks()) {
             ResourcePath path = query.getPath();
-            String curPath = path.getServiceRootUrl() + '/' + path.getVersion().urlPart + path.getPath();
+            String curPath = query.getContext().getPrefixGen().getUrlPrefix() + path.getPath();
             link = UrlHelper.getRelativePath(link, curPath);
         }
         return link;

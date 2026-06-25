@@ -19,12 +19,11 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -49,32 +48,36 @@ class UrlHelperTest {
     private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + PluginCoreService.V_1_1.urlPart;
 
     private static CoreSettings coreSettings;
-    private static QueryDefaults queryDefaults;
-    private static ModelRegistry modelRegistry;
+    private static ServiceContext context;
     private static PluginCoreModel pluginCoreModel;
 
     private static CoreSettings coreSettingsString;
-    private static QueryDefaults queryDefaultsString;
-    private static ModelRegistry modelRegistryString;
+    private static ServiceContext contextString;
     private static PluginCoreModel pluginCoreModelString;
 
     @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
-        modelRegistry = coreSettings.getModelRegistry();
-        queryDefaults = coreSettings.getQueryDefaults()
+        coreSettings.getQueryDefaults()
                 .setServiceRootUrl(SERVICE_ROOT_URL)
                 .setUseAbsoluteNavigationLinks(false);
+        context = new ServiceContext()
+                .setModelRegistry(coreSettings.getModelRegistry())
+                .setFunctionRegistry(coreSettings.getFunctionRegistry())
+                .setQueryDefaults(coreSettings.getQueryDefaults());
         pluginCoreModel = new PluginCoreModel();
         pluginCoreModel.init(coreSettings);
         coreSettings.getPluginManager().initPlugins(null);
 
         coreSettingsString = new CoreSettings();
         coreSettingsString.getPluginSettings().set("coreModel.idType", Constants.VALUE_ID_TYPE_STRING);
-        modelRegistryString = coreSettingsString.getModelRegistry();
-        queryDefaultsString = coreSettingsString.getQueryDefaults()
+        coreSettingsString.getQueryDefaults()
                 .setServiceRootUrl(SERVICE_ROOT_URL)
                 .setUseAbsoluteNavigationLinks(false);
+        contextString = new ServiceContext()
+                .setModelRegistry(coreSettingsString.getModelRegistry())
+                .setFunctionRegistry(coreSettingsString.getFunctionRegistry())
+                .setQueryDefaults(coreSettingsString.getQueryDefaults());
         pluginCoreModelString = new PluginCoreModel();
         pluginCoreModelString.init(coreSettingsString);
         coreSettingsString.getPluginManager().initPlugins(null);
@@ -83,15 +86,15 @@ class UrlHelperTest {
     @Test
     void testNextLinkTop() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$top=2",
                 "/Things?$top=2&$skip=2");
         testNextLink(
-                coreSettings,
+                context,
                 "/Things(5)/Datastreams?$top=2",
                 "/Things(5)/Datastreams?$top=2&$skip=2");
         testNextLink(
-                coreSettingsString,
+                contextString,
                 "/Things('a String Id')/Datastreams?$top=2",
                 "/Things('a String Id')/Datastreams?$top=2&$skip=2");
     }
@@ -99,7 +102,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkSkip() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$skip=2&$top=2",
                 "/Things?$skip=4&$top=2");
     }
@@ -107,7 +110,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkCountTrue() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$count=true&$skip=2&$top=2",
                 "/Things?$count=true&$skip=4&$top=2");
     }
@@ -115,7 +118,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkCountFalse() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$count=false&$skip=2&$top=2",
                 "/Things?$count=false&$top=2&$skip=4");
     }
@@ -123,7 +126,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkOrderByAliasAscDesc() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2",
                 "/Things?$orderby=@iot.id asc,@iot.id desc&$top=2&$skip=2");
     }
@@ -131,7 +134,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkSelectMultipleMixed() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Datastreams?$select=Observations, @iot.id&$top=2",
                 "/Datastreams?$select=Observations, @iot.id&$top=2&$skip=2");
     }
@@ -139,7 +142,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkSelectDistinct() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$select=distinct:properties/type&$top=2",
                 "/Things?$select=distinct:properties/type&$top=2&$skip=2");
     }
@@ -147,7 +150,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkExpand() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$expand=Locations&$top=2",
                 "/Things?$expand=Locations&$top=2&$skip=2");
     }
@@ -155,7 +158,7 @@ class UrlHelperTest {
     @Test
     void testNextLinkExpandMultipleNavigationPropertes() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Datastreams?$expand=Observations($count=true;$top=3),ObservedProperty&$top=2",
                 "/Datastreams?$expand=Observations($top=3;$count=true),ObservedProperty&$top=2&$skip=2");
     }
@@ -189,7 +192,7 @@ class UrlHelperTest {
         };
         for (String base : bases) {
             testNextLink(
-                    coreSettings,
+                    context,
                     base + "&$top=2",
                     base + "&$top=2&$skip=2");
         }
@@ -199,19 +202,19 @@ class UrlHelperTest {
     @Test
     void testNextLinkFilter() {
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$filter=id eq 1");
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$filter=id eq 'one'&$top=2");
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$filter=properties/prop1 eq 1&$top=2");
         testNextLink(
-                coreSettings,
+                context,
                 "/Things?$filter=properties/prop1&$top=2");
         testNextLink(
-                coreSettings,
+                context,
                 "/Datastreams?$filter=unitOfMeasurement/name eq 'metre'&$top=2");
     }
 
@@ -234,7 +237,7 @@ class UrlHelperTest {
         }
     }
 
-    private static void testNextLink(CoreSettings settings, String url) {
+    private static void testNextLink(ServiceContext context, String url) {
         String baseUrl;
         String expectedNextUrl;
         if (url.contains("?")) {
@@ -245,22 +248,21 @@ class UrlHelperTest {
             expectedNextUrl = url + "?$skip=2&$top=2";
         }
         testNextLink(
-                settings,
+                context,
                 baseUrl,
                 expectedNextUrl);
     }
 
-    private static void testNextLink(CoreSettings settings, String baseUrl, String expectedNextUrl) {
-
+    private static void testNextLink(ServiceContext context, String baseUrl, String expectedNextUrl) {
         Query queryBase = null;
         Query queryExpected = null;
         try {
-            queryBase = PathParser.parsePathAndQuery(PluginCoreService.V_1_1, baseUrl, settings, settings.getQueryDefaults());
+            queryBase = PathParser.parsePathAndQuery(PluginCoreService.V_1_1, baseUrl, context);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse base url: " + baseUrl, e);
         }
         try {
-            queryExpected = PathParser.parsePathAndQuery(PluginCoreService.V_1_1, expectedNextUrl, settings, settings.getQueryDefaults());
+            queryExpected = PathParser.parsePathAndQuery(PluginCoreService.V_1_1, expectedNextUrl, context);
         } catch (IllegalArgumentException e) {
             Assertions.fail("Failed to parse expexted url: " + expectedNextUrl, e);
         }
@@ -268,10 +270,10 @@ class UrlHelperTest {
         probeQuery(queryBase);
 
         String nextLink = UrlHelper.generateNextLink(queryBase.getPath(), queryBase);
-        nextLink = StringHelper.urlDecode(nextLink).substring(SERVICE_ROOT_URL_V11.length());
+        nextLink = StringHelper.urlDecode(nextLink);
         Query next = null;
         try {
-            next = PathParser.parsePathAndQuery(PluginCoreService.V_1_1, nextLink, settings, settings.getQueryDefaults());
+            next = PathParser.parsePathAndQuery(PluginCoreService.V_1_1, nextLink, context);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed for base url {}", baseUrl);
             LOGGER.error("Expected nextLink   {}", expectedNextUrl);

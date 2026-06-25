@@ -41,6 +41,7 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper20;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelperAbstract.EntityCreateInfo;
+import de.fraunhofer.iosb.ilt.statests.util.EntityHelperAbstract.StringModifier;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
@@ -55,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import org.apache.commons.lang3.Strings;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
@@ -71,6 +73,8 @@ import tools.jackson.databind.JsonNode;
 public class MqttCoreTests20 extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttCoreTests20.class);
+
+    private final StringModifier urlsHttpToMqtt = (s) -> Strings.CS.replace(s, serverSettings.getServiceRootUrl() + '/', "");
 
     private static List<EntityCreateInfo> entityTypesForCreate;
 
@@ -622,7 +626,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
             thing.setProperty(sMdl.npThingLocations, thingLocs);
             thingLocs.add(loc2.withOnlyPk());
             sSrvc.update(thing);
-            JsonNode result = eh.getEntity(thing, sMdl.npThingHistoricallocations, null, null, "id%20desc");
+            JsonNode result = eh.getEntity(thing, sMdl.npThingHistoricallocations, null, null, "id%20desc", urlsHttpToMqtt);
             future.complete(result);
             return null;
         };
@@ -793,7 +797,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
         return () -> {
             Entity entity = patchEntity(et);
             for (var future : futures) {
-                JsonNode jsonNode = eh.getEntity(entity, future.getSelect());
+                JsonNode jsonNode = getEntity(entity, future.getSelect());
                 jsonNode.asObject().remove(AT_CONTEXT);
                 future.getFuture().complete(jsonNode);
             }
@@ -830,19 +834,19 @@ public class MqttCoreTests20 extends AbstractTestClass {
     }
 
     public JsonNode getEntity(Entity entity) {
-        final JsonNode jsonNode = eh.getEntity(entity);
+        final JsonNode jsonNode = eh.getEntity(entity, urlsHttpToMqtt);
         jsonNode.asObject().remove(AT_CONTEXT);
         return jsonNode;
     }
 
     public final JsonNode getEntity(Entity entity, List<String> select) {
-        JsonNode jsonNode = eh.getEntity(entity, select);
+        JsonNode jsonNode = eh.getEntity(entity, select, urlsHttpToMqtt);
         jsonNode.asObject().remove(AT_CONTEXT);
         return jsonNode;
     }
 
     public JsonNode getEntity(Entity entity, NavigationProperty np) {
-        final JsonNode jsonNode = eh.getEntity(entity, np);
+        final JsonNode jsonNode = eh.getEntity(entity, np, urlsHttpToMqtt);
         jsonNode.asObject().remove(AT_CONTEXT);
         return jsonNode;
     }

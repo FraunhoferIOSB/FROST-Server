@@ -34,9 +34,9 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
-import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.PParser;
@@ -50,6 +50,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_REF;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_STR_LIT;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.nodes.T_VALUE;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -248,43 +249,41 @@ public class PathParser extends Visitor {
         }
     }
 
-    /**
-     * Parse the given path, assuming UTF-8 encoding.
-     *
-     * @param modelRegistry The Model Registry to use.
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
-     * @param path The path to parse.
-     * @return The parsed ResourcePath.
-     */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path) {
-        return parsePath(modelRegistry, serviceRootUrl, version, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+    public static ResourcePath parsePath(ServiceRequest request) {
+        return parsePath(request.getContext(), request.getVersion(), request.getUrlPath(), request.getUserPrincipal());
+    }
+
+    public static ResourcePath parsePath(ServiceRequest request, String path) {
+        return parsePath(request.getContext(), request.getVersion(), path, request.getUserPrincipal());
+    }
+
+    public static ResourcePath parsePath(ServiceContext context, Version version, String path) {
+        return parsePath(context, version, path, PrincipalExtended.ANONYMOUS_PRINCIPAL);
     }
 
     /**
      * Parse the given path.
      *
-     * @param modelRegistry The Model Registry to use.
-     * @param serviceRootUrl The root URL of the service.
-     * @param version The version of the service.
+     * @param context The request to use as context.
+     * @param version The API version.
      * @param path The path to parse.
      * @param user The principal of the user.
      * @return The parsed ResourcePath.
      */
-    public static ResourcePath parsePath(ModelRegistry modelRegistry, String serviceRootUrl, Version version, String path, PrincipalExtended user) {
-        ResourcePath resourcePath = new ResourcePath();
-        resourcePath.setServiceRootUrl(serviceRootUrl);
-        resourcePath.setVersion(version);
+    public static ResourcePath parsePath(ServiceContext context, Version version, String path, PrincipalExtended user) {
+        path = StringUtils.stripStart(path, "/");
+        ResourcePath resourcePath = new ResourcePath()
+                .setVersion(version)
+                .setPath(path);
         if (path == null) {
             resourcePath.setPath("");
             return resourcePath;
         }
-        resourcePath.setPath(path);
         LOGGER.debug("Parsing: {}", path);
         PParser parser = new PParser(path);
         try {
             parser.Start();
-            PathParser pp = new PathParser(modelRegistry, resourcePath, user.isAdmin());
+            PathParser pp = new PathParser(context.getModelRegistry(), resourcePath, user.isAdmin());
             pp.visit(parser.rootNode());
         } catch (ParseException ex) {
             throw new IllegalArgumentException("Path is not valid: " + ex.getMessage());
@@ -292,12 +291,16 @@ public class PathParser extends Visitor {
         return resourcePath;
     }
 
-    public static Query parsePathAndQuery(Version version, String pathAndQuery, CoreSettings settings, QueryDefaults qd) {
+    public static Query parsePathAndQuery(Version version, String pathAndQuery, ServiceContext context) {
+        return parsePathAndQuery(version, pathAndQuery, context, PrincipalExtended.ANONYMOUS_PRINCIPAL);
+    }
+
+    public static Query parsePathAndQuery(Version version, String pathAndQuery, ServiceContext context, PrincipalExtended user) {
         int index = pathAndQuery.indexOf('?');
         String pathString = pathAndQuery.substring(0, index);
         String queryString = pathAndQuery.substring(index + 1);
-        ResourcePath path = PathParser.parsePath(settings.getModelRegistry(), qd.getServiceRootUrl(), version, pathString);
-        return QueryParser.parseQuery(queryString, qd, settings, path).validate(null, path.getMainElementType());
+        ResourcePath path = PathParser.parsePath(context, version, pathString, user);
+        return QueryParser.parseQuery(queryString, context, path, user).validate(null, path.getMainElementType());
     }
 
 }

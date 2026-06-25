@@ -23,12 +23,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import java.io.IOException;
 import java.util.Set;
 
 /**
- *
- * @author scf
+ * The interface for Subscription objects.
  */
 public interface Subscription {
 
@@ -54,6 +54,13 @@ public interface Subscription {
      * @return The topic of the Subscription.
      */
     public String getTopic();
+
+    /**
+     * Get the version used for this subscription.
+     *
+     * @return The version used for this subscription.
+     */
+    public Version getVersion();
 
     /**
      * Check of the given entity is of interest to this Subscription.

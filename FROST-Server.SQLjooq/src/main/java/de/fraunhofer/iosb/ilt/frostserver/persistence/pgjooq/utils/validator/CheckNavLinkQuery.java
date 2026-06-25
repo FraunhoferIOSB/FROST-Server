@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorBoolean;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
@@ -31,8 +30,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -140,12 +139,14 @@ public class CheckNavLinkQuery implements ValidationCheck {
             targetNp = entityType.getNavigationProperty(getTargetNavLink());
             targetType = targetNp.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();
-            final ResourcePath path = new ResourcePath("", Version.INTERNAL, '/' + targetType.plural)
+            final ServiceContext serviceContext = new ServiceContext()
+                    .setFunctionRegistry(coreSettings.getFunctionRegistry())
+                    .setModelRegistry(coreSettings.getModelRegistry())
+                    .setQueryDefaults(coreSettings.getQueryDefaults());
+            final ResourcePath path = new ResourcePath(Version.INTERNAL, '/' + targetType.plural)
                     .addPathElement(new PathElementEntitySet(targetType));
             context = new DynamicContext();
-            final QueryDefaults queryDefaults = coreSettings.getQueryDefaults();
-            final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
-            parsedQuery = QueryParser.parseQuery(getQuery(), queryDefaults, coreSettings, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
+            parsedQuery = QueryParser.parseQuery(getQuery(), serviceContext, path, PrincipalExtended.INTERNAL_ADMIN_PRINCIPAL, context)
                     .validate(null, targetType);
             LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
         } catch (RuntimeException ex) {

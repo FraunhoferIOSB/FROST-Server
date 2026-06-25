@@ -69,6 +69,10 @@ public class ModelRegistry {
      */
     private final EntityChangedMessage.QueryGenerator messageQueryGenerator = new EntityChangedMessage.QueryGenerator();
 
+    public ModelRegistry() {
+        LOGGER.info("Initialising a new ModelRegistry.");
+    }
+
     private String ensureNamespace(EntityType type) {
         String namespace = type.getNamespace();
         if (StringHelper.isNullOrEmpty(namespace)) {

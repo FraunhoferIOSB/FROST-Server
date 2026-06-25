@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
@@ -78,8 +79,6 @@ import org.slf4j.LoggerFactory;
 public class MqttManager implements SubscriptionListener, MessageListener, RequestEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttManager.class);
-
-    private static final ServiceRequest.UrlPrefixGenerator MQTT_URL_PREFIX_GEN = r -> r.getVersion().urlPart + '/';
 
     /**
      * Listeners for integration-test use only. Not thread safe.
@@ -197,6 +196,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         LOGGER.trace("Received a {} message for a {}.", eventType, entityType);
         if (eventType == EntityChangedMessage.Type.DELETE) {
             // v1.0 does not do delete notification.
+            // TODO: Fix me for V2
             return;
         }
         // check if there is any subscription, if not do not publish at all
@@ -252,8 +252,11 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                 RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE));
 
                 final ServiceRequest serviceRequest = new ServiceRequest()
-                        .setPrefixGen(MQTT_URL_PREFIX_GEN)
-                        .setCoreSettings(settings)
+                        .setContext(new ServiceContext()
+                                .setPrefixGen(() -> version.urlPart + '/')
+                                .setFunctionRegistry(settings.getFunctionRegistry())
+                                .setModelRegistry(settings.getModelRegistry())
+                                .setQueryDefaults(settings.getQueryDefaults()))
                         .setVersion(version)
                         .setRequestType(type.requestType)
                         .setContentType(e.getContentType())
@@ -279,7 +282,11 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                 }
             } else {
                 final ServiceRequest serviceRequest = new ServiceRequest()
-                        .setCoreSettings(settings)
+                        .setContext(new ServiceContext()
+                                .setPrefixGen(() -> version.urlPart + '/')
+                                .setFunctionRegistry(settings.getFunctionRegistry())
+                                .setModelRegistry(settings.getModelRegistry())
+                                .setQueryDefaults(settings.getQueryDefaults()))
                         .setVersion(version)
                         .setRequestType(RequestTypeUtils.CREATE)
                         .setContent(e.getPayload())

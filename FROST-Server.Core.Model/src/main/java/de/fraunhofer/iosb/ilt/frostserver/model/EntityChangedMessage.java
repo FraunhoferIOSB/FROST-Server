@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import java.util.Collections;
 import java.util.HashSet;
@@ -196,13 +197,16 @@ public class EntityChangedMessage {
         public Query getQueryFor(EntityType entityType) {
             return messageQueries.computeIfAbsent(entityType, t -> {
                 // ServiceRootUrl and version are irrelevant for these internally used messages.
-                Query query = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.INTERNAL, "/" + entityType.entityName), INTERNAL_ADMIN_PRINCIPAL)
+                ServiceContext context = new ServiceContext()
+                        .setModelRegistry(t.getModelRegistry())
+                        .setQueryDefaults(queryDefaults);
+                Query query = new Query(context, new ResourcePath(Version.INTERNAL, entityType.entityName), INTERNAL_ADMIN_PRINCIPAL)
                         .setMetadata(Metadata.INTERNAL_COMPARE);
                 for (EntityPropertyMain ep : entityType.getEntityProperties()) {
                     query.addSelect(ep);
                 }
                 for (NavigationPropertyMain np : entityType.getNavigationEntities()) {
-                    Query subQuery = new Query(t.getModelRegistry(), queryDefaults, new ResourcePath("", Version.INTERNAL, "/" + np.getName()), INTERNAL_ADMIN_PRINCIPAL)
+                    Query subQuery = new Query(context, new ResourcePath(Version.INTERNAL, np.getName()), INTERNAL_ADMIN_PRINCIPAL)
                             .addSelect(np.getEntityType().getPrimaryKey().getKeyProperties())
                             .setMetadata(Metadata.INTERNAL_COMPARE);
                     query.addExpand(new Expand(np).setSubQuery(subQuery));

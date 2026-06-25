@@ -138,14 +138,12 @@ public class PluginResultFormatOData implements PluginResultFormat {
         @Override
         public FormatWriter format(ResourcePath path, Query query, Object result) {
             final Version version = path.getVersion();
-            final String contextBase = path.getServiceRootUrl()
-                    + '/' + version.urlPart
-                    + "/$metadata";
-            if (Entity.class.isAssignableFrom(result.getClass())) {
-                return formatAsEntity(result, contextBase, version);
+            final String contextBase = query.getContext().getPrefixGen().getUrlPrefix() + "$metadata";
+            if (result instanceof Entity e) {
+                return formatAsEntity(e, contextBase, version);
             }
-            if (EntitySet.class.isAssignableFrom(result.getClass())) {
-                return formatAsEntitySet(result, contextBase, version, query);
+            if (result instanceof EntitySet es) {
+                return formatAsEntitySet(es, contextBase, version, query);
             }
             // Not an Entity nor an EntitySet.
             String entityJsonString;
@@ -163,9 +161,8 @@ public class PluginResultFormatOData implements PluginResultFormat {
             return new FormatWriterGeneric(entityJsonString);
         }
 
-        private FormatWriter formatAsEntity(Object result, final String contextBase, final Version version) {
+        private FormatWriter formatAsEntity(Entity entity, final String contextBase, final Version version) {
             LOGGER.trace("Formatting as Entity.");
-            final Entity entity = (Entity) result;
             final EntityWrapper wrappedEntity = new EntityWrapper()
                     .setEntity(entity)
                     .setContext(contextBase + '#' + entity.getType().plural + "/$entity");
@@ -176,9 +173,8 @@ public class PluginResultFormatOData implements PluginResultFormat {
             }
         }
 
-        private FormatWriter formatAsEntitySet(Object result, final String contextBase, final Version version, final Query query) {
+        private FormatWriter formatAsEntitySet(EntitySet entitySet, final String contextBase, final Version version, final Query query) {
             LOGGER.trace("Formatting as EntitySet.");
-            EntitySet entitySet = (EntitySet) result;
             EntitySetResultOdata wrappedSet = new EntitySetResultOdata(entitySet, query)
                     .setContext(contextBase + '#' + entitySet.getEntityType().plural);
             if (version == PluginOData.VERSION_ODATA_40) {

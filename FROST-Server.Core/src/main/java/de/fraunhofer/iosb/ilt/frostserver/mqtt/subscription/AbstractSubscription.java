@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANONYMOUS_PRINCIPAL;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
-import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PrimaryKey;
@@ -33,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import de.fraunhofer.iosb.ilt.frostserver.query.FormatterOptions;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -42,6 +40,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConst
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.Equal;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,7 +55,6 @@ import java.util.function.Predicate;
  */
 public abstract class AbstractSubscription implements Subscription {
 
-    protected static final FormatterOptions MQTT_FORMAT_OPTIONS = FormatterOptions.of(false, true);
     protected final String topic;
     protected EntityType entityType;
 
@@ -71,15 +70,20 @@ public abstract class AbstractSubscription implements Subscription {
 
     protected ResourcePath path;
     protected CoreSettings settings;
-    protected QueryDefaults queryDefaults;
-    protected ModelRegistry modelRegistry;
+    protected ServiceContext context;
 
     protected AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
         this.topic = topic;
         this.path = path;
         this.settings = settings;
-        this.queryDefaults = settings.getQueryDefaults().setAlwaysOrder(false);
-        this.modelRegistry = settings.getModelRegistry();
+        final Version version = path.getVersion();
+        final QueryDefaults queryDefaults = settings.getQueryDefaults().setAlwaysOrder(false);
+        context = new ServiceContext()
+                .setModelRegistry(settings.getModelRegistry())
+                .setFunctionRegistry(settings.getFunctionRegistry())
+                .setQueryDefaults(queryDefaults)
+                .setMqttContext(true)
+                .setPrefixGen(() -> (version.getMqttFullUrls() ? queryDefaults.getServiceRootUrl() + '/' : "") + path.getVersion().urlPart + '/');
     }
 
     @Override
@@ -167,8 +171,7 @@ public abstract class AbstractSubscription implements Subscription {
             return;
         }
         matchExpression = extraFilter;
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
-                .setFormatOptions(MQTT_FORMAT_OPTIONS)
+        query = new Query(context, path, ANONYMOUS_PRINCIPAL)
                 .setFilter(extraFilter);
     }
 
@@ -184,8 +187,7 @@ public abstract class AbstractSubscription implements Subscription {
         if (extraFilter != null) {
             matchExpression = new And(matchExpression, extraFilter);
         }
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
-                .setFormatOptions(MQTT_FORMAT_OPTIONS)
+        query = new Query(context, path, ANONYMOUS_PRINCIPAL)
                 .setFilter(matchExpression);
     }
 
@@ -197,6 +199,11 @@ public abstract class AbstractSubscription implements Subscription {
     @Override
     public String getTopic() {
         return topic;
+    }
+
+    @Override
+    public Version getVersion() {
+        return path.getVersion();
     }
 
     @Override

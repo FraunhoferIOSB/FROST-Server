@@ -66,14 +66,15 @@ public class DataArrayValue {
     public DataArrayValue(ResourcePath path, Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
         this.datastream = observation.getProperty(npDatastream);
         this.components = components;
+        final String urlPrefix = observation.getQuery().getContext().getPrefixGen().getUrlPrefix();
         if (datastream != null) {
-            datastream.setSelfLink(UrlHelper.generateSelfLink(path, datastream));
+            datastream.setSelfLink(UrlHelper.generateSelfLink(urlPrefix, datastream));
         } else {
             if (npMultiDatastream == null) {
                 throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
             }
             multiDatastream = observation.getProperty(npMultiDatastream);
-            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(path, multiDatastream));
+            multiDatastream.setSelfLink(UrlHelper.generateSelfLink(urlPrefix, multiDatastream));
         }
     }
 

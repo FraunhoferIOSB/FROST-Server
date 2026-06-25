@@ -60,8 +60,7 @@ public class PropertySubscription extends AbstractSubscription {
             PkValue id = path.getIdentifiedElement().getPkValues();
             matcher = x -> x.getPrimaryKeyValues().equals(id);
         }
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
-                .setFormatOptions(MQTT_FORMAT_OPTIONS)
+        query = new Query(context, path, ANONYMOUS_PRINCIPAL)
                 .addSelect(property);
         generateFilter(2, null);
     }

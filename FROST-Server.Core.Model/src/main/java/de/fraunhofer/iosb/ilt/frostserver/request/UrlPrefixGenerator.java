@@ -15,20 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.query;
+package de.fraunhofer.iosb.ilt.frostserver.request;
 
-public class FormatterOptions {
+/**
+ * Generates the URL Prefix as it should be used for this request.
+ */
+public interface UrlPrefixGenerator {
 
-    public static final FormatterOptions FALLBACK = FormatterOptions.of(true, false);
-    public final boolean useAbsoluteNavigationLinks;
-    public final boolean mqttContext;
-
-    private FormatterOptions(boolean useAbsoluteNavigationLinks, boolean mqttContext) {
-        this.useAbsoluteNavigationLinks = useAbsoluteNavigationLinks;
-        this.mqttContext = mqttContext;
-    }
-
-    public static FormatterOptions of(boolean useAbsoluteNavigationLinks, boolean mqttContext) {
-        return new FormatterOptions(useAbsoluteNavigationLinks, mqttContext);
-    }
+    /**
+     * Generate the prefix for the given request. The result will end with a
+     * slash, or be empty. It may include the version number.
+     *
+     * @return the prefix to use for URLs.
+     */
+    public String getUrlPrefix();
 }

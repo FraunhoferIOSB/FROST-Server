@@ -85,7 +85,7 @@ public class ExpressionParser extends Visitor {
 
     public ExpressionParser(QueryParser queryParser, boolean admin, DynamicContext context) {
         this.queryParser = queryParser;
-        this.fr = queryParser.getSettings().getFunctionRegistry();
+        this.fr = queryParser.getServiceContext().getFunctionRegistry();
         this.admin = admin;
         this.context = context;
     }

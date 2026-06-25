@@ -26,6 +26,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.HEADER_PREFER;
 
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
@@ -165,8 +166,11 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         }
 
         final ServiceRequest serviceRequest = new ServiceRequest()
-                .setCoreSettings(coreSettings)
-                .setQueryDefaults(queryDefaults)
+                .setContext(new ServiceContext()
+                        .setFunctionRegistry(coreSettings.getFunctionRegistry())
+                        .setModelRegistry(coreSettings.getModelRegistry())
+                        .setQueryDefaults(coreSettings.getQueryDefaults())
+                        .setPrefixGen(() -> queryDefaults.getServiceRootUrl() + '/' + version.urlPart + '/'))
                 .setVersion(version)
                 .setRequestType(requestType)
                 .setHead(head)

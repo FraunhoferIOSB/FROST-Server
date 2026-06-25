@@ -33,8 +33,6 @@ import java.util.Map;
 
 /**
  * The context for validating an expression tree.
- *
- * @author scf
  */
 public class ParserContext {
 

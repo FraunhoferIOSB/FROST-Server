@@ -24,15 +24,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- *
- * @author jab
+ * A path in the API. Starts after the version number.
  */
 public class ResourcePath {
-
-    /**
-     * Base root URI of the server, without the version.
-     */
-    private String serviceRootUrl;
 
     /**
      * The version of the path.
@@ -81,10 +75,9 @@ public class ResourcePath {
         pathElements = new ArrayList<>();
     }
 
-    public ResourcePath(String serviceRootUrl, Version version, String pathUrl) {
+    public ResourcePath(Version version, String pathUrl) {
         pathElements = new ArrayList<>();
         this.version = version;
-        this.serviceRootUrl = serviceRootUrl;
         this.path = pathUrl;
     }
 
@@ -275,15 +268,6 @@ public class ResourcePath {
         return this;
     }
 
-    public String getServiceRootUrl() {
-        return serviceRootUrl;
-    }
-
-    public ResourcePath setServiceRootUrl(String serviceRootUrl) {
-        this.serviceRootUrl = serviceRootUrl;
-        return this;
-    }
-
     public Version getVersion() {
         return version;
     }
@@ -304,7 +288,7 @@ public class ResourcePath {
 
     @Override
     public int hashCode() {
-        return Objects.hash(serviceRootUrl, ref, value, pathElements, mainElement, identifiedElement);
+        return Objects.hash(ref, value, pathElements, mainElement, identifiedElement);
     }
 
     @Override
@@ -316,9 +300,7 @@ public class ResourcePath {
             return false;
         }
         final ResourcePath other = (ResourcePath) obj;
-        return Objects.equals(this.serviceRootUrl, other.serviceRootUrl)
-                && this.version == other.version
-                && this.ref == other.ref
+        return this.ref == other.ref
                 && this.value == other.value
                 && Objects.equals(this.pathElements, other.pathElements)
                 && Objects.equals(this.mainElement, other.mainElement)
@@ -326,15 +308,19 @@ public class ResourcePath {
     }
 
     public String getFullUrl() {
-        StringBuilder sb = new StringBuilder(serviceRootUrl)
-                .append('/').append(version.urlPart);
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
         for (PathElement rpe : pathElements) {
             if (rpe instanceof PathElementEntity epe && epe.primaryKeyFullySet()) {
                 sb.append("(").append(UrlHelper.quoteForUrl(epe.getEntityType().getPrimaryKey(), epe.getPkValues())).append(")");
             } else if (rpe instanceof PathElementArrayIndex) {
                 sb.append(rpe.toString());
             } else {
-                sb.append("/");
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append("/");
+                }
                 sb.append(rpe.toString());
             }
         }

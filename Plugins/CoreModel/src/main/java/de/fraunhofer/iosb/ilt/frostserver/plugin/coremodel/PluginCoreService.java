@@ -35,6 +35,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
@@ -85,6 +86,8 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
             .setCreateFeatures(INSERT_STA_11)
             .setUpdateFeatures(UPDATE_STA_11)
             .registerSytheticProperty(StandardProperties.EP_SELFLINK)
+            .setMqttNotifyDelete(false)
+            .setMqttFullUrls(true)
             .build();
     public static final Version V_1_1 = builder()
             .setUrlPart(VERSION_STA_V11_NAME)
@@ -96,6 +99,8 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
             .setCreateFeatures(INSERT_STA_11)
             .setUpdateFeatures(UPDATE_STA_11)
             .registerSytheticProperty(StandardProperties.EP_SELFLINK)
+            .setMqttNotifyDelete(false)
+            .setMqttFullUrls(true)
             .build();
 
     @DefaultValueBoolean(true)
@@ -158,7 +163,7 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
                 + '/';
         final List<Map<String, String>> entitySets = new ArrayList<>();
         result.put("value", entitySets);
-        final ModelRegistry mr = request.getCoreSettings().getModelRegistry();
+        final ModelRegistry mr = request.getModelRegistry();
         for (EntityType entityType : mr.getEntityTypes(request.getUserPrincipal().isAdmin())) {
             String collectionUri = path + entityType.plural;
             entitySets.add(createCapability(entityType.plural, collectionUri));
@@ -258,6 +263,7 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
 
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
+        request.getContext().setJsonReader(new JsonReaderDefault(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case CREATE:
             case UPDATE_ALL:

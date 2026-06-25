@@ -100,7 +100,7 @@ public class ServletMain extends HttpServlet {
                 sendResponse(new ServiceResponseHttpServlet(response, 404, NOT_FOUND), response);
                 return;
             }
-            executeService(serviceRequest, request, response);
+            executeService(coreSettings, serviceRequest, response);
         } catch (IllegalArgumentException exc) {
             sendResponse(new ServiceResponseHttpServlet(response, 400, exc.getMessage()), response);
         } catch (IOException exc) {

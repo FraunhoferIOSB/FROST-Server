@@ -43,6 +43,8 @@ public class Version {
             .setCreateFeatures(EditFeatures.NONE)
             .setUpdateFeatures(EditFeatures.NONE)
             .registerSytheticProperty(StandardProperties.EP_SELFLINK)
+            .setMqttNotifyDelete(false)
+            .setMqttFullUrls(false)
             .build();
 
     public final String urlPart;
@@ -55,6 +57,8 @@ public class Version {
     public final String selfLinkName;
     public final EditFeatures createFeatures;
     public final EditFeatures updateFeatures;
+    public final boolean mqttNotifyDelete;
+    public final boolean mqttFullUrls;
 
     public static class Builder {
 
@@ -68,6 +72,8 @@ public class Version {
         private EditFeatures updateFeatures;
         private SyntheticPropertyRegistry spr = new SyntheticPropertyRegistry();
         private Map<CannedResponseType, CannedResponse> responses = new TreeMap<>();
+        private boolean mqttNotifyDelete;
+        private boolean mqttFullUrls;
 
         public Builder setUrlPart(String urlPart) {
             this.urlPart = urlPart;
@@ -101,6 +107,16 @@ public class Version {
 
         public Builder setIdName(String idName) {
             this.idName = idName;
+            return this;
+        }
+
+        public Builder setMqttNotifyDelete(boolean mqttNotifyDelete) {
+            this.mqttNotifyDelete = mqttNotifyDelete;
+            return this;
+        }
+
+        public Builder setMqttFullUrls(boolean mqttFullUrls) {
+            this.mqttFullUrls = mqttFullUrls;
             return this;
         }
 
@@ -170,6 +186,8 @@ public class Version {
         this.createFeatures = builder.createFeatures;
         this.updateFeatures = builder.updateFeatures;
         this.responses = builder.responses;
+        this.mqttNotifyDelete = builder.mqttNotifyDelete;
+        this.mqttFullUrls = builder.mqttFullUrls;
     }
 
     @Override
@@ -199,6 +217,14 @@ public class Version {
 
     public String getSelfLinkName() {
         return selfLinkName;
+    }
+
+    public boolean getMqttCanDelete() {
+        return mqttNotifyDelete;
+    }
+
+    public boolean getMqttFullUrls() {
+        return mqttFullUrls;
     }
 
 }
