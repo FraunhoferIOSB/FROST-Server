@@ -261,7 +261,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                         .setRequestType(type.requestType)
                         .setContentType(e.getContentType())
                         .setContent(e.getPayload())
-                        .setUrlPath(url)
+                        .setUrl(url)
                         .setUserPrincipal(e.getPrincipal());
 
                 try {
