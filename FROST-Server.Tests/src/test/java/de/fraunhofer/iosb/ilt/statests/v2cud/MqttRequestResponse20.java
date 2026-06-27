@@ -298,6 +298,76 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         return true;
     }
 
+    @Test
+    void test02_ReadThings() throws ServiceFailureException {
+        LOGGER.info("  test02_ReadThings");
+        URI mqttUri = URI.create(serverSettings.getMqttUrl());
+        Mqtt5BlockingClient client = Mqtt5Client.builder()
+                .identifier(UUID.randomUUID().toString())
+                .serverHost(mqttUri.getHost())
+                .serverPort(mqttUri.getPort())
+                .buildBlocking();
+        Mqtt5ConnAck connAck = client.connectWith()
+                .cleanStart(true)
+                .restrictions()
+                .requestResponseInformation(true)
+                .applyRestrictions()
+                .send();
+        Optional<MqttUtf8String> responseInformation = connAck.getResponseInformation();
+        if (responseInformation.isEmpty()) {
+            Assertions.fail("No response information.");
+        }
+        String responseTopicBase = responseInformation.get().toString();
+        LOGGER.info("Got response topic: {}", responseTopicBase);
+        PublishAnalyser pa = new PublishAnalyser();
+
+        client.toAsync().subscribeWith()
+                .topicFilter(responseTopicBase)
+                .callback(pa)
+                .send();
+
+        Mqtt5PublishResult pubRes = client.publishWith()
+                .topic("v2.0/$request")
+                .responseTopic(responseTopicBase)
+                .correlationData(pa.expect(this::analyseThingsResponse))
+                .userProperties()
+                .add("url", "v2.0/Things?$count=true")
+                .add("type", "read")
+                .applyUserProperties()
+                .qos(MqttQos.EXACTLY_ONCE)
+                .send();
+        Assertions.assertFalse(pubRes.getError().isPresent(), "Request failed to send");
+        Awaitility.await()
+                .atMost(Durations.ONE_SECOND)
+                .untilTrue(pa.allDone);
+        Assertions.assertEquals(0, pa.getFailCount().get(), "Not all messages are correct.");
+        client.disconnect();
+    }
+
+    public boolean analyseThingsResponse(Mqtt5Publish publish) {
+        Optional<MqttUtf8String> contentType = publish.getContentType();
+        Assertions.assertTrue(contentType.isPresent(), "Content type is missing on message.");
+        Assertions.assertEquals(Constants.CONTENT_TYPE_APPLICATION_JSON, contentType.get().toString(), "Wrong content type on message.");
+
+        JsonNode tree = Utils.MAPPER.readTree(publish.getPayloadAsBytes());
+
+        JsonNode context = tree.get("@context");
+        Assertions.assertNotNull(context, "Field @context is missing.");
+        Assertions.assertTrue(context.isString(), "Field @context is not a string.");
+        Assertions.assertEquals("v2.0/$metadata#Things", context.stringValue(), "Incorrect context url");
+
+        JsonNode count = tree.get("@count");
+        Assertions.assertNotNull(count, "Field @count is missing.");
+        Assertions.assertTrue(count.isIntegralNumber(), "Field @context is not an Integral number.");
+        Assertions.assertEquals(4, count.asLong(), "Incorrect context url");
+
+        JsonNode value = tree.get("value");
+        Assertions.assertNotNull(value, "Response did not contain a value field.");
+        Assertions.assertTrue(value.isArray(), "Value field must be an array");
+
+        return true;
+    }
+
     public static final String decodePayload(Mqtt5Publish publish) {
         return new String(publish.getPayloadAsBytes(), StandardCharsets.UTF_8);
     }
