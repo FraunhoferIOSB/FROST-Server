@@ -26,7 +26,6 @@ import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedContext;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
-import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
@@ -202,9 +201,9 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
     }
 
     private synchronized void connect() {
+        final String host = brokerUri.getHost();
+        final int port = brokerUri.getPort();
         if (client == null) {
-            final String host = brokerUri.getHost();
-            final int port = brokerUri.getPort();
             LOGGER.info("Creating new hivemq-client for host: {}:{} with client-id {}", host, port, clientId);
             client = Mqtt5Client.builder()
                     .identifier(clientId)
@@ -222,7 +221,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
         }
         if (!client.getState().isConnected()) {
             try {
-                LOGGER.info("hivemq-client connecting to broker: {} with client-id {}", brokerUri, clientId);
+                LOGGER.info("hivemq-client connecting to broker: {}:{} with client-id {}", host, port, clientId);
                 client.connectWith()
                         .cleanStart(false)
                         .keepAlive(30)
@@ -231,7 +230,6 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
                         .sendMaximum(maxInFlight)
                         .applyRestrictions()
                         .send();
-                LOGGER.info("hivemq-client connected to broker");
             } catch (RuntimeException ex) {
                 LOGGER.error("Failed to connect to broker: {}", brokerUri);
                 LOGGER.error("", ex);
@@ -260,27 +258,29 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
 
     private synchronized void startListening() {
         try {
-            LOGGER.info("hivemq-client subscribing to topic: {}", topicName);
             if (client == null || !client.getState().isConnected()) {
                 connect();
             }
-            if (!listening) {
-                Mqtt5SubAck ack = client.toBlocking()
-                        .subscribeWith()
-                        .topicFilter(topicName)
-                        .qos(qosLevel)
-                        .send();
-                switch (ack.getReasonCodes().getFirst()) {
-                    case GRANTED_QOS_0:
-                    case GRANTED_QOS_1:
-                    case GRANTED_QOS_2:
-                        listening = true;
-                        break;
+            LOGGER.info("hivemq-client subscribing to topic: {}", topicName);
+            client.subscribeWith()
+                    .topicFilter(topicName)
+                    .qos(qosLevel)
+                    .send()
+                    .thenApply((ack) -> {
+                        switch (ack.getReasonCodes().getFirst()) {
+                            case GRANTED_QOS_0:
+                            case GRANTED_QOS_1:
+                            case GRANTED_QOS_2:
+                                LOGGER.info("hivemq-client succesfully subscribed to topic: {}", topicName);
+                                listening = true;
+                                break;
 
-                    default:
-                        listening = false;
-                }
-            }
+                            default:
+                                LOGGER.warn("hivemq-client failed to subscribe to topic: {}. Reason: {}", topicName, ack);
+                                listening = false;
+                        }
+                        return null;
+                    });
         } catch (RuntimeException ex) {
             LOGGER.error("Failed to start listening, removing client.", ex);
             Mqtt5AsyncClient tempclient = client;
@@ -294,9 +294,6 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
     }
 
     private synchronized void stopListening() {
-        if (!listening) {
-            return;
-        }
         try {
             LOGGER.info("hivemq-client unsubscribing from topic: {}", topicName);
             client.toBlocking()
@@ -375,11 +372,9 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
     }
 
     public void connectionLost(MqttClientDisconnectedContext context) {
-        if (listening) {
-            LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", context.getCause().getMessage());
-            LOGGER.debug("", context.getCause());
-            listening = false;
-        }
+        LOGGER.warn("Connection to message bus lost (Stacktrace in DEBUG): {}.", context.getCause().getMessage());
+        LOGGER.debug("", context.getCause());
+        listening = false;
     }
 
     public void messageArrived(Mqtt5Publish mqttMessage) {
