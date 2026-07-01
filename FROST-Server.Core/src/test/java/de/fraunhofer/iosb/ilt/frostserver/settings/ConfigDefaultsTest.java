@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.settings;
 
+import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_CONNECT_TIMEOUT_SECONDS;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_MAX_IN_FLIGHT;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_MQTT_BROKER;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_QOS_LEVEL;
@@ -147,6 +148,7 @@ class ConfigDefaultsTest {
         tags.add(TAG_RECV_QUEUE_SIZE);
         tags.add(TAG_QOS_LEVEL);
         tags.add(TAG_MAX_IN_FLIGHT);
+        tags.add(TAG_CONNECT_TIMEOUT_SECONDS);
         tags.add(TAG_MQTT_BROKER);
         tags.add(TAG_TOPIC_NAME);
         assertEquals(tags, b.configTags());
@@ -248,6 +250,7 @@ class ConfigDefaultsTest {
         Class c = MqttMessageBus.class;
         // Test configTags
         Set<String> tags = new HashSet<>();
+        tags.add(TAG_CONNECT_TIMEOUT_SECONDS);
         tags.add(TAG_SEND_WORKER_COUNT);
         tags.add(TAG_RECV_WORKER_COUNT);
         tags.add(TAG_SEND_QUEUE_SIZE);
@@ -272,5 +275,6 @@ class ConfigDefaultsTest {
         assertEquals("100", configDefaults.get(TAG_RECV_QUEUE_SIZE));
         assertEquals("2", configDefaults.get(TAG_QOS_LEVEL));
         assertEquals("50", configDefaults.get(TAG_MAX_IN_FLIGHT));
+        assertEquals("10", configDefaults.get(TAG_CONNECT_TIMEOUT_SECONDS));
     }
 }

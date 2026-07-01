@@ -92,12 +92,17 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
     @DefaultValueInt(50)
     public static final String TAG_MAX_IN_FLIGHT = "maxInFlight";
 
+    @DefaultValueInt(10)
+    public static final String TAG_CONNECT_TIMEOUT_SECONDS = "connectTimeout";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttMessageBus.class);
 
     private int sendPoolSize;
     private int sendQueueSize;
     private int recvPoolSize;
     private int recvQueueSize;
+
+    private int connectTimeoutSeconds;
 
     private final String clientId = "FROST-MQTT-Bus-" + UUID.randomUUID();
 
@@ -140,6 +145,8 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
         recvPoolSize = customSettings.getInt(TAG_RECV_WORKER_COUNT, getClass());
         recvQueueSize = customSettings.getInt(TAG_RECV_QUEUE_SIZE, getClass());
         logStatus = new LoggingStatus(this, this::checkWorkers, metricsSettings.isEnabled());
+
+        connectTimeoutSeconds = customSettings.getInt(TAG_CONNECT_TIMEOUT_SECONDS, getClass());
 
         sendQueue = new ArrayBlockingQueue<>(sendQueueSize);
         sendService = ProcessorHelper.createProcessors(
@@ -206,6 +213,10 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
                     .automaticReconnectWithDefaultConfig()
                     .addConnectedListener(this::connectComplete)
                     .addDisconnectedListener(this::connectionLost)
+                    .transportConfig()
+                    .socketConnectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
+                    .mqttConnectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
+                    .applyTransportConfig()
                     .buildAsync();
             client.publishes(MqttGlobalPublishFilter.ALL, this::messageArrived);
         }
