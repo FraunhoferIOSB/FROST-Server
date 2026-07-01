@@ -25,7 +25,6 @@ import com.hivemq.client.mqtt.lifecycle.MqttClientConnectedContext;
 import com.hivemq.client.mqtt.lifecycle.MqttClientDisconnectedContext;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import com.hivemq.client.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
@@ -190,15 +189,20 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
 
     public void connectComplete(MqttClientConnectedContext context) {
         LOGGER.info("Connected to MQTT message bus.");
+        if (!listeners.isEmpty()) {
+            startListening();
+        }
     }
 
     private synchronized void connect() {
         if (client == null) {
-            LOGGER.info("Creating new hivemq-client for broker: {} with client-id {}", brokerUri, clientId);
+            final String host = brokerUri.getHost();
+            final int port = brokerUri.getPort();
+            LOGGER.info("Creating new hivemq-client for host: {}:{} with client-id {}", host, port, clientId);
             client = Mqtt5Client.builder()
                     .identifier(clientId)
-                    .serverHost(brokerUri.getHost())
-                    .serverPort(brokerUri.getPort())
+                    .serverHost(host)
+                    .serverPort(port)
                     .automaticReconnectWithDefaultConfig()
                     .addConnectedListener(this::connectComplete)
                     .addDisconnectedListener(this::connectionLost)
@@ -208,8 +212,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
         if (!client.getState().isConnected()) {
             try {
                 LOGGER.info("hivemq-client connecting to broker: {} with client-id {}", brokerUri, clientId);
-                Mqtt5ConnAck ack = client.toBlocking()
-                        .connectWith()
+                client.connectWith()
                         .cleanStart(false)
                         .keepAlive(30)
                         .restrictions()
@@ -221,10 +224,6 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
             } catch (RuntimeException ex) {
                 LOGGER.error("Failed to connect to broker: {}", brokerUri);
                 LOGGER.error("", ex);
-                return;
-            }
-            if (!listeners.isEmpty()) {
-                startListening();
             }
         }
 
