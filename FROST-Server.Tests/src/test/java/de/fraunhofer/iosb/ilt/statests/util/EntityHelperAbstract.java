@@ -106,6 +106,17 @@ public abstract class EntityHelperAbstract {
         return this;
     }
 
+    public static List<String> selectAll(EntityType et) {
+        return et.getEntityProperties().stream().map(p -> p.getName()).toList();
+    }
+
+    public List<String> selectAllWithId(EntityType et) {
+        List<String> list = new ArrayList<>();
+        list.add(sSrvc.getVersion().selfLinkName);
+        list.addAll(selectAll(et));
+        return list;
+    }
+
     /**
      * Returns half of all entity properties of the given Entity Type.
      *
@@ -151,6 +162,10 @@ public abstract class EntityHelperAbstract {
 
     public final JsonNode getEntity(Entity entity, NavigationProperty np, StringModifier... modifiers) {
         return getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), np, null, null, null, modifiers);
+    }
+
+    public final JsonNode getEntity(Entity entity, NavigationProperty np, List<String> select, StringModifier... modifiers) {
+        return getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), np, select, null, null, modifiers);
     }
 
     public final JsonNode getEntity(Entity entity, NavigationProperty np, List<String> select, String expand, String orderby, StringModifier... modifiers) {
@@ -227,7 +242,7 @@ public abstract class EntityHelperAbstract {
     public final JsonNode getEntityJsonWithRetry(EntityType entityType, String filter, String expand, int retries, StringModifier... modifiers) {
         int retry = 0;
         while (retry < retries) {
-            JsonNode entity = getEntityJson(entityType, filter, expand, modifiers);
+            JsonNode entity = getEntityJson(entityType, null, null, filter, null, expand, null, modifiers);
             if (entity != null) {
                 return entity;
             }
@@ -243,8 +258,8 @@ public abstract class EntityHelperAbstract {
         return getEntityJson(entityType, null, null, null, null, expand, null, modifiers);
     }
 
-    public final JsonNode getEntityJson(EntityType entityType, String filter, String expand, StringModifier... modifiers) {
-        return getEntityJson(entityType, null, null, filter, null, expand, null, modifiers);
+    public final JsonNode getEntityJson(EntityType entityType, List<String> select, String filter, String expand, StringModifier... modifiers) {
+        return getEntityJson(entityType, null, null, filter, select, expand, null, modifiers);
     }
 
     public final JsonNode getEntityJson(EntityType entityType, PkValue pk, NavigationProperty np, List<String> select, String expand, String orderby, StringModifier... modifiers) {

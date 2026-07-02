@@ -320,11 +320,23 @@ public class MqttExtraTests11 extends AbstractTestClass {
                     0,
                     ZonedDateTime.parse("2016-01-01T01:00:00.000Z"),
                     eh.getCache(sMdl.etObservation));
-            JsonNode entityJson1 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "Datastream($select=description)");
+            JsonNode entityJson1 = eh.getEntityJson(
+                    sMdl.etObservation,
+                    eh.selectAllWithId(sMdl.etObservation),
+                    "id eq " + StringHelper.formatKeyValuesForUrl(obs),
+                    "Datastream($select=description)");
             obsFuture1.complete(entityJson1);
-            JsonNode entityJson2 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "Datastream");
+            JsonNode entityJson2 = eh.getEntityJson(
+                    sMdl.etObservation,
+                    eh.selectAllWithId(sMdl.etObservation),
+                    "id eq " + StringHelper.formatKeyValuesForUrl(obs),
+                    "Datastream");
             obsFuture2.complete(entityJson2);
-            JsonNode entityJson3 = eh.getEntityJson(sMdl.etObservation, "id eq " + StringHelper.formatKeyValuesForUrl(obs), "FeatureOfInterest($select=feature)");
+            JsonNode entityJson3 = eh.getEntityJson(
+                    sMdl.etObservation,
+                    eh.selectAllWithId(sMdl.etObservation),
+                    "id eq " + StringHelper.formatKeyValuesForUrl(obs),
+                    "FeatureOfInterest($select=feature)");
             obsFuture3.complete(entityJson3);
             return null;
         };
