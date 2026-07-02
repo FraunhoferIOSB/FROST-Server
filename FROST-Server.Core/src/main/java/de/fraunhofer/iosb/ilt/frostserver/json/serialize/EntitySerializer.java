@@ -77,7 +77,8 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         this.odata = odata;
         propertySerializers.put(StandardProperties.EP_SELFLINK, (ep, target, gen) -> {
             Entity entity = (Entity) target;
-            if (entity.getQuery().getMetadata() == Metadata.FULL) {
+            final Metadata metadata = entity.getQuery().getMetadata();
+            if (metadata == Metadata.FULL || metadata == Metadata.MINIMAL_WITH_ID) {
                 final String value = entity.getSelfLink();
                 if (value != null) {
                     gen.writeStringProperty(selfLinkField, value);
@@ -111,7 +112,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         } else {
             metadata = query.getMetadata();
             navigationProps = switch (metadata) {
-                case OFF, NONE, MINIMAL -> {
+                case OFF, NONE, MINIMAL, MINIMAL_WITH_ID -> {
                     yield Collections.emptySet();
                 }
                 case INTERNAL_COMPARE -> {

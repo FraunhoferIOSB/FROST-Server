@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.PathElementProperty;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class PropertySubscription extends AbstractSubscription {
             matcher = x -> x.getPrimaryKeyValues().equals(id);
         }
         query = new Query(context, path, ANONYMOUS_PRINCIPAL)
+                .setMetadata(Metadata.MINIMAL_WITH_ID)
                 .addSelect(property);
         generateFilter(2, null);
     }

@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
@@ -172,6 +173,7 @@ public abstract class AbstractSubscription implements Subscription {
         }
         matchExpression = extraFilter;
         query = new Query(context, path, ANONYMOUS_PRINCIPAL)
+                .setMetadata(Metadata.MINIMAL_WITH_ID)
                 .setFilter(extraFilter);
     }
 
@@ -188,6 +190,7 @@ public abstract class AbstractSubscription implements Subscription {
             matchExpression = new And(matchExpression, extraFilter);
         }
         query = new Query(context, path, ANONYMOUS_PRINCIPAL)
+                .setMetadata(Metadata.MINIMAL_WITH_ID)
                 .setFilter(matchExpression);
     }
 

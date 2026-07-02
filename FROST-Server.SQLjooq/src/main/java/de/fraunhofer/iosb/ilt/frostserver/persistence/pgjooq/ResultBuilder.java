@@ -162,7 +162,8 @@ public class ResultBuilder implements ResourcePathVisitor {
         if (query == null) {
             return;
         }
-        if (query.getMetadata() == Metadata.FULL) {
+        final Metadata metadata = query.getMetadata();
+        if (metadata == Metadata.FULL) {
             customLinksHelper.expandCustomLinks(query, entity, path);
         }
         for (Expand expand : query.getExpand()) {

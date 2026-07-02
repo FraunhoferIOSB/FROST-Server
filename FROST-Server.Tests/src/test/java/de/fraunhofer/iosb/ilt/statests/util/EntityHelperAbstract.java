@@ -138,7 +138,7 @@ public abstract class EntityHelperAbstract {
      * on the server.
      */
     public final JsonNode getEntity(Entity entity, StringModifier... modifiers) {
-        return getEntity(entity.getType(), entity.getPrimaryKeyValues(), modifiers);
+        return getEntityJson(entity.getType(), entity.getPrimaryKeyValues(), null, null, null, null, modifiers);
     }
 
     public final JsonNode getEntity(Entity entity, List<String> select, StringModifier... modifiers) {

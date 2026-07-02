@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
+import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -56,7 +57,8 @@ public class EntitySetSubscription extends AbstractSubscription {
         entityType = ((PathElementEntitySet) path.getLastElement()).getEntityType();
 
         String queryString = SubscriptionFactory.getQueryFromTopic(topic);
-        query = parseQuery(queryString);
+        query = parseQuery(queryString)
+                .setMetadata(Metadata.MINIMAL_WITH_ID);
         Expression filter = null;
         if (query != null) {
             if (query.getCount().isPresent()

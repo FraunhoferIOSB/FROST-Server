@@ -20,8 +20,22 @@ package de.fraunhofer.iosb.ilt.frostserver.query;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 
 public enum Metadata {
+    /**
+     * Return ALL metadata.
+     */
     FULL,
+    /**
+     * Only return minimal metadata, and @id.
+     */
+    MINIMAL_WITH_ID,
+    /**
+     * Return only metadata that can not be calculated. This is count and
+     * nextLink.
+     */
     MINIMAL,
+    /**
+     * Return no metadata.
+     */
     NONE,
     OFF,
     INTERNAL_COMPARE;

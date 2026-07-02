@@ -378,7 +378,8 @@ public class Query {
             if (entityType == null) {
                 validate();
             }
-            if (getMetadata() == Metadata.FULL) {
+            final Metadata setMeta = getMetadata();
+            if (setMeta == Metadata.FULL || setMeta == Metadata.MINIMAL_WITH_ID) {
                 selectedEntityPropMain.add(StandardProperties.EP_SELFLINK);
             }
             selectedEntityPropMain.addAll(entityType.getEntityProperties());

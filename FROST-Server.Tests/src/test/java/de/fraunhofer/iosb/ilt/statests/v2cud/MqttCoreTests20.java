@@ -145,6 +145,17 @@ public class MqttCoreTests20 extends AbstractTestClass {
         eh.clearCaches();
     }
 
+    private List<String> selectAll(EntityType et) {
+        return et.getEntityProperties().stream().map(p -> p.getName()).toList();
+    }
+
+    private List<String> selectAllWithId(EntityType et) {
+        List<String> list = new ArrayList<>();
+        list.add("@id");
+        list.addAll(selectAll(et));
+        return list;
+    }
+
     @Test
     void check01_SubscribeToEntitySetInsert() throws ServiceFailureException {
         LOGGER.info("  check01a_SubscribeToEntitySetInsert");
@@ -155,7 +166,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
         for (var eci : entityTypesForCreate) {
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> insertAction = getInsertAction(entityType, future);
             final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v2.0/" + entityType.mainSet)
                     .addExpectedJson(future.getFuture())
@@ -181,7 +193,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
         for (var eci : entityTypesForCreate) {
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> updateAction = getPatchUpdateAction(entityType, future);
             final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v2.0/" + entityType.mainSet)
                     .addExpectedJson(future.getFuture())
@@ -204,7 +217,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity original = eh.getCache(entityType, 0);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> updateAction = getPutUpdateAction(original, future);
             final TestSubscription testSubscription = new TestSubscription(mqttHelper, "v2.0/" + entityType.mainSet)
                     .addExpectedJson(future.getFuture())
@@ -327,7 +341,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity original = eh.getCache(entityType, 0);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> updateAction = getPutUpdateAction(original, future);
             final List<TestSubscription> subs = new ArrayList<>();
             final List<List<String>> paths = eh.findPathsTo(original, true, 4);
@@ -361,11 +376,16 @@ public class MqttCoreTests20 extends AbstractTestClass {
 
         Entity obsProp = eh.createObservedProperty();
 
-        final var futureThing = QueryJsonFuture.build();
-        final var futureLocation = QueryJsonFuture.build();
-        final var futureDatastream = QueryJsonFuture.build();
-        final var futureSensor = QueryJsonFuture.build();
-        final var futureHistLoc = QueryJsonFuture.build();
+        final var futureThing = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etThing));
+        final var futureLocation = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etLocation));
+        final var futureDatastream = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etDatastream));
+        final var futureSensor = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etSensor));
+        final var futureHistLoc = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etHistoricalLocation));
         final Callable<Object> updateAction = () -> {
             Entity thing = eh.newThing();
             Entity location = eh.newLocation();
@@ -380,11 +400,19 @@ public class MqttCoreTests20 extends AbstractTestClass {
             Entity tempThing = sSrvc.dao(thing.getType()).find(thing.getPrimaryKeyValues());
             Entity tempDs = thing.query(sMdl.npThingDatastreams).first();
 
-            futureThing.complete(getEntity(thing));
-            futureLocation.complete(getEntity(tempThing.query(sMdl.npThingLocations).first()));
-            futureHistLoc.complete(getEntity(tempThing.query(sMdl.npThingHistoricallocations).first()));
-            futureDatastream.complete(getEntity(tempDs));
-            futureSensor.complete(getEntity(tempDs.getProperty(sMdl.npDatastreamSensor, true)));
+            futureThing.complete(getEntity(thing, selectAllWithId(sMdl.etThing)));
+            futureLocation.complete(getEntity(
+                    tempThing.query(sMdl.npThingLocations).first(),
+                    selectAllWithId(sMdl.etLocation)));
+            futureHistLoc.complete(getEntity(
+                    tempThing.query(sMdl.npThingHistoricallocations).first(),
+                    selectAllWithId(sMdl.etHistoricalLocation)));
+            futureDatastream.complete(getEntity(
+                    tempDs,
+                    selectAllWithId(sMdl.etDatastream)));
+            futureSensor.complete(getEntity(
+                    tempDs.getProperty(sMdl.npDatastreamSensor, true),
+                    selectAllWithId(sMdl.etSensor)));
             return null;
         };
 
@@ -419,13 +447,20 @@ public class MqttCoreTests20 extends AbstractTestClass {
 
         Entity obsProp = eh.createObservedProperty();
 
-        final var futureObservation = QueryJsonFuture.build();
-        final var futureFeature = QueryJsonFuture.build();
-        final var futureThing = QueryJsonFuture.build();
-        final var futureLocation = QueryJsonFuture.build();
-        final var futureDatastream = QueryJsonFuture.build();
-        final var futureSensor = QueryJsonFuture.build();
-        final var futureHistLoc = QueryJsonFuture.build();
+        final var futureObservation = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etObservation));
+        final var futureFeature = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etFeature));
+        final var futureThing = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etThing));
+        final var futureLocation = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etLocation));
+        final var futureDatastream = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etDatastream));
+        final var futureSensor = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etSensor));
+        final var futureHistLoc = QueryJsonFuture.build()
+                .setSelect(selectAllWithId(sMdl.etHistoricalLocation));
         final Callable<Object> updateAction = () -> {
             Entity observation;
             Entity sensor = eh.newSensor();
@@ -443,11 +478,15 @@ public class MqttCoreTests20 extends AbstractTestClass {
             Entity tempDs = tempObs.getProperty(sMdl.npObservationDatastream);
             Entity tempThing = tempDs.getProperty(sMdl.npDatastreamThing);
 
-            futureObservation.complete(getEntity(tempObs));
-            futureFeature.complete(getEntity(tempFeature));
-            futureThing.complete(getEntity(tempThing));
-            futureLocation.complete(getEntity(tempThing.query(sMdl.npThingLocations).first()));
-            futureHistLoc.complete(getEntity(tempThing.query(sMdl.npThingHistoricallocations).first()));
+            futureObservation.complete(getEntity(tempObs, selectAllWithId(sMdl.etObservation)));
+            futureFeature.complete(getEntity(tempFeature, selectAllWithId(sMdl.etFeature)));
+            futureThing.complete(getEntity(tempThing, selectAllWithId(sMdl.etThing)));
+            futureLocation.complete(getEntity(
+                    tempThing.query(sMdl.npThingLocations).first(),
+                    selectAllWithId(sMdl.etLocation)));
+            futureHistLoc.complete(getEntity(
+                    tempThing.query(sMdl.npThingHistoricallocations).first(),
+                    selectAllWithId(sMdl.etHistoricalLocation)));
             // The generated fields are not coming though in the MQTT message.
             futureDatastream.complete(getEntity(tempDs, Arrays.asList(
                     "@id",
@@ -455,9 +494,10 @@ public class MqttCoreTests20 extends AbstractTestClass {
                     "name",
                     "description",
                     "resultType",
-                    "resultEncoding",
-                    "Thing", "Sensor", "ObservedProperties", "Observations", "UltimateFeaturesOfInterest")));
-            futureSensor.complete(getEntity(tempDs.getProperty(sMdl.npDatastreamSensor, true)));
+                    "resultEncoding")));
+            futureSensor.complete(getEntity(
+                    tempDs.getProperty(sMdl.npDatastreamSensor, true),
+                    selectAllWithId(sMdl.etSensor)));
             return null;
         };
 
@@ -505,7 +545,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity entity = eh.getCache(entityType, 0);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> updateAction = getPatchUpdateAction(entityType, future);
             final TestSubscription testSubscription = new TestSubscription(mqttHelper)
                     .setTopic(eh.createUrl(entity))
@@ -529,7 +570,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity entity = eh.getCache(entityType, 0);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> updateAction = getPutUpdateAction(entity, future);
             final TestSubscription testSubscription = new TestSubscription(mqttHelper)
                     .setTopic(eh.createUrl(entity))
@@ -555,7 +597,8 @@ public class MqttCoreTests20 extends AbstractTestClass {
             LOGGER.info("    {}", entityType);
 
             final Entity original = eh.getCache(entityType, 0);
-            final QueryJsonFuture future = QueryJsonFuture.build();
+            final QueryJsonFuture future = QueryJsonFuture.build()
+                    .setSelect(selectAllWithId(eci.et));
             final Callable<Object> updateAction = getPutUpdateAction(original, future);
             final List<TestSubscription> subs = new ArrayList<>();
             final List<List<String>> paths = eh.findPathsTo(original, false, 4);
@@ -626,7 +669,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
             thing.setProperty(sMdl.npThingLocations, thingLocs);
             thingLocs.add(loc2.withOnlyPk());
             sSrvc.update(thing);
-            JsonNode result = eh.getEntity(thing, sMdl.npThingHistoricallocations, null, null, "id%20desc", urlsHttpToMqtt);
+            JsonNode result = eh.getEntity(thing, sMdl.npThingHistoricallocations, Arrays.asList("@id", "id", "time"), null, "id%20desc", urlsHttpToMqtt);
             future.complete(result);
             return null;
         };
