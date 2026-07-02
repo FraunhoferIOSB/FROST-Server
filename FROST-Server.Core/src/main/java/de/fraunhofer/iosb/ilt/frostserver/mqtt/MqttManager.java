@@ -242,14 +242,23 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
             if (path.equals(MQTT_TOPIC_REQUEST)) {
                 String url = e.getUserProperty(MQTT_USER_PROPERTY_NAME_URL);
-                LOGGER.info("Original url:  {}", url);
+                LOGGER.debug("Original url:  {}", url);
+                if (StringHelper.isNullOrEmpty(url)) {
+                    LOGGER.debug("Publish to {} without url user property.", MQTT_TOPIC_REQUEST);
+                    return;
+                }
                 url = StringUtils.removeStart(url, '/');
                 url = Strings.CS.removeStart(url, version.urlPart);
                 if (!url.startsWith("/")) {
                     url = '/' + url;
                 }
-                LOGGER.info("Rewritten url: {}", url);
-                RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE));
+                LOGGER.debug("Rewritten url: {}", url);
+                final String rawType = e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE);
+                RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(rawType);
+                if (type == null) {
+                    LOGGER.debug("Request with unknown or no request type; {}", StringHelper.cleanForLogging(rawType));
+                    return;
+                }
 
                 final ServiceRequest serviceRequest = new ServiceRequest()
                         .setContext(new ServiceContext()
