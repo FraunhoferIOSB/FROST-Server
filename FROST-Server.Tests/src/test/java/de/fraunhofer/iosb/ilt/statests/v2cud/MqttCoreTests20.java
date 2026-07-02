@@ -798,7 +798,6 @@ public class MqttCoreTests20 extends AbstractTestClass {
             Entity entity = patchEntity(et);
             for (var future : futures) {
                 JsonNode jsonNode = getEntity(entity, future.getSelect());
-                jsonNode.asObject().remove(AT_CONTEXT);
                 future.getFuture().complete(jsonNode);
             }
             return null;

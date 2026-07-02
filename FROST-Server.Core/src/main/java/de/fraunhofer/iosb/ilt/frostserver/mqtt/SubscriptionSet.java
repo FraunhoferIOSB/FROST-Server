@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
  * A set of subscriptions, each with a client count. Adding a duplicate of a
  * subscription will only increase the count for that subscription, not actually
  * add a copy.
- *
- * @author scf
  */
 class SubscriptionSet {
 

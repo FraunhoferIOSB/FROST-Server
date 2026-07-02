@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -68,8 +69,13 @@ class SubscriptionManager {
         for (SubscriptionSetDirectParent subSet : parentedSubscriptions.values()) {
             subSet.handleEntityChanged(persistenceManager, entity, changeType, fields);
         }
+        Version lastVersion = null;
         for (Subscription subscription : complexSubscriptions.getSubscriptions().keySet()) {
             if (subscription.matches(persistenceManager, entity, fields)) {
+                if (lastVersion != subscription.getVersion()) {
+                    entity.setSelfLink(null);
+                    lastVersion = subscription.getVersion();
+                }
                 Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
                 mqttManager.notifySubscription(subscription, newEntity, changeType);
             }

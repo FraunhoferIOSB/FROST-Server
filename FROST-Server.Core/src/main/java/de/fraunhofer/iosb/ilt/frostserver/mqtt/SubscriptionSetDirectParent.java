@@ -24,6 +24,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.Subscription;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,8 +63,13 @@ class SubscriptionSetDirectParent {
             return;
         }
         // for each subscription on EntityType check match
+        Version lastVersion = null;
         for (Subscription subscription : subsForParent.getSubscriptions().keySet()) {
             if (subscription.matches(persistenceManager, entity, fields)) {
+                if (lastVersion != subscription.getVersion()) {
+                    entity.setSelfLink(null);
+                    lastVersion = subscription.getVersion();
+                }
                 Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
                 mqttManager.notifySubscription(subscription, newEntity, changeType);
             }
