@@ -620,7 +620,7 @@ public class MqttHelper11 {
         }
 
         public boolean allReceived() {
-            return expectedEntities.isEmpty();
+            return expectedEntities.isEmpty() && expectedJson.isEmpty();
         }
 
         public List<String> getErrors() {

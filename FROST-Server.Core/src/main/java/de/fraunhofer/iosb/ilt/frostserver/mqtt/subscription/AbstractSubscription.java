@@ -174,7 +174,8 @@ public abstract class AbstractSubscription implements Subscription {
         matchExpression = extraFilter;
         query = new Query(context, path, ANONYMOUS_PRINCIPAL)
                 .setMetadata(Metadata.MINIMAL_WITH_ID)
-                .setFilter(extraFilter);
+                .setFilter(extraFilter)
+                .validate();
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe, Expression extraFilter) {
@@ -191,7 +192,8 @@ public abstract class AbstractSubscription implements Subscription {
         }
         query = new Query(context, path, ANONYMOUS_PRINCIPAL)
                 .setMetadata(Metadata.MINIMAL_WITH_ID)
-                .setFilter(matchExpression);
+                .setFilter(matchExpression)
+                .validate();
     }
 
     @Override

@@ -8,6 +8,7 @@
 * Implemented handling of nested complex properties.
 
 **Internal changes & Bugfixes**
+* Fixed unvalidated query in some MQTT subscriptions.
 * Declared bouncycastle as direct dependency.
 * Fixed prefer-header not working in batch requests.
 * Updated V2 model to latest spec version.

@@ -63,7 +63,8 @@ public class PropertySubscription extends AbstractSubscription {
         }
         query = new Query(context, path, ANONYMOUS_PRINCIPAL)
                 .setMetadata(Metadata.MINIMAL_WITH_ID)
-                .addSelect(property);
+                .addSelect(property)
+                .validate();
         generateFilter(2, null);
     }
 

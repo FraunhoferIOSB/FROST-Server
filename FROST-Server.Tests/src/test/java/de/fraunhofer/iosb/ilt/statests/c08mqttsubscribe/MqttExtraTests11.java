@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -313,6 +314,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         final CompletableFuture<JsonNode> obsFuture1 = new CompletableFuture<>();
         final CompletableFuture<JsonNode> obsFuture2 = new CompletableFuture<>();
         final CompletableFuture<JsonNode> obsFuture3 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture4 = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
             Entity obs = EntityUtils.createObservation(
                     sSrvc,
@@ -338,6 +340,8 @@ public class MqttExtraTests11 extends AbstractTestClass {
                     "id eq " + StringHelper.formatKeyValuesForUrl(obs),
                     "FeatureOfInterest($select=feature)");
             obsFuture3.complete(entityJson3);
+            JsonNode entityJson4 = eh.getEntityJson(sMdl.etObservation, obs.getPrimaryKeyValues(), null, Arrays.asList("result"), "FeatureOfInterest($select=feature)", null);
+            obsFuture4.complete(entityJson4);
             return null;
         };
         final TestSubscription testSubscription1 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=Datastream($select=description)")
@@ -349,10 +353,14 @@ public class MqttExtraTests11 extends AbstractTestClass {
         final TestSubscription testSubscription3 = new TestSubscription(mqttHelper, "v1.1/Observations?$expand=FeatureOfInterest($select=feature)")
                 .addExpectedJson(obsFuture3)
                 .createReceivedListener(sMdl.etObservation);
+        final TestSubscription testSubscription4 = new TestSubscription(mqttHelper, "v1.1/Observations?$select=result&$expand=FeatureOfInterest($select=feature)")
+                .addExpectedJson(obsFuture4)
+                .createReceivedListener(sMdl.etObservation);
         MqttAction mqttAction = new MqttAction(insertAction)
                 .add(testSubscription1)
                 .add(testSubscription2)
-                .add(testSubscription3);
+                .add(testSubscription3)
+                .add(testSubscription4);
         mqttHelper.executeRequest(mqttAction);
     }
 
