@@ -3,6 +3,7 @@
 ## Version 2.6.4-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Declared bouncycastle as direct dependency.
 
 
 ## Version 2.6.3
