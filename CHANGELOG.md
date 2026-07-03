@@ -3,6 +3,7 @@
 ## Version 2.7.3-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed unvalidated query in some MQTT subscriptions.
 * Declared bouncycastle as direct dependency.
 
 

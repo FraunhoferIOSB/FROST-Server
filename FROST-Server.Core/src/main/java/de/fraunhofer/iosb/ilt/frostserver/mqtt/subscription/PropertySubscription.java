@@ -60,8 +60,9 @@ public class PropertySubscription extends AbstractSubscription {
             PkValue id = path.getIdentifiedElement().getPkValues();
             matcher = x -> x.getPrimaryKeyValues().equals(id);
         }
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
-        query.addSelect(property);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
+                .addSelect(property)
+                .validate();
         generateFilter(2, null);
     }
 

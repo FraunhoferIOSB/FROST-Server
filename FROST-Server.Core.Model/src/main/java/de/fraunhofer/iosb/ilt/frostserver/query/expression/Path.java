@@ -89,7 +89,7 @@ public class Path implements Variable<Path> {
     @Override
     public void validate(ParserContext context, EntityType type) {
         if (!elements.isEmpty()) {
-            throw new IllegalStateException("Double Validation of Path!");
+            return;
         }
         EntityType localType = type;
         String topName = rawElements.getName();

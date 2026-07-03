@@ -167,8 +167,9 @@ public abstract class AbstractSubscription implements Subscription {
             return;
         }
         matchExpression = extraFilter;
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
-        query.setFilter(extraFilter);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
+                .setFilter(extraFilter)
+                .validate();
     }
 
     private void createMatchExpression(List<Property> properties, final PathElementEntity epe, Expression extraFilter) {
@@ -183,8 +184,9 @@ public abstract class AbstractSubscription implements Subscription {
         if (extraFilter != null) {
             matchExpression = new And(matchExpression, extraFilter);
         }
-        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL);
-        query.setFilter(matchExpression);
+        query = new Query(modelRegistry, queryDefaults, path, ANONYMOUS_PRINCIPAL)
+                .setFilter(matchExpression)
+                .validate();
     }
 
     @Override
