@@ -1,8 +1,9 @@
 # Changelog
 
-## Version 2.6.4-SNAPSHOT
+## Version 2.6.4
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
 * Declared bouncycastle as direct dependency.
 
 
