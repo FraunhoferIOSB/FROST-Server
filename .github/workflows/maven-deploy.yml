@@ -27,10 +27,10 @@ jobs:
         echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE  --yes --batch --import-ownertrust
 
     - name: Checkout Source
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Cache maven repository
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-dpl-${{ hashFiles('**/pom.xml') }}
