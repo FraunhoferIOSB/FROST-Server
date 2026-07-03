@@ -8,6 +8,7 @@
 * Implemented handling of nested complex properties.
 
 **Internal changes & Bugfixes**
+* Declared bouncycastle as direct dependency.
 * Fixed prefer-header not working in batch requests.
 * Updated V2 model to latest spec version.
 * Improved model editor:
