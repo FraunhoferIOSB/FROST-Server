@@ -63,7 +63,7 @@ jobs:
         echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
         export version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
         echo "DOCKER_TAG_FULL=${version}"     >> $GITHUB_ENV
-        echo "DOCKER_TAG_SHORT=${version}" >> $GITHUB_ENV
+        echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV
         if [[ "$version" == *SNAPSHOT ]]; then echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV; fi
 
 
