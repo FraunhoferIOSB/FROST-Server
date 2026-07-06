@@ -103,11 +103,11 @@
         <version.jetty>12.1.10</version.jetty>
         <version.jooq>3.21.6</version.jooq>
         <version.json-patch>1.13</version.json-patch>
-        <version.junit>6.1.0</version.junit>
-        <version.junit-platform-suite>6.1.0</version.junit-platform-suite>
+        <version.junit>6.1.1</version.junit>
+        <version.junit-platform-suite>6.1.1</version.junit-platform-suite>
         <version.keycloak>25.0.3</version.keycloak>
         <version.liquibase>5.0.1</version.liquibase>
-        <version.logback>1.5.35</version.logback>
+        <version.logback>1.5.37</version.logback>
         <version.mariadb>3.5.9</version.mariadb>
 
         <version.maven.plugin.assembly>3.8.0</version.maven.plugin.assembly>
@@ -126,7 +126,7 @@
         <version.maven.plugin.release>3.3.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.6.2</version.maven.plugin.shade>
         <version.maven.plugin.source>3.4.0</version.maven.plugin.source>
-        <version.maven.plugin.spotless>3.7.0</version.maven.plugin.spotless>
+        <version.maven.plugin.spotless>3.8.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.5.6</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.5.1</version.maven.plugin.war>
 
@@ -135,7 +135,7 @@
         <version.org.json>20231013</version.org.json>
         <version.paho>1.2.5</version.paho>
         <version.postgis>2.5.1</version.postgis>
-        <version.postgres>42.7.11</version.postgres>
+        <version.postgres>42.7.12</version.postgres>
         <version.prometheus>1.8.0</version.prometheus>
         <version.slf4j-api>2.0.18</version.slf4j-api>
         <version.testcontainers>2.0.5</version.testcontainers>
