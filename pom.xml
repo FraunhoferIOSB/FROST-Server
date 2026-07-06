@@ -67,8 +67,7 @@
         <congocc.sha512>b29508d55d81cf5842cb5629df9ccfabfe75438bf17fa09347cde0a87cf8ce7cd158e5210881b7508a5f357685a19858ab03b635f6b4e8b61fbc1c4d70890400</congocc.sha512>
         <docker.dependencies.dir>${project.build.directory}/docker_deps</docker.dependencies.dir>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <root.basedir>${project.basedir}</root.basedir>
