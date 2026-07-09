@@ -245,7 +245,7 @@ public class TestSuite {
             .withClasspathResourceMapping("mosquitto.conf", "/mosquitto/config/mosquitto.conf", BindMode.READ_ONLY);
 
     @Container
-    private final KeycloakContainer keycloak = new KeycloakContainer()
+    private final KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak")
             .withRealmImportFile("keycloak/FROST-Test.json");
 
     static class SuiteFinaliser {
