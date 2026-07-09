@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
- * The interface for Subscription objects.
+ * The internal representation of a subscription.
  */
 public interface Subscription {
 

@@ -87,8 +87,8 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
 
     private final Map<EntityType, SubscriptionManager> subscriptions = new HashMap<>();
     private final CoreSettings settings;
-    private final SubscriptionFactory subscriptionFactory;
 
+    private SubscriptionFactory subscriptionFactory;
     private MqttServer server;
 
     private int entityChangedQueueSize;
@@ -119,7 +119,6 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
             throw new IllegalArgumentException("setting must be non-null");
         }
         this.settings = settings;
-        subscriptionFactory = new SubscriptionFactory(settings);
 
         init();
     }
@@ -159,6 +158,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                     entityCreateProcessors);
             // start MQTT server
             server = MqttServerFactory.get(settings);
+            subscriptionFactory = new SubscriptionFactory(settings, server.getUserCaches());
             server.addSubscriptionListener(this);
             server.addEntityCreateListener(this);
             server.start();
@@ -201,12 +201,14 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         }
         // check if there is any subscription, if not do not publish at all
         if (!subscriptions.containsKey(entityType)) {
+            LOGGER.trace("  No subscriptions for {}.", entityType);
             return;
         }
 
         Entity entity = message.getEntity();
         Set<Property> fields = message.getFields();
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(settings).create()) {
+            LOGGER.trace("  Checking Subscriptions for {}.", entityType);
             subscriptions.get(entityType)
                     .handleEntityChanged(persistenceManager, entity, message.getEventType(), fields);
         } catch (Exception ex) {
@@ -217,6 +219,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
     public void notifySubscription(Subscription subscription, Entity entity, Type changeType) {
         final String topic = subscription.getTopic();
         try {
+            LOGGER.trace("  Notifying {} of change in {}", topic, entity);
             String payload = subscription.formatMessage(entity);
             Map<String, String> userProps = new HashMap<>();
             userProps.put("type", changeType.label);
@@ -337,6 +340,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
     public void onSubscribe(SubscriptionEvent e) {
         Subscription subscription = subscriptionFactory.get(e.getTopic());
         if (subscription == null) {
+            LOGGER.debug("Ignoring subscription to {}", e);
             // Not a valid topic.
             return;
         }

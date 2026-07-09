@@ -45,6 +45,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.TestModel;
+import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import jakarta.json.JsonPatch;
@@ -311,6 +312,11 @@ class MqttManagerTest {
 
         public void removePublishListeners() {
             publishListeners.clear();
+        }
+
+        @Override
+        public UserCaches getUserCaches() {
+            return null;
         }
 
     }

@@ -262,6 +262,14 @@ public abstract class EntityHelperAbstract {
         return getEntityJson(entityType, null, null, filter, select, expand, null, modifiers);
     }
 
+    public final JsonNode getEntityJson(EntityType entityType, PkValue pk, String expand, StringModifier... modifiers) {
+        return getEntityJson(entityType, pk, null, selectAllWithId(entityType), expand, null, modifiers);
+    }
+
+    public final JsonNode getEntityJson(EntityType entityType, PkValue pk, List<String> select, String expand, StringModifier... modifiers) {
+        return getEntityJson(entityType, pk, null, select, expand, null, modifiers);
+    }
+
     public final JsonNode getEntityJson(EntityType entityType, PkValue pk, NavigationProperty np, List<String> select, String expand, String orderby, StringModifier... modifiers) {
         return getEntityJson(entityType, pk, np, null, select, expand, orderby, modifiers);
     }

@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
@@ -42,6 +43,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntit
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Projects;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
+import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostclient.utils.ParserUtils;
 import de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -79,6 +81,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Tests for access rights checking with Basic Authentication.
@@ -160,7 +163,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
         properties.put("plugins.modelLoader.idType.User", "STRING");
         properties.put("persistence.idGenerationMode.Role", "ClientGeneratedOnly");
         properties.put("persistence.idGenerationMode.User", "ClientGeneratedOnly");
-        properties.put("auth.mqtt.topicAllowList", "^/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+$");
+        properties.put("mqtt.fineGrainedAuth", "true");
+        properties.put("auth.mqtt.topicAllowList", "^(/Things)|(/[a-zA-Z0-9_-]+\\((('[^']+')|([0-9]+))\\)/[a-zA-Z0-9_-]+)$");
     }
 
     public ProjectAuthTests(ServerVersion version, Map<String, String> properties, boolean anonymousReadAllowed) {
@@ -692,6 +696,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                         OBSERVATIONS.get(16).getProperty(mdlSensing.npObservationFeatureofinterest).withOnlyPk()
                                 .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0))
                                 .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(1)));
+
         Entity expectedP1 = OBSERVATIONS.get(16)
                 .withOnlyPk()
                 .setProperty(
@@ -705,6 +710,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                         mdlSensing.npObservationFeatureofinterest,
                         OBSERVATIONS.get(16).getProperty(mdlSensing.npObservationFeatureofinterest).withOnlyPk()
                                 .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0)));
+
         testFilterResultsExpanded(ADMIN, serviceAdmin, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         testFilterResultsExpanded(WRITE, serviceWrite, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
         testFilterResultsExpanded(READ, serviceRead, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
@@ -755,11 +761,63 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_09a_SubscribeObservations() {
-        LOGGER.info("  test_09a_SubscribeObservations");
+    void test_08f_ObservationReadExpand_3() throws ServiceFailureException {
+        LOGGER.info("  test_08f_ObservationReadExpand_3");
+        final String filter = "id eq " + StringHelper.quoteForUrl(OBSERVATIONS.get(2).getPrimaryKeyValues().get(0));
+        final String expand = "Datastream($select=id;$expand=Thing($select=id;$expand=Projects($select=id))),FeatureOfInterest($select=id;$expand=Projects($select=id))";
+
+        Entity expectedAdmin = OBSERVATIONS.get(2)
+                .withOnlyPk()
+                .setProperty(
+                        mdlSensing.npObservationDatastream,
+                        DATASTREAMS.get(0).withOnlyPk()
+                                .setProperty(
+                                        mdlSensing.npDatastreamThing,
+                                        THINGS.get(0).withOnlyPk()
+                                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0))))
+                .setProperty(
+                        mdlSensing.npObservationFeatureofinterest,
+                        OBSERVATIONS.get(2).getProperty(mdlSensing.npObservationFeatureofinterest).withOnlyPk()
+                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0)));
+
+        Entity expectedAnon = OBSERVATIONS.get(2)
+                .withOnlyPk()
+                .setProperty(
+                        mdlSensing.npObservationDatastream,
+                        DATASTREAMS.get(0).withOnlyPk()
+                                .setProperty(
+                                        mdlSensing.npDatastreamThing,
+                                        THINGS.get(0).withOnlyPk()
+                                                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0))));
+
+        testFilterResultsExpanded(ADMIN, serviceAdmin, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(WRITE, serviceWrite, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(READ, serviceRead, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        if (anonymousReadAllowed) {
+            testFilterResultsExpanded(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAnon));
+        } else {
+            filterForException(ANONYMOUS, serviceAnon, mdlSensing.etObservation, filter, H401);
+        }
+        testFilterResultsExpanded(ADMIN_P1, serviceAdminProject1, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(OBS_CREATE_P1, serviceObsCreaterProject1, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAdmin));
+        testFilterResultsExpanded(ADMIN_P2, serviceAdminProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAnon));
+        testFilterResultsExpanded(OBS_CREATE_P2, serviceObsCreaterProject2, mdlSensing.etObservation, filter, expand, Arrays.asList(expectedAnon));
+    }
+
+    @Test
+    void test_09a_MQTT() {
+        LOGGER.info("  test_09a_MQTT");
         final CompletableFuture<Entity> obsFuture0 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture0Json1 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture0Json2 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture1Json1 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture2Json1 = new CompletableFuture<>();
+        final CompletableFuture<Entity> thingFuture0 = new CompletableFuture<>();
+        final CompletableFuture<Entity> thingFuture1 = new CompletableFuture<>();
+        final CompletableFuture<Entity> thingFuture2 = new CompletableFuture<>();
+        final CompletableFuture<Entity> thingFuture3 = new CompletableFuture<>();
         final Callable<Object> insertAction = () -> {
             Entity obs0 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -769,6 +827,10 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs0);
             obsFuture0.complete(obs0);
+            JsonNode entityJson0_1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture0Json1.complete(entityJson0_1);
+            JsonNode entityJson0_2 = ehAdminProject2.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture0Json2.complete(entityJson0_2);
 
             Entity obs1 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -778,6 +840,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs1);
             obsFuture1.complete(obs1);
+            JsonNode entityJson1_1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture1Json1.complete(entityJson1_1);
 
             Entity obs2 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -787,106 +851,180 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs2);
             obsFuture2.complete(obs2);
+            JsonNode entityJson2_1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture2Json1.complete(entityJson2_1);
+
+            Entity origThing0 = ehAdmin.getCache(mdlSensing.etThing, 0);
+            Entity updateThing0 = origThing0.withOnlyPk()
+                    .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("newProp", "newValue0").build());
+            serviceAdmin.update(updateThing0);
+            thingFuture0.complete(updateThing0);
+
+            Entity origThing1 = ehAdmin.getCache(mdlSensing.etThing, 1);
+            Entity updateThing1 = origThing1.withOnlyPk()
+                    .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("newProp", "newValue1").build());
+            serviceAdmin.update(updateThing1);
+            thingFuture1.complete(updateThing1);
+
+            Entity origThing2 = ehAdmin.getCache(mdlSensing.etThing, 2);
+            Entity updateThing2 = origThing2.withOnlyPk()
+                    .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("newProp", "newValue2").build());
+            serviceAdmin.update(updateThing2);
+            thingFuture2.complete(updateThing2);
+
+            Entity origThing3 = ehAdmin.getCache(mdlSensing.etThing, 3);
+            Entity updateThing3 = origThing3.withOnlyPk()
+                    .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("newProp", "newValue3").build());
+            serviceAdmin.update(updateThing3);
+            thingFuture3.complete(updateThing3);
             return null;
         };
 
         Entity ds0 = ehAdmin.getCache(mdlSensing.etDatastream, 0);
         String relationPathDs0 = ParserUtils.relationPath(ds0, mdlSensing.npDatastreamObservations);
-        String dsTopic0 = "v1.1/" + relationPathDs0;
+        String dsTopic0 = "v1.1/" + relationPathDs0 + "?$expand=FeatureOfInterest($select=id)";
 
         Entity ds1 = ehAdmin.getCache(mdlSensing.etDatastream, 1);
         String relationPathDs1 = ParserUtils.relationPath(ds1, mdlSensing.npDatastreamObservations);
-        String dsTopic1 = "v1.1/" + relationPathDs1;
+        String dsTopic1 = "v1.1/" + relationPathDs1 + "?$expand=FeatureOfInterest($select=id)";
 
         Entity ds2 = ehAdmin.getCache(mdlSensing.etDatastream, 2);
         String relationPathDs2 = ParserUtils.relationPath(ds2, mdlSensing.npDatastreamObservations);
-        String dsTopic2 = "v1.1/" + relationPathDs2;
+        String dsTopic2 = "v1.1/" + relationPathDs2 + "?$expand=FeatureOfInterest($select=id)";
 
-        final TestSubscription test1SubAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, "v1.1/Observations")
+        final TestSubscription test1SubAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Observations?$expand=FeatureOfInterest($select=id)")
                 .setName(ADMIN + "-1")
                 .addExpectedEntity(obsFuture0)
+                .addExpectedJson(obsFuture0Json1)
                 .addExpectedEntity(obsFuture1)
+                .addExpectedJson(obsFuture1Json1)
                 .addExpectedEntity(obsFuture2)
+                .addExpectedJson(obsFuture2Json1)
+                .setExpectedMessageCount(3)
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test0SubDsAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, dsTopic0)
+        final TestSubscription test0SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic0)
                 .setName(ADMIN + "-2")
                 .addExpectedEntity(obsFuture0)
+                .addExpectedJson(obsFuture0Json1)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test1SubDsAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, dsTopic1)
+        final TestSubscription test1SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic1)
                 .setName(ADMIN + "-3")
                 .addExpectedEntity(obsFuture1)
+                .addExpectedJson(obsFuture1Json1)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test2SubDsAdmin = new MqttHelper11.TestSubscription(mqttHelperAdmin, dsTopic2)
+        final TestSubscription test2SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic2)
                 .setName(ADMIN + "-4")
                 .addExpectedEntity(obsFuture2)
+                .addExpectedJson(obsFuture2Json1)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
+        final TestSubscription test3SubThingsAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Things")
+                .setName(ADMIN + "-5")
+                .addExpectedEntity(thingFuture0)
+                .addExpectedEntity(thingFuture1)
+                .addExpectedEntity(thingFuture2)
+                .addExpectedEntity(thingFuture3)
+                .createReceivedListener(mdlSensing.etThing);
 
-        final TestSubscription test1SubAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
+        final TestSubscription test1SubAdminP1 = new TestSubscription(mqttHelperAdminProject1, "v1.1/Observations")
                 .setName(ADMIN_P1 + "-1")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test0SubDsAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, dsTopic0)
+        final TestSubscription test0SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic0)
                 .setName(ADMIN_P1 + "-2")
                 .addExpectedEntity(obsFuture0)
+                .addExpectedJson(obsFuture0Json1)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test1SubDsAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, dsTopic1)
+        final TestSubscription test1SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic1)
                 .setName(ADMIN_P1 + "-3")
                 .addExpectedEntity(obsFuture1)
+                .addExpectedJson(obsFuture1Json1)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test2SubDsAdminP1 = new MqttHelper11.TestSubscription(mqttHelperAdminProject1, dsTopic2)
+        final TestSubscription test2SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic2)
                 .setName(ADMIN_P1 + "-4")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
+        final TestSubscription test3SubThingsAdminP1 = new TestSubscription(mqttHelperAdminProject1, "v1.1/Things")
+                .setName(ADMIN_P1 + "-5")
+                .addExpectedEntity(thingFuture0)
+                .addExpectedEntity(thingFuture2)
+                .createReceivedListener(mdlSensing.etThing);
 
-        final TestSubscription test1SubAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
+        final TestSubscription test1SubAdminP2 = new TestSubscription(mqttHelperAdminProject2, "v1.1/Observations")
                 .setName(ADMIN_P2 + "-1")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
 
-        final TestSubscription test0SubDsAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, dsTopic0)
+        final TestSubscription test0SubDsAdminP2 = new TestSubscription(mqttHelperAdminProject2, dsTopic0)
                 .setName(ADMIN_P2 + "-2")
                 .addExpectedEntity(obsFuture0)
+                .addExpectedJson(obsFuture0Json2)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test1SubDsAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, dsTopic1)
+        final TestSubscription test1SubDsAdminP2 = new TestSubscription(mqttHelperAdminProject2, dsTopic1)
                 .setName(ADMIN_P2 + "-3")
                 .addExpectedError("Failed to subscribe to")
                 .createReceivedListener(mdlSensing.etObservation);
-        final TestSubscription test2SubDsAdminP2 = new MqttHelper11.TestSubscription(mqttHelperAdminProject2, dsTopic2)
+        final TestSubscription test2SubDsAdminP2 = new TestSubscription(mqttHelperAdminProject2, dsTopic2)
                 .setName(ADMIN_P2 + "-4")
                 .addExpectedEntity(obsFuture2)
+                .addExpectedJson(obsFuture2Json1)
+                .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
+        final TestSubscription test3SubThingsAdminP2 = new TestSubscription(mqttHelperAdminProject2, "v1.1/Things")
+                .setName(ADMIN_P2 + "-5")
+                .addExpectedEntity(thingFuture0)
+                .addExpectedEntity(thingFuture1)
+                .addExpectedEntity(thingFuture2)
+                .createReceivedListener(mdlSensing.etThing);
 
         final TestSubscription test0SubDsAnon;
         final TestSubscription test1SubDsAnon;
         final TestSubscription test2SubDsAnon;
+        final TestSubscription test3SubThingsAnon;
         if (anonymousReadAllowed) {
-            test0SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic0)
+            test0SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic0)
                     .setName(ANONYMOUS + "-1")
                     .addExpectedEntity(obsFuture0)
+                    .addExpectedJson(obsFuture0Json2)
+                    .setExpectedMessageCount(1)
                     .createReceivedListener(mdlSensing.etObservation);
-            test1SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic1)
+            test1SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic1)
                     .setName(ANONYMOUS + "-2")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
-            test2SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic2)
+            test2SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic2)
                     .setName(ANONYMOUS + "-3")
                     .addExpectedError("Failed to subscribe to")
                     .createReceivedListener(mdlSensing.etObservation);
-        } else {
-            test0SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic0)
+            test3SubThingsAnon = new TestSubscription(mqttHelperAnon, "v1.1/Things")
                     .setName(ANONYMOUS + "-4")
-                    .addExpectedError("MQTT connect failed")
-                    .createReceivedListener(mdlSensing.etObservation);
-            test1SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic1)
+                    .addExpectedEntity(thingFuture0)
+                    .addExpectedEntity(thingFuture2)
+                    .createReceivedListener(mdlSensing.etThing);
+        } else {
+            test0SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic0)
                     .setName(ANONYMOUS + "-5")
                     .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
-            test2SubDsAnon = new MqttHelper11.TestSubscription(mqttHelperAnon, dsTopic2)
+            test1SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic1)
                     .setName(ANONYMOUS + "-6")
                     .addExpectedError("MQTT connect failed")
                     .createReceivedListener(mdlSensing.etObservation);
+            test2SubDsAnon = new TestSubscription(mqttHelperAnon, dsTopic2)
+                    .setName(ANONYMOUS + "-7")
+                    .addExpectedError("MQTT connect failed")
+                    .createReceivedListener(mdlSensing.etObservation);
+            test3SubThingsAnon = new TestSubscription(mqttHelperAnon, "v1.1/Things")
+                    .setName(ANONYMOUS + "-8")
+                    .addExpectedError("MQTT connect failed")
+                    .createReceivedListener(mdlSensing.etThing);
         }
 
         MqttHelper11.MqttAction mqttAction = new MqttHelper11.MqttAction(insertAction)
@@ -904,7 +1042,11 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                 .add(test2SubDsAdmin)
                 .add(test2SubDsAdminP1)
                 .add(test2SubDsAdminP2)
-                .add(test2SubDsAnon);
+                .add(test2SubDsAnon)
+                .add(test3SubThingsAdmin)
+                .add(test3SubThingsAdminP1)
+                .add(test3SubThingsAdminP2)
+                .add(test3SubThingsAnon);
         mqttHelperAdmin.executeRequest(mqttAction);
     }
 

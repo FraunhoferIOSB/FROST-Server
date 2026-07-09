@@ -42,6 +42,7 @@ public class PrincipalExtended implements Principal {
     private final String name;
     private final boolean admin;
     private final Set<String> roles;
+    private long userKey = -1;
     private Map<String, Object> context;
 
     public PrincipalExtended(String name, boolean admin, Set<String> roles) {
@@ -67,9 +68,31 @@ public class PrincipalExtended implements Principal {
         return roles.contains(role);
     }
 
+    /**
+     * Replaces the userKey only if the new userKey >= 0.
+     *
+     * @param userKey The new userKey.
+     * @return this.
+     */
+    public PrincipalExtended updateUserKey(long userKey) {
+        if (userKey >= 0) {
+            this.userKey = userKey;
+        }
+        return this;
+    }
+
+    /**
+     * The userKey is a unique key that describes the set of roles of the user.
+     *
+     * @return The userKey set for this Principal. Can be null.
+     */
+    public long getUserKey() {
+        return userKey;
+    }
+
     @Override
     public String toString() {
-        return name + " (" + admin + ")";
+        return name + " (" + userKey + "," + admin + ")";
     }
 
     /**

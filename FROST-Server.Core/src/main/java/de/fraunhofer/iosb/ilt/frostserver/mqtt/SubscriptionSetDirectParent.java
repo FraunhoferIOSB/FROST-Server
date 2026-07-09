@@ -34,8 +34,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A set of subscriptions that are keyed to a direct parent for faster access.
- *
- * @author scf
  */
 class SubscriptionSetDirectParent {
 
@@ -55,17 +53,22 @@ class SubscriptionSetDirectParent {
     public void handleEntityChanged(PersistenceManager persistenceManager, Entity entity, Type changeType, Set<Property> fields) {
         Entity parent = (Entity) entity.getProperty(relationToParent);
         if (parent == null) {
+            LOGGER.trace("    No parent");
             return;
         }
         PkValue pkValue = parent.getPrimaryKeyValues();
         SubscriptionSet subsForParent = subscriptions.get(pkValue);
         if (subsForParent == null) {
+            LOGGER.trace("    No subs for parent {}", parent);
             return;
         }
         // for each subscription on EntityType check match
+        LOGGER.trace("    Matching {} subs with parent {}", topicCount, parent);
         Version lastVersion = null;
         for (Subscription subscription : subsForParent.getSubscriptions().keySet()) {
+            LOGGER.trace("    Matching parent {} to {}", parent, subscription);
             if (subscription.matches(persistenceManager, entity, fields)) {
+                LOGGER.trace("    Match for parent {}", parent);
                 if (lastVersion != subscription.getVersion()) {
                     entity.setSelfLink(null);
                     lastVersion = subscription.getVersion();
@@ -86,6 +89,9 @@ class SubscriptionSetDirectParent {
             }
             SubscriptionSet subsForParent = subscriptions.computeIfAbsent(parentPk, t -> new SubscriptionSet(topicCount));
             subsForParent.addSubscription(subscription);
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("  Added subscription {} for {}", subscriptions.size(), subscription);
+            }
             return true;
         }
     }

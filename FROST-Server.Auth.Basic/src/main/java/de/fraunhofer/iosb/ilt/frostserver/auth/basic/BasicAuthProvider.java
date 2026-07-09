@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.LiquibaseUser;
+import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
@@ -41,7 +42,6 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,8 +94,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
 
-    private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
-    private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
+    private final UserCaches userCaches = new UserCaches();
 
     @Override
     public InitResult init(CoreSettings coreSettings) {
@@ -122,6 +121,11 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     }
 
     @Override
+    public UserCaches getUserCaches() {
+        return userCaches;
+    }
+
+    @Override
     public void addFilter(Object context, CoreSettings coreSettings) {
         BasicAuthFilterHelper.createFilters(context, coreSettings);
     }
@@ -137,14 +141,13 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         boolean admin = userData.roles.contains(roleAdmin);
 
         final PrincipalExtended userPrincipal = new PrincipalExtended(userData.userName, admin, userData.roles);
-        final UserClientInfo userInfo = usernameToUserinfo.computeIfAbsent(userData.userName, t -> new UserClientInfo());
+        final UserClientInfo userInfo = userCaches.getOrCreateUserInfo(userData.userName);
         userInfo.setUserPrincipal(userPrincipal);
-
-        String oldClientId = userInfo.addClientId(clientId, maxClientsPerUser);
-        if (oldClientId != null) {
-            clientidToUserinfo.remove(oldClientId);
+        if (userPrincipal.getUserKey() >= 0) {
+            userCaches.registerPrincipal(userPrincipal.getUserKey(), userPrincipal);
         }
-        clientidToUserinfo.put(clientId, userInfo);
+        userCaches.registerClientId(userInfo, clientId);
+
         return validUser;
     }
 
@@ -156,15 +159,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         }
         return DatabaseHandler.getInstance(coreSettings)
                 .userHasRole(userName, roleName);
-    }
-
-    @Override
-    public PrincipalExtended getUserPrincipal(String clientId) {
-        UserClientInfo userInfo = clientidToUserinfo.get(clientId);
-        if (userInfo == null) {
-            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
-        }
-        return userInfo.getUserPrincipal();
     }
 
     @Override

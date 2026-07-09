@@ -175,8 +175,8 @@ public class MqttHelper11 {
         List<MqttListener> listeners = new ArrayList<>();
         try {
             for (TestSubscription tl : ma.topics) {
-                LOGGER.debug("  {} Creating Subsctiption for {} messages on {}", tl.name, tl.getExpectedCount(), tl.topic);
-                MqttListener listener = new MqttListener(tl.name, mqttServerUri, tl.getTopic(), tl.getExpectedCount());
+                LOGGER.debug("  {} Creating subscription for {} messages on {}", tl.name, tl.getExpectedMessageCount(), tl.topic);
+                MqttListener listener = new MqttListener(tl.name, mqttServerUri, tl.getTopic(), tl.getExpectedMessageCount());
                 if (tl.mqttHelper.isAuthSet()) {
                     MqttConfig mqttConfig = tl.mqttHelper.sSrvc.getMqttConfig();
                     listener.setAuth(mqttConfig.getUsername(), mqttConfig.getPassword());
@@ -212,7 +212,7 @@ public class MqttHelper11 {
                     () -> "failure checking received entities for " + tl.getName() + " on " + tl.getTopic());
             Assertions.assertTrue(
                     tl.allReceived(),
-                    () -> "" + tl.getName() + " Did not receive " + tl.getExpectedCount() + " messages on " + tl.getTopic());
+                    () -> "" + tl.getName() + " Did not receive " + tl.getExpectedMessageCount() + " messages on " + tl.getTopic());
             Assertions.assertFalse(
                     tl.hasErrors(),
                     () -> "Errors encountered for " + tl.getName() + " on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
@@ -401,6 +401,8 @@ public class MqttHelper11 {
         private final List<JsonNode> receivedJson = new ArrayList<>();
         private final List<String> receivedErrors = new ArrayList<>();
 
+        private int expectedMessageCount = -1;
+
         private ReceivedListener mqttReceivedListener;
 
         public TestSubscription(MqttHelper11 mqttHelper) {
@@ -427,6 +429,18 @@ public class MqttHelper11 {
 
         public TestSubscription setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public int getExpectedMessageCount() {
+            if (expectedMessageCount == -1) {
+                return expectedEntities.size() + expectedJson.size() + expectedErrors.size();
+            }
+            return expectedMessageCount;
+        }
+
+        public TestSubscription setExpectedMessageCount(int expectedMessageCount) {
+            this.expectedMessageCount = expectedMessageCount;
             return this;
         }
 
@@ -467,10 +481,6 @@ public class MqttHelper11 {
             return expectedErrors;
         }
 
-        public int getExpectedCount() {
-            return expectedEntities.size() + expectedJson.size() + expectedErrors.size();
-        }
-
         public TestSubscription setMqttReceivedListener(ReceivedListener mqttReceivedListener) {
             this.mqttReceivedListener = mqttReceivedListener;
             return this;
@@ -478,22 +488,20 @@ public class MqttHelper11 {
 
         public TestSubscription received(JsonNode json) {
             if (expectsJson) {
-                LOGGER.debug("    Logging received JSON {}", json);
+                LOGGER.debug("    {} Logging received JSON {}", name, json);
                 synchronized (receivedJson) {
                     receivedJson.add(json);
                 }
-                LOGGER.debug("    Done Logging received JSON {}", json);
             }
             return this;
         }
 
         public TestSubscription received(Entity receivedEntity) {
             if (expectsEntities) {
-                LOGGER.debug("    Logging received Entity {}", receivedEntity);
+                LOGGER.debug("    {} Logging received Entity {}", name, receivedEntity);
                 synchronized (receivedEntities) {
                     receivedEntities.add(receivedEntity);
                 }
-                LOGGER.debug("    Done Logging received Entity {}", receivedEntity);
             }
             return this;
         }
@@ -507,12 +515,12 @@ public class MqttHelper11 {
          * @return true this.
          */
         public boolean checkAllReceived(long timeoutMs) {
-            LOGGER.debug("    Checking all received.");
+            LOGGER.debug("    {} Checking all received.", name);
             while (!receivedEntities.isEmpty()) {
                 Entity receivedEntity;
                 synchronized (receivedEntities) {
                     receivedEntity = receivedEntities.remove(0);
-                    LOGGER.debug("    Checking received entity {}.", receivedEntity);
+                    LOGGER.debug("    {} Checking received entity {}.", name, receivedEntity);
                 }
                 boolean result = checkReceived(receivedEntity, timeoutMs);
                 if (!result) {
@@ -524,7 +532,7 @@ public class MqttHelper11 {
                 JsonNode jsonNode;
                 synchronized (receivedJson) {
                     jsonNode = receivedJson.remove(0);
-                    LOGGER.debug("    Checking received JSON {}.", jsonNode);
+                    LOGGER.debug("    {} Checking received JSON {}.", name, jsonNode);
                 }
                 boolean result = checkReceived(jsonNode, timeoutMs);
                 if (!result) {
@@ -601,21 +609,21 @@ public class MqttHelper11 {
             while (it.hasNext()) {
                 Future<JsonNode> entityFuture = it.next();
                 try {
-                    LOGGER.debug("    Waiting for future on JSON {}", received);
+                    LOGGER.debug("    {} Waiting for future on JSON {}", name, received);
                     JsonNode expected = entityFuture.get(timeoutMs, TimeUnit.MILLISECONDS);
                     if (jsonEqualsWithLinkResolving(expected, received, topic)) {
                         it.remove();
-                        LOGGER.debug("    Match: received {} expected {}", received, expected);
+                        LOGGER.debug("    {} Match: received {} expected {}", name, received, expected);
                         return true;
                     } else {
-                        LOGGER.debug("    No Match: received {} expected {}", received, expected);
+                        LOGGER.debug("    {} No Match: received {} expected {}", name, received, expected);
                     }
                 } catch (InterruptedException | ExecutionException | TimeoutException ex) {
                     LOGGER.warn("Exeption waiting for future for {}.", name, ex);
                     return false;
                 }
             }
-            LOGGER.debug("    Nothing matched received JSON: {}", received);
+            LOGGER.debug("    {} Nothing matched received JSON: {}", name, received);
             return false;
         }
 

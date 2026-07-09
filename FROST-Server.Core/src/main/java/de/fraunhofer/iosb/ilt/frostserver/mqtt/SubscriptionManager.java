@@ -29,13 +29,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A manger for subscriptions for a single entity type.
- *
- * @author scf
  */
 class SubscriptionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionManager.class.getName());
 
     /**
      * The main entity type of the subscriptions in this manager.
@@ -67,10 +69,12 @@ class SubscriptionManager {
 
     public void handleEntityChanged(PersistenceManager persistenceManager, Entity entity, Type changeType, Set<Property> fields) {
         for (SubscriptionSetDirectParent subSet : parentedSubscriptions.values()) {
+            LOGGER.trace("    Direct subscription for {}.", entityType);
             subSet.handleEntityChanged(persistenceManager, entity, changeType, fields);
         }
         Version lastVersion = null;
         for (Subscription subscription : complexSubscriptions.getSubscriptions().keySet()) {
+            LOGGER.trace("    Complex subscription for {}.", entityType);
             if (subscription.matches(persistenceManager, entity, fields)) {
                 if (lastVersion != subscription.getVersion()) {
                     entity.setSelfLink(null);

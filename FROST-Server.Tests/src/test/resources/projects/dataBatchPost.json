@@ -145,6 +145,7 @@
                 "name": "Location 1",
                 "description": "The location of the first test thing",
                 "encodingType": "application/geo+json",
+                "restricted": true,
                 "location": {"type": "Point", "coordinates": [ 8, 49 ]},
                 "Projects": [{"@iot.id": "$project1"}]
             }

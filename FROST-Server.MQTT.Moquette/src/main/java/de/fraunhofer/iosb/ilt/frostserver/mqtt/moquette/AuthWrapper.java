@@ -35,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.settings.Settings;
@@ -64,6 +65,8 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthWrapper.class);
     private static final AuthProvider AUTH_PROVIDER_DENY_ALL = new AuthProvider() {
+        private final UserCaches userCaches = new UserCaches();
+
         @Override
         public void addFilter(Object context, CoreSettings coreSettings) {
             // This dummy does not add filters.
@@ -101,10 +104,9 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         }
 
         @Override
-        public PrincipalExtended getUserPrincipal(String clientId) {
-            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
+        public UserCaches getUserCaches() {
+            return userCaches;
         }
-
     };
 
     private final CoreSettings coreSettings;
@@ -192,7 +194,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             LOGGER.debug("Denied access to {}, wildcards not allowed.", topic);
             return false;
         }
-        PrincipalExtended userPrincipal = authProvider.getUserPrincipal(clientId);
+        PrincipalExtended userPrincipal = authProvider.getUserCaches().getUserPrincipal(clientId);
         LOGGER.debug("Checking access to {} for {} / {}", mqttTopic, user, userPrincipal);
         if (user != null && !user.equals(userPrincipal.getName())) {
             LOGGER.warn("Username {} does not match name in Principal: {}", user, userPrincipal);
@@ -241,9 +243,9 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
             PrincipalExtended.setLocalPrincipal(userPrincipal);
             boolean validPath = getPm().validatePath(path);
             if (validPath) {
-                LOGGER.debug("Allowing access for user {} to {}.", topic, userPrincipal);
+                LOGGER.debug("  Allowing access for user {} to {}.", userPrincipal, topic);
             } else {
-                LOGGER.debug(" Denying access for user {} to {}.", topic, userPrincipal);
+                LOGGER.debug("  Denying access for user {} to {}.", userPrincipal, topic);
             }
             return validPath;
         } catch (RuntimeException | UnsupportedEncodingException ex) {
@@ -261,8 +263,12 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         return persistenceManager;
     }
 
+    public UserCaches getUserCaches() {
+        return authProvider.getUserCaches();
+    }
+
     public PrincipalExtended getUserPrincipal(String clientId) {
-        final PrincipalExtended userPrincipal = authProvider.getUserPrincipal(clientId);
+        final PrincipalExtended userPrincipal = authProvider.getUserCaches().getUserPrincipal(clientId);
         LOGGER.debug("User principal for {} is {}", clientId, userPrincipal);
         return userPrincipal;
     }

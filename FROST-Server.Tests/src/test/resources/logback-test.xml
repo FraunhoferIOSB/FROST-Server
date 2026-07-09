@@ -15,9 +15,13 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.auth" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer" level="WARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.http" level="WARN"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.AuthWrapper" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette.MoquetteMqttServer" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionManager" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionSet" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.mqtt.SubscriptionSetDirectParent" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="OFF"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence" level="wARN"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.plugin" level="WARN"/>
@@ -32,8 +36,8 @@
     <logger name="de.fraunhofer.iosb.ilt.settings" level="WARN"/>
 
     <logger name="de.fraunhofer.iosb.ilt.statests" level="INFO"/>
+    <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11" level="INFO"/>
     <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttListener" level="INFO"/>
-    <logger name="de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper2" level="INFO"/>
     
     <logger name="de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests" level="INFO"/>
 

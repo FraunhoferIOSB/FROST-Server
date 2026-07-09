@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.moquette;
 
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
+import static de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings.TAG_MQTT_FINE_GRAINED_AUTH;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.create.RequestEvent;
@@ -28,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;
@@ -36,8 +38,11 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.settings.annotation.SensitiveValue;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
+import io.moquette.broker.subscriptions.Subscription;
+import io.moquette.broker.subscriptions.Topic;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.InterceptHandler;
+import io.moquette.interception.TopicRewriter;
 import io.moquette.interception.messages.InterceptConnectMessage;
 import io.moquette.interception.messages.InterceptDisconnectMessage;
 import io.moquette.interception.messages.InterceptPublishMessage;
@@ -54,20 +59,24 @@ import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Moquette implementation of the FROST MqttServer interface.
  */
-public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
+public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewriter {
 
     /**
      * Custom Settings | Tags
@@ -104,7 +113,9 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
     protected List<SubscriptionListener> subscriptionListeners = new CopyOnWriteArrayList<>();
     protected List<RequestEventListener> entityCreateListeners = new CopyOnWriteArrayList<>();
     private CoreSettings settings;
-    private final Map<String, List<String>> clientSubscriptions = new HashMap<>();
+    private boolean fineGrainedAuth = false;
+    private final AtomicLong keyGenerator = new AtomicLong();
+    private final Map<String, Set<String>> clientSubscriptions = new HashMap<>();
     private AuthWrapper authWrapper;
 
     /**
@@ -114,6 +125,14 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
 
     public MoquetteMqttServer() {
         frostClientId = "SensorThings API Server (" + UUID.randomUUID() + ")";
+    }
+
+    @Override
+    public UserCaches getUserCaches() {
+        if (authWrapper == null) {
+            return null;
+        }
+        return authWrapper.getUserCaches();
     }
 
     @Override
@@ -206,11 +225,13 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         final Settings authSettings = settings.getAuthSettings();
         final MetricsSettings metricsSettings = settings.getMetricsSettings();
         final boolean allowAnonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
-        authWrapper = createAuthWrapper();
 
         final ConfigWrapper config = new ConfigWrapper(customSettings);
         if (authWrapper != null) {
             config.setProperty(IConfig.ALLOW_ANONYMOUS_PROPERTY_NAME, allowAnonRead);
+        }
+        if (fineGrainedAuth) {
+            mqttBroker.setTopicRewriter(this);
         }
         // Ensure the immediate_flush property has a default of true.
         config.intProp(IConfig.BUFFER_FLUSH_MS_PROPERTY_NAME, 0);
@@ -255,6 +276,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
         Settings authSettings = settings.getAuthSettings();
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, "");
         if (!StringHelper.isNullOrEmpty(authProviderClassName)) {
+            fineGrainedAuth = settings.getMqttSettings().getCustomSettings().getBoolean(TAG_MQTT_FINE_GRAINED_AUTH, MqttSettings.class);
             return new AuthWrapper(settings, authProviderClassName, frostClientId);
         }
         return null;
@@ -273,6 +295,43 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             throw new IllegalArgumentException("MqttSettings must be non-null");
         }
         this.settings = settings;
+        authWrapper = createAuthWrapper();
+    }
+
+    @Override
+    public Topic rewriteTopic(Subscription subscription) {
+        String clientId = subscription.getClientId();
+        final Topic topicFilterClient = subscription.getTopicFilterClient();
+        final String topicClient = topicFilterClient.toString();
+
+        final int idx = topicClient.indexOf('?');
+        String pathString = idx >= 0
+                ? topicClient.substring(0, idx)
+                : topicClient;
+        String queryString = idx >= 0
+                ? topicClient.substring(idx + 1)
+                : "";
+        // TODO: Normalise query.
+        String topicInternal = StringUtils.removeStart(topicClient, '/');
+
+        if (fineGrainedAuth) {
+            PrincipalExtended userPrincipal = authWrapper.getUserPrincipal(clientId);
+            long userKey = userPrincipal.getUserKey();
+            if (userKey < 0) {
+                userKey = keyGenerator.incrementAndGet();
+                userPrincipal.updateUserKey(userKey);
+                authWrapper.getUserCaches().registerPrincipal(userKey, userPrincipal);
+            }
+            topicInternal = Long.toString(userKey) + '/' + topicInternal;
+            LOGGER.debug("Topic rewritten from {} to {}", topicClient, topicInternal);
+        }
+        return Topic.asTopic(topicInternal);
+    }
+
+    @Override
+    public Topic rewriteTopicInverse(Topic clientTopic, Topic publishedTopic) {
+        LOGGER.debug("Inverse Topic rewrite request from {} for {}", clientTopic, publishedTopic);
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private class AbstractInterceptHandlerImpl extends AbstractInterceptHandler {
@@ -283,7 +342,9 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 if (frostClientId.equals(msg.getClientID())) {
                     return;
                 }
-                LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("      Moquette -> FROST on {}", msg.getTopicName());
+                }
                 String payload = msg.getPayload().toString(StringHelper.UTF8);
                 PrincipalExtended userPrincipal;
                 if (authWrapper == null) {
@@ -326,7 +387,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 return;
             }
             LOGGER.trace("      Client connected: {}", clientId);
-            clientSubscriptions.put(clientId, new ArrayList<>());
+            clientSubscriptions.put(clientId, ConcurrentHashMap.newKeySet());
         }
 
         @Override
@@ -337,7 +398,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             }
             LOGGER.trace("      Client disconnected: {}", clientId);
             clientSubscriptions
-                    .getOrDefault(clientId, new ArrayList<>())
+                    .getOrDefault(clientId, Collections.emptySet())
                     .stream()
                     .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(clientId, subscribedTopic)));
             clientSubscriptions.remove(clientId);
@@ -350,11 +411,14 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 return;
             }
             final String topicFilter = msg.getTopicFilterInternal();
-            LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
-            clientSubscriptions
-                    .computeIfAbsent(clientId, t -> new ArrayList<>())
-                    .add(topicFilter);
-            fireSubscribe(new SubscriptionEvent(clientId, topicFilter));
+            LOGGER.debug("      Client {} subscribed to {}", clientId, topicFilter);
+            if (clientSubscriptions
+                    .computeIfAbsent(clientId, t -> ConcurrentHashMap.newKeySet())
+                    .add(topicFilter)) {
+                fireSubscribe(new SubscriptionEvent(clientId, topicFilter));
+            } else {
+                LOGGER.warn("Client {} subscribed to {} twice!", clientId, topicFilter);
+            }
         }
 
         @Override
@@ -364,8 +428,8 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
                 return;
             }
             final String topicFilter = msg.getTopicFilterInternal();
-            LOGGER.trace("      Client {} unsubscribed from {}", clientId, topicFilter);
-            boolean removed = clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
+            LOGGER.debug("      Client {} unsubscribed from {}", clientId, topicFilter);
+            boolean removed = clientSubscriptions.getOrDefault(clientId, Collections.emptySet())
                     .remove(topicFilter);
             if (removed) {
                 fireUnsubscribe(new SubscriptionEvent(clientId, topicFilter));

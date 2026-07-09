@@ -8,6 +8,18 @@ Things
 - 2, Thing 3, Project 1+2, public
 - 3, Thing 4, no project,  private
 
+Locations
+- 0, Location 1, Project 1,   restricted
+- 1, Location 2, Project 2,   private
+- 2, Location 3, Project 1+2, public
+- 3, Location 4, no Project,  private 
+
+Features
+- 0, Feature 1, Project  1,  restricted
+- 1, Feature 2, Project  2,  private
+- 2, Feature 3, Project 1+2, public
+- 3, Feature 4, no Project,  private 
+
 Datastreams
 - 0, Temperature of Thing 1, p1,   public
   - Obs: 0,1,2,3

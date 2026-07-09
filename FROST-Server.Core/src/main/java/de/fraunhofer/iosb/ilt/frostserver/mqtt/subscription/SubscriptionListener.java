@@ -20,8 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 import java.util.EventListener;
 
 /**
- *
- * @author jab
+ * Listener definition for Subscription events.
  */
 public interface SubscriptionListener extends EventListener {
 

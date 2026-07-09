@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
+import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserClientInfo;
@@ -68,15 +69,13 @@ public class KeycloakAuthProvider implements AuthProvider {
 
     private CoreSettings coreSettings;
     private String roleAdmin;
-    private int maxClientsPerUser;
     private boolean registerUserLocally;
     private boolean authenticateOnly;
     private DatabaseHandler databaseHandler;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
 
-    private final Map<String, UserClientInfo> clientidToUserinfo = new ConcurrentHashMap<>();
-    private final Map<String, UserClientInfo> usernameToUserinfo = new ConcurrentHashMap<>();
+    private final UserCaches userCaches = new UserCaches();
 
     /**
      * The map of clients. We need those to determine the authorisation.
@@ -91,7 +90,7 @@ public class KeycloakAuthProvider implements AuthProvider {
         OPTIONS.put("keycloak-config-file", FROST_SERVER_KEYCLOAKJSON);
         final Settings authSettings = coreSettings.getAuthSettings();
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
-        maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, KeycloakSettings.class);
+        userCaches.setMaxClientsPerUser(authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, KeycloakSettings.class));
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, KeycloakSettings.class);
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, KeycloakSettings.class);
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakSettings.class);
@@ -109,6 +108,11 @@ public class KeycloakAuthProvider implements AuthProvider {
             databaseHandler = DatabaseHandler.getInstance(coreSettings);
         }
         return InitResult.INIT_OK;
+    }
+
+    @Override
+    public UserCaches getUserCaches() {
+        return userCaches;
     }
 
     @Override
@@ -137,14 +141,12 @@ public class KeycloakAuthProvider implements AuthProvider {
         boolean admin = userData.roles.contains(roleAdmin);
 
         final PrincipalExtended userPrincipal = new PrincipalExtended(userData.userName, admin, userData.roles);
-        final UserClientInfo userInfo = usernameToUserinfo.computeIfAbsent(userData.userName, t -> new UserClientInfo());
+        final UserClientInfo userInfo = userCaches.getOrCreateUserInfo(userData.userName);
         userInfo.setUserPrincipal(userPrincipal);
-
-        String oldClientId = userInfo.addClientId(clientId, maxClientsPerUser);
-        if (oldClientId != null) {
-            clientidToUserinfo.remove(oldClientId);
+        if (userPrincipal.getUserKey() >= 0) {
+            userCaches.registerPrincipal(userPrincipal.getUserKey(), userPrincipal);
         }
-        clientidToUserinfo.put(clientId, userInfo);
+        userCaches.registerClientId(userInfo, clientId);
 
         return validUser;
     }
@@ -196,15 +198,6 @@ public class KeycloakAuthProvider implements AuthProvider {
         boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
         LOGGER.trace("User {} has role {}: {}", userName, roleName, hasRole);
         return hasRole;
-    }
-
-    @Override
-    public PrincipalExtended getUserPrincipal(String clientId) {
-        UserClientInfo userInfo = clientidToUserinfo.get(clientId);
-        if (userInfo == null) {
-            return PrincipalExtended.ANONYMOUS_PRINCIPAL;
-        }
-        return userInfo.getUserPrincipal();
     }
 
     @Override

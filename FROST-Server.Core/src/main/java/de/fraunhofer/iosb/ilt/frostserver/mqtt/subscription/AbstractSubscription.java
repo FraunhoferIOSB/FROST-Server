@@ -44,17 +44,22 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for all subscription types.
  */
 public abstract class AbstractSubscription implements Subscription {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSubscription.class.getName());
 
     protected final String topic;
     protected EntityType entityType;
@@ -73,10 +78,24 @@ public abstract class AbstractSubscription implements Subscription {
     protected CoreSettings settings;
     protected ServiceContext context;
 
-    protected AbstractSubscription(String topic, ResourcePath path, CoreSettings settings) {
+    protected final PrincipalExtended userPrincipal;
+    protected boolean fineGrainedAuth;
+
+    protected AbstractSubscription(CoreSettings settings, String topic, ResourcePath path) {
+        this(settings, PrincipalExtended.ANONYMOUS_PRINCIPAL, topic, path, false);
+    }
+
+    protected AbstractSubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path) {
+        this(settings, userPrincipal, topic, path, true);
+    }
+
+    private AbstractSubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path, boolean fga) {
+        this.userPrincipal = userPrincipal;
+        this.fineGrainedAuth = fga;
         this.topic = topic;
         this.path = path;
         this.settings = settings;
+        LOGGER.debug("Subscription for {} on {}", userPrincipal, topic);
         final Version version = path.getVersion();
         final QueryDefaults queryDefaults = settings.getQueryDefaults().setAlwaysOrder(false);
         context = new ServiceContext()
@@ -90,14 +109,32 @@ public abstract class AbstractSubscription implements Subscription {
     @Override
     public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
         if (!newEntity.getType().equals(entityType)) {
+            LOGGER.trace("      Wrong entity type, expected {}", entityType);
             return false;
         }
         if (matcher != null && !matcher.test(newEntity)) {
+            LOGGER.trace("      Matcher failed: {}", matcher);
             return false;
         }
         if (matchExpression != null) {
-            Object result = persistenceManager.get(newEntity.getPath(), query);
-            return result != null;
+            PrincipalExtended oldLocalPrincipal = PrincipalExtended.getLocalPrincipal();
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
+            try {
+                Object result = persistenceManager.get(newEntity.getPath(), query);
+                return result != null;
+            } finally {
+                PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
+            }
+        }
+        if (fineGrainedAuth) {
+            PrincipalExtended oldLocalPrincipal = PrincipalExtended.getLocalPrincipal();
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
+            try {
+                Object result = persistenceManager.get(newEntity.getType(), newEntity.getPrimaryKeyValues());
+                return result != null;
+            } finally {
+                PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
+            }
         }
         return true;
     }
@@ -203,6 +240,10 @@ public abstract class AbstractSubscription implements Subscription {
 
     @Override
     public String getTopic() {
+        final long userKey = userPrincipal.getUserKey();
+        if (fineGrainedAuth) {
+            return Long.toString(userKey) + '/' + topic;
+        }
         return topic;
     }
 
@@ -230,7 +271,7 @@ public abstract class AbstractSubscription implements Subscription {
 
     @Override
     public int hashCode() {
-        return Objects.hash(topic, entityType);
+        return Objects.hash(topic, entityType, userPrincipal);
     }
 
     @Override
@@ -248,7 +289,15 @@ public abstract class AbstractSubscription implements Subscription {
         if (!Objects.equals(this.topic, other.topic)) {
             return false;
         }
-        return this.entityType == other.entityType;
+        if (!Objects.equals(this.entityType, other.entityType)) {
+            return false;
+        }
+        return Objects.equals(this.userPrincipal, other.userPrincipal);
+    }
+
+    @Override
+    public String toString() {
+        return userPrincipal + ":" + getTopic();
     }
 
 }

@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
@@ -45,8 +46,13 @@ public class PropertySubscription extends AbstractSubscription {
     private Predicate<? super Entity> matcher;
     private Query query;
 
-    public PropertySubscription(String topic, ResourcePath path, CoreSettings settings) {
-        super(topic, path, settings);
+    public PropertySubscription(CoreSettings settings, String topic, ResourcePath path) {
+        super(settings, topic, path);
+        init();
+    }
+
+    public PropertySubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path) {
+        super(settings, userPrincipal, topic, path);
         init();
     }
 

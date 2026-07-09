@@ -144,8 +144,8 @@ public class EntityUtils {
             Entity nextResult = resultIt.next();
             Entity inExpectedList = findEntityIn(nextResult, testExpectedList);
             if (!testExpectedList.remove(inExpectedList)) {
-                LOGGER.info("Entity with pk {} found in result that is not expected.", nextResult.getPrimaryKeyValues());
-                return new ResultTestResult(false, "Entity with pk " + nextResult.getPrimaryKeyValues() + " found in result that is not expected.");
+                LOGGER.info("Entity {} found in result that is not expected.", nextResult);
+                return new ResultTestResult(false, "Entity " + nextResult + " found in result that is not expected.");
             }
 
             ResultTestResult subTestResult = compareNavprops(nextResult, inExpectedList);
@@ -171,7 +171,7 @@ public class EntityUtils {
                 return new ResultTestResult(false, "Not Found child " + expectedChild + ", found none");
             } else if (resultChild != null && expectedChild != null) {
                 if (!resultChild.getPrimaryKeyValues().equals(expectedChild.getPrimaryKeyValues())) {
-                    return new ResultTestResult(false, "Not Found child " + resultChild + ", expected " + expectedChild);
+                    return new ResultTestResult(false, "Found child " + resultChild + ", expected " + expectedChild);
                 }
                 ResultTestResult subCompareResult = compareNavprops(resultChild, expectedChild);
                 if (!subCompareResult.testOk) {

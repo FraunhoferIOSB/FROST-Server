@@ -318,7 +318,7 @@ public class DefaultEntity implements Entity {
 
     @Override
     public String toString() {
-        return "Entity: " + entityType;
+        return "Entity: " + entityType + ": " + getPrimaryKeyValues();
     }
 
 }

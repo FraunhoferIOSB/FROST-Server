@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -45,7 +46,12 @@ public class EntitySubscription extends AbstractSubscription {
     private Predicate<? super Entity> matcher;
 
     public EntitySubscription(CoreSettings settings, String topic, ResourcePath path) {
-        super(topic, path, settings);
+        super(settings, topic, path);
+        init();
+    }
+
+    public EntitySubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path) {
+        super(settings, userPrincipal, topic, path);
         init();
     }
 
@@ -75,11 +81,15 @@ public class EntitySubscription extends AbstractSubscription {
 
     @Override
     public String doFormatMessage(Entity entity) throws IOException {
+        PrincipalExtended oldLocalPrincipal = PrincipalExtended.getLocalPrincipal();
         try {
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
             entity.setQuery(emptyQuery);
             return settings.getFormatter(emptyQuery.getVersion(), FORMAT_NAME_DEFAULT).format(path, emptyQuery, entity).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
+        } finally {
+            PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
         }
     }
 

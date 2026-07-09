@@ -33,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
+import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Objects;
@@ -49,7 +50,12 @@ public class EntitySetSubscription extends AbstractSubscription {
     private Query expandQuery;
 
     public EntitySetSubscription(CoreSettings settings, String topic, ResourcePath path) {
-        super(topic, path, settings);
+        super(settings, topic, path);
+        init();
+    }
+
+    public EntitySetSubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path) {
+        super(settings, userPrincipal, topic, path);
         init();
     }
 
@@ -75,14 +81,11 @@ public class EntitySetSubscription extends AbstractSubscription {
             }
             filter = query.getFilter();
             if (!query.getExpand().isEmpty()) {
-                Query queryCopy = parseQuery(queryString);
-                if (queryCopy != null) {
-                    List<Expand> expandList = queryCopy.getExpand();
-                    expandQuery = new Query(queryCopy.getContext(), queryCopy.getPath(), ANONYMOUS_PRINCIPAL)
-                            .setExpand(expandList)
-                            .addSelect(query.getSelect().toArray(Property[]::new))
-                            .validate();
-                }
+                List<Expand> expandList = query.getExpand();
+                expandQuery = new Query(query.getContext(), query.getPath(), userPrincipal)
+                        .setExpand(expandList)
+                        .addSelect(query.getSelect().toArray(Property[]::new))
+                        .validate();
             }
         }
         generateFilter(1, filter);
@@ -101,11 +104,15 @@ public class EntitySetSubscription extends AbstractSubscription {
 
     @Override
     public String doFormatMessage(Entity entity) {
+        PrincipalExtended oldLocalPrincipal = PrincipalExtended.getLocalPrincipal();
         try {
+            PrincipalExtended.setLocalPrincipal(userPrincipal);
             entity.setQuery(query);
             return settings.getFormatter(query.getVersion(), FORMAT_NAME_DEFAULT).format(path, query, entity).getFormatted();
         } catch (IncorrectRequestException ex) {
             throw new IllegalArgumentException(ex);
+        } finally {
+            PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
         }
     }
 
@@ -114,10 +121,15 @@ public class EntitySetSubscription extends AbstractSubscription {
         if (expandQuery != null) {
             ResourcePath resourcePath = newEntity.getPath()
                     .setVersion(expandQuery.getVersion());
-            Object expandEntity = persistenceManager.get(resourcePath, expandQuery);
-
-            if (expandEntity instanceof Entity entity) {
-                return entity;
+            PrincipalExtended oldLocalPrincipal = PrincipalExtended.getLocalPrincipal();
+            try {
+                PrincipalExtended.setLocalPrincipal(userPrincipal);
+                Object expandEntity = persistenceManager.get(resourcePath, expandQuery);
+                if (expandEntity instanceof Entity entity) {
+                    return entity;
+                }
+            } finally {
+                PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
             }
         }
         return super.fetchExpand(persistenceManager, newEntity);

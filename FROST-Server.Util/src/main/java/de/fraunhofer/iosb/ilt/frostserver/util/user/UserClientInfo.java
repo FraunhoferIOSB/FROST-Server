@@ -33,6 +33,9 @@ public class UserClientInfo {
     }
 
     public UserClientInfo setUserPrincipal(PrincipalExtended userPrincipal) {
+        if (this.userPrincipal != null) {
+            userPrincipal.updateUserKey(this.userPrincipal.getUserKey());
+        }
         this.userPrincipal = userPrincipal;
         return this;
     }

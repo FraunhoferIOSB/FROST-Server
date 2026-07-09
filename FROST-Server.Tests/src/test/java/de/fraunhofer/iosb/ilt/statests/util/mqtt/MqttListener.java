@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.util.mqtt;
 
 import static de.fraunhofer.iosb.ilt.frostserver.util.StringHelper.isNullOrEmpty;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionEvent;
@@ -97,6 +98,9 @@ public class MqttListener implements Callable<JsonNode> {
     }
 
     private void notifyMessage(String message) {
+        if (barrier.getCount() == 0) {
+            LOGGER.error("{} has a negative barrier, received more than expected!", name);
+        }
         barrier.countDown();
         LOGGER.debug("{} Received message, barrier now at {}", clientId, barrier.getCount());
         if (listener != null) {
@@ -105,6 +109,9 @@ public class MqttListener implements Callable<JsonNode> {
     }
 
     private void notifyError(String message) {
+        if (barrier.getCount() == 0) {
+            LOGGER.error("{} has a negative barrier, received more than expected!", name);
+        }
         barrier.countDown();
         LOGGER.debug("{} Received error, barrier now at {}", clientId, barrier.getCount());
         if (listener != null) {
@@ -115,7 +122,7 @@ public class MqttListener implements Callable<JsonNode> {
     public MqttListener connect() {
         try {
             final CountDownLatch connectBarrier = new CountDownLatch(2);
-            clientId = "TS-" + name + "-" + topic + "-" + UUID.randomUUID();
+            clientId = "TS-" + name + "-" + UUID.randomUUID();
             mqttClient = new MqttAsyncClient(mqttServerUri, clientId, new MemoryPersistence());
             LOGGER.debug("  c: {} connecting to {}", clientId, mqttServerUri);
             MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -129,7 +136,8 @@ public class MqttListener implements Callable<JsonNode> {
             MqttManager.addTestSubscriptionListener(new SubscriptionListener() {
                 @Override
                 public void onSubscribe(SubscriptionEvent subscription) {
-                    if (clientId.equals(subscription.getClientId()) && topic.equals(subscription.getTopic())) {
+                    final String subbedTopic = subscription.getTopic();
+                    if (clientId.equals(subscription.getClientId()) && subbedTopic.endsWith(topic)) {
                         LOGGER.debug("  s: {} Subscribed to {}", clientId, subscription);
                         connectBarrier.countDown();
                     }
@@ -145,6 +153,7 @@ public class MqttListener implements Callable<JsonNode> {
             mqttClient.connect(connOpts, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
+                    LOGGER.debug("  c: {} Connected.", name);
                     mqttClient.setCallback(new MqttCallback() {
                         @Override
                         public void connectionLost(Throwable thrwbl) {
@@ -208,12 +217,18 @@ public class MqttListener implements Callable<JsonNode> {
                     } else {
                         message = exception.getMessage();
                     }
-                    LOGGER.debug("Exception during connect for {}:", name, message);
                     notifyError("MQTT connect failed: " + message);
+                    connectBarrier.countDown();
+                    connectBarrier.countDown();
+                    LOGGER.debug("  c: {} Exception during connect: {}", name, message);
                 }
             });
             try {
-                connectBarrier.await(ServerSettings.MQTT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                if (connectBarrier.await(ServerSettings.MQTT_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                    LOGGER.debug("  c: {} connect done.", name);
+                } else {
+                    LOGGER.debug("  c: {} connect failed.", name);
+                }
             } catch (InterruptedException ex) {
                 LOGGER.error("Exception:", ex);
             }
@@ -229,10 +244,12 @@ public class MqttListener implements Callable<JsonNode> {
         try {
             barrier.await();
         } catch (InterruptedException ex) {
-            LOGGER.error("waiting for MQTT events on {} timed out: Barrier={}.", topic, barrier.getCount());
+            LOGGER.error("{} waiting for MQTT events on {} timed out: Barrier={}.", name, topic, barrier.getCount());
+            LOGGER.debug("Exception:", ex);
+            fail(name + " waiting for MQTT events on " + topic + " timed out: " + ex.getMessage());
         } finally {
             if (mqttClient != null) {
-                LOGGER.trace("        Closing client: unsubscribing...");
+                LOGGER.trace("        {} Closing client: unsubscribing...", name);
                 final CountDownLatch unsubBarrier = new CountDownLatch(1);
                 final CountDownLatch disconnectBarrier = new CountDownLatch(1);
                 if (mqttClient.isConnected()) {
@@ -264,7 +281,7 @@ public class MqttListener implements Callable<JsonNode> {
                     });
                     disconnectBarrier.await(10, TimeUnit.SECONDS);
                 }
-                LOGGER.trace("        Closing client: closing...");
+                LOGGER.trace("        {} Closing client: closing...", name);
                 // Closing the client can take a long time. Do it in the background.
                 new Thread(() -> {
                     try {
@@ -273,7 +290,7 @@ public class MqttListener implements Callable<JsonNode> {
                         LOGGER.error("Exception closing MQTT connection.", ex);
                     }
                 }, "MQTT-Close").start();
-                LOGGER.trace("        Closing client: done.");
+                LOGGER.trace("        {} Closing client: done.", name);
             }
         }
         return result;

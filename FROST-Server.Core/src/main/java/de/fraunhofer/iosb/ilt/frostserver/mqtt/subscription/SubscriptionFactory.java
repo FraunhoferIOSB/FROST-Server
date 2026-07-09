@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings.TAG_MQTT_FINE_GRAINED_AUTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
 
 import de.fraunhofer.iosb.ilt.frostserver.mqtt.MqttManager;
@@ -28,16 +29,19 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory for subscription instances.
+ * Helper class for turning topics into subscriptions.
  */
 public class SubscriptionFactory {
 
@@ -45,6 +49,8 @@ public class SubscriptionFactory {
 
     private final CoreSettings settings;
     private final ServiceContext context;
+    private final UserCaches userCaches;
+    private boolean fineGrainedAuth = false;
 
     /**
      * TODO: Make this configurable in Moquette, and fix it there!
@@ -52,8 +58,9 @@ public class SubscriptionFactory {
     public String responseTopicBase = "/reqresp/response/";
 
     public static String getPathFromTopic(String topic) {
-        String pathString = topic.contains("?")
-                ? topic.substring(0, topic.indexOf('?'))
+        final int idx = topic.indexOf('?');
+        String pathString = idx >= 0
+                ? topic.substring(0, idx)
                 : topic;
         if (!pathString.startsWith(URI_PATH_SEP)) {
             pathString = URI_PATH_SEP + pathString;
@@ -62,17 +69,20 @@ public class SubscriptionFactory {
     }
 
     public static String getQueryFromTopic(String topic) {
-        return topic.contains("?")
-                ? topic.substring(topic.indexOf('?') + 1)
+        final int idx = topic.indexOf('?');
+        return idx >= 0
+                ? topic.substring(idx + 1)
                 : "";
     }
 
-    public SubscriptionFactory(CoreSettings settings) {
+    public SubscriptionFactory(CoreSettings settings, UserCaches userCaches) {
         this.settings = settings;
         context = new ServiceContext()
                 .setModelRegistry(settings.getModelRegistry())
                 .setFunctionRegistry(settings.getFunctionRegistry())
                 .setQueryDefaults(settings.getQueryDefaults().setAlwaysOrder(false));
+        this.userCaches = userCaches;
+        fineGrainedAuth = settings.getMqttSettings().getCustomSettings().getBoolean(TAG_MQTT_FINE_GRAINED_AUTH, MqttSettings.class);
     }
 
     public Subscription get(String topic) {
@@ -86,6 +96,18 @@ public class SubscriptionFactory {
         }
         if (topic.startsWith(URI_PATH_SEP)) {
             throw new IllegalArgumentException(errorMsg + "topic must not start with '" + URI_PATH_SEP + "'.");
+        }
+        PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
+        if (fineGrainedAuth) {
+            String[] split = StringUtils.split(topic, "/", 2);
+            try {
+                long userKey = Long.parseLong(split[0]);
+                userPrincipal = userCaches.getUserPrincipal(userKey);
+                topic = split[1];
+            } catch (NumberFormatException ex) {
+                LOGGER.error("Incorrect internal topic, not starting with a userkey: {}", topic);
+                throw new IllegalArgumentException("Expected a topic starting with a number, not " + split[0]);
+            }
         }
         Version version;
         try {
@@ -105,17 +127,29 @@ public class SubscriptionFactory {
         final int size = path.size();
         if (path.getLastElement() instanceof PathElementEntitySet) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
-            return new EntitySetSubscription(settings, topic, path);
+            if (fineGrainedAuth) {
+                return new EntitySetSubscription(settings, userPrincipal, topic, path);
+            } else {
+                return new EntitySetSubscription(settings, topic, path);
+            }
         }
         if (path.getLastElement() instanceof PathElementEntity) {
             // SensorThings Standard 14.2.2 - Subscribe to Entity
-            return new EntitySubscription(settings, topic, path);
+            if (fineGrainedAuth) {
+                return new EntitySubscription(settings, userPrincipal, topic, path);
+            } else {
+                return new EntitySubscription(settings, topic, path);
+            }
         }
         if (size >= 2
                 && path.get(size - 2) instanceof PathElementEntity
                 && path.get(size - 1) instanceof PathElementProperty) {
             // SensorThings Standard 14.2.3 - Subscribe to Property
-            return new PropertySubscription(topic, path, settings);
+            if (fineGrainedAuth) {
+                return new PropertySubscription(settings, userPrincipal, topic, path);
+            } else {
+                return new PropertySubscription(settings, topic, path);
+            }
         }
         throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");
     }
