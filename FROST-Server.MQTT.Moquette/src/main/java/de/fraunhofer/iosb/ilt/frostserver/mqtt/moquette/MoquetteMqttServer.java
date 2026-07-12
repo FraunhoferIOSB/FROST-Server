@@ -463,6 +463,10 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             }
             final String topicFilterClient = msg.getTopicFilterClient();
             final String topicFilterIntrnl = msg.getTopicFilterInternal();
+            if (topicFilterIntrnl.startsWith(responseTopicBase)) {
+                LOGGER.debug("      Ignoring subscription of {} to response topic {}", clientId, topicFilterIntrnl);
+                return;
+            }
             LOGGER.debug("      Client {} subscribed to {}", clientId, topicFilterIntrnl);
             if (clientSubscriptions
                     .computeIfAbsent(clientId, t -> ConcurrentHashMap.newKeySet())

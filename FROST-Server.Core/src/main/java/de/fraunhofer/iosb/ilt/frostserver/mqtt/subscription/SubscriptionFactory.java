@@ -51,29 +51,6 @@ public class SubscriptionFactory {
     private final UserCaches userCaches;
     private boolean fineGrainedAuth = false;
 
-    /**
-     * TODO: Make this configurable in Moquette, and fix it there!
-     */
-    public String responseTopicBase = "/reqresp/response/";
-
-    public static String getPathFromTopic(String topic) {
-        final int idx = topic.indexOf('?');
-        String pathString = idx >= 0
-                ? topic.substring(0, idx)
-                : topic;
-        if (!pathString.startsWith(URI_PATH_SEP)) {
-            pathString = URI_PATH_SEP + pathString;
-        }
-        return pathString;
-    }
-
-    public static String getQueryFromTopic(String topic) {
-        final int idx = topic.indexOf('?');
-        return idx >= 0
-                ? topic.substring(idx + 1)
-                : "";
-    }
-
     public SubscriptionFactory(CoreSettings settings, UserCaches userCaches) {
         this.settings = settings;
         context = new ServiceContext()
@@ -88,10 +65,6 @@ public class SubscriptionFactory {
         final String errorMsg = "Subscription to topic '" + topic + "' is invalid. Reason: ";
         if (topic == null || topic.isEmpty()) {
             throw new IllegalArgumentException(errorMsg + "topic must be non-empty.");
-        }
-        if (topic.startsWith(responseTopicBase)) {
-            // This is not a subscription for us.
-            return null;
         }
         if (topic.startsWith(URI_PATH_SEP)) {
             throw new IllegalArgumentException(errorMsg + "topic must not start with '" + URI_PATH_SEP + "'.");
@@ -167,4 +140,23 @@ public class SubscriptionFactory {
         }
         return result;
     }
+
+    public static String getPathFromTopic(String topic) {
+        final int idx = topic.indexOf('?');
+        String pathString = idx >= 0
+                ? topic.substring(0, idx)
+                : topic;
+        if (!pathString.startsWith(URI_PATH_SEP)) {
+            pathString = URI_PATH_SEP + pathString;
+        }
+        return pathString;
+    }
+
+    public static String getQueryFromTopic(String topic) {
+        final int idx = topic.indexOf('?');
+        return idx >= 0
+                ? topic.substring(idx + 1)
+                : "";
+    }
+
 }
