@@ -262,6 +262,26 @@
 
     <profiles>
         <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report-aggregate</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>release</id>
             <build>
                 <plugins>
@@ -278,17 +298,6 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <configuration>
                             <skipAssembly>true</skipAssembly>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <configuration>
-                            <!--
-                                Can be set to true once https://issues.sonatype.org/browse/NEXUS-19853 is fixed.
-                                Then source and javadoc plugins can also be turned off.
-                            -->
-                            <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
                         </configuration>
                     </plugin>
                 </plugins>

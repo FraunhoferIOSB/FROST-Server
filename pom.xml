@@ -73,12 +73,10 @@
         <root.basedir>${project.basedir}</root.basedir>
 
         <!-- Sonar -->
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml,${project.basedir}/../../FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.cpd.java.minimumLines>15</sonar.cpd.java.minimumLines>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.language>java</sonar.language>
+        <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
 
         <version.FROST-Client-Dynamic>2.38</version.FROST-Client-Dynamic>
@@ -434,6 +432,11 @@
                     <version>${version.maven.plugin.exec}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>5.6.0.6792</version>
+                </plugin>
+                <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${version.maven.plugin.spotless}</version>
@@ -503,6 +506,11 @@
                         <failOnMissingWebXml>true</failOnMissingWebXml>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>${version.maven.plugin.surefire</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -545,13 +553,6 @@
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
-                            </execution>
-                            <execution>
-                                <id>report-aggregate</id>
-                                <goals>
-                                    <goal>report-aggregate</goal>
-                                </goals>
-                                <phase>verify</phase>
                             </execution>
                         </executions>
                     </plugin>
