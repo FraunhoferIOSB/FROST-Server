@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import java.util.Objects;

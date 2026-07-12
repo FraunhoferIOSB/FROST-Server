@@ -17,6 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.CUSTOM_PROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.SERIALISE_NULLS;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotatable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
@@ -35,9 +39,6 @@ import java.util.Set;
  * @param <P> The type of the value of the property.
  */
 public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annotatable, EntityProperty<P> {
-
-    public static final String CUSTOM_PROPS = "hasCustomProperties";
-    public static final String SERIALISE_NULLS = "serialiseNulls";
 
     /**
      * Flag indicating the property has sub-properties and can be queried, even
@@ -62,11 +63,11 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
         this(name, type, NULLABLE);
     }
 
-    public EntityPropertyMain(String name, PropertyType type, String... options) {
+    public EntityPropertyMain(String name, PropertyType type, Option... options) {
         this(name, type, new HashSet<>(Arrays.asList(options)));
     }
 
-    public EntityPropertyMain(String name, PropertyType type, Set<String> options) {
+    public EntityPropertyMain(String name, PropertyType type, Set<Option> options) {
         super(name, type, options);
         aliases.add(name);
         this.hasCustomProperties = options.contains(CUSTOM_PROPS);

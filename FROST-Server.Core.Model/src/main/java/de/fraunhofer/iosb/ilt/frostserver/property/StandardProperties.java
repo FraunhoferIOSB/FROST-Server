@@ -17,10 +17,10 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.CUSTOM_PROPS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SERIALISE_NULLS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.CUSTOM_PROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.SERIALISE_NULLS;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_SELF_LINK;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_DATETIMEOFFSET;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_GEOMETRY;

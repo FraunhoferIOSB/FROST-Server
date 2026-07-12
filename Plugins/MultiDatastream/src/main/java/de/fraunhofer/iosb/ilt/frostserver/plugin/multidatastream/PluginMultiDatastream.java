@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream;
 
 import static de.fraunhofer.iosb.ilt.frostserver.model.ext.TypeReferencesHelper.TYPE_REFERENCE_LIST_STRING;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive.EDM_STRING;
 

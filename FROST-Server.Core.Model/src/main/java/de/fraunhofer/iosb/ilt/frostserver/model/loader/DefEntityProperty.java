@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.CUSTOM_PROPS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SERIALISE_NULLS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.READONLY;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.CUSTOM_PROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.READONLY;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.SERIALISE_NULLS;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
@@ -34,10 +34,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -164,7 +165,7 @@ public class DefEntityProperty implements AnnotatedConfigurable<Void, Void> {
     public void registerProperties(ModelRegistry modelRegistry) {
         if (entityProperty == null) {
             PropertyType propType = modelRegistry.getPropertyType(type);
-            Set<String> options = new HashSet<>();
+            Set<Option> options = EnumSet.noneOf(Option.class);
             if (required) {
                 options.add(REQUIRED);
             }

@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+
 import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
@@ -46,35 +48,35 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
 
     public static class NavigationPropertyEntity extends NavigationPropertyMain<Entity> {
 
-        public NavigationPropertyEntity(String propertyName, String... options) {
+        public NavigationPropertyEntity(String propertyName, Option... options) {
             this(propertyName, null, 0, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, Set<String> options) {
+        public NavigationPropertyEntity(String propertyName, Set<Option> options) {
             this(propertyName, null, 0, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, int priority, String... options) {
+        public NavigationPropertyEntity(String propertyName, int priority, Option... options) {
             this(propertyName, null, priority, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, int priority, Set<String> options) {
+        public NavigationPropertyEntity(String propertyName, int priority, Set<Option> options) {
             this(propertyName, null, priority, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, String... options) {
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, Option... options) {
             this(propertyName, inverse, 0, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, Set<String> options) {
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, Set<Option> options) {
             this(propertyName, inverse, 0, options);
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, int priority, String... options) {
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, int priority, Option... options) {
             this(propertyName, inverse, priority, new HashSet<>(Arrays.asList(options)));
         }
 
-        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, int priority, Set<String> options) {
+        public NavigationPropertyEntity(String propertyName, NavigationPropertyMain inverse, int priority, Set<Option> options) {
             super(propertyName, false, priority, options);
             if (inverse != null) {
                 setInverses(inverse);
@@ -129,11 +131,11 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
      */
     private final int priority;
 
-    private NavigationPropertyMain(String propertyName, boolean isSet, int priority, String... options) {
+    private NavigationPropertyMain(String propertyName, boolean isSet, int priority, Option... options) {
         this(propertyName, isSet, priority, new HashSet<>(Arrays.asList(options)));
     }
 
-    private NavigationPropertyMain(String propertyName, boolean isSet, int priority, Set<String> options) {
+    private NavigationPropertyMain(String propertyName, boolean isSet, int priority, Set<Option> options) {
         super(propertyName, TypeSimplePrimitive.EDM_UNTYPED, options);
         this.entitySet = isSet;
         this.priority = priority;

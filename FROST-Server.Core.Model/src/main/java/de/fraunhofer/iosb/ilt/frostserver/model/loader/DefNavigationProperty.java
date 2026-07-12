@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.model.loader;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
@@ -33,8 +33,10 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -154,7 +156,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         if (navProp != null) {
             return;
         }
-        Set<String> options = new HashSet<>();
+        Set<Option> options = EnumSet.noneOf(Option.class);
         if (required) {
             options.add(REQUIRED);
         }

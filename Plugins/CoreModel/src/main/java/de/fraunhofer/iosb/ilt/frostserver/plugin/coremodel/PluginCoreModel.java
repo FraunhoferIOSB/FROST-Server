@@ -19,10 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings.TAG_ENABLE_CORE_MODEL;
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.CUSTOM_PROPS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain.SERIALISE_NULLS;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.NULLABLE;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.CUSTOM_PROPS;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.SERIALISE_NULLS;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_ENCODINGTYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties.EP_PROPERTIES;

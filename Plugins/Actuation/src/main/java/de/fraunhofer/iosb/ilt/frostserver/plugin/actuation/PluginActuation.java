@@ -19,7 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.LiquibaseHelper.CHANGE_SET_NAME;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings.TAG_ENABLE_ACTUATION;
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;

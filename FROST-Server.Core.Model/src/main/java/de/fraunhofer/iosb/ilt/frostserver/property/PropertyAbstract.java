@@ -17,9 +17,13 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.property;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.NULLABLE;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.READONLY;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
+
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -29,9 +33,13 @@ import java.util.Set;
  */
 public abstract class PropertyAbstract<P> implements Property<P> {
 
-    public static final String READONLY = "readOnly";
-    public static final String REQUIRED = "required";
-    public static final String NULLABLE = "nullable";
+    public static enum Option {
+        READONLY,
+        REQUIRED,
+        NULLABLE,
+        CUSTOM_PROPS,
+        SERIALISE_NULLS
+    }
 
     private String name;
     private PropertyType type;
@@ -49,11 +57,11 @@ public abstract class PropertyAbstract<P> implements Property<P> {
      */
     private boolean readOnly;
 
-    protected PropertyAbstract(String name, PropertyType type, String... options) {
-        this(name, type, new HashSet<>(Arrays.asList(options)));
+    protected PropertyAbstract(String name, PropertyType type, Option... options) {
+        this(name, type, EnumSet.copyOf(Arrays.asList(options)));
     }
 
-    protected PropertyAbstract(String name, PropertyType type, Set<String> options) {
+    protected PropertyAbstract(String name, PropertyType type, Set<Option> options) {
         if (type == null) {
             throw new IllegalArgumentException("Type must not be null");
         }

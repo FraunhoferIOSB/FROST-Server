@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.serialise;
 
-import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.property.PropertyAbstract.Option.REQUIRED;
 import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_ID;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
