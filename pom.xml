@@ -473,7 +473,6 @@
                         </pom>
                         <java>
                             <eclipse>
-                                <version>4.21</version>
                                 <file>${root.basedir}/scripts/codestyle/formatter.xml</file>
                             </eclipse>
                             <excludes>
