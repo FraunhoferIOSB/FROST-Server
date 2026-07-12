@@ -61,7 +61,7 @@ public abstract class DatabaseHandler {
     protected final Settings authSettings;
     protected final boolean plainTextPassword;
     protected final String connectionUrl;
-    protected boolean maybeUpdateDatabase;
+    protected boolean doUpdateDatabase;
 
     private PassiveExpiringMap<UserData, UserData> cache;
 
@@ -99,7 +99,7 @@ public abstract class DatabaseHandler {
         this.liquibaseChangelogFilename = liquibaseChangelogFilename;
         this.coreSettings = coreSettings;
         authSettings = coreSettings.getAuthSettings();
-        maybeUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
+        doUpdateDatabase = authSettings.getBoolean(TAG_AUTO_UPDATE_DATABASE, BasicAuthProvider.class);
         plainTextPassword = authSettings.getBoolean(TAG_PLAIN_TEXT_PASSWORD, BasicAuthProvider.class);
         connectionUrl = authSettings.get(TAG_DB_URL, ConnectionUtils.class);
         int userCacheLifeMs = authSettings.getInt(TAG_USER_CACHE_LIFE_MS, BasicAuthProvider.class);
@@ -169,14 +169,14 @@ public abstract class DatabaseHandler {
     public abstract boolean userHasRole(String userName, String roleName);
 
     protected void maybeUpdateDatabase() {
-        if (maybeUpdateDatabase) {
+        if (doUpdateDatabase) {
             BasicAuthProvider basicAuthProvider = new BasicAuthProvider();
             basicAuthProvider.init(coreSettings);
             Map<String, Object> params = CollectionsHelper.propertiesBuilder()
                     .addProperty(CHANGE_SET_NAME, "Auth.Basic")
                     .build();
             basicAuthProvider.createLiqibaseParams(null, params);
-            maybeUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, basicAuthProvider, params);
+            doUpdateDatabase = LiquibaseUtils.maybeUpdateDatabase(LOGGER, basicAuthProvider, params);
         }
     }
 

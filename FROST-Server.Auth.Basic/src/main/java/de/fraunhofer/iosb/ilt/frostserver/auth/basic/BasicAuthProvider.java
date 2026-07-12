@@ -90,7 +90,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     private CoreSettings coreSettings;
     private String roleAdmin;
     private boolean authenticateOnly;
-    private int maxClientsPerUser;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
 
@@ -103,9 +102,10 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         final Settings authSettings = coreSettings.getAuthSettings();
         authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
-        maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
+        int maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
+        userCaches.setMaxClientsPerUser(maxClientsPerUser);
 
         if (authenticateOnly) {
             try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {

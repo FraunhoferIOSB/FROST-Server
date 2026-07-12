@@ -134,7 +134,7 @@ public class TypeComplex extends PropertyType implements ContainerType<TypeCompl
 
     public ComplexValue instantiate() {
         if (instantiator == null) {
-            this.instantiator = ComplexValueImpl.createFor(this);
+            this.instantiator = ComplexValueImpl.getInstantiator();
         }
         return instantiator.instantiate(this);
     }

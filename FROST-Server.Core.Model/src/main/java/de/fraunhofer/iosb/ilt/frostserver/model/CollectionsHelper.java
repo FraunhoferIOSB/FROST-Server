@@ -103,7 +103,7 @@ public class CollectionsHelper {
         return new PropertyBuilder();
     }
 
-    public static PropertyBuilder LinkedHashMapBuilder() {
+    public static PropertyBuilder linkedHashMapBuilder() {
         return new PropertyBuilder(new LinkedHashMap<>());
     }
 

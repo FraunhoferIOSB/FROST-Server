@@ -150,7 +150,7 @@ public class TestHelper {
         propertyValues.put(pluginCoreModel.epResultTimeDs, TimeInterval.parse("2014-03-01T13:00:00Z/2014-05-11T15:30:00Z"));
         propertyValues.put(StandardProperties.EP_SELFLINK, "http://my.self/link");
         propertyValues.put(pluginCoreModel.epTime, TimeInstant.now());
-        ComplexValueImpl unit1 = UnitOfMeasurement.UnitOfMeasurement("unitName", "unitSymbol", "unitDefinition");
+        ComplexValueImpl unit1 = UnitOfMeasurement.create("unitName", "unitSymbol", "unitDefinition");
         propertyValues.put(pluginCoreModel.epUnitOfMeasurement, unit1);
         propertyValues.put(pluginCoreModel.epValidTime, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
         propertyValues.put(pluginActuation.epTaskingParameters, parameters);

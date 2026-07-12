@@ -100,8 +100,7 @@ public class MapValue implements ComplexValue<MapValue> {
 
     @Override
     public MapValue setProperty(String name, Object value) {
-        content.put(name, value);
-        return this;
+        return put(name, value);
     }
 
     @Override

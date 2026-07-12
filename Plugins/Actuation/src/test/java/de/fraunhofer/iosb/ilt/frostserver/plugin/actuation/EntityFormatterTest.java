@@ -271,7 +271,7 @@ class EntityFormatterTest {
                                 .setPrimaryKeyValues(PkValue.of(1L))
                                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                                .setProperty(pluginCoreModel.epUnitOfMeasurement, UnitOfMeasurement.UnitOfMeasurement("degree Celsius", "°C", "http://unitsofmeasure.org/ucum.html#para-30"))
+                                .setProperty(pluginCoreModel.epUnitOfMeasurement, UnitOfMeasurement.create("degree Celsius", "°C", "http://unitsofmeasure.org/ucum.html#para-30"))
                                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                                 .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                                 .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))

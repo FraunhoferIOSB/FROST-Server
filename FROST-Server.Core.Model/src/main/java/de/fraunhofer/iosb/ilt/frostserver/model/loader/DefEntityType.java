@@ -184,7 +184,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         }
     }
 
-    public EntityType getEntityType(ModelRegistry modelRegistry) {
+    public EntityType getEntityType() {
         if (entityType == null) {
             throw new IllegalStateException("EntityType " + name + " not initialised!");
         }

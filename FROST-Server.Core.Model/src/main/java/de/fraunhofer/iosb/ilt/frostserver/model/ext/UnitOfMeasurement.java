@@ -29,7 +29,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValueImpl;
  */
 public class UnitOfMeasurement {
 
-    public static ComplexValueImpl UnitOfMeasurement(
+    private UnitOfMeasurement() {
+        // Not for initialisation.
+    }
+
+    public static ComplexValueImpl create(
             String name,
             String symbol,
             String definition) {

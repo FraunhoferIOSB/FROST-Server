@@ -299,7 +299,7 @@ class EntityFormatterTest {
                         .setPrimaryKeyValues(PkValue.of(1L))
                         .setProperty(pluginCoreModel.epName, "This is a datastream measuring the temperature in an oven.")
                         .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring the temperature in an oven.")
-                        .setProperty(pluginCoreModel.epUnitOfMeasurement, UnitOfMeasurement.UnitOfMeasurement("degree Celsius", "°C", "http://unitsofmeasure.org/ucum.html#para-30"))
+                        .setProperty(pluginCoreModel.epUnitOfMeasurement, UnitOfMeasurement.create("degree Celsius", "°C", "http://unitsofmeasure.org/ucum.html#para-30"))
                         .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                         .setProperty(pluginCoreModel.epObservedArea, TestHelper.getPolygon(2, 100, 0, 101, 0, 101, 1, 100, 1, 100, 0))
                         .setProperty(pluginCoreModel.epPhenomenonTimeDs, TestHelper.createTimeInterval(2014, 03, 1, 13, 0, 0, 2015, 05, 11, 15, 30, 0, UTC))
@@ -474,8 +474,8 @@ class EntityFormatterTest {
                 .setProperty(pluginCoreModel.epName, "This is a datastream measuring the wind.")
                 .setProperty(pluginCoreModel.epDescription, "This is a datastream measuring wind direction and speed.")
                 .setProperty(epUnitOfMeasurements, Arrays.asList(
-                        UnitOfMeasurement.UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"),
-                        UnitOfMeasurement.UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")))
+                        UnitOfMeasurement.create("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"),
+                        UnitOfMeasurement.create("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond")))
                 .setProperty(epMultiObservationDataTypes, Arrays.asList(
                         "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
                         "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"))

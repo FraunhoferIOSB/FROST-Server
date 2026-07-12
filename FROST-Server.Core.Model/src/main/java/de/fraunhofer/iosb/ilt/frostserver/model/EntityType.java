@@ -432,10 +432,7 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
 
     public void validateUpdate(Entity entity) throws IncompleteEntityException {
         for (Property property : getProperties()) {
-            if (!(property instanceof EntityPropertyMain)) {
-                continue;
-            }
-            if (entity.isSetProperty(property)) {
+            if (property instanceof EntityPropertyMain && entity.isSetProperty(property)) {
                 if (property.isReadOnly()) {
                     entity.unsetProperty(property);
                     continue;
@@ -474,16 +471,18 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
             throw new IncompleteEntityException("Incorrect 'parent' entity type for " + entityName + ": " + navPropToParent);
         }
         EntityType parentType = navPropToParent.getEntityType();
-        if (navPropToParent instanceof NavigationPropertyEntitySet navPropToParentSet) {
-            entity.addNavigationEntity(navPropToParentSet, new DefaultEntity(parentType).setPrimaryKeyValues(parentPkValues));
-        } else if (navPropToParent instanceof NavigationPropertyEntity navPropToParentEntity) {
-            Entity parent = entity.getProperty(navPropToParentEntity);
-            if (parent != null && !Objects.equals(parentPkValues, parent.getPrimaryKeyValues())) {
-                throw new IllegalArgumentException("Navigation property " + navPropToParent.getName() + " set in both JSON and URL.");
+        switch (navPropToParent) {
+            case NavigationPropertyEntitySet npParentSet ->
+                entity.addNavigationEntity(npParentSet, new DefaultEntity(parentType).setPrimaryKeyValues(parentPkValues));
+            case NavigationPropertyEntity npParentEntity -> {
+                Entity parent = entity.getProperty(npParentEntity);
+                if (parent != null && !Objects.equals(parentPkValues, parent.getPrimaryKeyValues())) {
+                    throw new IllegalArgumentException("Navigation property " + navPropToParent.getName() + " set in both JSON and URL.");
+                }
+                entity.setProperty(navPropToParent, new DefaultEntity(parentType).setPrimaryKeyValues(parentPkValues));
             }
-            entity.setProperty(navPropToParent, new DefaultEntity(parentType).setPrimaryKeyValues(parentPkValues));
-        } else {
-            throw new IllegalStateException("Unknown navigation property type: " + navPropToParent);
+            default ->
+                throw new IllegalStateException("Unknown navigation property type: " + navPropToParent);
         }
     }
 

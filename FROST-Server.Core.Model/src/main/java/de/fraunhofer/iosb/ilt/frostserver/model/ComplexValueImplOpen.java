@@ -85,8 +85,8 @@ public class ComplexValueImplOpen implements ComplexValue<ComplexValueImplOpen> 
         return properties.containsKey(property.getJsonName());
     }
 
-    public static TypeComplex.Instantiator createFor(TypeComplex type) {
-        return t -> new ComplexValueImpl(t);
+    public static TypeComplex.Instantiator getInstantiator() {
+        return ComplexValueImplOpen::new;
     }
 
     @Override

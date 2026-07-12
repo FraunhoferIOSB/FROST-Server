@@ -115,7 +115,7 @@ class EntityParserTest {
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                        UnitOfMeasurement.UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
+                        UnitOfMeasurement.create("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
@@ -175,8 +175,8 @@ class EntityParserTest {
                 + "    }\n"
                 + "}";
         List<ComplexValueImpl> unitsOfMeasurement = new ArrayList<>();
-        unitsOfMeasurement.add(UnitOfMeasurement.UnitOfMeasurement("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
-        unitsOfMeasurement.add(UnitOfMeasurement.UnitOfMeasurement("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
+        unitsOfMeasurement.add(UnitOfMeasurement.create("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
+        unitsOfMeasurement.add(UnitOfMeasurement.create("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
         List<String> observationTypes = new ArrayList<>();
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");
         observationTypes.add("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement");

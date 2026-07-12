@@ -123,7 +123,7 @@ class EntityCompleteTest {
         assertFalse(isEntityComplete(entity, containingSet));
 
         List<ComplexValueImpl> unitOfMeasurements = new ArrayList<>();
-        unitOfMeasurements.add(UnitOfMeasurement.UnitOfMeasurement("temperature", "degC", "SomeUrl"));
+        unitOfMeasurements.add(UnitOfMeasurement.create("temperature", "degC", "SomeUrl"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
         assertFalse(isEntityComplete(entity, containingSet));
 
@@ -152,7 +152,7 @@ class EntityCompleteTest {
 
         assertFalse(isEntityComplete(entity, new PathElementEntitySet(pluginCoreModel.npDatastreamsThing, new PathElementEntity(PkValue.of(2L), pluginCoreModel.etThing, null))));
 
-        unitOfMeasurements.add(UnitOfMeasurement.UnitOfMeasurement("temperature", "degC", "SomeUrl"));
+        unitOfMeasurements.add(UnitOfMeasurement.create("temperature", "degC", "SomeUrl"));
         entity.setProperty(epUnitOfMeasurements, unitOfMeasurements);
         assertFalse(isEntityComplete(entity, containingSet));
 

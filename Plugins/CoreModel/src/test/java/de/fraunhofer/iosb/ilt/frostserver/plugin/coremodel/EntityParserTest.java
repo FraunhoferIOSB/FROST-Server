@@ -87,7 +87,7 @@ class EntityParserTest {
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                        UnitOfMeasurement.UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
+                        UnitOfMeasurement.create("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
@@ -179,7 +179,7 @@ class EntityParserTest {
                 + "}";
         final Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                        UnitOfMeasurement.UnitOfMeasurement("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
+                        UnitOfMeasurement.create("Percentage", "%", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html"))
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
@@ -224,7 +224,7 @@ class EntityParserTest {
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setProperty(pluginCoreModel.epUnitOfMeasurement,
-                        UnitOfMeasurement.UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
+                        UnitOfMeasurement.create("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
@@ -917,7 +917,7 @@ class EntityParserTest {
                 .addNavigationEntity(
                         pluginCoreModel.npDatastreamsThing,
                         new DefaultEntity(pluginCoreModel.etDatastream)
-                                .setProperty(pluginCoreModel.epUnitOfMeasurement, UnitOfMeasurement.UnitOfMeasurement("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
+                                .setProperty(pluginCoreModel.epUnitOfMeasurement, UnitOfMeasurement.create("Celsius", "C", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Celsius"))
                                 .setProperty(pluginCoreModel.epName, "Temperature measurement")
                                 .setProperty(pluginCoreModel.epDescription, "Temperature measurement")
                                 .setProperty(pluginCoreModel.epObservationType, "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")

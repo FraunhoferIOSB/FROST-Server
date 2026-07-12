@@ -82,4 +82,8 @@ public class KeycloakSettings implements ConfigDefaults {
     @DefaultValue("PT5S")
     public static final String TAG_USER_CACHE_CLEANUP_INTERVAL = "userCacheCleanupInterval";
 
+    private KeycloakSettings() {
+        // Not for instantiation
+    }
+
 }

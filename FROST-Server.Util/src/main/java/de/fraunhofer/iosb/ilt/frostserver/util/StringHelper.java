@@ -52,8 +52,6 @@ import net.time4j.format.expert.IsoDecimalStyle;
 import net.time4j.range.MomentInterval;
 import net.time4j.tz.ZonalOffset;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -66,8 +64,6 @@ public class StringHelper {
     private static final String OUTPUT_CLEAN_REGEX = "[^A-Za-z0-9'.,;:()?/ _-]";
     private static final String OUTPUT_CLEAN_REPLACE = " ";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StringHelper.class);
-    private static final String UTF8_NOT_SUPPORTED = "UTF-8 not supported?";
     private static final NonZeroCondition NON_ZERO_FRACTION = new NonZeroCondition(PlainTime.NANO_OF_SECOND);
 
     public static final ChronoPrinter<Moment> FORMAT_MOMENT = buildMomentFormatter();
@@ -240,13 +236,11 @@ public class StringHelper {
         builder.startOptionalSection(NON_ZERO_FRACTION);
 
         switch (decimalStyle) {
-            case COMMA:
+            case COMMA ->
                 builder.addLiteral(',', '.');
-                break;
-            case DOT:
+            case DOT ->
                 builder.addLiteral('.', ',');
-                break;
-            default:
+            default ->
                 throw new UnsupportedOperationException(decimalStyle.name());
         }
 

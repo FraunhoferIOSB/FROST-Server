@@ -83,14 +83,13 @@ public class WktParser extends Visitor {
         final int childCount = node.size();
 
         switch (childCount) {
-            case 2:
+            case 2 ->
                 visit(node.get(0));
-                break;
-            case 3:
+            case 3 -> {
                 visit(node.get(1));
                 visit(node.get(0));
-                break;
-            default:
+            }
+            default ->
                 throw new IllegalArgumentException("Incorrect number of items found in WKT.");
         }
         return result;

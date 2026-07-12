@@ -95,8 +95,8 @@ public class ComplexValueImpl implements ComplexValue<ComplexValueImpl> {
         return properties.containsKey(property);
     }
 
-    public static TypeComplex.Instantiator createFor(TypeComplex type) {
-        return t -> new ComplexValueImpl(t);
+    public static TypeComplex.Instantiator getInstantiator() {
+        return ComplexValueImpl::new;
     }
 
     @Override

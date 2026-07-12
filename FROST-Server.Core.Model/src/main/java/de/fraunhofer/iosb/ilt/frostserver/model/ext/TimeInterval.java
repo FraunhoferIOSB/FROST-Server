@@ -120,13 +120,15 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
     @Override
     public Object getProperty(String name) {
         switch (name) {
-            case NAME_INTERVAL_START:
+            case NAME_INTERVAL_START -> {
                 return interval.getStartAsMoment();
+            }
 
-            case NAME_INTERVAL_END:
+            case NAME_INTERVAL_END -> {
                 return interval.getEndAsMoment();
+            }
 
-            default:
+            default ->
                 throw new IllegalArgumentException("Unknown sub-property: " + name);
         }
     }
@@ -134,13 +136,15 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
     @Override
     public TimeInterval setProperty(String name, Object value) {
         switch (name) {
-            case NAME_INTERVAL_START:
+            case NAME_INTERVAL_START -> {
                 return setProperty(EP_START_TIME, value);
+            }
 
-            case NAME_INTERVAL_END:
+            case NAME_INTERVAL_END -> {
                 return setProperty(EP_END_TIME, value);
+            }
 
-            default:
+            default ->
                 throw new IllegalArgumentException("Unknown sub-property: " + name);
         }
     }
@@ -162,14 +166,15 @@ public class TimeInterval implements TimeObject, ComplexValue<TimeInterval> {
             return this;
         }
         Moment moment;
-        if (value instanceof Moment m) {
-            moment = m;
-        } else if (value instanceof Instant i) {
-            moment = Moment.from(i);
-        } else if (value instanceof TimeInstant i) {
-            moment = i.getDateTime();
-        } else {
-            throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
+        switch (value) {
+            case Moment m ->
+                moment = m;
+            case Instant i ->
+                moment = Moment.from(i);
+            case TimeInstant i ->
+                moment = i.getDateTime();
+            default ->
+                throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
         }
         if (property == EP_START_TIME) {
             interval = interval.withStart(moment);

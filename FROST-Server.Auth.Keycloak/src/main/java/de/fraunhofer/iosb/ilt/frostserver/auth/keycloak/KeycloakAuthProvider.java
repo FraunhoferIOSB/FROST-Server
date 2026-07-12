@@ -170,7 +170,7 @@ public class KeycloakAuthProvider implements AuthProvider {
                 client.setLastSeen(Instant.now());
                 client.setSubject(subject);
                 CLIENTMAP.put(clientId, client);
-                client.getSubject().getPrincipals().stream().forEach(t -> userData.roles.add(t.getName()));
+                client.getSubject().getPrincipals().forEach(t -> userData.roles.add(t.getName()));
                 if (registerUserLocally) {
                     databaseHandler.enureUserInUsertable(userData.userName, userData.roles);
                 }

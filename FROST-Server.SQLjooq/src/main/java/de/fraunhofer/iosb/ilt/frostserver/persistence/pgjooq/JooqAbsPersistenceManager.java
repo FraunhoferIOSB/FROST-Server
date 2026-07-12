@@ -776,7 +776,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                 if (!StringHelper.isNullOrEmpty(tableName)) {
                     LOGGER.debug("  Table: {}.", tableName);
                     getDbTable(tableName);
-                    getOrCreateMainTable(entityTypeDef.getEntityType(modelRegistry), entityTypeDef.getTable());
+                    getOrCreateMainTable(entityTypeDef.getEntityType(), entityTypeDef.getTable());
                 }
             }
         }
@@ -827,7 +827,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void registerModelFields(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
-            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            final EntityType entityType = entityTypeDef.getEntityType();
             StaMainTable typeStaTable = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
                 registerFieldsForEntityProperty(propertyDef, typeStaTable);
@@ -858,7 +858,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void registerModelMappings(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
-            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            final EntityType entityType = entityTypeDef.getEntityType();
             final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefEntityProperty propertyDef : entityTypeDef.getEntityProperties()) {
                 registerMappingForEntityProperties(propertyDef, table);
@@ -871,7 +871,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void registerHooks(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
-            final EntityType entityType = entityTypeDef.getEntityType(settings.getModelRegistry());
+            final EntityType entityType = entityTypeDef.getEntityType();
             final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
             for (DefPmHook hookDef : entityTypeDef.getHooks()) {
                 PmHook hook = hookDef.getHook();
