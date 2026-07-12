@@ -246,7 +246,7 @@ public class UrlHelper {
         return generateSelfLink(urlPrefix, entity.getType(), entity.getPrimaryKeyValues());
     }
 
-    public static String generateSelfLink(ResourcePath path, Entity entity) {
+    public static String generateSelfLink(Entity entity) {
         return generateSelfLink(entity.getQuery().getContext().getPrefixGen().getUrlPrefix(), entity.getType(), entity.getPrimaryKeyValues());
     }
 
@@ -296,7 +296,7 @@ public class UrlHelper {
      */
     public static String generateNavLink(ResourcePath path, Entity parent, Entity entity, boolean absolute) {
         String urlPrefix = parent.getQuery().getContext().getPrefixGen().getUrlPrefix();
-        String result = urlPrefix + generateSelfLink(path, parent) + "/" + entity.getType().entityName;
+        String result = urlPrefix + generateSelfLink(parent) + "/" + entity.getType().entityName;
         if (!absolute) {
             String curPath = urlPrefix + path.getPath();
             result = getRelativePath(result, curPath);
@@ -316,7 +316,7 @@ public class UrlHelper {
      * @return A navigation link or null depending on query responseMetadata.
      */
     public static String generateNavLink(ResourcePath path, Entity parent, EntitySet es, boolean absolute) {
-        String result = generateSelfLink(path, parent) + "/" + es.getEntityType().plural;
+        String result = generateSelfLink(parent) + "/" + es.getEntityType().plural;
         if (!absolute) {
             String urlPrefix = parent.getQuery().getContext().getPrefixGen().getUrlPrefix();
             String curPath = urlPrefix + path.getPath();

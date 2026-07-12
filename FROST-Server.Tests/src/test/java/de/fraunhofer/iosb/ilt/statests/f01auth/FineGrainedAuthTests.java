@@ -247,39 +247,40 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 PkValue pk = pkFromSelfLink(location);
                 final String type = typeFromSelfLink(location);
                 switch (type) {
-                    case "things":
+                    case "things" ->
                         THINGS.add(serviceAdmin.dao(mdlSensing.etThing).find(pk));
-                        break;
-                    case "locations":
+
+                    case "locations" ->
                         LOCATIONS.add(serviceAdmin.dao(mdlSensing.etLocation).find(pk));
-                        break;
-                    case "sensors":
+
+                    case "sensors" ->
                         SENSORS.add(serviceAdmin.dao(mdlSensing.etSensor).find(pk));
-                        break;
-                    case "observedproperties":
+
+                    case "observedproperties" ->
                         O_PROPS.add(serviceAdmin.dao(mdlSensing.etObservedProperty).find(pk));
-                        break;
-                    case "observations":
+
+                    case "observations" ->
                         OBSERVATIONS.add(serviceAdmin.dao(mdlSensing.etObservation).find(pk));
-                        break;
-                    case "datastreams":
+
+                    case "datastreams" ->
                         DATASTREAMS.add(serviceAdmin.dao(mdlSensing.etDatastream).find(pk));
-                        break;
-                    case "users":
+
+                    case "users" ->
                         USERS.add(serviceAdmin.dao(mdlUsers.etUser).find(pk));
-                        break;
-                    case "projects":
+
+                    case "projects" ->
                         PROJECTS.add(serviceAdmin.dao(mdlUsers.etProject).find(pk));
-                        break;
-                    case "roles":
+
+                    case "roles" ->
                         ROLES.add(serviceAdmin.dao(mdlUsers.etRole).find(pk));
-                        break;
-                    case "userprojectroles":
+
+                    case "userprojectroles" ->
                         USER_PROJECT_ROLES.add(serviceAdmin.dao(mdlUsers.etUserProjectRole).find(pk));
-                        break;
-                    default:
+
+                    default -> {
                         LOGGER.error("Type {} should not have been created.", type);
                         throw new IllegalArgumentException("Type " + type + " should not have been created.");
+                    }
 
                 }
             }

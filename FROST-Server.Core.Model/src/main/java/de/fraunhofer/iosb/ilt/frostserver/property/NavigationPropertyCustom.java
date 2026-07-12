@@ -235,20 +235,23 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
             int count = subPath.size() - 1;
             for (int idx = 0; idx < count; idx++) {
                 String curPathItem = subPath.get(idx);
-                if (curTarget instanceof ObjectNode on) {
-                    curTarget = on.get(curPathItem);
-                } else if (curTarget instanceof ArrayNode an) {
-                    try {
-                        int nr = Integer.parseInt(curPathItem);
-                        curTarget = an.get(nr);
-                    } catch (NumberFormatException ex) {
-                        LOGGER.trace("Not a number, can't access array: {}", curPathItem, ex);
+                switch (curTarget) {
+                    case ObjectNode on ->
+                        curTarget = on.get(curPathItem);
+                    case ArrayNode an -> {
+                        try {
+                            int nr = Integer.parseInt(curPathItem);
+                            curTarget = an.get(nr);
+                        } catch (NumberFormatException ex) {
+                            LOGGER.trace("Not a number, can't access array: {}", curPathItem, ex);
+                            return;
+                        }
+                    }
+                    case Map m ->
+                        curTarget = m.get(curPathItem);
+                    default -> {
                         return;
                     }
-                } else if (curTarget instanceof Map m) {
-                    curTarget = m.get(curPathItem);
-                } else {
-                    return;
                 }
             }
             if (curTarget instanceof ObjectNode on) {

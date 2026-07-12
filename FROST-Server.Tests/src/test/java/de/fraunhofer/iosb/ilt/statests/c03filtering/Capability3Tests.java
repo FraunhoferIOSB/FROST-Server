@@ -741,22 +741,17 @@ public abstract class Capability3Tests extends AbstractTestClass {
         }
         String fullMessage = message + " Checking: '" + Objects.toString(o1) + "' " + order + " '" + Objects.toString(o2) + "'";
         switch (order) {
-            case LT:
+            case LT ->
                 assertTrue(result < 0, fullMessage);
-                break;
-            case LE:
+            case LE ->
                 assertTrue(result <= 0, fullMessage);
-                break;
-            case EQ:
+            case EQ ->
                 assertEquals(0, result, fullMessage);
-                break;
-            case GE:
+            case GE ->
                 assertTrue(result >= 0, fullMessage);
-                break;
-            case GT:
+            case GT ->
                 assertTrue(result > 0, fullMessage);
-                break;
-            default:
+            default ->
                 throw new AssertionError(order.name());
         }
         return result;
@@ -1414,30 +1409,30 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
                     int result = value.compareTo(propertyValue);
                     switch (operator) {
-                        case NE:
+                        case NE -> {
                             String message = properties.get(j) + " should not be equal to " + value + ". But the property value is " + propertyValue;
                             assertNotEquals(0, result, message);
-                            break;
-                        case LT:
-                            message = properties.get(j) + " should be less than " + value + ". But the property value is " + propertyValue;
+                        }
+                        case LT -> {
+                            String message = properties.get(j) + " should be less than " + value + ". But the property value is " + propertyValue;
                             assertTrue(result > 0, message);
-                            break;
-                        case LE:
-                            message = properties.get(j) + " should be less than or equal to " + value + ". But the property value is " + propertyValue;
+                        }
+                        case LE -> {
+                            String message = properties.get(j) + " should be less than or equal to " + value + ". But the property value is " + propertyValue;
                             assertTrue(result >= 0, message);
-                            break;
-                        case EQ:
-                            message = properties.get(j) + " should be equal to " + value + ". But the property value is " + propertyValue;
+                        }
+                        case EQ -> {
+                            String message = properties.get(j) + " should be equal to " + value + ". But the property value is " + propertyValue;
                             assertEquals(0, result, message);
-                            break;
-                        case GE:
-                            message = properties.get(j) + " should be greate than or equal to " + value + ". But the property value is " + propertyValue;
+                        }
+                        case GE -> {
+                            String message = properties.get(j) + " should be greate than or equal to " + value + ". But the property value is " + propertyValue;
                             assertTrue(result <= 0, message);
-                            break;
-                        case GT:
-                            message = properties.get(j) + " should be greater than " + value + ". But the property value is " + propertyValue;
+                        }
+                        case GT -> {
+                            String message = properties.get(j) + " should be greater than " + value + ". But the property value is " + propertyValue;
                             assertTrue(result < 0, message);
-                            break;
+                        }
                     }
                 }
             }

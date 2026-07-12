@@ -240,27 +240,25 @@ public class HTTPMethods {
 
             HttpResponse result = new HttpResponse(connection.getResponseCode());
             switch (connection.getResponseCode()) {
-                case 201:
+                case 201 -> {
                     String locationHeader = connection.getHeaderField("location");
                     if (locationHeader == null || locationHeader.isEmpty()) {
                         result.setResponse(responseToString(connection));
                     } else {
                         result.setResponse(locationHeader);
                     }
-                    break;
-                case 200:
+                }
+                case 200 ->
                     result.setResponse(responseToString(connection));
-                    break;
-                case 400:
-                case 500:
+
+                case 400, 500 ->
                     result.setResponse(errorToString(connection));
-                    break;
-                default:
+
+                default ->
                     result.setResponse("");
-                    break;
             }
             return result;
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException | RuntimeException e) {
             LOGGER.error("Exception: ", e);
             return null;
         } finally {
@@ -285,20 +283,19 @@ public class HTTPMethods {
 
             HttpResponse result = new HttpResponse(statusCode);
             switch (statusCode) {
-                case 201:
+                case 201 -> {
                     String locationHeader = httpResponse.getFirstHeader("location").getValue();
                     if (locationHeader == null || locationHeader.isEmpty()) {
                         result.setResponse(EntityUtils.toString(httpResponse.getEntity()));
                     } else {
                         result.setResponse(locationHeader);
                     }
-                    break;
-                case 200:
+                }
+                case 200 ->
                     result.setResponse(EntityUtils.toString(httpResponse.getEntity()));
-                    break;
-                default:
+
+                default ->
                     result.setResponse("");
-                    break;
             }
             return result;
         } catch (IOException | RuntimeException e) {

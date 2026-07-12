@@ -162,11 +162,13 @@ public class ParserUtils {
 
         @Override
         public ComplexValue deserialize(JsonParser parser, DeserializationContext ctxt) {
-            ComplexValue result = type.instantiate();
+            ComplexValue result = null;
             JsonToken currentToken = parser.currentToken();
             if (currentToken == JsonToken.VALUE_NULL) {
-                return null;
+                // Value is an explicit JSON null.
+                return result;
             }
+            result = type.instantiate();
             currentToken = parser.nextToken();
             while (currentToken == JsonToken.PROPERTY_NAME) {
                 String fieldName = parser.currentName();

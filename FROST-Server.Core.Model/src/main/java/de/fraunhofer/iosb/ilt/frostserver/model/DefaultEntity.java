@@ -120,7 +120,7 @@ public class DefaultEntity implements Entity {
     @Override
     public String getSelfLink() {
         if (selfLink == null && query != null) {
-            selfLink = UrlHelper.generateSelfLink(query.getPath(), this);
+            selfLink = UrlHelper.generateSelfLink(this);
         }
         return selfLink;
     }

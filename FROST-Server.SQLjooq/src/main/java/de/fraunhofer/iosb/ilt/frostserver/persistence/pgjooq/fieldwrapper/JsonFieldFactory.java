@@ -26,8 +26,7 @@ import org.jooq.Field;
 import org.jooq.impl.DSL;
 
 /**
- *
- * @author Hylke van der Schaaf
+ * Handles JSON fields and queries into them.
  */
 public class JsonFieldFactory {
 
@@ -130,6 +129,7 @@ public class JsonFieldFactory {
                 case BOOLEAN:
                 case NUMBER:
                     return new SimpleFieldWrapper(jsonExpression.eq(otherToJson(other)));
+
                 case STRING:
                 default:
                     return new SimpleFieldWrapper(getExpression(KEY_STRING).eq(StringCastHelper.build(other)));
@@ -151,6 +151,7 @@ public class JsonFieldFactory {
                             jsonExpression
                                     .lessThan(otherToJson(other))
                                     .and(createTypePredicate(type)));
+
                 case STRING:
                 default:
                     return new SimpleFieldWrapper(
@@ -169,6 +170,7 @@ public class JsonFieldFactory {
                             jsonExpression
                                     .lessOrEqual(otherToJson(other))
                                     .and(createTypePredicate(type)));
+
                 case STRING:
                 default:
                     return new SimpleFieldWrapper(
@@ -187,6 +189,7 @@ public class JsonFieldFactory {
                             jsonExpression
                                     .gt(otherToJson(other))
                                     .and(createTypePredicate(type)));
+
                 case STRING:
                 default:
                     return new SimpleFieldWrapper(
@@ -205,6 +208,7 @@ public class JsonFieldFactory {
                             jsonExpression
                                     .greaterOrEqual(otherToJson(other))
                                     .and(createTypePredicate(type)));
+
                 case STRING:
                 default:
                     return new SimpleFieldWrapper(

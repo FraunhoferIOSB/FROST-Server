@@ -142,31 +142,13 @@ public class Expand implements Comparable<Expand> {
             final String firstRawPath = rawPath.get(0);
             final Property property = entityType.getProperty(firstRawPath);
             final int rawCount = rawPath.size();
-            if (property instanceof NavigationPropertyMain npm) {
-                if (npm.isAdminOnly() && !parentQuery.getPrincipal().isAdmin()) {
+            switch (property) {
+                case NavigationPropertyMain npm ->
+                    validateNavProperty(npm, firstRawPath, entityType, rawCount);
+                case EntityPropertyMain epm ->
+                    validateEntityProperty(epm, modelRegistry, rawCount);
+                default ->
                     throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
-                }
-                validatedPath = npm;
-                if (rawCount > 1) {
-                    // Need to re-nest this expand!
-                    Expand subExpand = new Expand(subQuery);
-                    for (int i = 1; i < rawCount; i++) {
-                        subExpand.addToRawPath(rawPath.get(i));
-                    }
-                    rawPath.clear();
-                    rawPath.add(firstRawPath);
-                    subQuery = new Query(parentQuery);
-                    subQuery.addExpand(subExpand);
-                    subQuery.setParentExpand(this);
-                }
-            } else if (property instanceof EntityPropertyMain epm && epm.hasCustomProperties()) {
-                NavigationPropertyCustom tempPath = new NavigationPropertyCustom(modelRegistry, epm);
-                for (int i = 1; i < rawCount; i++) {
-                    tempPath.addToSubPath(rawPath.get(i));
-                }
-                validatedPath = tempPath;
-            } else {
-                throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
             }
 
         }
@@ -175,6 +157,35 @@ public class Expand implements Comparable<Expand> {
                 subQuery.setMetadata(parentQuery.getMetadata());
             }
             subQuery.validate(context, validatedPath.getEntityType());
+        }
+    }
+
+    private void validateNavProperty(NavigationPropertyMain npm, String firstRawPath, EntityType entityType, int rawCount) throws IllegalArgumentException {
+        if (npm.isAdminOnly() && !parentQuery.getPrincipal().isAdmin()) {
+            throw new IllegalArgumentException("Unknown path '" + firstRawPath + "' in expand on entity type " + entityType.entityName);
+        }
+        validatedPath = npm;
+        if (rawCount > 1) {
+            // Need to re-nest this expand!
+            Expand subExpand = new Expand(subQuery);
+            for (int i = 1; i < rawCount; i++) {
+                subExpand.addToRawPath(rawPath.get(i));
+            }
+            rawPath.clear();
+            rawPath.add(firstRawPath);
+            subQuery = new Query(parentQuery);
+            subQuery.addExpand(subExpand);
+            subQuery.setParentExpand(this);
+        }
+    }
+
+    private void validateEntityProperty(EntityPropertyMain epm, ModelRegistry modelRegistry, final int rawCount) {
+        if (epm.hasCustomProperties()) {
+            NavigationPropertyCustom tempPath = new NavigationPropertyCustom(modelRegistry, epm);
+            for (int i = 1; i < rawCount; i++) {
+                tempPath.addToSubPath(rawPath.get(i));
+            }
+            validatedPath = tempPath;
         }
     }
 

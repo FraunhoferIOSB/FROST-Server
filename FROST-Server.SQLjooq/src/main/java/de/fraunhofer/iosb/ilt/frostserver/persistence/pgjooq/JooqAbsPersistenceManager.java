@@ -674,7 +674,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         final EntityType entityType = entity.getType();
         final IdGenerationType typeIdGenerationMode = (IdGenerationType) entityType.getIdGenerationMode();
         switch (typeIdGenerationMode) {
-            case SERVER_GENERATED_ONLY:
+            case SERVER_GENERATED_ONLY -> {
                 if (entityId.isFullyUnSet()) {
                     LOGGER.trace("Using server generated id.");
                     return false;
@@ -682,25 +682,27 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                     LOGGER.warn("idGenerationMode is '{}' but @iot.id '{}' is present. Ignoring @iot.id.", typeIdGenerationMode, entityId);
                     return false;
                 }
+            }
 
-            case SERVER_AND_CLIENT_GENERATED:
+            case SERVER_AND_CLIENT_GENERATED -> {
                 if (!validateClientSuppliedId(entityId)) {
                     LOGGER.debug("No valid @iot.id. Using server generated id.");
                     return false;
                 }
-                break;
+            }
 
-            case CLIENT_GENERATED_ONLY:
+            case CLIENT_GENERATED_ONLY -> {
                 if (!validateClientSuppliedId(entityId)) {
                     LOGGER.error("No @iot.id and idGenerationMode is '{}'", typeIdGenerationMode);
                     throw new IncompleteEntityException("Error: no @iot.id");
                 }
-                break;
+            }
 
-            default:
+            default -> {
                 // not a valid generation mode
                 LOGGER.error("idGenerationMode '{}' is not implemented.", typeIdGenerationMode);
                 throw new IllegalArgumentException("idGenerationMode '" + typeIdGenerationMode.toString() + "' is not implemented.");
+            }
         }
 
         LOGGER.debug("Using client generated id.");
@@ -1029,20 +1031,17 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         target.put("id-" + entity, type);
         target.put("idTypeLong", "BIGINT");
         switch (type) {
-            case "LONG":
+            case "LONG" ->
                 target.put(ID_TYPE + entity, "BIGINT");
-                break;
-
-            case "STRING":
+            case "STRING" -> {
                 target.put(ID_TYPE + entity, "VARCHAR(36)");
                 target.put("defaultValueComputed-" + entity, "uuid_generate_v1mc()");
-                break;
-
-            case "UUID":
+            }
+            case "UUID" -> {
                 target.put(ID_TYPE + entity, "uuid");
                 target.put("defaultValueComputed-" + entity, "uuid_generate_v1mc()");
-                break;
-            default:
+            }
+            default ->
                 throw new IllegalArgumentException("Unknown ID type: " + type);
         }
     }

@@ -23,8 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.Naviga
 import java.util.Objects;
 
 /**
- *
- * @author jab
+ * An Entity with primary key.
  */
 public class PathElementEntity implements PathElementEntityType {
 
@@ -58,12 +57,6 @@ public class PathElementEntity implements PathElementEntityType {
 
     public PathElementEntity setPkValues(PkValue pkValue) {
         this.pkValue = pkValue;
-        return this;
-    }
-
-    @Deprecated
-    public PathElementEntity setPkValues(Object... pkValues) {
-        this.pkValue = new PkValue(pkValues);
         return this;
     }
 

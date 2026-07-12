@@ -36,11 +36,13 @@ public abstract class Operator<T extends Operator<T>> extends Function<T> {
         List<Expression<?>> parameters = getParameters();
         final int size = parameters.size();
         switch (size) {
-            case 1:
+            case 1 -> {
                 return "( " + getName() + " (" + parameters.get(0).toUrl() + "))";
-            case 2:
+            }
+            case 2 -> {
                 return "(" + parameters.get(0).toUrl() + " " + getName() + " " + parameters.get(1).toUrl() + ")";
-            default:
+            }
+            default ->
                 throw new IllegalArgumentException("Operator " + getName() + " should not have " + size + " parameters.");
         }
     }

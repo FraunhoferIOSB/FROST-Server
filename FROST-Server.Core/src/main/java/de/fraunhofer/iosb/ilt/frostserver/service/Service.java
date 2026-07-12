@@ -197,24 +197,31 @@ public class Service implements AutoCloseable {
         String requestType = request.getRequestType();
         try (Timer timer = REQUEST_DURATION.labelValues(requestType).startTimer()) {
             switch (requestType) {
-                case CREATE:
+                case CREATE -> {
                     return executePost(request, response);
-                case READ:
+                }
+                case READ -> {
                     return executeGet(request, response);
-                case DELETE:
+                }
+                case DELETE -> {
                     return executeDelete(request, response);
-                case UPDATE_ALL:
+                }
+                case UPDATE_ALL -> {
                     return executePut(request, response);
-                case UPDATE_CHANGES:
+                }
+                case UPDATE_CHANGES -> {
                     return executePatch(request, response, false);
-                case UPDATE_CHANGESET:
+                }
+                case UPDATE_CHANGESET -> {
                     return executePatch(request, response, true);
-                default:
+                }
+                default -> {
                     PluginService plugin = settings.getPluginManager().getServiceForRequestType(request.getVersion(), requestType);
                     if (plugin == null) {
                         return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Illegal request type.");
                     }
                     return plugin.execute(this, request, response);
+                }
             }
         }
     }
@@ -558,7 +565,7 @@ public class Service implements AutoCloseable {
             response.setResult(entity);
             response.setCode(HttpURLConnection.HTTP_CREATED);
             if (query.getMetadata() != Metadata.OFF) {
-                String url = UrlHelper.generateSelfLink(path, entity);
+                String url = UrlHelper.generateSelfLink(entity);
                 response.addHeader(Constants.HEADER_LOCATION, url);
             }
             return formatResponse(response, formatter, query, path, entity);
