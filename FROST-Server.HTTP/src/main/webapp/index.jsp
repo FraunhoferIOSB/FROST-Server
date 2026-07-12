@@ -103,6 +103,7 @@
         </table>
         <a href="https://github.com/FraunhoferIOSB/FROST-Server">FROST-Server on GitHub</a>
         <h2>HTTP Tool</h2>
+        <label for="method">Send:</label><br/>
         <div class="flex-container">
             <select id="method">
                 <option value="GET">GET</option>
@@ -114,6 +115,7 @@
             <input type="text" id="url" name="url" style="flex-grow: 1" value="v1.1/Things"><input type="button" value="execute" onclick="execute();">
         </div>
         <div>
+            <label for="data">Body:</label><br/>
             <textarea id="data" name="content" rows="10" cols="80">
 {
   "name" : "Kitchen",
