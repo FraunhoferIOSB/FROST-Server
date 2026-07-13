@@ -73,11 +73,14 @@
         <root.basedir>${project.basedir}</root.basedir>
 
         <!-- Sonar -->
-        <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.aggregateXmlReportPaths>${maven.multiModuleProjectDirectory}/FROST-Server.Tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.aggregateXmlReportPaths>
         <sonar.cpd.java.minimumLines>15</sonar.cpd.java.minimumLines>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.java.binaries>target/classes</sonar.java.binaries>
+        <sonar.java.test.binaries>target/test-classes</sonar.java.test.binaries>
         <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
         <sonar.organization>fraunhofer-iosb</sonar.organization>
+        <sonar.sources>src/main/java</sonar.sources>
 
         <version.FROST-Client-Dynamic>2.38</version.FROST-Client-Dynamic>
         <version.annotation-api>1.3.1</version.annotation-api>
@@ -118,6 +121,7 @@
         <version.maven.plugin.javadoc>3.12.0</version.maven.plugin.javadoc>
         <version.maven.plugin.release>3.3.1</version.maven.plugin.release>
         <version.maven.plugin.shade>3.6.2</version.maven.plugin.shade>
+        <version.maven.plugin.sonar>5.7.0.6970</version.maven.plugin.sonar>
         <version.maven.plugin.source>3.4.0</version.maven.plugin.source>
         <version.maven.plugin.spotless>3.8.0</version.maven.plugin.spotless>
         <version.maven.plugin.surefire>3.5.6</version.maven.plugin.surefire>
@@ -434,7 +438,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>5.6.0.6792</version>
+                    <version>${version.maven.plugin.sonar}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
@@ -526,9 +530,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${version.maven.plugin.surefire}</version>
-                <configuration>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -553,6 +554,13 @@
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <phase>verify</phase>
                             </execution>
                         </executions>
                     </plugin>
