@@ -32,7 +32,7 @@ jobs:
       env:
         HELM_VERSION: "v3.16.1"
       run: |
-        wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz
+        wget https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz -O /tmp/helm.tar.gz --max-redirect=0
         tar xzf /tmp/helm.tar.gz -C /tmp --strip-components=1
         chmod +x /tmp/helm
 

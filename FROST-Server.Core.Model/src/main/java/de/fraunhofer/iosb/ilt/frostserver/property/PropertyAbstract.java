@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public abstract class PropertyAbstract<P> implements Property<P> {
 
-    public static enum Option {
+    public enum Option {
         READONLY,
         REQUIRED,
         NULLABLE,

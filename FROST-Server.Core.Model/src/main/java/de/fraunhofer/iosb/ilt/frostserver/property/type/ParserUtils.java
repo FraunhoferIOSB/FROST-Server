@@ -127,17 +127,19 @@ public class ParserUtils {
 
         @Override
         public List<ComplexValue> deserialize(JsonParser parser, DeserializationContext ctxt) {
-            List<ComplexValue> result = new ArrayList<>();
+            List<ComplexValue> result = null;
             JsonToken currentToken = parser.currentToken();
             if (currentToken == null) {
                 currentToken = parser.nextToken();
             }
             if (currentToken == JsonToken.VALUE_NULL) {
-                return null;
+                // Value is an explicit JSON null, return null.
+                return result;
             }
             if (currentToken != JsonToken.START_ARRAY) {
                 throw new IllegalArgumentException("Expected " + JsonToken.START_ARRAY + " got " + currentToken);
             }
+            result = new ArrayList<>();
             currentToken = parser.nextToken();
             while (currentToken != JsonToken.END_ARRAY) {
                 result.add(itemDeser.deserialize(parser, ctxt));
@@ -165,7 +167,7 @@ public class ParserUtils {
             ComplexValue result = null;
             JsonToken currentToken = parser.currentToken();
             if (currentToken == JsonToken.VALUE_NULL) {
-                // Value is an explicit JSON null.
+                // Value is an explicit JSON null, return null.
                 return result;
             }
             result = type.instantiate();
