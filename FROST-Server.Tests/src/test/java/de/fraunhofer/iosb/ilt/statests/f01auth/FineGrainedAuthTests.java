@@ -683,6 +683,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
                 .add(testSubAdminP2)
                 .add(testSubDsAdminP2);
         mqttHelperAdmin.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test

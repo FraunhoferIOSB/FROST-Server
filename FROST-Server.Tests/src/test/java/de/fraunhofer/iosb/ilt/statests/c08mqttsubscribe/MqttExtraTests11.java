@@ -223,6 +223,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         MqttAction mqttAction = new MqttAction(insertAction)
                 .add(testSubscription);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test
@@ -268,6 +269,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
                 .add(testSubscription2)
                 .add(testSubscription3);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test
@@ -305,6 +307,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
                 .add(testSubscription2)
                 .add(testSubscription3);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test
@@ -361,6 +364,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
                 .add(testSubscription3)
                 .add(testSubscription4);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
 }

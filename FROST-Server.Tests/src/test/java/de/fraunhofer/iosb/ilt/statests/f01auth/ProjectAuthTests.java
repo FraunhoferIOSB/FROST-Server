@@ -1038,6 +1038,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                 .add(test3SubThingsAdminP2)
                 .add(test3SubThingsAnon);
         mqttHelperAdmin.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test

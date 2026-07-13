@@ -46,6 +46,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -397,6 +398,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
                 .add(testSubscriptionRead)
                 .add(testSubscriptionAnon);
         mqttHelperAdmin.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
 }

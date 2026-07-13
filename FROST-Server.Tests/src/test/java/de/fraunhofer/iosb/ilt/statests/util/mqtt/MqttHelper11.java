@@ -226,6 +226,7 @@ public class MqttHelper11 {
             }
         }
         Assertions.assertFalse(failed, messages);
+        ma.setAllOk();
     }
 
     private static boolean jsonEqualsWithLinkResolving(JsonNode node1, JsonNode node2, String topic) {
@@ -672,6 +673,7 @@ public class MqttHelper11 {
 
         private final Callable<Object> action;
         private final List<TestSubscription> topics = new ArrayList<>();
+        private boolean allOk;
 
         public MqttAction(Callable<Object> action) {
             this.action = action;
@@ -698,6 +700,14 @@ public class MqttHelper11 {
 
         public List<TestSubscription> getTopics() {
             return topics;
+        }
+
+        public boolean isAllOk() {
+            return allOk;
+        }
+
+        public void setAllOk() {
+            allOk = true;
         }
 
     }

@@ -152,7 +152,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final QueryJsonFuture future = QueryJsonFuture.build()
@@ -164,11 +166,13 @@ public class MqttCoreTests20 extends AbstractTestClass {
             final MqttAction mqttAction = new MqttAction(insertAction)
                     .add(testSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
 
             for (int i = 1; i <= eci.count; i++) {
                 createEntity(entityType, i);
             }
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -179,7 +183,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final QueryJsonFuture future = QueryJsonFuture.build()
@@ -191,7 +197,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
             final MqttAction mqttAction = new MqttAction(updateAction)
                     .add(testSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -202,7 +210,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity original = eh.getCache(entityType, 0);
@@ -215,7 +225,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
             final MqttAction mqttAction = new MqttAction(updateAction)
                     .add(testSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -225,7 +237,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
 
@@ -246,11 +260,13 @@ public class MqttCoreTests20 extends AbstractTestClass {
                     .add(evenSubscription)
                     .add(oddSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
 
             for (int i = 1; i <= eci.count; i++) {
                 createEntity(entityType, i);
             }
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -261,7 +277,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
 
@@ -282,7 +300,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
                     .add(evenSubscription)
                     .add(oddSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -293,7 +313,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity original = eh.getCache(entityType, 0);
@@ -314,7 +336,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
                     .add(evenSubscription)
                     .add(oddSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -353,6 +377,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
                 final MqttAction mqttAction = new MqttAction(updateAction)
                         .addAll(subs);
                 mqttHelper.executeRequest(mqttAction);
+                Assertions.assertTrue(mqttAction.isAllOk());
             }
         }
         Assertions.assertTrue(totalPaths >= 6, "Did not find enough paths, something is amiss.");
@@ -427,6 +452,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
                 .add(tsHistLoc)
                 .add(tsLoc);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test
@@ -520,6 +546,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
                 .add(tsObservation)
                 .add(tsLoc);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
     }
 
     @Test
@@ -530,7 +557,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity entity = eh.getCache(entityType, 0);
@@ -544,7 +573,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
             final MqttAction mqttAction = new MqttAction(updateAction)
                     .add(testSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -555,7 +586,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         // Give the server a second to send out the messages created by the setup.
         waitMillis(WAIT_AFTER_CLEANUP);
 
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             final Entity entity = eh.getCache(entityType, 0);
@@ -569,7 +602,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
             final MqttAction mqttAction = new MqttAction(updateAction)
                     .add(testSubscription);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     @Test
@@ -581,7 +616,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         int totalPaths = 0;
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
 
@@ -609,6 +646,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
                 final MqttAction mqttAction = new MqttAction(updateAction)
                         .addAll(subs);
                 mqttHelper.executeRequest(mqttAction);
+                Assertions.assertTrue(mqttAction.isAllOk());
             }
         }
         Assertions.assertTrue(totalPaths >= 6, "Did not find enough paths, something is amiss.");
@@ -665,11 +703,14 @@ public class MqttCoreTests20 extends AbstractTestClass {
         final MqttAction mqttAction = new MqttAction(updateAction)
                 .add(sub);
         mqttHelper.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
 
     }
 
     private void SubscribeToPropertyUpdate(boolean patch) throws IllegalArgumentException {
+        int count = 0;
         for (var eci : entityTypesForCreate) {
+            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
             Entity entity = eh.getCache(entityType, 0);
@@ -704,7 +745,9 @@ public class MqttCoreTests20 extends AbstractTestClass {
             final MqttAction mqttAction = new MqttAction(updateAction)
                     .addAll(subs);
             mqttHelper.executeRequest(mqttAction);
+            Assertions.assertTrue(mqttAction.isAllOk());
         }
+        Assertions.assertEquals(8, count);
     }
 
     private static class QueryJsonFuture {
