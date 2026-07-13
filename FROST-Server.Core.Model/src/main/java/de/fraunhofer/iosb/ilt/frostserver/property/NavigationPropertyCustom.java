@@ -82,7 +82,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
         return this;
     }
 
-    private void init(ComplexValue<?> entity) {
+    private <C extends ComplexValue<C>> void init(ComplexValue<C> entity) {
         if (type == null) {
             throw new IllegalArgumentException("Path not to a custom link: " + entityProperty + "/" + StringUtils.join(subPath, '/'));
         }
@@ -147,18 +147,18 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
     }
 
     @Override
-    public Entity getFrom(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> Entity getFrom(ComplexValue<C> entity) {
         init(entity);
         return (Entity) targetData.getKey(targetData.fullKeyEntity);
     }
 
     @Override
-    public void setOn(ComplexValue<?> entity, Entity value) {
+    public <C extends ComplexValue<C>> void setOn(ComplexValue<C> entity, Entity value) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> boolean isSetOn(ComplexValue<C> entity) {
         init(entity);
         return targetData.containsKey(targetData.fullKeyEntity);
     }
@@ -229,7 +229,7 @@ public class NavigationPropertyCustom implements NavigationProperty<Entity> {
             }
         }
 
-        public void findLinkTargetData(ComplexValue entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
+        public <C extends ComplexValue<C>> void findLinkTargetData(ComplexValue<C> entity, EntityPropertyMain entityProperty, List<String> subPath, String name, EntityType type) {
             clear();
             Object curTarget = entityProperty.getFrom(entity);
             int count = subPath.size() - 1;

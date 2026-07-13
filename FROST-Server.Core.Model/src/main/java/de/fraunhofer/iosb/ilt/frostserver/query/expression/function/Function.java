@@ -136,12 +136,12 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
         return sb.toString();
     }
 
-    public T addParameters(List<Expression<?>> parameters) {
+    public T addParameters(List<Expression<? extends Expression<?>>> parameters) {
         this.parameters.addAll(parameters);
         return getSelf();
     }
 
-    public T addParameters(Expression<?>... parameters) {
+    public T addParameters(Expression<? extends Expression<?>>... parameters) {
         this.parameters.addAll(Arrays.asList(parameters));
         return getSelf();
     }
@@ -152,7 +152,7 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
         return getSelf();
     }
 
-    public List<Expression<?>> getParameters() {
+    public List<Expression<? extends Expression<?>>> getParameters() {
         return parameters;
     }
 

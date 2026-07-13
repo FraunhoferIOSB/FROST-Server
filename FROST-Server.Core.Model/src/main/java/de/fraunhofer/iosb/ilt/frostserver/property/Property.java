@@ -22,12 +22,11 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.Comparator;
 
 /**
+ * The definition of a concrete Property.
  *
- * @author jab
- * @author scf
  * @param <P> The type of the value of the property.
  */
-public interface Property<P> extends Comparable<Property<?>> {
+public interface Property<P> extends Comparable<Property<P>> {
 
     /**
      * The name of this property as used in URLs.
@@ -73,28 +72,31 @@ public interface Property<P> extends Comparable<Property<?>> {
     public boolean isReadOnly();
 
     /**
-     * Get the value of this property from the given entity.
+     * Get the value of this property from the given complex value.
      *
+     * @param <C> The type of the complex value.
      * @param entity The entity to get this property from.
      * @return This property, fetched from the given entity.
      */
-    public P getFrom(ComplexValue<?> entity);
+    public <C extends ComplexValue<C>> P getFrom(ComplexValue<C> entity);
 
     /**
-     * Set this property to the given value, on the given entity.
+     * Set this property to the given value, on the given complex value.
      *
+     * @param <C> The type of the complex value.
      * @param entity The entity to set this property on.
      * @param value The value to set the property to.
      */
-    public void setOn(ComplexValue<?> entity, P value);
+    public <C extends ComplexValue<C>> void setOn(ComplexValue<C> entity, P value);
 
     /**
-     * Check if this property is set on the given entity.
+     * Check if this property is set on the given complex value.
      *
+     * @param <C> The type of the complex value.
      * @param entity The entity for which to check if this entity is set.
      * @return True if this property is set on the given entity.
      */
-    public boolean isSetOn(ComplexValue<?> entity);
+    public <C extends ComplexValue<C>> boolean isSetOn(ComplexValue<C> entity);
 
     /**
      * The priority used for ordering. Important when a property needs to be

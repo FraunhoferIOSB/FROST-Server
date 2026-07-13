@@ -71,17 +71,17 @@ public class PropertyReference<P> implements Property<P> {
     }
 
     @Override
-    public P getFrom(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> P getFrom(ComplexValue<C> entity) {
         return referencedProperty.getFrom(entity);
     }
 
     @Override
-    public void setOn(ComplexValue<?> entity, P value) {
+    public <C extends ComplexValue<C>> void setOn(ComplexValue<C> entity, P value) {
         referencedProperty.setOn(entity, value);
     }
 
     @Override
-    public boolean isSetOn(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> boolean isSetOn(ComplexValue<C> entity) {
         return referencedProperty.isSetOn(entity);
     }
 
@@ -103,7 +103,7 @@ public class PropertyReference<P> implements Property<P> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final PropertyReference<?> other = (PropertyReference<?>) obj;
+        final PropertyReference other = (PropertyReference) obj;
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }

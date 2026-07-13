@@ -34,8 +34,8 @@ public class FunctionRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FunctionRegistry.class);
 
-    private final Map<String, Expression<?>> expressionsByName = new HashMap<>();
-    private final Map<Class<? extends Expression>, Expression<?>> expressionsByClass = new HashMap<>();
+    private final Map<String, Expression<? extends Expression>> expressionsByName = new HashMap<>();
+    private final Map<Class<? extends Expression>, Expression<? extends Expression>> expressionsByClass = new HashMap<>();
     // Cached path, since it is much used.
     private Path rootPath;
 
@@ -43,7 +43,7 @@ public class FunctionRegistry {
         LOGGER.info("Initialising a new FunctionRegistry.");
     }
 
-    public void registerExpression(Expression<?> function) {
+    public <E extends Expression<E>> void registerExpression(E function) {
         expressionsByClass.put(function.getClass(), function);
         String name = function.getName().toLowerCase(Locale.ROOT);
         if (expressionsByName.put(name, function) != null) {
@@ -56,7 +56,7 @@ public class FunctionRegistry {
         }
     }
 
-    public Collection<Expression<?>> getExpressions() {
+    public Collection<Expression<? extends Expression>> getExpressions() {
         return Collections.unmodifiableCollection(expressionsByName.values());
     }
 
@@ -68,8 +68,8 @@ public class FunctionRegistry {
         return (T) expression;
     }
 
-    public Expression<?> getExpression(String name, boolean admin) {
-        final Expression<?> expression = expressionsByName.get(name);
+    public <E extends Expression<E>> Expression<E> getExpression(String name, boolean admin) {
+        final Expression<E> expression = (Expression<E>) expressionsByName.get(name);
         if (expression == null) {
             throw new IllegalArgumentException("Unknown function name: " + name);
         }
@@ -79,13 +79,13 @@ public class FunctionRegistry {
         return expression.newInstance();
     }
 
-    public Function<?> getFunction(String name, boolean admin) {
-        final Expression<?> expression = expressionsByName.get(name);
-        if ((expression instanceof Function<?> f)) {
+    public <F extends Function<F>> F getFunction(String name, boolean admin) {
+        final Expression expression = expressionsByName.get(name);
+        if ((expression instanceof Function f)) {
             if (f.isAdminOnly() && !admin) {
                 throw new IllegalArgumentException("Unknown function name: " + name);
             }
-            return f.newInstance();
+            return (F) f.newInstance();
         }
         if (expression == null) {
             throw new IllegalArgumentException("Unknown function name: " + name);

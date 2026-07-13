@@ -85,12 +85,12 @@ public class Version {
             return this;
         }
 
-        public Builder registerSytheticProperty(EntityPropertyMain<?> property) {
+        public <P> Builder registerSytheticProperty(EntityPropertyMain<P> property) {
             spr.registerProperty(property);
             return this;
         }
 
-        public Builder registerSytheticProperty(String externalName, EntityPropertyMain<?> property) {
+        public <P> Builder registerSytheticProperty(String externalName, EntityPropertyMain<P> property) {
             spr.registerProperty(externalName, property);
             return this;
         }

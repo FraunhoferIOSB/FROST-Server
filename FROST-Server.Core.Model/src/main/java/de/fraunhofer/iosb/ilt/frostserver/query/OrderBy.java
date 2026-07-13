@@ -58,7 +58,7 @@ public class OrderBy {
         this.type = OrderType.ASCENDING;
     }
 
-    public Expression<?> getExpression() {
+    public <E extends Expression<E>> Expression<E> getExpression() {
         return expression;
     }
 

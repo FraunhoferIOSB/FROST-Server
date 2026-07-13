@@ -192,17 +192,17 @@ public abstract class NavigationPropertyMain<P extends NavigableElement> extends
     }
 
     @Override
-    public P getFrom(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> P getFrom(ComplexValue<C> entity) {
         return entity.getProperty(this);
     }
 
     @Override
-    public void setOn(ComplexValue<?> entity, P value) {
+    public <C extends ComplexValue<C>> void setOn(ComplexValue<C> entity, P value) {
         entity.setProperty(this, value);
     }
 
     @Override
-    public boolean isSetOn(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> boolean isSetOn(ComplexValue<C> entity) {
         return entity.isSetProperty(this);
     }
 

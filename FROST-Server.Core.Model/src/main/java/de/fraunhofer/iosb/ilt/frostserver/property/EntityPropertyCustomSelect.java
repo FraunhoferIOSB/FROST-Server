@@ -72,7 +72,7 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     }
 
     @Override
-    public Object getFrom(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> Object getFrom(ComplexValue<C> entity) {
         Object baseProperty = entity.getProperty(mainProperty);
         if (baseProperty instanceof Map map) {
             return CollectionsHelper.getFrom(map, subPath);
@@ -84,7 +84,7 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     }
 
     @Override
-    public void setOn(ComplexValue<?> entity, Object value) {
+    public <C extends ComplexValue<C>> void setOn(ComplexValue<C> entity, Object value) {
         Object baseProperty = entity.getProperty(mainProperty);
         if (baseProperty == null) {
             Map<String, Object> basePropertyMap = new LinkedHashMap<>();
@@ -99,7 +99,7 @@ public class EntityPropertyCustomSelect extends PropertyAbstract<Object> impleme
     }
 
     @Override
-    public boolean isSetOn(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> boolean isSetOn(ComplexValue<C> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 

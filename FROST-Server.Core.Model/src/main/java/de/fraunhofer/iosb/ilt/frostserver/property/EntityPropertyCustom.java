@@ -46,17 +46,17 @@ public class EntityPropertyCustom extends PropertyAbstract<Object> implements En
     }
 
     @Override
-    public Object getFrom(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> Object getFrom(ComplexValue<C> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public void setOn(ComplexValue<?> entity, Object value) {
+    public <C extends ComplexValue<C>> void setOn(ComplexValue<C> entity, Object value) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
     @Override
-    public boolean isSetOn(ComplexValue<?> entity) {
+    public <C extends ComplexValue<C>> boolean isSetOn(ComplexValue<C> entity) {
         throw new UnsupportedOperationException(NOT_SUPPORTED);
     }
 
