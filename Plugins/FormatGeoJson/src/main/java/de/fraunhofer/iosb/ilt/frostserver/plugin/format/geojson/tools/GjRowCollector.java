@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimple;
+import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -81,7 +82,8 @@ public class GjRowCollector {
         }
         boolean isGeom = false;
         if (type instanceof TypeSimple ts) {
-            if (ts.getUnderlyingType().getName().startsWith("Edm.Geo")) {
+            final TypeSimplePrimitive ut = ts.getUltimateUnderlyingType();
+            if (ut.getName().startsWith("Geo")) {
                 isGeom = true;
             }
         }

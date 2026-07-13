@@ -52,6 +52,7 @@ import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -573,10 +574,10 @@ public class GeoTests20 extends AbstractTestClass {
         String geoJsonExpected = IOUtils.resourceToString("geoJsonResult.json", StandardCharsets.UTF_8, getClass().getClassLoader());
         JsonNode expected = SimpleJsonMapper.getSimpleObjectMapper().readTree(geoJsonExpected);
 
-        String url = sSrvc.getBaseUrl() + sMdl.etLocation.mainSet + "?$orderby=id&$format=GeoJSON";
+        String url = sSrvc.getBaseUrl() + sMdl.etLocation.mainSet + "?$select=name,description,encodingType,location&$orderby=id&$format=GeoJSON";
         HttpResponse response = HTTPMethods.doGet(url);
         JsonNode received = SimpleJsonMapper.getSimpleObjectMapper().readTree(response.response);
 
-        Utils.jsonEquals(expected, received);
+        Assertions.assertTrue(Utils.jsonEquals(expected, received));
     }
 }

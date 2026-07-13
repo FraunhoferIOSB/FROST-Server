@@ -58,8 +58,28 @@ public abstract class TypeSimple extends PropertyType {
         this.parser = parser;
     }
 
+    /**
+     * Get the direct underlying type, that may itself have an underlying type.
+     *
+     * @return the direct underlying type.
+     */
     public TypeSimplePrimitive getUnderlyingType() {
         return underlyingType;
+    }
+
+    /**
+     * Get the ultimate, deepest underlying type.
+     *
+     * @return the ultimate, deepest underlying type.
+     */
+    public TypeSimplePrimitive getUltimateUnderlyingType() {
+        TypeSimplePrimitive deepest = null;
+        TypeSimplePrimitive next = underlyingType;
+        while (next != null && next != deepest) {
+            deepest = next;
+            next = deepest.getUnderlyingType();
+        }
+        return deepest;
     }
 
     protected Parser getParser() {
