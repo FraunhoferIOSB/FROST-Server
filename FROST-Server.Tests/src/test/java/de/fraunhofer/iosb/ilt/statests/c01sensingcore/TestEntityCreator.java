@@ -80,11 +80,11 @@ public class TestEntityCreator {
     }
 
     private static String getEntitiesJson() {
-        return pathToString("src/test/resources/entitiesDefault.json");
+        return pathToString("test-classes/entitiesDefault.json");
     }
 
     private static String getActuationJson() {
-        return pathToString("src/test/resources/entitiesDefaultActuation.json");
+        return pathToString("test-classes/entitiesDefaultActuation.json");
     }
 
     private static String pathToString(String path) throws RuntimeException {

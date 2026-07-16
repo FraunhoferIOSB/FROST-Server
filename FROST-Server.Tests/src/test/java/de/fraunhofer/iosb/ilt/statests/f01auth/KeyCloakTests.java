@@ -92,7 +92,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("plugins.modelLoader.enable", "true");
         SERVER_PROPERTIES.put("plugins.modelLoader.modelPath", "");
         SERVER_PROPERTIES.put("plugins.modelLoader.modelFiles", modelUrl("Role.json") + ", " + modelUrl("UserNoPass.json"));
-        SERVER_PROPERTIES.put("plugins.modelLoader.liquibasePath", "target/test-classes/finegrainedsecurity/liquibase");
+        SERVER_PROPERTIES.put("plugins.modelLoader.liquibasePath", "test-classes/finegrainedsecurity/liquibase");
         SERVER_PROPERTIES.put("plugins.modelLoader.liquibaseFiles", "tablesSecurityUPR.xml");
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.Role", "STRING");
         SERVER_PROPERTIES.put("plugins.modelLoader.idType.User", "STRING");
