@@ -20,6 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatInternal;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
@@ -91,7 +92,7 @@ class MqttManagerTest {
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_MESSAGE_QUEUE_SIZE, "20000");
         properties.put(CoreSettings.PREFIX_MQTT + MqttSettings.TAG_SUBSCRIBE_THREAD_POOL_SIZE, "10");
         properties.put(CoreSettings.PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, DummyPersistenceManager.class.getName());
-        properties.put(CoreSettings.PREFIX_PLUGINS + PluginManager.TAG_PROVIDED_PLUGINS, TestModel.class.getName() + "," + PluginManager.VALUE_PROVIDED_PLUGINS);
+        properties.put(CoreSettings.PREFIX_PLUGINS + PluginManager.TAG_PROVIDED_PLUGINS, TestModel.class.getName() + "," + PluginResultFormatInternal.class.getName());
 
         coreSettings = new CoreSettings(properties);
         modelRegistry = coreSettings.getModelRegistry();
