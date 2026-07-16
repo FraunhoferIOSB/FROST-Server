@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyCustom;
@@ -75,7 +74,6 @@ class QueryParserTest {
     @BeforeAll
     public static void beforeClass() {
         coreSettings = new CoreSettings();
-        DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
         coreSettings.getQueryDefaults()
                 .setAlwaysOrder(false)
                 .setUseAbsoluteNavigationLinks(false);

@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
@@ -60,7 +59,6 @@ class EntityFormatterTest {
     @BeforeAll
     public static void initClass() {
         coreSettings = new CoreSettings();
-        DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
         coreSettings.getQueryDefaults()
                 .setServiceRootUrl("http://example.org/v1.0/")
                 .setUseAbsoluteNavigationLinks(false);

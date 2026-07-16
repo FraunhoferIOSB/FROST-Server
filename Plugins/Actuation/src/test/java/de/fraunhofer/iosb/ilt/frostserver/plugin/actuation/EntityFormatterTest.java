@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
-import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
@@ -58,7 +57,6 @@ class EntityFormatterTest {
     public static void initClass() {
         if (context == null) {
             coreSettings = new CoreSettings();
-            DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
             coreSettings.getSettings().getProperties().put("plugins." + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
             coreSettings.getQueryDefaults()
                     .setUseAbsoluteNavigationLinks(false);
