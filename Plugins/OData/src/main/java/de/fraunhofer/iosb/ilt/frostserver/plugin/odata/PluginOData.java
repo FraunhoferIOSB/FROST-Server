@@ -254,7 +254,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         List<LandingPageItem> entitySetList = new ArrayList<>();
         result.put("value", entitySetList);
         for (EntityType entityType : modelRegistry.getEntityTypes(request.getUserPrincipal().isAdmin())) {
-            entitySetList.add(new LandingPageItem().generateFrom(entityType, path));
+            entitySetList.add(LandingPageItem.generateFrom(entityType, path));
         }
 
         settings.getPluginManager().modifyServiceDocument(request, result);

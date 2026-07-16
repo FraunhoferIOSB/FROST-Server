@@ -19,10 +19,10 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.odata;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import java.util.Objects;
 
 /**
- *
- * @author hylke
+ * An EntityContainer as it appears on the landing page.
  */
 public class LandingPageItem {
 
@@ -30,10 +30,16 @@ public class LandingPageItem {
     private String url;
     private String title;
 
-    public LandingPageItem generateFrom(EntityType et, String path) {
-        name = et.plural;
-        url = path + et.plural;
-        return this;
+    public LandingPageItem() {
+    }
+
+    public LandingPageItem(String name, String url) {
+        this.name = name;
+        this.url = url;
+    }
+
+    public static LandingPageItem generateFrom(EntityType et, String path) {
+        return new LandingPageItem(et.plural, path + et.plural);
     }
 
     /**
@@ -45,9 +51,11 @@ public class LandingPageItem {
 
     /**
      * @param name the name to set
+     * @return this.
      */
-    public void setName(String name) {
+    public LandingPageItem setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**
@@ -59,9 +67,12 @@ public class LandingPageItem {
 
     /**
      * @param url the url to set
+     * @return this.
      */
-    public void setUrl(String url) {
+    public LandingPageItem setUrl(String url) {
         this.url = url;
+        return this;
+
     }
 
     /**
@@ -74,8 +85,41 @@ public class LandingPageItem {
 
     /**
      * @param title the title to set
+     * @return this.
      */
-    public void setTitle(String title) {
+    public LandingPageItem setTitle(String title) {
         this.title = title;
+        return this;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.name);
+        hash = 37 * hash + Objects.hashCode(this.url);
+        hash = 37 * hash + Objects.hashCode(this.title);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final LandingPageItem other = (LandingPageItem) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.url, other.url)) {
+            return false;
+        }
+        return Objects.equals(this.title, other.title);
+    }
+
 }
