@@ -151,29 +151,14 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
 
     public void init(String namespace) {
         this.namespace = namespace;
-        int idx = 0;
-        int keyIdx = -1;
-        final String keyName;
+        int keyIdx;
+        for (DefEntityProperty property : getEntityProperties()) {
+            property.init();
+        }
         if (StringHelper.isNullOrEmpty(key)) {
-            for (DefEntityProperty property : getEntityProperties()) {
-                property.init();
-                if ("id".equalsIgnoreCase(property.getType())) {
-                    keyIdx = idx;
-                }
-                idx++;
-            }
+            keyIdx = findPrimaryKey();
         } else {
-            if (key.size() > 1) {
-                LOGGER.error("Multi-column keys are currently not supported!");
-            }
-            keyName = key.get(0);
-            for (DefEntityProperty property : getEntityProperties()) {
-                property.init();
-                if (keyName.equalsIgnoreCase(property.getName())) {
-                    keyIdx = idx;
-                }
-                idx++;
-            }
+            keyIdx = parsePrimaryKey();
         }
         if (keyIdx > 0) {
             LOGGER.debug("Moving Id column from {} to the front.", keyIdx);
@@ -182,6 +167,33 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         for (DefNavigationProperty property : getNavigationProperties()) {
             property.init();
         }
+    }
+
+    private int parsePrimaryKey() {
+        String keyName;
+        if (key.size() > 1) {
+            LOGGER.error("Multi-column keys are currently not supported!");
+        }
+        int idx = 0;
+        keyName = key.get(0);
+        for (DefEntityProperty property : getEntityProperties()) {
+            if (keyName.equalsIgnoreCase(property.getName())) {
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
+    }
+
+    private int findPrimaryKey() {
+        int idx = 0;
+        for (DefEntityProperty property : getEntityProperties()) {
+            if ("id".equalsIgnoreCase(property.getType())) {
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
     }
 
     public EntityType getEntityType() {
@@ -226,7 +238,7 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
         }
         for (DefNavigationProperty defNp : navigationProperties) {
             defNp.setSourceEntityType(entityType);
-            defNp.registerProperties(modelRegistry);
+            defNp.registerProperty(modelRegistry);
         }
         if (!StringHelper.isNullOrEmpty(orderByDflt)) {
             for (String ob : orderByDflt) {

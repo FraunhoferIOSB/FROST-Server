@@ -51,6 +51,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents the Query the user executed.
@@ -60,6 +62,8 @@ public class Query {
     private static final String ERROR_ADD_PLACEHOLDER_OR_PROPERTY = "Either add PropertyPlaceholder or Property instances, not both.";
 
     private static final Set<EntityPropertyMain> refSelect = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(StandardProperties.EP_SELFLINK)));
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Query.class);
 
     private final ServiceContext serviceContext;
     private final PrincipalExtended principal;
@@ -150,14 +154,73 @@ public class Query {
         return validate(null, entityType);
     }
 
-    public Query validate(ParserContext context, EntityType entityType) {
+    public Query validate(ParserContext context, EntityType et) {
         if (context == null) {
             context = new ParserContext(serviceContext.getModelRegistry());
         }
         if (this.entityType == null) {
-            this.entityType = entityType;
+            this.entityType = et;
+        } else if (entityType != et) {
+            LOGGER.warn("Query has entityType {} set, but is being validated with {}", entityType, et);
         }
         selectEntityPropMain = null;
+        parseRawSelect();
+
+        for (Expand e : expand) {
+            e.validate(context, entityType);
+        }
+        reNestExpands();
+
+        if (filter != null) {
+            filter.validate(context, entityType);
+        }
+        if (skipFilter != null) {
+            skipFilter.validate(context, entityType);
+        }
+        PrimaryKey primaryKey = entityType.getPrimaryKey();
+        int pkCount = findOrderKeyCount(primaryKey, context);
+        pkOrder = pkCount >= primaryKey.getKeyProperties().size();
+        if (serviceContext.getQueryDefaults().isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
+            addMissingDefaultOrderFieldsToOrderBy();
+            pkOrder = true;
+        }
+        return this;
+    }
+
+    private void addMissingDefaultOrderFieldsToOrderBy() {
+        for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
+            if (!isDefaultOrderFieldInOrderBy(dfltOrder)) {
+                orderBy.add(dfltOrder);
+            }
+        }
+    }
+
+    private boolean isDefaultOrderFieldInOrderBy(OrderBy dfltOrder) {
+        boolean found = false;
+        for (OrderBy order : orderBy) {
+            if (order.getExpression().toUrl().equalsIgnoreCase(dfltOrder.getExpression().toUrl())) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
+    private int findOrderKeyCount(PrimaryKey primaryKey, ParserContext context) {
+        int pkCount = 0;
+        for (var keyProp : primaryKey.getKeyProperties()) {
+            final String pkName = keyProp.getName();
+            for (OrderBy order : orderBy) {
+                order.getExpression().validate(context, entityType);
+                if (pkName.equals(order.getExpression().toUrl())) {
+                    pkCount++;
+                }
+            }
+        }
+        return pkCount;
+    }
+
+    private void parseRawSelect() throws IllegalArgumentException {
         for (PropertyPlaceholder pp : rawSelect) {
             Property property = entityType.getProperty(pp.getName());
             if (property == null) {
@@ -176,46 +239,6 @@ public class Query {
                 }
             }
         }
-
-        for (Expand e : expand) {
-            e.validate(context, entityType);
-        }
-        reNestExpands();
-
-        if (filter != null) {
-            filter.validate(context, entityType);
-        }
-        if (skipFilter != null) {
-            skipFilter.validate(context, entityType);
-        }
-        PrimaryKey primaryKey = entityType.getPrimaryKey();
-        int pkCount = 0;
-        for (var keyProp : primaryKey.getKeyProperties()) {
-            final String pkName = keyProp.getName();
-            for (OrderBy order : orderBy) {
-                order.getExpression().validate(context, entityType);
-                if (pkName.equals(order.getExpression().toUrl())) {
-                    pkCount++;
-                }
-            }
-        }
-        pkOrder = pkCount >= primaryKey.getKeyProperties().size();
-        if (serviceContext.getQueryDefaults().isAlwaysOrder() && !pkOrder && !selectDistinct && !path.isEntityProperty()) {
-            for (OrderBy dfltOrder : entityType.getOrderbyDefaults()) {
-                boolean found = false;
-                for (OrderBy order : orderBy) {
-                    if (order.getExpression().toUrl().equalsIgnoreCase(dfltOrder.getExpression().toUrl())) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    orderBy.add(dfltOrder);
-                }
-            }
-            pkOrder = true;
-        }
-        return this;
     }
 
     /**
@@ -632,7 +655,7 @@ public class Query {
 
         addCountToUrl(sb, separator);
 
-        if (sb.length() > 0) {
+        if (!sb.isEmpty()) {
             return sb.substring(1);
         }
         return "";

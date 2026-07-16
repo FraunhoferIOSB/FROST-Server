@@ -33,7 +33,7 @@ public class BooleanConstant extends Constant<BooleanConstant, Boolean> {
     }
 
     public BooleanConstant(String value) {
-        super("booleanconstant", Boolean.valueOf(value));
+        super(EXPR_NAME_BOOLEANCONSTANT, Boolean.valueOf(value));
     }
 
     @Override

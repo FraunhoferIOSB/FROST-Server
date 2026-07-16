@@ -27,7 +27,7 @@ import java.util.List;
  */
 public abstract class Operator<T extends Operator<T>> extends Function<T> {
 
-    public Operator(String functionName) {
+    protected Operator(String functionName) {
         super(functionName);
     }
 

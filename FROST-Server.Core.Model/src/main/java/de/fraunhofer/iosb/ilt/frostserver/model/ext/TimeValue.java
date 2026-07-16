@@ -141,6 +141,49 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
 
     @Override
     public TimeValue setProperty(Property property, Object value) {
+        if (property == EP_START_TIME) {
+            return setStart(valueToMoment(value));
+        }
+        if (property == EP_END_TIME) {
+            return setEnd(valueToMoment(value));
+        }
+        throw new IllegalArgumentException("Unknown sub-property: " + property);
+
+    }
+
+    private TimeValue setEnd(Moment moment) {
+        if (instant != null) {
+            if (moment == null) {
+                return this;
+            }
+            // setting end on instant, convert to interval.
+            interval = TimeInterval.create(instant.getDateTime(), moment);
+            instant = null;
+        } else {
+            if (moment == null) {
+                // Removing end from interval, convert to instant
+                instant = TimeInstant.create(interval.getStart());
+                interval = null;
+            } else {
+                interval.setProperty(EP_END_TIME, moment);
+            }
+        }
+        return this;
+    }
+
+    private TimeValue setStart(Moment moment) {
+        if (moment == null) {
+            return this;
+        }
+        if (instant != null) {
+            instant = new TimeInstant(moment);
+        } else {
+            interval.setProperty(EP_START_TIME, moment);
+        }
+        return this;
+    }
+
+    private Moment valueToMoment(Object value) throws IllegalArgumentException {
         Moment moment;
         if (value == null) {
             moment = null;
@@ -151,39 +194,9 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
         } else if (value instanceof TimeInstant i) {
             moment = i.getDateTime();
         } else {
-            throw new IllegalArgumentException("TimeInterval only accepts Moment or Instant, not " + value.getClass().getName());
+            throw new IllegalArgumentException("Expected Moment or Instant, not " + value.getClass().getName());
         }
-        if (property == EP_START_TIME) {
-            if (moment == null) {
-                return this;
-            }
-            if (instant != null) {
-                instant = new TimeInstant(moment);
-            } else {
-                interval.setProperty(property, moment);
-            }
-            return this;
-        }
-        if (property == EP_END_TIME) {
-            if (instant != null) {
-                if (moment == null) {
-                    return this;
-                }
-                // setting end on instant, convert to interval.
-                interval = TimeInterval.create(instant.getDateTime(), moment);
-                instant = null;
-            } else {
-                if (moment == null) {
-                    // Removing end from interval, convert to instant
-                    instant = TimeInstant.create(interval.getStart());
-                    interval = null;
-                } else {
-                    interval.setProperty(property, moment);
-                }
-            }
-        }
-        throw new IllegalArgumentException("Unknown sub-property: " + property);
-
+        return moment;
     }
 
     @Override
@@ -204,10 +217,10 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
     public TimeValue setProperty(String name, Object value) {
         switch (name) {
             case NAME_INTERVAL_START:
-                return setProperty(EP_START_TIME, value);
+                return setStart(valueToMoment(value));
 
             case NAME_INTERVAL_END:
-                return setProperty(EP_END_TIME, value);
+                return setEnd(valueToMoment(value));
 
             default:
                 throw new IllegalArgumentException("Unknown sub-property: " + name);

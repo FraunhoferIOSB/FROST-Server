@@ -51,7 +51,7 @@ class EntityBuilderTest {
     private Map<EntityType, Map<Property, Object>> propertyValues;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
@@ -59,7 +59,7 @@ class EntityBuilderTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         propertyValues = testModel.getTestPropertyValues(modelRegistry);
     }
 

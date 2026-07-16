@@ -204,6 +204,11 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
             LOGGER.error("Re-Init of EntityType!");
         }
         initialised = true;
+        initProperties();
+        initPrimaryKey();
+    }
+
+    private void initProperties() {
         for (Property property : properties) {
             if (property instanceof EntityPropertyMain entityPropertyMain) {
                 entityProperties.add(entityPropertyMain);
@@ -221,6 +226,9 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
                 }
             }
         }
+    }
+
+    private void initPrimaryKey() {
         // Make sure we have a default orderby and that it contains the primary key last.
         int pkCount = 0;
         for (var keyProp : primaryKey.getKeyProperties()) {

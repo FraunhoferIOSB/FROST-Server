@@ -32,10 +32,11 @@ public class ServiceContext {
     private ModelRegistry modelRegistry;
     private QueryDefaults queryDefaults;
     private JsonReader jsonReader;
-    private UrlPrefixGenerator prefixGen = PREFIX_GEN_DEFAULT;
+    private UrlPrefixGenerator prefixGen;
     private boolean mqttContext;
 
     public ServiceContext() {
+        this.prefixGen = PREFIX_GEN_DEFAULT;
     }
 
     public FunctionRegistry getFunctionRegistry() {

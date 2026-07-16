@@ -152,7 +152,7 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         }
     }
 
-    public void registerProperties(ModelRegistry modelRegistry) {
+    public void registerProperty(ModelRegistry modelRegistry) {
         if (navProp != null) {
             return;
         }
@@ -176,35 +176,43 @@ public class DefNavigationProperty implements AnnotatedConfigurable<Void, Void> 
         navProp.addAnnotations(annotations);
 
         if (symmetrical) {
-            navPropInverse = targetEntityType.getNavigationProperty(name);
-            if (navPropInverse == null) {
-                navPropInverse = navProp;
-            }
-            LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
-            navProp.setInverses(navPropInverse);
+            registerInverseSymetrical();
         } else if (inverse == null) {
             LOGGER.debug("    {} -> {}", name, targetEntityType.entityName);
             LOGGER.warn("No inverse for navigation property {}", name);
         } else {
-            navPropInverse = targetEntityType.getNavigationProperty(inverse.name);
-
-            if (navPropInverse == null) {
-                options = new HashSet<>();
-                if (inverse.required) {
-                    options.add(REQUIRED);
-                }
-                if (inverse.entitySet) {
-                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp, inverse.priority);
-                } else {
-                    navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.priority, options);
-                }
-                navPropInverse.setEntityType(sourceEntityType);
-                navPropInverse.addAnnotations(inverse.annotations);
-                targetEntityType.registerProperty(navPropInverse);
-            }
-            LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
-            navProp.setInverses(navPropInverse);
+            registerInverse();
         }
+    }
+
+    private void registerInverse() {
+        Set<Option> options;
+        navPropInverse = targetEntityType.getNavigationProperty(inverse.name);
+        if (navPropInverse == null) {
+            options = new HashSet<>();
+            if (inverse.required) {
+                options.add(REQUIRED);
+            }
+            if (inverse.entitySet) {
+                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntitySet(inverse.name, navProp, inverse.priority);
+            } else {
+                navPropInverse = new NavigationPropertyMain.NavigationPropertyEntity(inverse.name, navProp, inverse.priority, options);
+            }
+            navPropInverse.setEntityType(sourceEntityType);
+            navPropInverse.addAnnotations(inverse.annotations);
+            targetEntityType.registerProperty(navPropInverse);
+        }
+        LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
+        navProp.setInverses(navPropInverse);
+    }
+
+    private void registerInverseSymetrical() {
+        navPropInverse = targetEntityType.getNavigationProperty(name);
+        if (navPropInverse == null) {
+            navPropInverse = navProp;
+        }
+        LOGGER.debug("    {} -> {} -> {}", name, targetEntityType.entityName, navPropInverse.getName());
+        navProp.setInverses(navPropInverse);
     }
 
     public NavigationPropertyMain getNavigationProperty() {
