@@ -19,9 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 /**
  * Helps with Handling expressions
- *
- * @param <R> The return vale of handler functions.
  */
-public interface ExpressionHelper<R extends Object> {
+public interface ExpressionHelper {
 
 }

@@ -24,7 +24,7 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression;
  * @param <P> the parameter type for the handle calls.
  * @param <R> the return type for the handle calls.
  */
-public interface ExpressionHandler<E extends Expression<E>, P extends ExpressionHelper<R>, R> {
+public interface ExpressionHandler<E extends Expression<E>, P extends ExpressionHelper, R> {
 
     public R handle(E expression, P helper);
 }

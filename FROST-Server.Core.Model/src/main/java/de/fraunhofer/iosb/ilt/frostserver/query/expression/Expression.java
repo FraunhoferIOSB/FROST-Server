@@ -51,9 +51,9 @@ public interface Expression<T extends Expression<T>> {
 
     public ExpressionHandler getHandler();
 
-    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper<R>, R> handler);
+    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper, R> handler);
 
-    public <R> R handle(ExpressionHelper<R> h);
+    public <R> R handle(ExpressionHelper h);
 
     /**
      * Validate the raw elements in this Expression against the given context

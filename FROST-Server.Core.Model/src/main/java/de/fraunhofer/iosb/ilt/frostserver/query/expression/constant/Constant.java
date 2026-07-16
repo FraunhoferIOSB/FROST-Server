@@ -70,13 +70,13 @@ public abstract class Constant<T extends Constant<T, V>, V> implements Value<T> 
     }
 
     @Override
-    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper<R>, R> handler) {
+    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper, R> handler) {
         this.handler = handler;
         return getSelf();
     }
 
     @Override
-    public <R> R handle(ExpressionHelper<R> h) {
+    public <R> R handle(ExpressionHelper h) {
         if (!hasHandler()) {
             LOGGER.error("No hanlder for {} ({})", getName(), getClass());
         }

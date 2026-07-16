@@ -103,7 +103,7 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
     }
 
     @Override
-    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper<R>, R> handler) {
+    public <R> T setHandler(ExpressionHandler<T, ExpressionHelper, R> handler) {
         if (this.handler != null) {
             LOGGER.warn("Replacing handler for function {}", getName());
         }
@@ -112,7 +112,7 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
     }
 
     @Override
-    public <R> R handle(ExpressionHelper<R> h) {
+    public <R> R handle(ExpressionHelper h) {
         if (!hasHandler()) {
             LOGGER.error("No hanlder for {} ({})", getName(), getClass());
         }

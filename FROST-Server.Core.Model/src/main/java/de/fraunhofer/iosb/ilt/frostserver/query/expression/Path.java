@@ -76,13 +76,13 @@ public class Path implements Variable<Path> {
     }
 
     @Override
-    public <R> Path setHandler(ExpressionHandler<Path, ExpressionHelper<R>, R> handler) {
+    public <R> Path setHandler(ExpressionHandler<Path, ExpressionHelper, R> handler) {
         this.handler = handler;
         return getSelf();
     }
 
     @Override
-    public <R> R handle(ExpressionHelper<R> h) {
+    public <R> R handle(ExpressionHelper h) {
         return (R) handler.handle(this, h);
     }
 
