@@ -1,6 +1,6 @@
 {
   "conformance": [
-    "https://gitlab.cc-asp.fraunhofer.de/iosb/tep/opencitysense/frost-plugin-opencitysense"
+    "https://fraunhoferiosb.github.io/FROST-Server/extensions/DataModel-OpenCitySense.html"
   ],
   "simplePropertyTypes": [],
   "entityTypes": [
