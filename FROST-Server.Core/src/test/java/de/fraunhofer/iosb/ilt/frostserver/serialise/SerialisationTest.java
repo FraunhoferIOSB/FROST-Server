@@ -32,7 +32,6 @@ import java.util.Map;
 import net.time4j.Moment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
@@ -51,10 +50,6 @@ class SerialisationTest {
         testModel = new TestModel();
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
         modelRegistry.initFinalise();
-    }
-
-    @BeforeEach
-    public void setUp() {
     }
 
     @Test

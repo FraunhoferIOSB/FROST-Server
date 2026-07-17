@@ -146,7 +146,7 @@ public class CustomEntityChangedMessageDeserializer extends ValueDeserializer<En
 
     private Entity handleEntity(JsonParser parser, DeserializationContext ctxt, EntityType type, EntityChangedMessage message) throws JacksonException, IllegalArgumentException {
         if (type == null) {
-            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+            throw new UnresolvedForwardReference(parser, TYPE_NOT_KNOW_YET);
         }
         Entity entity = CustomEntityDeserializer.getInstance(modelRegistry, type, Version.INTERNAL)
                 .deserialize(parser, ctxt);

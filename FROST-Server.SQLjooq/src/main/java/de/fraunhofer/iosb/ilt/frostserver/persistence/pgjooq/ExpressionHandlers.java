@@ -701,6 +701,8 @@ public class ExpressionHandlers {
 
     public static class ImpTime {
 
+        private static final String TIMEZONE_WITH_ISO_OFFSETS = "timezone_with_iso_offsets";
+
         public static FieldWrapper handle(Date node, JooqExpHlpr h) {
             List<Expression<?>> params = node.getParameters();
             Expression<?> p1 = params.get(0);
@@ -713,7 +715,7 @@ public class ExpressionHandlers {
             if (e1 instanceof TimeFieldWrapper timeExpression) {
                 if (e2 != null) {
                     final Field<String> zone = e2.getFieldAsType(String.class, true);
-                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    final Field<Timestamp> zonedTime = DSL.function(TIMEZONE_WITH_ISO_OFFSETS, java.sql.Timestamp.class, zone, timeExpression.getDateTime());
                     return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, zonedTime));
                 } else {
                     return new SimpleFieldWrapper(DSL.function("date", java.sql.Date.class, timeExpression.getDateTime()));
@@ -738,7 +740,7 @@ public class ExpressionHandlers {
             if (e1 instanceof TimeFieldWrapper timeExpression) {
                 if (e2 != null) {
                     final Field<String> zone = e2.getFieldAsType(String.class, true);
-                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    final Field<Timestamp> zonedTime = DSL.function(TIMEZONE_WITH_ISO_OFFSETS, java.sql.Timestamp.class, zone, timeExpression.getDateTime());
                     return new SimpleFieldWrapper(DSL.extract(zonedTime, part));
                 } else {
                     return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), part));
@@ -793,7 +795,7 @@ public class ExpressionHandlers {
             if (e1 instanceof TimeFieldWrapper timeExpression) {
                 if (e2 != null) {
                     final Field<String> zone = e2.getFieldAsType(String.class, true);
-                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    final Field<Timestamp> zonedTime = DSL.function(TIMEZONE_WITH_ISO_OFFSETS, java.sql.Timestamp.class, zone, timeExpression.getDateTime());
                     return new SimpleFieldWrapper(zonedTime.cast(SQLDataType.TIME));
                 } else {
                     return new SimpleFieldWrapper(timeExpression.getDateTime().cast(SQLDataType.TIME));
@@ -814,7 +816,7 @@ public class ExpressionHandlers {
             if (e1 instanceof TimeFieldWrapper timeExpression) {
                 if (e2 != null) {
                     final Field<String> zone = e2.getFieldAsType(String.class, true);
-                    final Field<Timestamp> zonedTime = DSL.function("timezone_with_iso_offsets", java.sql.Timestamp.class, zone, timeExpression.getDateTime());
+                    final Field<Timestamp> zonedTime = DSL.function(TIMEZONE_WITH_ISO_OFFSETS, java.sql.Timestamp.class, zone, timeExpression.getDateTime());
                     return new SimpleFieldWrapper(DSL.extract(zonedTime, DatePart.TIMEZONE).div(60));
                 } else {
                     return new SimpleFieldWrapper(DSL.extract(timeExpression.getDateTime(), DatePart.TIMEZONE).div(60));

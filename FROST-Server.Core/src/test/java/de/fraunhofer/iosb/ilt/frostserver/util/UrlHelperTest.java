@@ -41,9 +41,6 @@ class UrlHelperTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelperTest.class.getName());
 
-    public UrlHelperTest() {
-    }
-
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
 
     private static CoreSettings coreSettings;

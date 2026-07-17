@@ -134,11 +134,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         }
 
         QueryDefaults queryDefaults = coreSettings.getQueryDefaults().copy();
-        if (autodetectRootUrl) {
-            String detectedRootUrl = generateRootUrl(request, version, contextPath);
-            LOGGER.debug("Detected serviceRootURL: {}", detectedRootUrl);
-            queryDefaults.setServiceRootUrl(detectedRootUrl);
-        }
+        detectRootUrl(request, version, contextPath, queryDefaults);
 
         final PluginService plugin = coreSettings.getPluginManager().getServiceForPath(version, path);
         if (plugin == null) {
@@ -153,17 +149,7 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         decodeAccepHeader(request, parameterMap);
         decodePreferHeader(request, parameterMap);
 
-        final String contentEncoding = request.getHeader(CONTENT_ENCODING);
-        InputStream is = request.getInputStream();
-        if (!StringHelper.isNullOrEmpty(contentEncoding)) {
-            if (contentEncoding.startsWith(CONTENT_ENCODING_GZIP) || contentEncoding.startsWith(CONTENT_ENCODING_XGZIP)) {
-                is = new GZIPInputStream(is);
-            } else if (contentEncoding.startsWith(CONTENT_ENCODING_DEFLATE)) {
-                is = new DeflateInputStream(is);
-            } else {
-                LOGGER.info("Unknown Content-Encoding: {}", contentEncoding);
-            }
-        }
+        InputStream is = decodeInputStream(request);
 
         final ServiceRequest serviceRequest = new ServiceRequest()
                 .setContext(new ServiceContext()
@@ -192,6 +178,29 @@ public class HttpRequestDecoder extends ConfigProvider<HttpRequestDecoder> {
         logServiceRequest(request, serviceRequest);
 
         return serviceRequest;
+    }
+
+    private InputStream decodeInputStream(HttpServletRequest request) throws IOException {
+        final String contentEncoding = request.getHeader(CONTENT_ENCODING);
+        InputStream is = request.getInputStream();
+        if (!StringHelper.isNullOrEmpty(contentEncoding)) {
+            if (contentEncoding.startsWith(CONTENT_ENCODING_GZIP) || contentEncoding.startsWith(CONTENT_ENCODING_XGZIP)) {
+                is = new GZIPInputStream(is);
+            } else if (contentEncoding.startsWith(CONTENT_ENCODING_DEFLATE)) {
+                is = new DeflateInputStream(is);
+            } else {
+                LOGGER.info("Unknown Content-Encoding: {}", contentEncoding);
+            }
+        }
+        return is;
+    }
+
+    private void detectRootUrl(HttpServletRequest request, Version version, String contextPath, QueryDefaults queryDefaults) {
+        if (autodetectRootUrl) {
+            String detectedRootUrl = generateRootUrl(request, version, contextPath);
+            LOGGER.debug("Detected serviceRootURL: {}", detectedRootUrl);
+            queryDefaults.setServiceRootUrl(detectedRootUrl);
+        }
     }
 
     private String generateRootUrl(HttpServletRequest request, Version version, String reqBasePath) {

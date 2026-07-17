@@ -94,35 +94,42 @@ public class PersistenceManagerFactory {
 
     public void maybeUpdateDatabase() {
         if (maybeUpdateDatabase) {
-            PersistenceManager pm = create();
-            final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
-            Map<String, Object> liquibaseParams = new LinkedHashMap<>();
-            for (LiquibaseUser lbu : liquibaseUsers) {
-                liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
-            }
-            if (LOGGER.isDebugEnabled()) {
-                for (var entry : liquibaseParams.entrySet()) {
-                    LOGGER.debug("  param: {}={}", entry.getKey(), entry.getValue());
-                }
-            }
-
-            // Ensure the PM gets to go first.
-            if (pm instanceof LiquibaseUser liquibaseUser) {
-                LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser, liquibaseParams);
-            }
-
-            if (liquibaseUsers.isEmpty()) {
-                LOGGER.warn("No Liquibase users found!");
-                return;
-            }
-            for (LiquibaseUser lbu : liquibaseUsers) {
-                if (LiquibaseUtils.maybeUpdateDatabase(LOGGER, lbu, liquibaseParams)) {
-                    // upgrade failed, but should be tried again later.
-                    return;
-                }
-            }
-            // all upgrades succeeded, or permanently failed. Don't try again.
-            maybeUpdateDatabase = false;
+            updateDatabase();
         }
+    }
+
+    private void updateDatabase() {
+        PersistenceManager pm = create();
+        final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
+        Map<String, Object> liquibaseParams = new LinkedHashMap<>();
+        for (LiquibaseUser lbu : liquibaseUsers) {
+            liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
+        }
+        if (LOGGER.isDebugEnabled()) {
+            for (var entry : liquibaseParams.entrySet()) {
+                LOGGER.debug("  param: {}={}", entry.getKey(), entry.getValue());
+            }
+        }
+
+        // Ensure the PM gets to go first.
+        if (pm instanceof LiquibaseUser liquibaseUser) {
+            LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser, liquibaseParams);
+        }
+
+        if (liquibaseUsers.isEmpty()) {
+            LOGGER.warn("No Liquibase users found!");
+            return;
+        }
+        maybeUpdateDatabase = updateUsers(liquibaseUsers, liquibaseParams);
+    }
+
+    private boolean updateUsers(final Set<LiquibaseUser> liquibaseUsers, Map<String, Object> liquibaseParams) {
+        for (LiquibaseUser lbu : liquibaseUsers) {
+            if (LiquibaseUtils.maybeUpdateDatabase(LOGGER, lbu, liquibaseParams)) {
+                // upgrade failed, but should be tried again later.
+                return true;
+            }
+        }
+        return false;
     }
 }

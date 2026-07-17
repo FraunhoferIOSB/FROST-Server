@@ -205,59 +205,67 @@ public class PluginManager implements ConfigDefaults {
         final String[] split = classList.trim().split(",");
         LOGGER.info("Loading {} plugins...", split.length);
         for (String className : split) {
-            try {
-                LOGGER.info("Loading {}", className);
-                final Class<?> loadedClass = getClass().getClassLoader().loadClass(className.trim());
-                if (!Plugin.class.isAssignableFrom(loadedClass)) {
-                    LOGGER.error("Given class {} does not implement the Plugin interface.", className);
-                } else {
-                    final Class<? extends Plugin> castedClass = loadedClass.asSubclass(Plugin.class);
-                    final Plugin plugin = castedClass.getDeclaredConstructor().newInstance();
-                    pluginsToLoad.add(plugin);
-                }
-            } catch (NoClassDefFoundError | ClassNotFoundException ex) {
-                LOGGER.warn("Could not find given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
-            } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                LOGGER.warn("Could not load given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
-                LOGGER.info("Exception:", ex);
-            } catch (RuntimeException ex) {
-                LOGGER.warn("Plugin caused an exception during loading.", ex);
-            }
+            checkPluginClass(className, pluginsToLoad);
         }
 
         while (!pluginsToLoad.isEmpty()) {
             int count = pluginsToLoad.size();
             LOGGER.info("Initialising {} plugins...", count);
-            for (Iterator<Plugin> it = pluginsToLoad.iterator(); it.hasNext();) {
-                Plugin plugin = it.next();
-                try {
-                    LOGGER.info("Initialising {}", plugin.getClass().getName());
-                    InitResult result = plugin.init(settings);
-                    switch (result) {
-                        case INIT_DELAY:
-                            // don't remove, try again later.
-                            break;
-
-                        case INIT_FAILED:
-                            // Failed, don't try again.
-                            LOGGER.warn("Failed to initialise plugin: '{}'", plugin);
-                            it.remove();
-                            break;
-
-                        default:
-                        case INIT_OK:
-                            // All is fine.
-                            it.remove();
-                            break;
-                    }
-
-                } catch (RuntimeException ex) {
-                    LOGGER.warn("Plugin caused an exception during initialisation.", ex);
-                }
-            }
+            loadPlugins(pluginsToLoad);
             if (count == pluginsToLoad.size()) {
                 LOGGER.error("All {} remaining plugins can not be initialised", count);
                 break;
+            }
+        }
+    }
+
+    private void checkPluginClass(String className, final List<Plugin> pluginsToLoad) {
+        try {
+            LOGGER.info("Loading {}", className);
+            final Class<?> loadedClass = getClass().getClassLoader().loadClass(className.trim());
+            if (!Plugin.class.isAssignableFrom(loadedClass)) {
+                LOGGER.error("Given class {} does not implement the Plugin interface.", className);
+            } else {
+                final Class<? extends Plugin> castedClass = loadedClass.asSubclass(Plugin.class);
+                final Plugin plugin = castedClass.getDeclaredConstructor().newInstance();
+                pluginsToLoad.add(plugin);
+            }
+        } catch (NoClassDefFoundError | ClassNotFoundException ex) {
+            LOGGER.warn("Could not find given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            LOGGER.warn("Could not load given plugin class: '{}': {}", StringHelper.cleanForLogging(className), ex.getMessage());
+            LOGGER.info("Exception:", ex);
+        } catch (RuntimeException ex) {
+            LOGGER.warn("Plugin caused an exception during loading.", ex);
+        }
+    }
+
+    private void loadPlugins(List<Plugin> pluginsToLoad) {
+        for (Iterator<Plugin> it = pluginsToLoad.iterator(); it.hasNext();) {
+            Plugin plugin = it.next();
+            try {
+                LOGGER.info("Initialising {}", plugin.getClass().getName());
+                InitResult result = plugin.init(settings);
+                switch (result) {
+                    case INIT_DELAY:
+                        // don't remove, try again later.
+                        break;
+
+                    case INIT_FAILED:
+                        // Failed, don't try again.
+                        LOGGER.warn("Failed to initialise plugin: '{}'", plugin);
+                        it.remove();
+                        break;
+
+                    default:
+                    case INIT_OK:
+                        // All is fine.
+                        it.remove();
+                        break;
+                }
+
+            } catch (RuntimeException ex) {
+                LOGGER.warn("Plugin caused an exception during initialisation.", ex);
             }
         }
     }

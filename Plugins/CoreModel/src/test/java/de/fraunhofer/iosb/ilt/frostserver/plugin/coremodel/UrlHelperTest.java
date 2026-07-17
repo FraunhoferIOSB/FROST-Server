@@ -41,11 +41,7 @@ class UrlHelperTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UrlHelperTest.class.getName());
 
-    public UrlHelperTest() {
-    }
-
     private static final String SERVICE_ROOT_URL = "http://example.org/FROST-Server";
-    private static final String SERVICE_ROOT_URL_V11 = SERVICE_ROOT_URL + '/' + PluginCoreService.V_1_1.urlPart;
 
     private static CoreSettings coreSettings;
     private static ServiceContext context;

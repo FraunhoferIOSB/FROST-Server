@@ -36,7 +36,7 @@ public class ServletPrometheusMetrics extends PrometheusMetricsServlet {
 
     private static MetricsSettings settings;
 
-    public static synchronized MetricsSettings setSettings(MetricsSettings settings) {
+    public static MetricsSettings setSettings(MetricsSettings settings) {
         if (ServletPrometheusMetrics.settings != null) {
             return ServletPrometheusMetrics.settings;
         }
@@ -48,7 +48,7 @@ public class ServletPrometheusMetrics extends PrometheusMetricsServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (settings == null) {
             CoreSettings coreSettings = (CoreSettings) request.getServletContext().getAttribute(TAG_CORE_SETTINGS);
-            settings = setSettings(coreSettings.getMetricsSettings());
+            setSettings(coreSettings.getMetricsSettings());
         }
         if (settings.isServlet()) {
             super.service(request, response);
