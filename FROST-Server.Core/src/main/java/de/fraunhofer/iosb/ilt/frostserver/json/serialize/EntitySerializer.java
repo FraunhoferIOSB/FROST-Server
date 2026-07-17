@@ -166,27 +166,48 @@ public class EntitySerializer extends ValueSerializer<Entity> {
             final String name = ep.getName();
             Collection<String> aliases = ep.getAliases();
             if (aliases.size() > 1) {
-                if (odata) {
-                    // OData: find the first alias that does not start with an @
-                    for (String alias : aliases) {
-                        if (!alias.startsWith("@")) {
-                            gen.writePOJOProperty(alias, value);
-                            return;
-                        }
-                    }
-                } else {
-                    // STA: Find the first alias that starts with an @
-                    for (String alias : aliases) {
-                        if (alias.startsWith("@")) {
-                            gen.writePOJOProperty(alias, value);
-                            return;
-                        }
-                    }
+                if (maybeWriteAlias(aliases, gen, value)) {
+                    return;
                 }
             }
             // Either no aliases, or no matching found.
             gen.writePOJOProperty(name, value);
         }
+    }
+
+    private boolean maybeWriteAlias(Collection<String> aliases, JsonGenerator gen, final Object value) throws JacksonException {
+        if (odata) {
+            if (maybeWriteOdata(aliases, gen, value)) {
+                return true;
+            }
+        } else {
+            if (maybeWriteSta(aliases, gen, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean maybeWriteOdata(Collection<String> aliases, JsonGenerator gen, final Object value) throws JacksonException {
+        // OData: find the first alias that does not start with an @
+        for (String alias : aliases) {
+            if (!alias.startsWith("@")) {
+                gen.writePOJOProperty(alias, value);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean maybeWriteSta(Collection<String> aliases, JsonGenerator gen, final Object value) throws JacksonException {
+        // STA: Find the first alias that starts with an @
+        for (String alias : aliases) {
+            if (alias.startsWith("@")) {
+                gen.writePOJOProperty(alias, value);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void writeComplexValueImpl(EntityPropertyMain<?> ep, ComplexValueImpl cv, JsonGenerator gen) throws IOException {

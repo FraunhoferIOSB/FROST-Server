@@ -49,6 +49,10 @@ public class Exceptions {
         }
     }
 
+    public static final IllegalArgumentException illegalArgument(String message, Object... params) {
+        return new IllegalArgumentException(replacePlaceholders(message, params));
+    }
+
     public static final String replacePlaceholders(String line, Object... params) {
         StringBuilder replaced = new StringBuilder();
         int idx = 0;

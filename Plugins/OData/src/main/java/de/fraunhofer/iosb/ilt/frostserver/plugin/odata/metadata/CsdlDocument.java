@@ -43,11 +43,11 @@ public class CsdlDocument {
         V4_0("4.0"),
         V4_01("4.01");
 
-        private ODataVersion(String name) {
-            this.name = name;
+        private ODataVersion(String identifier) {
+            this.identifier = identifier;
         }
 
-        public final String name;
+        public final String identifier;
     }
 
     @JsonProperty("$Version")
@@ -169,7 +169,7 @@ public class CsdlDocument {
      * @return this.
      */
     public CsdlDocument generateFrom(ODataVersion version, ModelRegistry mr) {
-        this.version = version.name;
+        this.version = version.identifier;
         CsdlSchema schema = null;
         String lastNamespace = "";
         if (mr.getNamespaces().isEmpty()) {

@@ -32,6 +32,7 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.UnresolvedForwardReference;
 
 /**
  * Deserialiser for entity changed messages.
@@ -112,7 +113,7 @@ public class CustomEntityChangedMessageDeserializer extends ValueDeserializer<En
     private void handleEpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, JacksonException {
         String fieldName;
         if (type == null) {
-            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+            throw new UnresolvedForwardReference(parser, TYPE_NOT_KNOW_YET);
         }
         if (parser.currentToken() == JsonToken.VALUE_NULL) {
             // No Fields.
@@ -129,7 +130,7 @@ public class CustomEntityChangedMessageDeserializer extends ValueDeserializer<En
     private void handleNpFields(JsonParser parser, EntityType type, EntityChangedMessage message) throws IllegalArgumentException, JacksonException {
         String fieldName;
         if (type == null) {
-            throw new IllegalArgumentException(TYPE_NOT_KNOW_YET);
+            throw new UnresolvedForwardReference(parser, TYPE_NOT_KNOW_YET);
         }
         if (parser.currentToken() == JsonToken.VALUE_NULL) {
             // No Fields.

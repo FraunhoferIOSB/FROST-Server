@@ -152,40 +152,48 @@ public abstract class AbstractSubscription implements Subscription {
         for (int i = startIdx; i >= 0; i--) {
             PathElement element = path.get(i);
             if (element instanceof PathElementEntitySet) {
-                NavigationPropertyMain navPropInverse = null;
-                if (nextPathElement instanceof PathElementEntityType peet) {
-                    final NavigationPropertyMain navProp = peet.getNavigationProperty();
-                    if (navProp != null) {
-                        navPropInverse = navProp.getInverse();
-                    }
-                }
-                properties.add(navPropInverse);
+                handleEntitySet(nextPathElement, properties);
                 direct = false;
 
             } else if (element instanceof PathElementEntity epe) {
-                NavigationPropertyMain navProp = null;
-                if (nextPathElement instanceof PathElementEntityType peet) {
-                    navProp = peet.getNavigationProperty().getInverse();
-                }
-
-                final PkValue id = epe.getPkValues();
-                if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
-                    createMatcher(navProp, id);
-                    assert (i <= 1);
-                    return;
-                }
-
-                properties.add(navProp);
-
-                if (id != null) {
-                    createMatchExpression(properties, epe, extraFilter);
-                    // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
-                    assert (i <= 1);
+                if (handleEntity(epe, nextPathElement, direct, i, properties, extraFilter)) {
                     return;
                 }
             }
             nextPathElement = element;
         }
+    }
+
+    private void handleEntitySet(PathElement nextPathElement, final List<Property> properties) {
+        NavigationPropertyMain navPropInverse = null;
+        if (nextPathElement instanceof PathElementEntityType peet) {
+            final NavigationPropertyMain navProp = peet.getNavigationProperty();
+            if (navProp != null) {
+                navPropInverse = navProp.getInverse();
+            }
+        }
+        properties.add(navPropInverse);
+    }
+
+    private boolean handleEntity(PathElementEntity epe, PathElement nextPathElement, boolean direct, int i, final List<Property> properties, Expression extraFilter) {
+        NavigationPropertyMain navProp = null;
+        if (nextPathElement instanceof PathElementEntityType peet) {
+            navProp = peet.getNavigationProperty().getInverse();
+        }
+        final PkValue id = epe.getPkValues();
+        if (direct && navProp != null && !navProp.isEntitySet() && id != null) {
+            createMatcher(navProp, id);
+            assert (i <= 1);
+            return true;
+        }
+        properties.add(navProp);
+        if (id != null) {
+            createMatchExpression(properties, epe, extraFilter);
+            // there should be at most two PathElements left, the EntitySetPath and the EntityPath now visiting
+            assert (i <= 1);
+            return true;
+        }
+        return false;
     }
 
     private void createMatcher(final NavigationPropertyMain navProp, PkValue pkValue) {

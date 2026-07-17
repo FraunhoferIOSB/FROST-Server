@@ -433,13 +433,13 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
 
     private static class LoggingStatus extends ChangingStatusLogger.ChangingStatusDefault {
 
-        public static final String MESSAGE = "RecvQueue: {} [{}, {}, {}] SendQueue: {} [{}, {}, {}] ";
-        public static final String LABEL_QUEUE_NAME = "queue_name";
-        public static final String LABEL_SEND = "Send";
-        public static final String LABEL_RECEIVE = "Receive";
-        public static final String DEAD = "Dead";
-        public static final String WORKING = "Working";
-        public static final String WAITING = "Waiting";
+        private static final String MESSAGE = "RecvQueue: {} [{}, {}, {}] SendQueue: {} [{}, {}, {}] ";
+        private static final String LABEL_QUEUE_NAME = "queue_name";
+        private static final String LABEL_SEND = "Send";
+        private static final String LABEL_RECEIVE = "Receive";
+        private static final String DEAD = "Dead";
+        private static final String WORKING = "Working";
+        private static final String WAITING = "Waiting";
 
         public final Object[] status;
         private final Runnable processor;
@@ -467,7 +467,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
             GaugeWithCallback.builder()
                     .name("message_bus_queue_fill")
                     .help("Fill level of the Queue (0 - 1)")
-                    .labelNames("queue_name")
+                    .labelNames(LABEL_QUEUE_NAME)
                     .callback(cb -> {
                         cb.call((1.0 * (Integer) status[0] / parent.recvQueueSize), LABEL_RECEIVE);
                         cb.call((1.0 * (Integer) status[4] / parent.sendQueueSize), LABEL_SEND);
@@ -476,7 +476,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
             GaugeWithCallback.builder()
                     .name("message_bus_queue_fill_max")
                     .help("Maximum fill level of the Queue since last call (0 - 1)")
-                    .labelNames("queue_name")
+                    .labelNames(LABEL_QUEUE_NAME)
                     .callback(cb -> {
                         cb.call(1.0 * recvQueueCountMax / parent.recvQueueSize, LABEL_RECEIVE);
                         recvQueueCountMax = 0;
@@ -487,7 +487,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
             GaugeWithCallback.builder()
                     .name("message_bus_worker_status")
                     .help("Overview of what workers do")
-                    .labelNames("queue_name", "worker_status")
+                    .labelNames(LABEL_QUEUE_NAME, "worker_status")
                     .callback(cb -> {
                         process();
                         cb.call((Integer) status[1], LABEL_RECEIVE, WAITING);

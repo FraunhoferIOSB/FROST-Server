@@ -203,7 +203,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
             isOdata401 = true;
             version = ODataVersion.V4_01;
         }
-        response.addHeader("OData-Version", version.name);
+        response.addHeader("OData-Version", version.identifier);
         request.getContext()
                 .setJsonReader(new JsonReaderOData(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
         switch (request.getRequestType()) {

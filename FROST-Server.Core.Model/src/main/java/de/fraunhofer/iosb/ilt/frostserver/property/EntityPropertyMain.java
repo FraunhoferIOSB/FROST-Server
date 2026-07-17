@@ -27,7 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.annotations.Annotation;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +51,7 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
      */
     public final boolean serialiseNull;
 
-    private final Collection<String> aliases = new ArrayList<>();
+    private final List<String> aliases = new ArrayList<>();
 
     /**
      * The (OData)annotations for this Entity Property.
@@ -74,7 +73,7 @@ public class EntityPropertyMain<P> extends PropertyAbstract<P> implements Annota
         this.serialiseNull = options.contains(SERIALISE_NULLS);
     }
 
-    public Collection<String> getAliases() {
+    public List<String> getAliases() {
         return aliases;
     }
 

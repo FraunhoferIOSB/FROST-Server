@@ -244,82 +244,88 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         try (Service service = new Service(settings)) {
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
             if (path.equals(MQTT_TOPIC_REQUEST)) {
-                String url = e.getUserProperty(MQTT_USER_PROPERTY_NAME_URL);
-                LOGGER.debug("Original url:  {}", url);
-                if (StringHelper.isNullOrEmpty(url)) {
-                    LOGGER.debug("Publish to {} without url user property.", MQTT_TOPIC_REQUEST);
-                    return;
-                }
-                url = StringUtils.removeStart(url, '/');
-                url = Strings.CS.removeStart(url, version.urlPart);
-                if (!url.startsWith("/")) {
-                    url = '/' + url;
-                }
-                LOGGER.debug("Rewritten url: {}", url);
-                final String rawType = e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE);
-                RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(rawType);
-                if (type == null) {
-                    LOGGER.debug("Request with unknown or no request type; {}", StringHelper.cleanForLogging(rawType));
-                    return;
-                }
-                final String responseTopic = e.getResponseTopic();
-                if (StringHelper.isNullOrEmpty(responseTopic)) {
-                    LOGGER.debug("Request without response topic: {}", url);
-                    return;
-                }
-
-                final ServiceRequest serviceRequest = new ServiceRequest()
-                        .setContext(new ServiceContext()
-                                .setPrefixGen(() -> version.urlPart + '/')
-                                .setFunctionRegistry(settings.getFunctionRegistry())
-                                .setModelRegistry(settings.getModelRegistry())
-                                .setQueryDefaults(settings.getQueryDefaults()))
-                        .setVersion(version)
-                        .setRequestType(type.requestType)
-                        .setContentType(e.getContentType())
-                        .setContent(e.getPayload())
-                        .setUrl(url)
-                        .setUserPrincipal(e.getPrincipal());
-
-                try {
-                    ServiceRequest.setLocalRequest(serviceRequest);
-                    service.distributeRequest(serviceRequest, serviceResponse);
-                } finally {
-                    ServiceRequest.removeLocalRequest();
-                }
-                Map<String, String> responseProps = new HashMap<>();
-                responseProps.put("status", Integer.toString(serviceResponse.getCode()));
-                server.publish(responseTopic, serviceResponse.getFormattedResult(), 2, serviceResponse.getContentType(), responseProps, e.getCorrelationData());
-                if (serviceResponse.isSuccessful()) {
-                    LOGGER.debug("executed request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
-                            topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
-                } else {
-                    LOGGER.info("Failed to execute request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
-                            topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
-                }
+                handleRestRequest(e, version, service, serviceResponse, topic);
             } else {
-                final ServiceRequest serviceRequest = new ServiceRequest()
-                        .setContext(new ServiceContext()
-                                .setPrefixGen(() -> version.urlPart + '/')
-                                .setFunctionRegistry(settings.getFunctionRegistry())
-                                .setModelRegistry(settings.getModelRegistry())
-                                .setQueryDefaults(settings.getQueryDefaults()))
-                        .setVersion(version)
-                        .setRequestType(RequestTypeUtils.CREATE)
-                        .setContent(e.getPayload())
-                        .setUrlPath(path)
-                        .setUserPrincipal(e.getPrincipal());
-                try {
-                    ServiceRequest.setLocalRequest(serviceRequest);
-                    service.distributeRequest(serviceRequest, serviceResponse);
-                } finally {
-                    ServiceRequest.removeLocalRequest();
-                }
-                if (!serviceResponse.isSuccessful()) {
-                    LOGGER.info("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
-                            topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
-                }
+                handleSimpleCreate(e, version, path, service, serviceResponse, topic);
             }
+        }
+    }
+
+    private void handleRestRequest(RequestEvent e, Version version, Service service, ServiceResponseDefault serviceResponse, String topic) {
+        String url = e.getUserProperty(MQTT_USER_PROPERTY_NAME_URL);
+        LOGGER.debug("Original url:  {}", url);
+        if (StringHelper.isNullOrEmpty(url)) {
+            LOGGER.debug("Publish to {} without url user property.", MQTT_TOPIC_REQUEST);
+            return;
+        }
+        url = StringUtils.removeStart(url, '/');
+        url = Strings.CS.removeStart(url, version.urlPart);
+        if (!url.startsWith("/")) {
+            url = '/' + url;
+        }
+        LOGGER.debug("Rewritten url: {}", url);
+        final String rawType = e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE);
+        RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(rawType);
+        if (type == null) {
+            LOGGER.debug("Request with unknown or no request type; {}", StringHelper.cleanForLogging(rawType));
+            return;
+        }
+        final String responseTopic = e.getResponseTopic();
+        if (StringHelper.isNullOrEmpty(responseTopic)) {
+            LOGGER.debug("Request without response topic: {}", url);
+            return;
+        }
+        final ServiceRequest serviceRequest = new ServiceRequest()
+                .setContext(new ServiceContext()
+                        .setPrefixGen(() -> version.urlPart + '/')
+                        .setFunctionRegistry(settings.getFunctionRegistry())
+                        .setModelRegistry(settings.getModelRegistry())
+                        .setQueryDefaults(settings.getQueryDefaults()))
+                .setVersion(version)
+                .setRequestType(type.requestType)
+                .setContentType(e.getContentType())
+                .setContent(e.getPayload())
+                .setUrl(url)
+                .setUserPrincipal(e.getPrincipal());
+        try {
+            ServiceRequest.setLocalRequest(serviceRequest);
+            service.distributeRequest(serviceRequest, serviceResponse);
+        } finally {
+            ServiceRequest.removeLocalRequest();
+        }
+        Map<String, String> responseProps = new HashMap<>();
+        responseProps.put("status", Integer.toString(serviceResponse.getCode()));
+        server.publish(responseTopic, serviceResponse.getFormattedResult(), 2, serviceResponse.getContentType(), responseProps, e.getCorrelationData());
+        if (serviceResponse.isSuccessful()) {
+            LOGGER.debug("executed request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
+                    topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
+        } else {
+            LOGGER.info("Failed to execute request (topic: {}, url: {}, payload: {}, code: {}, message: {})",
+                    topic, url, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
+        }
+    }
+
+    private void handleSimpleCreate(RequestEvent e, Version version, String path, Service service, ServiceResponseDefault serviceResponse, String topic) {
+        final ServiceRequest serviceRequest = new ServiceRequest()
+                .setContext(new ServiceContext()
+                        .setPrefixGen(() -> version.urlPart + '/')
+                        .setFunctionRegistry(settings.getFunctionRegistry())
+                        .setModelRegistry(settings.getModelRegistry())
+                        .setQueryDefaults(settings.getQueryDefaults()))
+                .setVersion(version)
+                .setRequestType(RequestTypeUtils.CREATE)
+                .setContent(e.getPayload())
+                .setUrlPath(path)
+                .setUserPrincipal(e.getPrincipal());
+        try {
+            ServiceRequest.setLocalRequest(serviceRequest);
+            service.distributeRequest(serviceRequest, serviceResponse);
+        } finally {
+            ServiceRequest.removeLocalRequest();
+        }
+        if (!serviceResponse.isSuccessful()) {
+            LOGGER.info("Creating entity via MQTT failed (topic: {}, payload: {}, code: {}, message: {})",
+                    topic, e.getPayload(), serviceResponse.getCode(), serviceResponse.getMessage());
         }
     }
 
@@ -429,8 +435,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
 
         public static final String MESSAGE = "entityCreateQueue: {} [{}, {}, {}] entityChangedQueue: {} [{}, {}, {}] topics: {}";
 
-        public static final String CHANGED = "Changed";
-        public static final String CREATE = "Create";
+        private static final String LABEL_CHANGED = "Changed";
+        private static final String LABEL_CREATE = "Create";
+        private static final String LABEL_QUEUE_NAME = "queue_name";
 
         public static final String DEAD = "Dead";
         public static final String WORKING = "Working";
@@ -442,7 +449,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         private int changedQueueCountMax = 0;
         private int createQueueCountMax = 0;
 
-        private boolean metrics;
+        private final boolean metrics;
         private Counter queueOverrunCounter;
         private CounterDataPoint queueOverrunCreate;
         private CounterDataPoint queueOverrunChanged;
@@ -463,47 +470,47 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
             GaugeWithCallback.builder()
                     .name("mqtt_manager_queue_fill")
                     .help("Fill level of the Queue (0 - 1)")
-                    .labelNames("queue_name")
+                    .labelNames(LABEL_QUEUE_NAME)
                     .callback(cb -> {
-                        cb.call((1.0 * (Integer) status[0] / parent.entityChangedQueueSize), CHANGED);
-                        cb.call((1.0 * (Integer) status[4] / parent.entityCreateQueueSize), CREATE);
+                        cb.call((1.0 * (Integer) status[0] / parent.entityChangedQueueSize), LABEL_CHANGED);
+                        cb.call((1.0 * (Integer) status[4] / parent.entityCreateQueueSize), LABEL_CREATE);
                     })
                     .register();
             GaugeWithCallback.builder()
                     .name("mqtt_manager_queue_fill_max")
                     .help("Maximum fill level of the Queue since last call (0 - 1)")
-                    .labelNames("queue_name")
+                    .labelNames(LABEL_QUEUE_NAME)
                     .callback(cb -> {
-                        cb.call(1.0 * changedQueueCountMax / parent.entityChangedQueueSize, CHANGED);
+                        cb.call(1.0 * changedQueueCountMax / parent.entityChangedQueueSize, LABEL_CHANGED);
                         changedQueueCountMax = 0;
-                        cb.call(1.0 * createQueueCountMax / parent.entityCreateQueueSize, CREATE);
+                        cb.call(1.0 * createQueueCountMax / parent.entityCreateQueueSize, LABEL_CREATE);
                         createQueueCountMax = 0;
                     })
                     .register();
             GaugeWithCallback.builder()
                     .name("mqtt_manager_worker_status")
                     .help("Overview of what workers do")
-                    .labelNames("queue_name", "worker_status")
+                    .labelNames(LABEL_QUEUE_NAME, "worker_status")
                     .callback(cb -> {
                         process();
-                        cb.call((Integer) status[1], CHANGED, WAITING);
-                        cb.call((Integer) status[2], CHANGED, WORKING);
-                        cb.call((Integer) status[3], CHANGED, DEAD);
-                        cb.call((Integer) status[5], CREATE, WAITING);
-                        cb.call((Integer) status[6], CREATE, WORKING);
-                        cb.call((Integer) status[7], CREATE, DEAD);
+                        cb.call((Integer) status[1], LABEL_CHANGED, WAITING);
+                        cb.call((Integer) status[2], LABEL_CHANGED, WORKING);
+                        cb.call((Integer) status[3], LABEL_CHANGED, DEAD);
+                        cb.call((Integer) status[5], LABEL_CREATE, WAITING);
+                        cb.call((Integer) status[6], LABEL_CREATE, WORKING);
+                        cb.call((Integer) status[7], LABEL_CREATE, DEAD);
                     })
                     .register();
 
             queueOverrunCounter = Counter.builder()
                     .name("mqtt_manager_queue_overruns")
                     .help("Number of items dropped because the queue was full")
-                    .labelNames("queue_name")
+                    .labelNames(LABEL_QUEUE_NAME)
                     .register();
-            queueOverrunCounter.initLabelValues(CREATE);
-            queueOverrunCounter.initLabelValues(CHANGED);
-            queueOverrunCreate = queueOverrunCounter.labelValues(CREATE);
-            queueOverrunChanged = queueOverrunCounter.labelValues(CHANGED);
+            queueOverrunCounter.initLabelValues(LABEL_CREATE);
+            queueOverrunCounter.initLabelValues(LABEL_CHANGED);
+            queueOverrunCreate = queueOverrunCounter.labelValues(LABEL_CREATE);
+            queueOverrunChanged = queueOverrunCounter.labelValues(LABEL_CHANGED);
 
             topicCount = Gauge.builder()
                     .name("mqtt_manager_topics")

@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.UnknownVersionException;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.UserCaches;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -62,13 +63,9 @@ public class SubscriptionFactory {
     }
 
     public Subscription get(String topic) {
-        final String errorMsg = "Subscription to topic '" + topic + "' is invalid. Reason: ";
-        if (topic == null || topic.isEmpty()) {
-            throw new IllegalArgumentException(errorMsg + "topic must be non-empty.");
-        }
-        if (topic.startsWith(URI_PATH_SEP)) {
-            throw new IllegalArgumentException(errorMsg + "topic must not start with '" + URI_PATH_SEP + "'.");
-        }
+        Exceptions.illegalArgumentIf(StringHelper.isNullOrEmpty(topic), "topic must be non-empty.");
+        Exceptions.illegalArgumentIf(topic.startsWith(URI_PATH_SEP), "Invalid topic: '{}', topic must not start with {}", topic, URI_PATH_SEP);
+
         PrincipalExtended userPrincipal = PrincipalExtended.ANONYMOUS_PRINCIPAL;
         if (fineGrainedAuth) {
             String[] split = StringUtils.split(topic, "/", 2);
@@ -78,25 +75,26 @@ public class SubscriptionFactory {
                 topic = split[1];
             } catch (NumberFormatException ex) {
                 LOGGER.error("Incorrect internal topic, not starting with a userkey: {}", topic);
-                throw new IllegalArgumentException("Expected a topic starting with a number, not " + split[0]);
+                throw Exceptions.illegalArgument("Expected a topic starting with a number, not {}", split[0]);
             }
         }
         Version version;
         try {
             version = MqttManager.getVersionFromTopic(settings, topic);
         } catch (UnknownVersionException ex) {
-            throw new IllegalArgumentException(errorMsg + "topic must start with a version numer. Known versions :" + settings.getPluginManager().getVersions().keySet());
+            throw Exceptions.illegalArgument("Invalid topic '{}', topic must start with a version numer. Known versions :{}", topic, settings.getPluginManager().getVersions().keySet());
         }
 
         String internalTopic = topic.substring(version.urlPart.length() + 1);
         ResourcePath path = parsePath(
                 version,
                 getPathFromTopic(internalTopic));
-        if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException(errorMsg + "invalid path.");
-        }
+        Exceptions.illegalArgumentIf(path == null || path.isEmpty(), "Invalid topic: '{}', invalid path.", topic);
         path.compress();
-        final int size = path.size();
+        return createSubscription(path, userPrincipal, topic);
+    }
+
+    private Subscription createSubscription(ResourcePath path, PrincipalExtended userPrincipal, String topic) {
         if (path.getLastElement() instanceof PathElementEntitySet) {
             // SensorThings Standard 14.2.1 - Subscribe to EntitySet
             if (fineGrainedAuth) {
@@ -113,6 +111,7 @@ public class SubscriptionFactory {
                 return new EntitySubscription(settings, topic, path);
             }
         }
+        final int size = path.size();
         if (size >= 2
                 && path.get(size - 2) instanceof PathElementEntity
                 && path.get(size - 1) instanceof PathElementProperty) {
@@ -123,7 +122,7 @@ public class SubscriptionFactory {
                 return new PropertySubscription(settings, topic, path);
             }
         }
-        throw new IllegalArgumentException(errorMsg + "topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)");
+        throw Exceptions.illegalArgument("Invalid topic: '{}', topic does not match any allowed pattern (RESOURCE_PATH/COLLECTION_NAME, RESOURCE_PATH_TO_AN_ENTITY, RESOURCE_PATH_TO_AN_ENTITY/PROPERTY_NAME, RESOURCE_PATH/COLLECTION_NAME?$select=PROPERTY_1,PROPERTY_2,…)", topic);
     }
 
     private ResourcePath parsePath(Version version, String topic) {
