@@ -29,13 +29,13 @@
                 <tableExists tableName="feature_projects" />
             </not>
             <changeLogPropertyDefined property="idType-Project" />
-            <changeLogPropertyDefined property="idType-FeatureOfInterest" />
+            <changeLogPropertyDefined property="idType-Feature" />
         </preConditions>
         <createTable tableName="feature_projects">
             <column name="project_id" type="${idType-Project}">
                 <constraints nullable="false"/>
             </column>
-            <column name="feature_id" type="${idType-FeatureOfInterest}">
+            <column name="feature_id" type="${idType-Feature}">
                 <constraints nullable="false"/>
             </column>
         </createTable>

@@ -7,7 +7,7 @@
       "name": "TaskingCapability",
       "plural": "TaskingCapabilities",
       "adminOnly": false,
-      "table": "taskingcapabilities",
+      "table": "tasking_capabilities",
       "key": [],
       "orderByDflt": [],
       "entityProperties": [

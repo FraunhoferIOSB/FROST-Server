@@ -23,12 +23,12 @@
 
     <changeSet author="generated" id="2026-06-11-taskingcapabilities-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="CONTINUE">
-            <tableExists tableName="taskingcapabilities" />
+            <tableExists tableName="tasking_capabilities" />
             <not>
-                <columnExists columnName="restricted" tableName="taskingcapabilities" />
+                <columnExists columnName="restricted" tableName="tasking_capabilities" />
             </not>
         </preConditions>
-        <addColumn tableName="taskingcapabilities">
+        <addColumn tableName="tasking_capabilities">
             <column name="restricted" type="BOOLEAN" defaultValueBoolean="false" />
         </addColumn>
     </changeSet>
