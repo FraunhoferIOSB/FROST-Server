@@ -116,7 +116,7 @@ public class ModelRegistry {
 
         EntityType existing = entityTypesByName.get(fullName);
         if (existing == type) {
-            LOGGER.info("Entity type {} already registered.", fullName);
+            LOGGER.debug("Entity type {} already registered.", fullName);
             return this;
         }
         Exceptions.illegalArgumentIf(existing != null, "Duplicate entity type name: {}", fullName);
@@ -240,6 +240,6 @@ public class ModelRegistry {
     }
 
     public static final String fullName(String namespace, String name) {
-        return namespace == null ? name : namespace + '.' + name;
+        return StringHelper.isNullOrEmpty(namespace) ? name : namespace + '.' + name;
     }
 }

@@ -57,6 +57,15 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
     private String name;
 
     /**
+     * The namespace of the EntityType. Only set this if this is not the primary
+     * definition of the EntityType.
+     */
+    @ConfigurableField(editor = EditorString.class, optional = true,
+            label = "Namespace", description = "The namespace of the Entity Type.")
+    @EditorString.EdOptsString()
+    private String namespace;
+
+    /**
      * The plural name of the EntityType.
      */
     @ConfigurableField(editor = EditorString.class,
@@ -146,8 +155,6 @@ public class DefEntityType implements AnnotatedConfigurable<Void, Void> {
 
     @JsonIgnore
     private EntityType entityType;
-    @JsonIgnore
-    private String namespace;
 
     public void init(String namespace) {
         this.namespace = namespace;

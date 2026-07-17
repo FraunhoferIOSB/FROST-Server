@@ -92,8 +92,8 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 LOGGER.warn("PluginModelLoader must be enabled before the Projects plugin, delaying initialisation...");
                 return INIT_DELAY;
             }
-            if (!pCoreModelV1) {
-                LOGGER.warn("PluginCoreModelV1 must be enabled before the Projects plugin, delaying initialisation...");
+            if (!pCoreModelV1 && !pCoreModelV2) {
+                LOGGER.warn("PluginCoreModel or PluginCoreModelV2 must be enabled before the Projects plugin, delaying initialisation...");
                 return INIT_DELAY;
             }
             if (pCoreModelV1 && !pCoreModelV2) {

@@ -2,6 +2,7 @@
   "conformance": [
     "http://www.opengis.net/spec/iot_sensing/2.0/req/sensing-extension-om/datamodel"
   ],
+  "namespace": "org.OGC.STA",
   "simplePropertyTypes": [],
   "entityTypes": [
     {
