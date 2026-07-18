@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class DateTimeTests10 extends DateTimeTests {
 
     public DateTimeTests10() {
-        super(ServerVersion.v_1_0);
+        super(ServerVersion.V_1_0);
     }
 
 }

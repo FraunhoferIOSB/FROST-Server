@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class BasicAuthTests10 extends BasicAuthTests {
 
     public BasicAuthTests10() {
-        super(ServerVersion.v_1_0);
+        super(ServerVersion.V_1_0);
     }
 
 }

@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class BasicAuthCryptPwTests10 extends BasicAuthCryptPwTests {
 
     public BasicAuthCryptPwTests10() {
-        super(ServerVersion.v_1_0);
+        super(ServerVersion.V_1_0);
     }
 
 }

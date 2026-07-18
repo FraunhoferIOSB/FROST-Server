@@ -321,9 +321,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
                 String message = "The GET entities Association Link response does not match SensorThings API : missing \"value\" in response.: " + entityTypes.toString() + ids.toString();
                 assertTrue(response.contains("value"), message);
                 JsonNode value = Utils.MAPPER.readTree(response).get("value");
-                int count = 0;
-                for (int i = 0; i < value.size() && count < 2; i++) {
-                    count++;
+                for (int i = 0; i < value.size() && i < 2; i++) {
                     JsonNode obj = value.get(i);
                     message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
                     assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
@@ -523,9 +521,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
         try {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
-            int count = 0;
-            for (int i = 0; i < entities.size() && count < 2; i++) {
-                count++;
+            for (int i = 0; i < entities.size() && i < 2; i++) {
                 JsonNode entity = entities.get(i);
                 checkEntityControlInformation(entity);
             }
@@ -565,9 +561,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
         try {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
-            int count = 0;
-            for (int i = 0; i < entities.size() && count < 2; i++) {
-                count++;
+            for (int i = 0; i < entities.size() && i < 2; i++) {
                 JsonNode entity = entities.get(i);
                 checkEntityProperties(entityType, entity);
             }
@@ -615,9 +609,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
         try {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
-            int count = 0;
-            for (int i = 0; i < entities.size() && count < 2; i++) {
-                count++;
+            for (int i = 0; i < entities.size() && i < 2; i++) {
                 JsonNode entity = entities.get(i);
                 checkEntityRelations(entityType, entity);
             }

@@ -83,9 +83,6 @@ public class SensorThingsUserModel implements DataModel {
 
     public ModelRegistry mr;
 
-    public SensorThingsUserModel() {
-    }
-
     @Override
     public final void init(SensorThingsService service, ModelRegistry modelRegistry) {
         if (this.mr != null) {

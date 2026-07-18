@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class MultiDatastreamObsPropTests10 extends MultiDatastreamObsPropTests {
 
     public MultiDatastreamObsPropTests10() {
-        super(ServerVersion.v_1_0);
+        super(ServerVersion.V_1_0);
     }
 
 }

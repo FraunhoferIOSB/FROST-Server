@@ -26,7 +26,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class DeleteFilterTests11 extends DeleteFilterTests {
 
     public DeleteFilterTests11() {
-        super(ServerVersion.v_1_1);
+        super(ServerVersion.V_1_1);
     }
 
 }

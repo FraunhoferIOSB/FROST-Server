@@ -93,7 +93,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
     }
 
     public MqttCoreTests20() {
-        super(ServerVersion.v_2_0, SERVER_PROPERTIES);
+        super(ServerVersion.V_2_0, SERVER_PROPERTIES);
     }
 
     @Override

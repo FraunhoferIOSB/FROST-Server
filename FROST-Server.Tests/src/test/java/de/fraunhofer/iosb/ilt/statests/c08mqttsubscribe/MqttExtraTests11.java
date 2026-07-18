@@ -67,7 +67,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
     private static SensorThingsV11Sensing sMdl;
 
     public MqttExtraTests11() {
-        super(ServerVersion.v_1_1);
+        super(ServerVersion.V_1_1);
     }
 
     @Override

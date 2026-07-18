@@ -96,7 +96,7 @@ public class ReferenceTests20 extends AbstractTestClass {
     }
 
     public ReferenceTests20() {
-        super(ServerVersion.v_2_0, SERVER_PROPERTIES);
+        super(ServerVersion.V_2_0, SERVER_PROPERTIES);
     }
 
     @Override

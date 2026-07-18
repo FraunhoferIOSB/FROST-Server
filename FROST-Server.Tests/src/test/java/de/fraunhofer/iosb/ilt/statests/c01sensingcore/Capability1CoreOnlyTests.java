@@ -214,10 +214,10 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
         String response = responseMap.response;
         if ("object".equalsIgnoreCase(property.jsonType)) {
             message = "Reading property value of \"" + property + "\" of \"" + entityType + "\" fails.";
-            assertEquals(0, response.indexOf("{"), message);
+            assertEquals(0, response.indexOf('{'), message);
         } else {
             message = "Reading property value of \"" + property + "\" of \"" + entityType + "\" fails.";
-            assertEquals(-1, response.indexOf("{"), message);
+            assertEquals(-1, response.indexOf('{'), message);
         }
     }
 
@@ -326,9 +326,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
                 String message = "The GET entities Association Link response does not match SensorThings API : missing \"value\" in response.: " + entityTypes.toString() + ids.toString();
                 assertTrue(response.contains("value"), message);
                 JsonNode value = Utils.MAPPER.readTree(response).get("value");
-                int count = 0;
-                for (int i = 0; i < value.size() && count < 2; i++) {
-                    count++;
+                for (int i = 0; i < value.size() && i < 2; i++) {
                     JsonNode obj = value.get(i);
                     message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
                     assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
@@ -528,9 +526,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
         try {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
-            int count = 0;
-            for (int i = 0; i < entities.size() && count < 2; i++) {
-                count++;
+            for (int i = 0; i < entities.size() && i < 2; i++) {
                 JsonNode entity = entities.get(i);
                 checkEntityControlInformation(entity);
             }
@@ -570,9 +566,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
         try {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
-            int count = 0;
-            for (int i = 0; i < entities.size() && count < 2; i++) {
-                count++;
+            for (int i = 0; i < entities.size() && i < 2; i++) {
                 JsonNode entity = entities.get(i);
                 checkEntityProperties(entityType, entity);
             }
@@ -620,9 +614,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
         try {
             JsonNode jsonResponse = Utils.MAPPER.readTree(response);
             JsonNode entities = jsonResponse.get("value");
-            int count = 0;
-            for (int i = 0; i < entities.size() && count < 2; i++) {
-                count++;
+            for (int i = 0; i < entities.size() && i < 2; i++) {
                 JsonNode entity = entities.get(i);
                 checkEntityRelations(entityType, entity);
             }

@@ -129,9 +129,7 @@ public class MqttHelper11 {
     }
 
     public void publish(String topic, String message, int qos, boolean retained, List<Class<? extends Exception>> expectedExceptions) {
-        MqttAsyncClient client = null;
-        try {
-            client = new MqttAsyncClient(mqttServerUri, "Pub-" + clientId);
+        try (MqttAsyncClient client = new MqttAsyncClient(mqttServerUri, "Pub-" + clientId)) {
             MqttConnectOptions connOpts = new MqttConnectOptions();
             if (isAuthSet()) {
                 MqttConfig mqttConfig = sSrvc.getMqttConfig();
@@ -141,6 +139,7 @@ public class MqttHelper11 {
             connOpts.setCleanSession(true);
             client.connect(connOpts).waitForCompletion(MQTT_CONNECT_TIMEOUT);
             client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(MQTT_PUBLISH_TIMEOUT);
+            client.disconnectForcibly();
         } catch (RuntimeException | MqttException ex) {
             if (expectedExceptions.contains(ex.getClass())) {
                 LOGGER.debug("Got expected exception {}", ex.getClass());
@@ -148,24 +147,6 @@ public class MqttHelper11 {
                 LOGGER.error("Exception on server {} :", mqttServerUri, ex);
                 fail("error publishing message on MQTT: " + ex.getMessage());
             }
-        } finally {
-            final MqttAsyncClient mc = client;
-            new Thread(() -> {
-                if (mc != null) {
-                    try {
-                        if (mc.isConnected()) {
-                            mc.disconnectForcibly();
-                        }
-                    } catch (MqttException ex) {
-                        LOGGER.warn("Exception disconnecting", ex);
-                    }
-                    try {
-                        mc.close();
-                    } catch (MqttException ex) {
-                        LOGGER.warn("Exception closing", ex);
-                    }
-                }
-            }).start();
         }
     }
 

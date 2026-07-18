@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class FineGrainedAuthTestsBasic11 extends FineGrainedAuthTestsBasic {
 
     public FineGrainedAuthTestsBasic11() {
-        super(ServerVersion.v_1_1);
+        super(ServerVersion.V_1_1);
     }
 
 }

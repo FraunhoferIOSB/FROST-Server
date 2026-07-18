@@ -25,7 +25,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class FineGrainedAuthTestsKeycloak11 extends FineGrainedAuthTestsKeycloak {
 
     public FineGrainedAuthTestsKeycloak11() {
-        super(ServerVersion.v_1_1, false);
+        super(ServerVersion.V_1_1, false);
     }
 
 }

@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class Capability1CoreOnlyTests11 extends Capability1CoreOnlyTests {
 
     public Capability1CoreOnlyTests11() {
-        super(ServerVersion.v_1_1);
+        super(ServerVersion.V_1_1);
     }
 
 }

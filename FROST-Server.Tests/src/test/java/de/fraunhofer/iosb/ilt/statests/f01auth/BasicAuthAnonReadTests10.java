@@ -22,7 +22,7 @@ import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 public class BasicAuthAnonReadTests10 extends BasicAuthAnonReadTests {
 
     public BasicAuthAnonReadTests10() {
-        super(ServerVersion.v_1_0);
+        super(ServerVersion.V_1_0);
     }
 
 }

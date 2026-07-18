@@ -532,23 +532,11 @@ public class TestSuite {
 
     public int findRandomPort() {
         int port;
-        ServerSocket s = null;
-        try {
-            s = new ServerSocket(0);
+        try (ServerSocket s = new ServerSocket(0)) {
             port = s.getLocalPort();
-            s.close();
-            s = null;
         } catch (IOException ex) {
             LOGGER.error("Failed to find a port. Using default 11883", ex);
             return 11883;
-        } finally {
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (IOException ex) {
-                    LOGGER.error("Failed to close port.", ex);
-                }
-            }
         }
         return port;
     }
@@ -634,7 +622,7 @@ public class TestSuite {
                     LOGGER.trace("Normal Entity: {}", name);
             }
         }
-        if (version == ServerVersion.v_1_0) {
+        if (version == ServerVersion.V_1_0) {
             if (hasMultiDatastream) {
                 serverSettings.addImplementedRequirement(version, ServerSettings.MULTIDATA_REQ);
             }
@@ -642,7 +630,7 @@ public class TestSuite {
                 serverSettings.addImplementedRequirement(version, ServerSettings.TASKING_REQ);
             }
         }
-        if (version == ServerVersion.v_1_1) {
+        if (version == ServerVersion.V_1_1) {
             JsonNode serverSettingsObject = jsonResponse.get("serverSettings");
             JsonNode conformanceArray = serverSettingsObject.get("conformance");
             for (JsonNode reqItem : conformanceArray) {
