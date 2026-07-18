@@ -37,7 +37,7 @@ public class TableRef {
     private Field<?> joinedTargetField;
     private Field<?> joinedFromField;
 
-    public TableRef(StaMainTable<?> table) {
+    public <T extends StaMainTable<T>> TableRef(T table) {
         this.type = table.getEntityType();
         this.table = table;
     }
@@ -50,8 +50,8 @@ public class TableRef {
         return type == null && table == null;
     }
 
-    public StaMainTable<?> getTable() {
-        return table;
+    public <T extends StaMainTable<T>> T getTable() {
+        return (T) table;
     }
 
     public void addJoin(NavigationProperty link, TableRef joinedTable) {
@@ -66,11 +66,11 @@ public class TableRef {
         joins.clear();
     }
 
-    public TableRef createJoin(String name, QueryState<?> queryState) {
+    public <T extends StaMainTable<T>> TableRef createJoin(String name, QueryState<T> queryState) {
         return table.createJoin(name, queryState, this);
     }
 
-    public void createSemiJoin(String name, StaMainTable joinTarget, QueryState<?> queryState) {
+    public <T extends StaMainTable<T>> void createSemiJoin(String name, StaMainTable joinTarget, QueryState<T> queryState) {
         table.createSemiJoin(name, joinTarget, queryState);
     }
 
@@ -96,20 +96,20 @@ public class TableRef {
         return found;
     }
 
-    public Field<?> getJoinedTargetField() {
-        return joinedTargetField;
+    public <F> Field<F> getJoinedTargetField() {
+        return (Field<F>) joinedTargetField;
     }
 
-    public TableRef setJoinedTargetField(Field<?> joinedFromField) {
+    public <F> TableRef setJoinedTargetField(Field<F> joinedFromField) {
         this.joinedTargetField = joinedFromField;
         return this;
     }
 
-    public Field<?> getJoinedFromField() {
-        return joinedFromField;
+    public <F> Field<F> getJoinedFromField() {
+        return (Field<F>) joinedFromField;
     }
 
-    public TableRef setJoinedFromField(Field<?> joinedOnField) {
+    public <F> TableRef setJoinedFromField(Field<F> joinedOnField) {
         this.joinedFromField = joinedOnField;
         return this;
     }

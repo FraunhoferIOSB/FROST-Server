@@ -105,7 +105,7 @@ public class QueryBuilder implements ResourcePathVisitor {
     private boolean forUpdate = false;
     private boolean parsed = false;
 
-    private QueryState<?> queryState;
+    private QueryState queryState;
 
     public QueryBuilder(JooqPersistenceManager pm) {
         this.pm = pm;
@@ -116,7 +116,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         return pm;
     }
 
-    public QueryState<?> getQueryState() {
+    public <T extends StaMainTable<T>> QueryState<T> getQueryState() {
         return queryState;
     }
 
@@ -527,7 +527,7 @@ public class QueryBuilder implements ResourcePathVisitor {
         return tableCollection;
     }
 
-    public static TableRef createJoinedRef(TableRef base, NavigationProperty np, StaMainTable<?> table) {
+    public static <T extends StaMainTable<T>> TableRef createJoinedRef(TableRef base, NavigationProperty np, T table) {
         if (np.getEntityType() != table.getEntityType()) {
             throw new IllegalArgumentException("NavProp does not point to given table: " + np.getEntityType() + " != " + table.getEntityType());
         }

@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostI
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPostUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
@@ -108,7 +109,7 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     private final transient SortedSet<SortingWrapper<Double, HookPreDelete>> hooksPreDelete;
     private final transient SortedSet<SortingWrapper<Double, HookPostDelete>> hooksPostDelete;
 
-    protected StaTableAbstract(DataType<?> idType, Name alias, StaTableAbstract<T> aliasedBase, Table updatedSql) {
+    protected <I> StaTableAbstract(DataType<I> idType, Name alias, StaTableAbstract<T> aliasedBase, Table updatedSql) {
         super(alias, null, updatedSql);
         this.idType = idType;
         if (aliasedBase == null) {
@@ -287,34 +288,23 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
     @Override
     public Entity insertIntoDatabase(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
-        EntityFactories entityFactories = pm.getEntityFactories();
-        EntityType entityType = entity.getType();
-        Map<Field, Object> insertFields = new HashMap<>();
+        final EntityFactories entityFactories = pm.getEntityFactories();
+        final EntityType entityType = entity.getType();
+        final Map<Field, Object> insertFields = new HashMap<>();
 
         // First, run the pre-insert hooks in the PRE_RELATION phase.
-        for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            if (!hookWrapper.getObject().preInsertIntoDatabase(PRE_RELATIONS, pm, entity, insertFields)) {
-                return null;
-            }
+        if (runPreInsertHooks(pm, entity, insertFields, PRE_RELATIONS)) {
+            return null;
         }
 
         // Second create/validate single-entity navigation links.
         // this must happen first so the second step can use these in validation
         // TODO: add Priority number, handle priorities < 0 here
-        for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
-            if (entity.isSetProperty(np)) {
-                Entity ne = entity.getProperty(np);
-                entityFactories.entityExistsOrCreate(pm, ne, updateMode);
-                PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
-                registry.convert(thisTable, entity, insertFields);
-            }
-        }
+        // TODO: Check if <we> are the mandatory target of the back-link, in case of 1-1 relations
+        insertHandleRelatedEntities(pm, entity, updateMode, insertFields);
 
-        // Third, run the pre-insert hooks in POST_RELATION phase.
-        for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
-            if (!hookWrapper.getObject().preInsertIntoDatabase(POST_RELATIONS, pm, entity, insertFields)) {
-                return null;
-            }
+        if (runPreInsertHooks(pm, entity, insertFields, POST_RELATIONS)) {
+            return null;
         }
 
         // Fourth, deal with the ID, user-defined or not
@@ -353,18 +343,11 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
 
         // Seventh, deal with set-navigation links.
         // TODO: add Priority number, handle priorities >= 0 here
-        for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
-            if (entity.isSetProperty(np)) {
-                LOGGER.debug("  Linking {}", np);
-                updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
-            }
-        }
+        insertHandleRelatedSets(pm, entity, updateMode);
 
         // Eigth, run the post-insert hooks in POST_INSERT phase.
-        for (SortingWrapper<Double, HookPostInsert> hookWrapper : hooksPostInsert) {
-            if (!hookWrapper.getObject().postInsertIntoDatabase(pm, entity, insertFields)) {
-                return null;
-            }
+        if (runPostInsertHooks(pm, entity, insertFields)) {
+            return null;
         }
 
         // Finally, create a new Entity from the returned result and return it.
@@ -373,6 +356,49 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             sp.convert(thisTable, result, newEntity, dataSize);
         }
         return newEntity;
+    }
+
+    private void insertHandleRelatedEntities(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode, Map<Field, Object> insertFields) throws NoSuchEntityException, IncompleteEntityException {
+        final EntityFactories entityFactories = pm.getEntityFactories();
+        final T thisTable = getThis();
+        final EntityType entityType = entity.getType();
+        for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
+            if (entity.isSetProperty(np)) {
+                Entity ne = entity.getProperty(np);
+                entityFactories.entityExistsOrCreate(pm, ne, updateMode);
+                PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
+                registry.convert(thisTable, entity, insertFields);
+            }
+        }
+    }
+
+    private void insertHandleRelatedSets(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        final EntityType entityType = entity.getType();
+        for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
+            if (entity.isSetProperty(np)) {
+                LOGGER.debug("  Linking {}", np);
+                updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
+            }
+        }
+    }
+
+    private boolean runPreInsertHooks(JooqPersistenceManager pm, Entity entity, Map<Field, Object> insertFields, Phase fase) throws IncompleteEntityException, NoSuchEntityException {
+        // Third, run the pre-insert hooks in POST_RELATION phase.
+        for (SortingWrapper<Double, HookPreInsert> hookWrapper : hooksPreInsert) {
+            if (!hookWrapper.getObject().preInsertIntoDatabase(fase, pm, entity, insertFields)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean runPostInsertHooks(JooqPersistenceManager pm, Entity entity, Map<Field, Object> insertFields) throws IncompleteEntityException, NoSuchEntityException {
+        for (SortingWrapper<Double, HookPostInsert> hookWrapper : hooksPostInsert) {
+            if (!hookWrapper.getObject().postInsertIntoDatabase(pm, entity, insertFields)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -397,24 +423,10 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             throw new IllegalStateException("Unknown relation: " + navProp.getName());
         }
         if (updateMode.deepUpdate) {
-            EntityFactories ef = pm.getEntityFactories();
-            boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
-            for (Entity child : linkedSet) {
-                if (ef.entityExists(pm, child, admin)) {
-                    final PathElementEntity childPe = new PathElementEntity(child.getPrimaryKeyValues(), child.getType(), null);
-                    pm.update(childPe, child, updateMode);
-                }
-            }
+            deepUpdateNavigationPropertySet(pm, linkedSet, updateMode);
         }
         if (updateMode.createAndLinkNew) {
-            EntityFactories ef = pm.getEntityFactories();
-            for (Entity child : linkedSet) {
-                final NavigationPropertyMain backLink = navProp.getInverse();
-                if (!backLink.isEntitySet()) {
-                    child.setProperty(backLink, entity);
-                }
-                ef.entityExistsOrCreate(pm, child, updateMode);
-            }
+            createAndLinkNew(pm, linkedSet, navProp, entity, updateMode);
         }
 
         if (updateMode.removeMissing) {
@@ -430,28 +442,38 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
     }
 
+    private void deepUpdateNavigationPropertySet(JooqPersistenceManager pm, EntitySet linkedSet, EditFeatures updateMode) throws IncompleteEntityException, NoSuchEntityException {
+        EntityFactories ef = pm.getEntityFactories();
+        boolean admin = PrincipalExtended.getLocalPrincipal().isAdmin();
+        for (Entity child : linkedSet) {
+            if (ef.entityExists(pm, child, admin)) {
+                final PathElementEntity childPe = new PathElementEntity(child.getPrimaryKeyValues(), child.getType(), null);
+                pm.update(childPe, child, updateMode);
+            }
+        }
+    }
+
+    private void createAndLinkNew(JooqPersistenceManager pm, EntitySet linkedSet, final NavigationPropertyEntitySet navProp, Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        EntityFactories ef = pm.getEntityFactories();
+        for (Entity child : linkedSet) {
+            final NavigationPropertyMain backLink = navProp.getInverse();
+            if (!backLink.isEntitySet()) {
+                child.setProperty(backLink, entity);
+            }
+            ef.entityExistsOrCreate(pm, child, updateMode);
+        }
+    }
+
     @Override
     public EntityChangedMessage updateInDatabase(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode, DataSize dataSize) throws NoSuchEntityException, IncompleteEntityException {
         final T thisTable = getThis();
-        final EntityFactories entityFactories = pm.getEntityFactories();
         final EntityType entityType = entity.getType();
         final Map<Field, Object> updateFields = new HashMap<>();
         final EntityChangedMessage message = new EntityChangedMessage();
 
-        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : hooksPreUpdate) {
-            hookWrapper.getObject().preUpdateInDatabase(pm, entity, entityId, updateMode);
-        }
+        runPreUpdateHooks(pm, entity, entityId, updateMode);
 
-        for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
-            if (entity.isSetProperty(np)) {
-                Entity ne = entity.getProperty(np);
-                if (!entityFactories.entityExists(pm, ne, PrincipalExtended.getLocalPrincipal().isAdmin())) {
-                    throw new NoSuchEntityException("Linked " + ne.getType() + " not found.");
-                }
-                PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
-                registry.convert(thisTable, entity, updateFields, message);
-            }
-        }
+        updateHandleRelatedEntities(pm, entity, updateFields, message);
 
         final Set<EntityPropertyMain> entityProperties = entityType.getEntityProperties();
         final List<EntityPropertyMain> primaryKeyProperties = entityType.getPrimaryKey().getKeyProperties();
@@ -480,15 +502,9 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
             result = executeUpdate(pm, dslContext, thisTable, updateFields, where, selectFields);
         }
 
-        for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
-            if (entity.isSetProperty(np)) {
-                updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
-            }
-        }
+        updateHandleRelatedSets(pm, entity, updateMode);
 
-        for (SortingWrapper<Double, HookPostUpdate> hookWrapper : hooksPostUpdate) {
-            hookWrapper.getObject().postUpdateInDatabase(pm, entity, entityId, updateMode);
-        }
+        runPostUpdateHooks(pm, entity, entityId, updateMode);
 
         Entity newEntity = new DefaultEntity(entityType, entity.getPrimaryKeyValues());
         message.setEntity(newEntity);
@@ -500,6 +516,37 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         }
 
         return message;
+    }
+
+    private void runPreUpdateHooks(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode) throws IncompleteEntityException, NoSuchEntityException {
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : hooksPreUpdate) {
+            hookWrapper.getObject().preUpdateInDatabase(pm, entity, entityId, updateMode);
+        }
+    }
+
+    private void updateHandleRelatedEntities(JooqPersistenceManager pm, Entity entity, Map<Field, Object> updateFields, EntityChangedMessage message) throws NoSuchEntityException {
+        final T thisTable = getThis();
+        final EntityFactories entityFactories = pm.getEntityFactories();
+        final EntityType entityType = entity.getType();
+        for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
+            if (entity.isSetProperty(np)) {
+                Entity ne = entity.getProperty(np);
+                if (!entityFactories.entityExists(pm, ne, PrincipalExtended.getLocalPrincipal().isAdmin())) {
+                    throw new NoSuchEntityException("Linked " + ne.getType() + " not found.");
+                }
+                PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
+                registry.convert(thisTable, entity, updateFields, message);
+            }
+        }
+    }
+
+    private void updateHandleRelatedSets(JooqPersistenceManager pm, Entity entity, EditFeatures updateMode) throws NoSuchEntityException, IncompleteEntityException {
+        final EntityType entityType = entity.getType();
+        for (NavigationPropertyMain<EntitySet> np : entityType.getNavigationSets()) {
+            if (entity.isSetProperty(np)) {
+                updateNavigationPropertySet(entity, entity.getProperty(np), pm, updateMode);
+            }
+        }
     }
 
     public Record executeUpdate(JooqPersistenceManager pm, DSLContext dslContext, T thisTable, Map<Field, Object> updateFields, Condition where, Set<Field> selectFields) throws DataAccessException, IllegalStateException {
@@ -530,6 +577,12 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         } catch (TooManyRowsException e) {
             LOGGER.error("Updating {} with WHERE {} caused too many rows to change (more than one)!", getName(), where);
             throw new IllegalStateException(CHANGED_MULTIPLE_ROWS, e);
+        }
+    }
+
+    private void runPostUpdateHooks(JooqPersistenceManager pm, Entity entity, PkValue entityId, EditFeatures updateMode) throws IncompleteEntityException, NoSuchEntityException {
+        for (SortingWrapper<Double, HookPostUpdate> hookWrapper : hooksPostUpdate) {
+            hookWrapper.getObject().postUpdateInDatabase(pm, entity, entityId, updateMode);
         }
     }
 

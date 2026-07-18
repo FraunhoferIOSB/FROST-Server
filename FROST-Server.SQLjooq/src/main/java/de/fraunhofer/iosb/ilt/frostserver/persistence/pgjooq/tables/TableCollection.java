@@ -88,7 +88,7 @@ public class TableCollection {
         return tablesByType.values();
     }
 
-    public void registerTable(EntityType type, StaTableAbstract<?> table) {
+    public <I, T extends StaMainTable<T>> void registerTable(EntityType type, StaTableAbstract<I, T> table) {
         tablesByType.put(type, table);
         tablesByClass.put(table.getClass(), table);
         tablesByName.put(table.getName(), table);
@@ -143,10 +143,11 @@ public class TableCollection {
     }
 
     /**
+     * @param <T> The table type.
      * @return the tablesByType
      */
-    public Map<EntityType, StaMainTable<?>> getTablesByType() {
-        return tablesByType;
+    public <T extends StaMainTable<T>> Map<EntityType, T> getTablesByType() {
+        return (Map<EntityType, T>) tablesByType;
     }
 
     /**

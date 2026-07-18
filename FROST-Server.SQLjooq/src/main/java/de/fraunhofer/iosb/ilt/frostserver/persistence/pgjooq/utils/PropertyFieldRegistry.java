@@ -129,56 +129,60 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
      */
     public PropertyFields<T> getPropertyFieldsForProperty(Property property) {
         if (property instanceof EntityPropertyCustomSelect epcs) {
-            EntityPropertyMain parentProp = epcs.getMainProperty();
-            PropertyFields<T> lastPropFields = propFieldsMap.get(parentProp);
-            final PropertyFields<T> mainPropCopy = lastPropFields.emptyCopy();
-            PropertyFields<T> lastPropCopy = mainPropCopy;
-
-            PropertyType parentType = parentProp.getType();
-            final List<String> subPath = epcs.getSubPath();
-            EntityPropertyMain lastProp = parentProp;
-            PropertyType lastType = parentType;
-            for (int idx = 0; idx < subPath.size(); idx++) {
-                if (lastType instanceof TypeComplex tc) {
-                    boolean openType = tc.isOpenType();
-                    String pathPart = subPath.get(idx);
-                    EntityPropertyMain subProp = tc.getEntityProperty(pathPart);
-                    if (subProp == null) {
-                        // We have reached a custom property.
-                        if (!openType) {
-                            throw new IllegalArgumentException("No path: at " + pathPart + " of " + epcs);
-                        }
-                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
-                    } else {
-                        // Nested properties
-                        PropertyFields<T> subPropFields = lastPropFields.subFields.get(subProp);
-                        PropertyFields<T> subPropCopy = subPropFields.emptyCopy();
-                        lastPropCopy.addSubProperty(subPropCopy);
-
-                        lastProp = subProp;
-                        lastPropFields = subPropFields;
-                        lastPropCopy = subPropCopy;
-                    }
-                } else {
-                    final boolean hasCustomProperties = lastProp.hasCustomProperties();
-                    if (hasCustomProperties || lastPropFields.jsonType) {
-                        if (hasCustomProperties != lastPropFields.jsonType) {
-                            LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", hasCustomProperties, lastPropFields.jsonType);
-                        }
-                        // Not a complex type, but can be queried.
-                        return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
-                    } else {
-                        LOGGER.error("Not a complex property: {} {}", property, parentType);
-                        return null;
-                    }
-                }
-            }
-            lastPropCopy.fieldsAll.putAll(lastPropFields.fieldsAll);
-            lastPropCopy.fieldsSelect.putAll(lastPropFields.fieldsSelect);
-            return mainPropCopy;
+            return getPropertyFieldsForCustomProperty(epcs);
         } else {
             return propFieldsMap.get(property);
         }
+    }
+
+    private PropertyFields<T> getPropertyFieldsForCustomProperty(EntityPropertyCustomSelect epcs) throws IllegalArgumentException {
+        EntityPropertyMain parentProp = epcs.getMainProperty();
+        PropertyFields<T> lastPropFields = propFieldsMap.get(parentProp);
+        final PropertyFields<T> mainPropCopy = lastPropFields.emptyCopy();
+        PropertyFields<T> lastPropCopy = mainPropCopy;
+
+        PropertyType parentType = parentProp.getType();
+        final List<String> subPath = epcs.getSubPath();
+        EntityPropertyMain lastProp = parentProp;
+        PropertyType lastType = parentType;
+        for (int idx = 0; idx < subPath.size(); idx++) {
+            if (lastType instanceof TypeComplex tc) {
+                boolean openType = tc.isOpenType();
+                String pathPart = subPath.get(idx);
+                EntityPropertyMain subProp = tc.getEntityProperty(pathPart);
+                if (subProp == null) {
+                    // We have reached a custom property.
+                    if (!openType) {
+                        throw new IllegalArgumentException("No path: at " + pathPart + " of " + epcs);
+                    }
+                    return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
+                } else {
+                    // Nested properties
+                    PropertyFields<T> subPropFields = lastPropFields.subFields.get(subProp);
+                    PropertyFields<T> subPropCopy = subPropFields.emptyCopy();
+                    lastPropCopy.addSubProperty(subPropCopy);
+
+                    lastProp = subProp;
+                    lastPropFields = subPropFields;
+                    lastPropCopy = subPropCopy;
+                }
+            } else {
+                final boolean hasCustomProperties = lastProp.hasCustomProperties();
+                if (hasCustomProperties || lastPropFields.jsonType) {
+                    if (hasCustomProperties != lastPropFields.jsonType) {
+                        LOGGER.warn("Config diference between Property.hasCustomProperties ({}) and PropertyField.jsonType ({})", hasCustomProperties, lastPropFields.jsonType);
+                    }
+                    // Not a complex type, but can be queried.
+                    return handleEntityPropertyCustomSelect(epcs, lastPropFields, subPath, idx);
+                } else {
+                    LOGGER.error("Not a complex property: {} {}", epcs, parentType);
+                    return null;
+                }
+            }
+        }
+        lastPropCopy.fieldsAll.putAll(lastPropFields.fieldsAll);
+        lastPropCopy.fieldsSelect.putAll(lastPropFields.fieldsSelect);
+        return mainPropCopy;
     }
 
     private PropertyFields<T> handleEntityPropertyCustomSelect(EntityPropertyCustomSelect epcs, PropertyFields<T> propFields, List<String> subPath, int idx) {
