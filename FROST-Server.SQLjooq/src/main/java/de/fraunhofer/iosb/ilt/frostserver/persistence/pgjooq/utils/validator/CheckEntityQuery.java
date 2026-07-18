@@ -39,9 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckEntityQuery implements ValidationCheck {
 
-    /**
-     * The logger for this class.
-     */
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckEntityQuery.class);
 
     @ConfigurableField(editor = EditorString.class,
@@ -49,9 +47,9 @@ public class CheckEntityQuery implements ValidationCheck {
     @EditorString.EdOptsString
     private String query;
 
-    private EntityType entityType;
-    private DynamicContext context;
-    private Query parsedQuery;
+    private transient EntityType entityType;
+    private transient DynamicContext context;
+    private transient Query parsedQuery;
 
     @Override
     public boolean check(JooqPersistenceManager pm, Entity contextEntity) {

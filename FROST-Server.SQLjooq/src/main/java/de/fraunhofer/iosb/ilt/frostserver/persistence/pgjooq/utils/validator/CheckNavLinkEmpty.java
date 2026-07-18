@@ -34,9 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckNavLinkEmpty implements ValidationCheck {
 
-    /**
-     * The logger for this class.
-     */
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckNavLinkEmpty.class);
 
     public enum EmptyState {
@@ -66,9 +64,9 @@ public class CheckNavLinkEmpty implements ValidationCheck {
     @EditorEnum.EdOptsEnum(sourceType = EmptyState.class, dflt = "MUST_BE_EMPTY")
     private EmptyState requiredState = EmptyState.MUST_BE_EMPTY;
 
-    private EntityType entityType;
-    private EntityType targetType;
-    private NavigationPropertyMain targetNp;
+    private transient EntityType entityType;
+    private transient EntityType targetType;
+    private transient NavigationPropertyMain targetNp;
 
     @Override
     public boolean check(JooqPersistenceManager pm, Entity contextEntity) {

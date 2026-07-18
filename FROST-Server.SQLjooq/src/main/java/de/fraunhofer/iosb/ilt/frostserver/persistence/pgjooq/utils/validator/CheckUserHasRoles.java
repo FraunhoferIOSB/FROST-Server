@@ -33,6 +33,8 @@ import java.util.Set;
  */
 public class CheckUserHasRoles implements ValidationCheck, UserCondition {
 
+    private static final long serialVersionUID = 1L;
+
     public enum Type {
         ANY,
         ALL

@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorList;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
+import java.io.Serializable;
 import java.util.List;
 import org.jooq.Table;
 
@@ -34,7 +35,9 @@ public class SecurityWrapperMulti implements SecurityTableWrapper {
     private static final long serialVersionUID = 1L;
 
     @ConfigurableClass
-    public static class IfConditionThenWrapper implements AnnotatedConfigurable<Void, Void> {
+    public static class IfConditionThenWrapper implements AnnotatedConfigurable<Void, Void>, Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         @ConfigurableField(editor = EditorSubclass.class, label = "If", description = "The condition in which to apply the Wrapper")
         @EditorSubclass.EdOptsSubclass(iface = UserCondition.class, merge = true, nameField = "@class", shortenClassNames = true)

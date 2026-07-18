@@ -40,9 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckNavLinksEmpty implements ValidationCheck {
 
-    /**
-     * The logger for this class.
-     */
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckNavLinksEmpty.class);
 
     @ConfigurableField(editor = EditorList.class,
@@ -61,8 +59,8 @@ public class CheckNavLinksEmpty implements ValidationCheck {
     @EditorEnum.EdOptsEnum(sourceType = CheckMulti.Type.class, dflt = "AND")
     private CheckMulti.Type combineType;
 
-    private EntityType entityType;
-    private List<NavigationPropertyMain> targetNps;
+    private transient EntityType entityType;
+    private transient List<NavigationPropertyMain> targetNps;
 
     @Override
     public boolean check(JooqPersistenceManager pm, Entity contextEntity) {

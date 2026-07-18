@@ -30,6 +30,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.io.Serializable;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +49,9 @@ public class SecurityWrapperJoin implements SecurityTableWrapper {
     private static final long serialVersionUID = 1L;
 
     @ConfigurableClass
-    public static class TableJoin implements AnnotatedConfigurable<Void, Void> {
+    public static class TableJoin implements AnnotatedConfigurable<Void, Void>, Serializable {
+
+        private static final long serialVersionUID = 1L;
 
         public enum JoinType {
             INNER,

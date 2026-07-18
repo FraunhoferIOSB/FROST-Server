@@ -20,13 +20,14 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import java.io.Serializable;
 
 /**
  *
  * @author hylke
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface UserCondition extends AnnotatedConfigurable<Void, Void> {
+public interface UserCondition extends AnnotatedConfigurable<Void, Void>, Serializable {
 
     public boolean isValid(JooqPersistenceManager pm);
 

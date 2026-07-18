@@ -21,10 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 
-/**
- *
- * @author hylke
- */
 public interface HookValidator extends SecurityWrapper {
 
     public void registerHooks(StaMainTable mainTable, JooqPersistenceManager ppm);

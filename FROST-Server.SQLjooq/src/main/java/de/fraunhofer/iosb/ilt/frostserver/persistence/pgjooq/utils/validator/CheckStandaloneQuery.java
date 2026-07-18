@@ -40,9 +40,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
 
-    /**
-     * The logger for this class.
-     */
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckStandaloneQuery.class);
 
     @ConfigurableField(editor = EditorString.class,
@@ -55,10 +54,10 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
     @EditorString.EdOptsString
     private String query;
 
-    private ResourcePath path;
-    private EntityType entityType;
-    private DynamicContext context;
-    private Query parsedQuery;
+    private transient ResourcePath path;
+    private transient EntityType entityType;
+    private transient DynamicContext context;
+    private transient Query parsedQuery;
 
     @Override
     public boolean check(JooqPersistenceManager pm, Entity contextEntity) {

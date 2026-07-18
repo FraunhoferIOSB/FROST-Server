@@ -21,13 +21,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import java.io.Serializable;
 
 /**
  *
  * @author scf
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface ValidationCheck extends AnnotatedConfigurable<Void, Void> {
+public interface ValidationCheck extends AnnotatedConfigurable<Void, Void>, Serializable {
 
     public boolean check(JooqPersistenceManager pm, Entity context);
 

@@ -44,9 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CheckNavLinkQuery implements ValidationCheck {
 
-    /**
-     * The logger for this class.
-     */
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckNavLinkQuery.class);
 
     @ConfigurableField(editor = EditorString.class,
@@ -64,11 +62,11 @@ public class CheckNavLinkQuery implements ValidationCheck {
     @EditorBoolean.EdOptsBool(dflt = true)
     private boolean emptyAllowed = true;
 
-    private EntityType entityType;
-    private EntityType targetType;
-    private NavigationPropertyMain targetNp;
-    private DynamicContext context;
-    private Query parsedQuery;
+    private transient EntityType entityType;
+    private transient EntityType targetType;
+    private transient NavigationPropertyMain targetNp;
+    private transient DynamicContext context;
+    private transient Query parsedQuery;
 
     @Override
     public boolean check(JooqPersistenceManager pm, Entity contextEntity) {

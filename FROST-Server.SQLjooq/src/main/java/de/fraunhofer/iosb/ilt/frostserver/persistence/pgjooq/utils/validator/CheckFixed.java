@@ -27,6 +27,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceMana
  */
 public class CheckFixed implements ValidationCheck, UserCondition {
 
+    private static final long serialVersionUID = 1L;
+
     @ConfigurableField(editor = EditorBoolean.class,
             label = "Always Valid", description = "If checked always return valid, otherwise always return inValid.")
     @EditorBoolean.EdOptsBool()

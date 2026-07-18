@@ -31,6 +31,8 @@ import java.util.List;
  */
 public class CheckMulti implements ValidationCheck {
 
+    private static final long serialVersionUID = 1L;
+
     public enum Type {
         AND,
         OR
