@@ -163,6 +163,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
     /**
      * Create a <code>public.DATASTREAMS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the ID column used in the database.
      * @param idTypeOp The (SQL)DataType of the OBS_PROPERTY_ID column used in
      * the database.
@@ -172,7 +173,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpDatastreams(DataType<?> idType, DataType<?> idTypeOp, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpDatastreams(DataType<I> idType, DataType<?> idTypeOp, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colSensorId = createField(DSL.name(NAME_COL_SENSORID), idTypeSnsr.nullable(false));
@@ -272,20 +273,20 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
-    public TableField<Record, ?> getSensorId() {
-        return colSensorId;
+    public <I> TableField<Record, I> getSensorId() {
+        return (TableField<Record, I>) colSensorId;
     }
 
-    public TableField<Record, ?> getObsPropertyId() {
-        return colObsPropertyId;
+    public <I> TableField<Record, I> getObsPropertyId() {
+        return (TableField<Record, I>) colObsPropertyId;
     }
 
-    public TableField<Record, ?> getThingId() {
-        return colThingId;
+    public <I> TableField<Record, I> getThingId() {
+        return (TableField<Record, I>) colThingId;
     }
 
     @Override

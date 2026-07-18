@@ -45,12 +45,13 @@ public class TableImpThingsLocations extends StaLinkTable<TableImpThingsLocation
     /**
      * Create a <code>public.THINGS_LOCATIONS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idTypeThing The (SQL)DataType of the ThingId column used in the
      * actual database.
      * @param idTypeLocation The (SQL)DataType of the LocationId column used in
      * the actual database.
      */
-    public TableImpThingsLocations(DataType<?> idTypeThing, DataType<?> idTypeLocation) {
+    public <I> TableImpThingsLocations(DataType<I> idTypeThing, DataType<I> idTypeLocation) {
         super(DSL.name(NAME_TABLE), null);
         colThingId = createField(DSL.name(NAME_COL_TL_THINGID), idTypeThing);
         colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), idTypeLocation);
@@ -62,12 +63,12 @@ public class TableImpThingsLocations extends StaLinkTable<TableImpThingsLocation
         colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), aliased.colLocationId.getDataType());
     }
 
-    public TableField<Record, ?> getLocationId() {
-        return colLocationId;
+    public <I> TableField<Record, I> getLocationId() {
+        return (TableField<Record, I>) colLocationId;
     }
 
-    public TableField<Record, ?> getThingId() {
-        return colThingId;
+    public <I> TableField<Record, I> getThingId() {
+        return (TableField<Record, I>) colThingId;
     }
 
     @Override

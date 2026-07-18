@@ -40,8 +40,6 @@ import org.jooq.TableField;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDataType;
 import org.jooq.impl.SQLDataType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TableImpThings extends StaTableAbstract<TableImpThings> {
 
@@ -51,7 +49,6 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
     public static final String NAME_COL_NAME = "NAME";
     public static final String NAME_COL_PROPERTIES = "PROPERTIES";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableImpThings.class.getName());
     private static final long serialVersionUID = -729589982;
 
     /**
@@ -79,11 +76,12 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
     /**
      * Create a <code>public.THINGS</code> table reference
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpThings(DataType<?> idType, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpThings(DataType<I> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
     }
@@ -143,8 +141,8 @@ public class TableImpThings extends StaTableAbstract<TableImpThings> {
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
     @Override

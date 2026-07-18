@@ -115,7 +115,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public TableRef join(S joinSource, QueryState<?> queryState, TableRef sourceRef) {
+    public <O extends StaMainTable<O>> TableRef join(S joinSource, QueryState<O> queryState, TableRef sourceRef) {
         Field<?> sourceField = sourceFieldAccessor.getField(joinSource);
         T targetAliased = (T) target.asSecure(queryState.getNextAlias(), queryState.getPersistenceManager());
         Field<?> targetField = targetFieldAccessor.getField(targetAliased);
@@ -133,7 +133,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState) {
+    public <O extends StaMainTable<O>> void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<O> queryState) {
         Field sourceField = sourceFieldAccessor.getField(joinSource);
         Field targetField = targetFieldAccessor.getField((T) joinTarget);
         queryState.setSqlWhere(queryState.getSqlWhere().and(targetField.eq(sourceField)));

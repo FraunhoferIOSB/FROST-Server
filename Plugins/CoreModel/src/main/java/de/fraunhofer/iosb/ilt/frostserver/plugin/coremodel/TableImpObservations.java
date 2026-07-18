@@ -176,6 +176,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
     /**
      * Create a <code>public.OBSERVATIONS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the ID column used in the database.
      * @param idTypeDs The (SQL)DataType of the DATASTREAM_ID column used in the
      * database.
@@ -183,7 +184,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
      * the database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpObservations(DataType<?> idType, DataType<?> idTypeDs, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpObservations(DataType<I> idType, DataType<?> idTypeDs, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colDatastreamId = createField(DSL.name(NAME_COL_DATASTREAMID), idTypeDs);
@@ -293,16 +294,16 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
-    public TableField<Record, ?> getDatastreamId() {
-        return colDatastreamId;
+    public <I> TableField<Record, I> getDatastreamId() {
+        return (TableField<Record, I>) colDatastreamId;
     }
 
-    public TableField<Record, ?> getFeatureId() {
-        return colFeatureId;
+    public <I> TableField<Record, I> getFeatureId() {
+        return (TableField<Record, I>) colFeatureId;
     }
 
     @Override

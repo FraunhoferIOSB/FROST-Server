@@ -50,12 +50,13 @@ public class TableImpMultiDatastreamsObsProperties extends StaLinkTable<TableImp
      * Create a <code>public.MULTI_DATASTREAMS_OBS_PROPERTIES</code> table
      * reference.
      *
+     * @param <I> The id column types.
      * @param idTypeMds The (SQL)DataType of the MultiDatastreamId column used
      * in the actual database.
      * @param idTypeObsProp The (SQL)DataType of the ObsPropertyId column used
      * in the actual database.
      */
-    public TableImpMultiDatastreamsObsProperties(DataType<?> idTypeMds, DataType<?> idTypeObsProp) {
+    public <I> TableImpMultiDatastreamsObsProperties(DataType<I> idTypeMds, DataType<?> idTypeObsProp) {
         super(DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);
         colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), idTypeMds);
         colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), idTypeObsProp);
@@ -67,12 +68,12 @@ public class TableImpMultiDatastreamsObsProperties extends StaLinkTable<TableImp
         colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), aliased.colObsPropertyId.getDataType());
     }
 
-    public TableField<Record, ?> getMultiDatastreamId() {
-        return colMultiDatastreamId;
+    public <I> TableField<Record, I> getMultiDatastreamId() {
+        return (TableField<Record, I>) colMultiDatastreamId;
     }
 
-    public TableField<Record, ?> getObsPropertyId() {
-        return colObsPropertyId;
+    public <I> TableField<Record, I> getObsPropertyId() {
+        return (TableField<Record, I>) colObsPropertyId;
     }
 
     @Override

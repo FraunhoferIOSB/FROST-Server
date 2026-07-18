@@ -70,12 +70,13 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
     /**
      * Create a <code>public.HIST_LOCATIONS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the ID column used in the database.
      * @param idTypeThing The (SQL)DataType of the THING_ID column used in the
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpHistLocations(DataType<?> idType, DataType<?> idTypeThing, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpHistLocations(DataType<I> idType, DataType<?> idTypeThing, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
         colThingId = createField(DSL.name(NAME_COL_THINGID), idTypeThing);
@@ -128,12 +129,12 @@ public class TableImpHistLocations extends StaTableAbstract<TableImpHistLocation
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
-    public TableField<Record, ?> getThingId() {
-        return colThingId;
+    public <I> TableField<Record, I> getThingId() {
+        return (TableField<Record, I>) colThingId;
     }
 
     @Override

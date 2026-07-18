@@ -81,11 +81,12 @@ public class TableImpObsProperties extends StaTableAbstract<TableImpObsPropertie
     /**
      * Create a <code>public.OBS_PROPERTIES</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpObsProperties(DataType<?> idType, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpObsProperties(DataType<I> idType, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
         this.pluginCoreModel = pluginCoreModel;
     }
@@ -128,8 +129,8 @@ public class TableImpObsProperties extends StaTableAbstract<TableImpObsPropertie
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
     @Override

@@ -86,13 +86,14 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
     /**
      * Create a <code>public.ACTUATORS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      * @param pluginActuation the actuation plugin this table belongs to.
      * @param pluginCoreModel the coreModel plugin that this data model links
      * to.
      */
-    public TableImpActuators(DataType<?> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpActuators(DataType<I> idType, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("ACTUATORS"), null, null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
@@ -158,8 +159,8 @@ public class TableImpActuators extends StaTableAbstract<TableImpActuators> {
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <T> TableField<Record, T> getId() {
+        return (TableField<Record, T>) colId;
     }
 
     @Override

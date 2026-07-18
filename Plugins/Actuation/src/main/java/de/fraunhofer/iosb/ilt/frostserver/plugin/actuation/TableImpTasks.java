@@ -74,13 +74,15 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
     /**
      * Create a <code>public.TASKS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the Id columns used in the actual
-     * database.
+     * @param idTypeTaskingCap The (SQL)DataType of the Id columns used in the
+     * actual database.
      * @param pluginActuation the actuation plugin this table belongs to.
      * @param pluginCoreModel the coreModel plugin that this data model links
      * to.
      */
-    public TableImpTasks(DataType<?> idType, DataType<?> idTypeTaskingCap, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpTasks(DataType<I> idType, DataType<I> idTypeTaskingCap, PluginActuation pluginActuation, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name("TASKS"), null, null);
         this.pluginActuation = pluginActuation;
         this.pluginCoreModel = pluginCoreModel;
@@ -127,12 +129,12 @@ public class TableImpTasks extends StaTableAbstract<TableImpTasks> {
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
-    public TableField<Record, ?> getTaskingCapabilityId() {
-        return colTaskingCapabilityId;
+    public <I> TableField<Record, I> getTaskingCapabilityId() {
+        return (TableField<Record, I>) colTaskingCapabilityId;
     }
 
     @Override

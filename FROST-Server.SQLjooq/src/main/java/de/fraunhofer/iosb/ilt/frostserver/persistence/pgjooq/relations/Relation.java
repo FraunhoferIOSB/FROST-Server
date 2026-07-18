@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 /**
  * The interface for table-to-table relations.
  *
- * @author hylke
  * @param <S> the type of the table linked from.
  */
 public interface Relation<S extends StaMainTable<S>> {
@@ -42,21 +41,23 @@ public interface Relation<S extends StaMainTable<S>> {
     /**
      * Create a table join across this relation.
      *
+     * @param <O> The type of the other table.
      * @param source The (aliased) source table to join on.
      * @param queryState The query state to register the join on.
      * @param sourceRef The table tree to add the join to.
      * @return A new table tree leaf-entry.
      */
-    public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef);
+    public <O extends StaMainTable<O>> TableRef join(S source, QueryState<O> queryState, TableRef sourceRef);
 
     /**
      * Create a semi-join, useful for sub-queries that link to the main query.
      *
+     * @param <O> The type of the other table.
      * @param joinSource The source (subquery) table.
      * @param joinTarget The target (outer) query table.
      * @param queryState The query state to register the join on.
      */
-    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState);
+    public <O extends StaMainTable<O>> void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<O> queryState);
 
     /**
      * Create a link between the given source and target. This is not

@@ -156,6 +156,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
     /**
      * Create a <code>public.MULTI_DATASTREAMS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      * @param idTypeSnsr The (SQL)DataType of the SENSOR_ID column used in the
@@ -165,7 +166,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
      * @param pMultiDs the multiDatastream plugin this table belongs to.
      * @param pCoreModel the coreModel plugin that this data model links to.
      */
-    public TableImpMultiDatastreams(DataType<?> idType, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
+    public <I> TableImpMultiDatastreams(DataType<I> idType, DataType<?> idTypeSnsr, DataType<?> idTypeTng, PluginMultiDatastream pMultiDs, PluginCoreModel pCoreModel) {
         super(idType, DSL.name("MULTI_DATASTREAMS"), null, null);
         this.pluginMultiDatastream = pMultiDs;
         this.pluginCoreModel = pCoreModel;
@@ -428,16 +429,16 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
-    public TableField<Record, ?> getSensorId() {
-        return colSensorId;
+    public <I> TableField<Record, I> getSensorId() {
+        return (TableField<Record, I>) colSensorId;
     }
 
-    public TableField<Record, ?> getThingId() {
-        return colThingId;
+    public <I> TableField<Record, I> getThingId() {
+        return (TableField<Record, I>) colThingId;
     }
 
     @Override

@@ -44,12 +44,13 @@ public class TableImpLocationsHistLocations extends StaLinkTable<TableImpLocatio
     /**
      * Create a <code>public.LOCATIONS_HIST_LOCATIONS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idTypeLocation The (SQL)DataType of the LocationId column used in
      * the actual database.
      * @param idTypeHistLoc The (SQL)DataType of the HistLocationId column used
      * in the actual database.
      */
-    public TableImpLocationsHistLocations(DataType<?> idTypeLocation, DataType<?> idTypeHistLoc) {
+    public <I> TableImpLocationsHistLocations(DataType<I> idTypeLocation, DataType<?> idTypeHistLoc) {
         super(DSL.name(NAME_TABLE), null);
         colLocationId = createField(DSL.name(NAME_COL_LOCATIONID), idTypeLocation);
         colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), idTypeHistLoc);
@@ -61,12 +62,12 @@ public class TableImpLocationsHistLocations extends StaLinkTable<TableImpLocatio
         colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), aliased.colHistLocationId.getDataType());
     }
 
-    public TableField<Record, ?> getLocationId() {
-        return colLocationId;
+    public <I> TableField<Record, I> getLocationId() {
+        return (TableField<Record, I>) colLocationId;
     }
 
-    public TableField<Record, ?> getHistLocationId() {
-        return colHistLocationId;
+    public <I> TableField<Record, I> getHistLocationId() {
+        return (TableField<Record, I>) colHistLocationId;
     }
 
     @Override

@@ -46,7 +46,7 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
     private int[] pkFieldIdx;
     private List<Field> pkFields;
 
-    public StaTableDynamic(Name tableName, EntityType entityType, DataType<?> idType) {
+    public <I> StaTableDynamic(Name tableName, EntityType entityType, DataType<I> idType) {
         super(idType, tableName, null, null);
         this.tableName = tableName;
         this.entityType = entityType;

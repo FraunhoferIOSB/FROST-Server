@@ -104,13 +104,14 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
     /**
      * Create a <code>public.LOCATIONS</code> table reference.
      *
+     * @param <I> The id column types.
      * @param idType The (SQL)DataType of the Id columns used in the actual
      * database.
      * @param idTypeFeature The (SQL)DataType of the FEATURE_ID column used in
      * the database.
      * @param pluginCoreModel the coreModel plugin this table belongs to.
      */
-    public TableImpLocations(DataType<?> idType, DataType<?> idTypeFeature, PluginCoreModel pluginCoreModel) {
+    public <I> TableImpLocations(DataType<I> idType, DataType<I> idTypeFeature, PluginCoreModel pluginCoreModel) {
         super(idType, DSL.name(NAME_TABLE), null, null);
         colGenFoiId = createField(DSL.name(NAME_COL_GEN_FOI_ID), idTypeFeature);
         this.pluginCoreModel = pluginCoreModel;
@@ -195,12 +196,12 @@ public class TableImpLocations extends StaTableAbstract<TableImpLocations> {
         return Arrays.asList(colId);
     }
 
-    public TableField<Record, ?> getId() {
-        return colId;
+    public <I> TableField<Record, I> getId() {
+        return (TableField<Record, I>) colId;
     }
 
-    public TableField<Record, ?> getGenFoiId() {
-        return colGenFoiId;
+    public <I> TableField<Record, I> getGenFoiId() {
+        return (TableField<Record, I>) colGenFoiId;
     }
 
     @Override

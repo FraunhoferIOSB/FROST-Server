@@ -88,7 +88,7 @@ public class TableCollection {
         return tablesByType.values();
     }
 
-    public <I, T extends StaMainTable<T>> void registerTable(EntityType type, StaTableAbstract<I, T> table) {
+    public <T extends StaMainTable<T>> void registerTable(EntityType type, StaTableAbstract<T> table) {
         tablesByType.put(type, table);
         tablesByClass.put(table.getClass(), table);
         tablesByName.put(table.getName(), table);

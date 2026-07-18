@@ -162,7 +162,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public TableRef join(S source, QueryState<?> queryState, TableRef sourceRef) {
+    public <O extends StaMainTable<O>> TableRef join(S source, QueryState<O> queryState, TableRef sourceRef) {
         L linkTableAliased = (L) linkTable.as(queryState.getNextAlias());
         T targetAliased = (T) target.asSecure(queryState.getNextAlias(), queryState.getPersistenceManager());
         Field<Object> sourceField = sourceFieldAcc.getField(source);
@@ -176,7 +176,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     @Override
-    public void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<?> queryState) {
+    public <O extends StaMainTable<O>> void semiJoinTo(S joinSource, StaMainTable joinTarget, QueryState<O> queryState) {
         if (joinTarget.getEntityType() != target.getEntityType()) {
             throw new IllegalArgumentException("SemiJoin target entity type incorrect. Expected " + target.getEntityType() + ", got " + joinTarget.getEntityType());
         }
