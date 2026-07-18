@@ -202,38 +202,8 @@ public class KeycloakFilter implements Filter {
         FilterRequestAuthenticator authenticator = new FilterRequestAuthenticator(deployment, tokenStore, facade, httpRequest, 8443);
         AuthOutcome outcome = authenticator.authenticate();
         if (outcome == AuthOutcome.AUTHENTICATED) {
-            LOGGER.debug("User is authenticated...");
-            if (facade.isEnded()) {
-                LOGGER.debug("Facade is ended.");
-                return;
-            }
-            AuthenticatedActionsHandler actions = new AuthenticatedActionsHandler(deployment, facade);
-            if (actions.handledRequest()) {
-                LOGGER.debug("Request handled by authentication actions.");
-                return;
-            } else {
-                final KeycloakAccount account = findKeycloakAccount(httpRequest);
-                final Principal principalBasic = account.getPrincipal();
-                final String userName = principalBasic.getName();
-                final Set<String> roles = account.getRoles();
-                final PrincipalExtended pe = new PrincipalExtended(userName, roles.contains(roleAdmin), roles);
-                if (registerUserLocally) {
-                    databaseHandler.enureUserInUsertable(userName, roles);
-                }
-                if (authenticateOnly) {
-                    chain.doFilter(new RequestWrapper(httpRequest, pe), response);
-                    return;
-                }
-                if (roles.contains(roleMappings.get(requiredRole))) {
-                    LOGGER.debug("User has correct role.");
-                    chain.doFilter(new RequestWrapper(httpRequest, pe), response);
-                    return;
-                } else {
-                    LOGGER.debug("User is not allowed.");
-                    throwHttpError(403, httpResponse);
-                    return;
-                }
-            }
+            filterAuthenticated(facade, deployment, httpRequest, chain, response, requiredRole, httpResponse);
+            return;
         }
 
         if (requiredRole == Role.NONE) {
@@ -253,6 +223,38 @@ public class KeycloakFilter implements Filter {
         }
         LOGGER.debug("User is not allowed.");
         throwHttpError(401, httpResponse);
+    }
+
+    private void filterAuthenticated(OIDCServletHttpFacade facade, KeycloakDeployment deployment, HttpServletRequest httpRequest, FilterChain chain, ServletResponse response, Role requiredRole, HttpServletResponse httpResponse) throws IOException, ServletException {
+        LOGGER.debug("User is authenticated...");
+        if (facade.isEnded()) {
+            LOGGER.debug("Facade is ended.");
+            return;
+        }
+        AuthenticatedActionsHandler actions = new AuthenticatedActionsHandler(deployment, facade);
+        if (actions.handledRequest()) {
+            LOGGER.debug("Request handled by authentication actions.");
+            return;
+        }
+        final KeycloakAccount account = findKeycloakAccount(httpRequest);
+        final Principal principalBasic = account.getPrincipal();
+        final String userName = principalBasic.getName();
+        final Set<String> roles = account.getRoles();
+        final PrincipalExtended pe = new PrincipalExtended(userName, roles.contains(roleAdmin), roles);
+        if (registerUserLocally) {
+            databaseHandler.enureUserInUsertable(userName, roles);
+        }
+        if (authenticateOnly) {
+            chain.doFilter(new RequestWrapper(httpRequest, pe), response);
+            return;
+        }
+        if (roles.contains(roleMappings.get(requiredRole))) {
+            LOGGER.debug("User has correct role.");
+            chain.doFilter(new RequestWrapper(httpRequest, pe), response);
+            return;
+        }
+        LOGGER.debug("User is not allowed.");
+        throwHttpError(403, httpResponse);
     }
 
     private KeycloakAccount findKeycloakAccount(HttpServletRequest httpRequest) {

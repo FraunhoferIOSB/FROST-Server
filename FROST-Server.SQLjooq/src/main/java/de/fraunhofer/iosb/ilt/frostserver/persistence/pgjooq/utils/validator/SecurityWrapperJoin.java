@@ -45,6 +45,8 @@ import org.jooq.impl.DSL;
 @ConfigurableClass
 public class SecurityWrapperJoin implements SecurityTableWrapper {
 
+    private static final long serialVersionUID = 1L;
+
     @ConfigurableClass
     public static class TableJoin implements AnnotatedConfigurable<Void, Void> {
 

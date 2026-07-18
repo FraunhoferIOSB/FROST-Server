@@ -31,10 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * A multiplexing validator for CreateUpdateDelete actions.
  */
 public class ValidatorCUD implements HookValidator {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidatorCUD.class);
     private static final String OPERATION_NOT_ALLOWED = "Operation not allowed.";

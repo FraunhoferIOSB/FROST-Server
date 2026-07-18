@@ -72,7 +72,7 @@ public class JsonWriter {
         module.addSerializer(Property.class, new EntityPropertySerialiser());
         module.addSerializer(Date.class, new DateSerialiser());
 
-        ObjectMapper mapper = JsonMapper.builder()
+        return JsonMapper.builder()
                 .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
                 .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
@@ -82,8 +82,6 @@ public class JsonWriter {
                 .addModule(module)
                 .addModule(new JSONPModule())
                 .build();
-
-        return mapper;
     }
 
     public static void addModule(JacksonModule module) {

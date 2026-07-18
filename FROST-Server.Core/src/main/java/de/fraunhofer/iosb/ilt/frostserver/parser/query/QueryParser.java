@@ -58,7 +58,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_O_TOP;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_PATH_SEPARATOR;
 import de.fraunhofer.iosb.ilt.frostserver.util.queryparser.nodes.T_STRING;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.nio.charset.Charset;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,18 +289,14 @@ public class QueryParser extends Visitor {
     }
 
     public static Query parseQuery(String query, ServiceContext serviceContext, ResourcePath path) {
-        return parseQuery(query, StringHelper.UTF8, serviceContext, path, PrincipalExtended.ANONYMOUS_PRINCIPAL, new DynamicContext());
+        return parseQuery(query, serviceContext, path, PrincipalExtended.ANONYMOUS_PRINCIPAL, new DynamicContext());
     }
 
     public static Query parseQuery(String query, ServiceContext serviceContext, ResourcePath path, PrincipalExtended user) {
-        return parseQuery(query, StringHelper.UTF8, serviceContext, path, user, new DynamicContext());
+        return parseQuery(query, serviceContext, path, user, new DynamicContext());
     }
 
     public static Query parseQuery(String query, ServiceContext serviceContext, ResourcePath path, PrincipalExtended user, DynamicContext context) {
-        return parseQuery(query, StringHelper.UTF8, serviceContext, path, user, context);
-    }
-
-    public static Query parseQuery(String query, Charset encoding, ServiceContext serviceContext, ResourcePath path, PrincipalExtended user, DynamicContext context) {
         if (query == null || query.isEmpty()) {
             return new Query(serviceContext, path, user);
         }

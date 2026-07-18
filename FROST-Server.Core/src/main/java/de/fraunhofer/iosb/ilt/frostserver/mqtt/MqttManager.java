@@ -267,7 +267,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         final String rawType = e.getUserProperty(MQTT_USER_PROPERTY_NAME_TYPE);
         RequestTypeUtils.Type_23019 type = RequestTypeUtils.Type_23019.of(rawType);
         if (type == null) {
-            LOGGER.debug("Request with unknown or no request type; {}", StringHelper.cleanForLogging(rawType));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Request with unknown or no request type; {}", StringHelper.cleanForLogging(rawType));
+            }
             return;
         }
         final String responseTopic = e.getResponseTopic();
@@ -450,7 +452,6 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         private int createQueueCountMax = 0;
 
         private final boolean metrics;
-        private Counter queueOverrunCounter;
         private CounterDataPoint queueOverrunCreate;
         private CounterDataPoint queueOverrunChanged;
         private Gauge topicCount;
@@ -502,7 +503,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
                     })
                     .register();
 
-            queueOverrunCounter = Counter.builder()
+            Counter queueOverrunCounter = Counter.builder()
                     .name("mqtt_manager_queue_overruns")
                     .help("Number of items dropped because the queue was full")
                     .labelNames(LABEL_QUEUE_NAME)

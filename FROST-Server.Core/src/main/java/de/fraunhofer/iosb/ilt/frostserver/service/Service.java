@@ -484,10 +484,23 @@ public class Service implements AutoCloseable {
         }
     }
 
+    /**
+     * Add one reference to a collection:
+     *
+     * <pre>
+     * {@code
+     * POST Datastream(1)/ObservedProperties/$ref
+     * {"@id": "ObservedProperties(2)"}
+     * }
+     * </pre>
+     *
+     * @param pm the PersistenceManager
+     * @param path the Path
+     * @param request the request
+     * @param response the response
+     * @return the response or a new ServiceResponse.
+     */
     private ServiceResponse handlePostRef(PersistenceManager pm, ResourcePath path, ServiceRequest request, ServiceResponse response) {
-        // Add one reference to a collection:
-        // POST Datastream(1)/ObservedProperties/$ref
-        // {"@id": "ObservedProperties(2)"}
         PathElement mainElement = path.getMainElement();
         if (mainElement instanceof PathElementEntitySet mainSet) {
             try {
@@ -606,7 +619,7 @@ public class Service implements AutoCloseable {
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
-        } catch (IncompleteEntityException | IOException | RuntimeException exc) {
+        } catch (IncompleteEntityException | RuntimeException exc) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, exc.getMessage());
             LOGGER.debug(EXCEPTION, exc);
             rollbackAndClose(pm);
@@ -616,7 +629,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException {
+    private ServiceResponse handlePatch(PersistenceManager pm, ServiceRequest request, ServiceResponse response) {
         PathElementEntity mainElement;
         Entity entity;
         try {
@@ -634,7 +647,7 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
-        } catch (JsonParseException | JacksonException exc) {
+        } catch (IOException | JsonParseException | JacksonException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
         } catch (IncompleteEntityException | NoSuchEntityException exc) {
@@ -659,7 +672,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handleChangeSet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException, IncompleteEntityException {
+    private ServiceResponse handleChangeSet(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IncompleteEntityException {
         PathElementEntity mainElement;
         JsonPatch jsonPatch;
         try {
@@ -743,7 +756,7 @@ public class Service implements AutoCloseable {
         } catch (ForbiddenException e) {
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
-        } catch (IOException | RuntimeException e) {
+        } catch (RuntimeException e) {
             LOGGER.trace("Failed to handle request", e);
             rollbackAndClose(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
@@ -752,13 +765,23 @@ public class Service implements AutoCloseable {
         }
     }
 
-    private ServiceResponse handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse response) throws IOException {
-        // TODO: Replace all references in a set,
-        //   PUT Datastream(1)/ObservedProperties/$ref
-        //     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
-        // or the one reference for non-sets:
-        //   PUT Datastream(1)/Thing/$ref
-        //     {"@id": "Things(2)"}
+    /**
+     * <pre>
+     * {@code
+     *   PUT Datastream(1)/ObservedProperties/$ref
+     *     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
+     * or the one reference for non-sets:
+     *   PUT Datastream(1)/Thing/$ref
+     *     {"@id": "Things(2)"}
+     * }
+     * </pre>
+     *
+     * @param pm the PersistenceManager
+     * @param request the request
+     * @param response the response
+     * @return the response, or a new response.
+     */
+    private ServiceResponse handlePut(PersistenceManager pm, ServiceRequest request, ServiceResponse response) {
         try {
             ResourcePath path = parsePathForPutPatch(pm, request);
             if (path.isRef()) {
@@ -787,9 +810,21 @@ public class Service implements AutoCloseable {
         return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "PUT to ref only allowed on Entity or EntitySet");
     }
 
+    /**
+     * <pre>
+     * {@code
+     *   PUT Datastream(1)/ObservedProperties/$ref
+     *     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
+     * }
+     * </pre>
+     *
+     * @param pm the PersistenceManager
+     * @param request the request
+     * @param mainSet the set to apply to
+     * @param response the response
+     * @return the response, or a new response.
+     */
     private ServiceResponse handlePutRefSet(PersistenceManager pm, ServiceRequest request, PathElementEntitySet mainSet, ServiceResponse response) {
-        //   PUT Datastream(1)/ObservedProperties/$ref
-        //     {"value": [{ "@id": "ObservedProperties(2)" },{ "@id": "ObservedProperties(3)" }]}
         try {
             EntityReferenceList references = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReferenceList.class);
             List<Entity> targetEntities = references.resolve(
@@ -819,9 +854,21 @@ public class Service implements AutoCloseable {
         }
     }
 
+    /**
+     * <pre>
+     * {@code
+     *   PUT Datastream(1)/Thing/$ref
+     *     {"@id": "Things(2)"}
+     * }
+     * </pre>
+     *
+     * @param pm the PersistenceManager
+     * @param request the request
+     * @param mainEntity the Entity to apply to
+     * @param response the response
+     * @return the response, or a new response.
+     */
     private ServiceResponse handlePutRefEntity(PersistenceManager pm, ServiceRequest request, PathElementEntity mainEntity, ServiceResponse response) {
-        //   PUT Datastream(1)/Thing/$ref
-        //     {"@id": "Things(2)"}
         try {
             EntityReference entityReference = request.getJsonReader().getMapper().readValue(request.getContentReader(), EntityReference.class);
             Entity targetEntity = entityReference.resolve(modelRegistry, request.getUserPrincipal().isAdmin());

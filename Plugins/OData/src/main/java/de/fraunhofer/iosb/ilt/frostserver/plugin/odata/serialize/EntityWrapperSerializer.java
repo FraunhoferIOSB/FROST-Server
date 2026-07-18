@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySerializer;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
@@ -48,7 +47,7 @@ public class EntityWrapperSerializer extends ValueSerializer<EntityWrapper> {
         try {
             gen.writeStringProperty(contextField, wrapper.getContext());
             innerSerialiser.writeContent(wrapper.getEntity(), gen);
-        } catch (IOException | RuntimeException exc) {
+        } catch (RuntimeException exc) {
             LOGGER.error("Failed to serialise entity.", exc);
             throw new StreamWriteException(gen, "could not serialize Entity");
         } finally {

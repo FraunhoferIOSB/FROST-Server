@@ -71,7 +71,7 @@ class UrlHelperTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etRoom);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
 
@@ -92,7 +92,7 @@ class UrlHelperTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
         expResult.addPathElement(espe, true, false);
         expResult.setMainElement(espe);
         expResult.setRef(true);
@@ -103,7 +103,7 @@ class UrlHelperTest {
     @Test
     void testSelfLink() {
         ResourcePath path = new ResourcePath(Version.INTERNAL, "Houses");
-        path.addPathElement(new PathElementEntitySet(testModel.ET_HOUSE), true, false);
+        path.addPathElement(new PathElementEntitySet(testModel.etHouse), true, false);
 
         Query query = new Query(context, path);
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
@@ -116,7 +116,7 @@ class UrlHelperTest {
     @Test
     void testNextLink() {
         ResourcePath path = new ResourcePath(Version.INTERNAL, "Houses");
-        path.addPathElement(new PathElementEntitySet(testModel.ET_HOUSE), true, false);
+        path.addPathElement(new PathElementEntitySet(testModel.etHouse), true, false);
 
         Query query = new Query(context, path);
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);

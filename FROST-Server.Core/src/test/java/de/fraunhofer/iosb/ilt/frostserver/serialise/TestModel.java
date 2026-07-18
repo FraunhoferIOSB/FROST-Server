@@ -39,56 +39,52 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConst
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author hylke
- */
 public class TestModel {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, REQUIRED);
-    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
-    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, REQUIRED);
+    public final EntityPropertyMain<Number> epValue = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
+    public final EntityPropertyMain<TimeValue> epTime = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_HOUSE_ROOM = new NavigationPropertyEntity("House", REQUIRED);
-    public final NavigationPropertyEntitySet NP_ROOMS_HOUSE = new NavigationPropertyEntitySet("Rooms");
+    public final NavigationPropertyEntity npRoomHouse = new NavigationPropertyEntity("House", REQUIRED);
+    public final NavigationPropertyEntitySet npHouseRooms = new NavigationPropertyEntitySet("Rooms");
 
-    public final NavigationPropertyEntity NP_BATHROOMFOR_ROOM = new NavigationPropertyEntity("BathroomFor");
-    public final NavigationPropertyEntitySet NP_BATHROOMS_HOUSE = new NavigationPropertyEntitySet("Bathrooms");
+    public final NavigationPropertyEntity npRoomBathroom = new NavigationPropertyEntity("BathroomFor");
+    public final NavigationPropertyEntitySet npHouseBathrooms = new NavigationPropertyEntitySet("Bathrooms");
 
-    public final NavigationPropertyEntitySet NP_STREETS_HOUSE = new NavigationPropertyEntitySet("Streets");
-    public final NavigationPropertyEntitySet NP_HOUSES_STREET = new NavigationPropertyEntitySet("Houses");
+    public final NavigationPropertyEntitySet npHouseStreets = new NavigationPropertyEntitySet("Streets");
+    public final NavigationPropertyEntitySet npStreetHouses = new NavigationPropertyEntitySet("Houses");
 
-    public final EntityType ET_STREET = new EntityType("Street", "Streets");
-    public final EntityType ET_HOUSE = new EntityType("House", "Houses");
-    public final EntityType ET_ROOM = new EntityType("Room", "Rooms");
+    public final EntityType etStreet = new EntityType("Street", "Streets");
+    public final EntityType etHouse = new EntityType("House", "Houses");
+    public final EntityType etRoom = new EntityType("Room", "Rooms");
 
     public void initModel(ModelRegistry modelRegistry, String idType) {
-        NP_BATHROOMS_HOUSE.setInverses(NP_BATHROOMFOR_ROOM);
-        NP_BATHROOMS_HOUSE.setEntityType(ET_ROOM);
-        NP_BATHROOMFOR_ROOM.setEntityType(ET_HOUSE);
-        NP_HOUSE_ROOM.setInverses(NP_ROOMS_HOUSE);
-        NP_STREETS_HOUSE.setInverses(NP_STREETS_HOUSE);
+        npHouseBathrooms.setInverses(npRoomBathroom);
+        npHouseBathrooms.setEntityType(etRoom);
+        npRoomBathroom.setEntityType(etHouse);
+        npRoomHouse.setInverses(npHouseRooms);
+        npHouseStreets.setInverses(npHouseStreets);
 
-        modelRegistry.registerEntityType(ET_STREET);
-        ET_STREET.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
-                .registerProperty(EP_NAME)
-                .registerProperty(NP_HOUSES_STREET);
-        modelRegistry.registerEntityType(ET_HOUSE);
-        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
-                .registerProperty(EP_NAME)
-                .registerProperty(EP_VALUE)
+        modelRegistry.registerEntityType(etStreet);
+        etStreet.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(epName)
+                .registerProperty(npStreetHouses);
+        modelRegistry.registerEntityType(etHouse);
+        etHouse.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(epName)
+                .registerProperty(epValue)
                 .registerProperty(StandardProperties.EP_PROPERTIES)
-                .registerProperty(NP_STREETS_HOUSE)
-                .registerProperty(NP_ROOMS_HOUSE)
-                .registerProperty(NP_BATHROOMS_HOUSE);
-        modelRegistry.registerEntityType(ET_ROOM);
-        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
-                .registerProperty(EP_NAME)
-                .registerProperty(EP_VALUE)
-                .registerProperty(EP_TIME)
+                .registerProperty(npHouseStreets)
+                .registerProperty(npHouseRooms)
+                .registerProperty(npHouseBathrooms);
+        modelRegistry.registerEntityType(etRoom);
+        etRoom.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(epName)
+                .registerProperty(epValue)
+                .registerProperty(epTime)
                 .registerProperty(StandardProperties.EP_PROPERTIES)
-                .registerProperty(NP_HOUSE_ROOM)
-                .registerProperty(NP_BATHROOMFOR_ROOM);
+                .registerProperty(npRoomHouse)
+                .registerProperty(npRoomBathroom);
     }
 
     public Map<EntityType, Map<Property, Object>> getTestPropertyValues(ModelRegistry modelRegistry) {
@@ -96,19 +92,19 @@ public class TestModel {
         Map<Property, Object> propertyValuesStreet = new HashMap<>();
         Map<Property, Object> propertyValuesHouse = new HashMap<>();
         Map<Property, Object> propertyValuesRoom = new HashMap<>();
-        propertyValues.put(ET_STREET, propertyValuesStreet);
-        propertyValues.put(ET_HOUSE, propertyValuesHouse);
-        propertyValues.put(ET_ROOM, propertyValuesRoom);
+        propertyValues.put(etStreet, propertyValuesStreet);
+        propertyValues.put(etHouse, propertyValuesHouse);
+        propertyValues.put(etRoom, propertyValuesRoom);
 
-        propertyValuesStreet.put(ET_STREET.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
-        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
-        propertyValuesRoom.put(ET_ROOM.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
-        propertyValuesStreet.put(EP_NAME, "StreetName");
-        propertyValuesHouse.put(EP_NAME, "HouseName");
-        propertyValuesRoom.put(EP_NAME, "RoomName");
-        propertyValuesHouse.put(EP_VALUE, 6);
-        propertyValuesRoom.put(EP_VALUE, 7);
-        propertyValuesRoom.put(EP_TIME, TimeInstant.now());
+        propertyValuesStreet.put(etStreet.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesHouse.put(etHouse.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesRoom.put(etRoom.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesStreet.put(epName, "StreetName");
+        propertyValuesHouse.put(epName, "HouseName");
+        propertyValuesRoom.put(epName, "RoomName");
+        propertyValuesHouse.put(epValue, 6);
+        propertyValuesRoom.put(epValue, 7);
+        propertyValuesRoom.put(epTime, TimeInstant.now());
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
@@ -120,24 +116,24 @@ public class TestModel {
         propertyValuesRoom.put(StandardProperties.EP_SELFLINK, "http://my.self/link");
 
         long nextId = 100;
-        propertyValuesRoom.put(NP_BATHROOMFOR_ROOM, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
-        propertyValuesRoom.put(NP_HOUSE_ROOM, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
+        propertyValuesRoom.put(npRoomBathroom, new DefaultEntity(etHouse, PkValue.of(nextId++)));
+        propertyValuesRoom.put(npRoomHouse, new DefaultEntity(etHouse, PkValue.of(nextId++)));
 
-        EntitySetImpl rooms = new EntitySetImpl(ET_ROOM);
-        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
-        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
-        propertyValuesHouse.put(NP_ROOMS_HOUSE, rooms);
-        propertyValuesHouse.put(NP_BATHROOMS_HOUSE, rooms);
+        EntitySetImpl rooms = new EntitySetImpl(etRoom);
+        rooms.add(new DefaultEntity(etRoom, PkValue.of(nextId++)));
+        rooms.add(new DefaultEntity(etRoom, PkValue.of(nextId++)));
+        propertyValuesHouse.put(npHouseRooms, rooms);
+        propertyValuesHouse.put(npHouseBathrooms, rooms);
 
-        EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
-        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
-        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
-        propertyValuesStreet.put(NP_HOUSES_STREET, houses);
+        EntitySetImpl houses = new EntitySetImpl(etHouse);
+        houses.add(new DefaultEntity(etHouse, PkValue.of(nextId++)));
+        houses.add(new DefaultEntity(etHouse, PkValue.of(nextId++)));
+        propertyValuesStreet.put(npStreetHouses, houses);
 
-        EntitySetImpl streets = new EntitySetImpl(ET_STREET);
-        streets.add(new DefaultEntity(ET_STREET, PkValue.of(nextId++)));
-        streets.add(new DefaultEntity(ET_STREET, PkValue.of(nextId++)));
-        propertyValuesHouse.put(NP_STREETS_HOUSE, streets);
+        EntitySetImpl streets = new EntitySetImpl(etStreet);
+        streets.add(new DefaultEntity(etStreet, PkValue.of(nextId++)));
+        streets.add(new DefaultEntity(etStreet, PkValue.of(nextId++)));
+        propertyValuesHouse.put(npHouseStreets, streets);
 
         for (EntityType et : modelRegistry.getEntityTypes()) {
             assertTrue(propertyValues.containsKey(et), "Missing values for " + et);

@@ -100,7 +100,7 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
         while (currentToken == JsonToken.PROPERTY_NAME) {
             String fieldName = parser.currentName();
             if (version.getSelfLinkName().equals(fieldName)) {
-                deserializeSelfLink(parser, ctxt, target);
+                deserializeSelfLink(parser, target);
             } else {
                 deserializeProperty(parser, ctxt, target, fieldName, failOnUnknown);
             }
@@ -110,7 +110,7 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
         return target;
     }
 
-    private void deserializeSelfLink(JsonParser parser, DeserializationContext ctxt, Entity target) {
+    private void deserializeSelfLink(JsonParser parser, Entity target) {
         String selfLink = parser.nextStringValue();
         if (selfLink == null) {
             final String message = "Failed to parse selflink " + version.getSelfLinkName() + ". Expected a string, got " + parser.currentToken();
@@ -140,12 +140,16 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
     }
 
     private void deserializeProperty(JsonParser parser, DeserializationContext ctxt, Property property, Entity target) throws JacksonException {
-        if (property instanceof EntityPropertyMain epm) {
-            deserializeEntityProperty(parser, ctxt, epm, target);
-        } else if (property instanceof NavigationPropertyEntity npe) {
-            deserializeNavigationProperty(parser, ctxt, npe, target);
-        } else if (property instanceof NavigationPropertyEntitySet npes) {
-            deserializeNavigationProperty(parser, ctxt, npes, target);
+        switch (property) {
+            case EntityPropertyMain epm ->
+                deserializeEntityProperty(parser, ctxt, epm, target);
+            case NavigationPropertyEntity npe ->
+                deserializeNavigationProperty(parser, ctxt, npe, target);
+            case NavigationPropertyEntitySet npes ->
+                deserializeNavigationProperty(parser, ctxt, npes, target);
+            default -> {
+                LOGGER.warn("Unknown property type: {}", property);
+            }
         }
     }
 

@@ -52,7 +52,7 @@ class PathParserTest {
     private static PluginCoreModel pluginCoreModelString;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         coreSettings.getQueryDefaults()
                 .setUseAbsoluteNavigationLinks(false);

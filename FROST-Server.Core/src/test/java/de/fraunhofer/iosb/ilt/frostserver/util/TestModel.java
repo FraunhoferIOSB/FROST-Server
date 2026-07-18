@@ -48,72 +48,68 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author hylke
- */
 public class TestModel implements PluginService {
 
-    public final EntityPropertyMain<String> EP_NAME = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, REQUIRED);
-    public final EntityPropertyMain<Number> EP_VALUE = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
-    public final EntityPropertyMain<TimeValue> EP_TIME = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
+    public final EntityPropertyMain<String> epName = new EntityPropertyMain<>("name", TypeSimplePrimitive.EDM_STRING, REQUIRED);
+    public final EntityPropertyMain<Number> epValue = new EntityPropertyMain<>("value", TypeSimplePrimitive.EDM_DECIMAL);
+    public final EntityPropertyMain<TimeValue> epTime = new EntityPropertyMain<>("time", TypeSimplePrimitive.EDM_DATETIMEOFFSET);
 
-    public final NavigationPropertyEntity NP_ROOM_HOUSE = new NavigationPropertyEntity("House", REQUIRED);
-    public final NavigationPropertyEntitySet NP_HOUSE_ROOMS = new NavigationPropertyEntitySet("Rooms", NP_ROOM_HOUSE);
+    public final NavigationPropertyEntity npRoomHouse = new NavigationPropertyEntity("House", REQUIRED);
+    public final NavigationPropertyEntitySet npHouseRooms = new NavigationPropertyEntitySet("Rooms", npRoomHouse);
 
-    public final NavigationPropertyEntitySet NP_HOUSES = new NavigationPropertyEntitySet("Houses");
+    public final NavigationPropertyEntitySet npHouses = new NavigationPropertyEntitySet("Houses");
 
-    public final EntityType ET_HOUSE = new EntityType("House", "Houses");
-    public final EntityType ET_ROOM = new EntityType("Room", "Rooms");
+    public final EntityType etHouse = new EntityType("House", "Houses");
+    public final EntityType etRoom = new EntityType("Room", "Rooms");
 
     public void initModel(ModelRegistry modelRegistry, String idType) {
-        modelRegistry.registerEntityType(ET_HOUSE);
-        ET_HOUSE.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
-                .registerProperty(EP_NAME)
-                .registerProperty(EP_VALUE)
+        modelRegistry.registerEntityType(etHouse);
+        etHouse.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(epName)
+                .registerProperty(epValue)
                 .registerProperty(StandardProperties.EP_PROPERTIES)
-                .registerProperty(NP_HOUSE_ROOMS);
-        modelRegistry.registerEntityType(ET_ROOM);
-        ET_ROOM.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
-                .registerProperty(EP_NAME)
-                .registerProperty(EP_VALUE)
-                .registerProperty(EP_TIME)
+                .registerProperty(npHouseRooms);
+        modelRegistry.registerEntityType(etRoom);
+        etRoom.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(epName)
+                .registerProperty(epValue)
+                .registerProperty(epTime)
                 .registerProperty(StandardProperties.EP_PROPERTIES)
-                .registerProperty(NP_HOUSE_ROOMS)
-                .registerProperty(NP_ROOM_HOUSE);
+                .registerProperty(npHouseRooms)
+                .registerProperty(npRoomHouse);
     }
 
     public Entity createHouse(long id, String name, double value) {
-        return new DefaultEntity(ET_HOUSE, PkValue.of(id))
-                .setProperty(EP_NAME, name)
-                .setProperty(EP_VALUE, value);
+        return new DefaultEntity(etHouse, PkValue.of(id))
+                .setProperty(epName, name)
+                .setProperty(epValue, value);
     }
 
     public Entity createRoom(long id, String name, double value) {
-        return new DefaultEntity(ET_HOUSE, PkValue.of(id))
-                .setProperty(EP_NAME, name)
-                .setProperty(EP_VALUE, value);
+        return new DefaultEntity(etHouse, PkValue.of(id))
+                .setProperty(epName, name)
+                .setProperty(epValue, value);
     }
 
     public Entity createRoom(long id, String name, double value, TimeValue time) {
         return createRoom(id, name, value)
-                .setProperty(EP_TIME, time);
+                .setProperty(epTime, time);
     }
 
     public Map<EntityType, Map<Property, Object>> getTestPropertyValues(ModelRegistry modelRegistry) {
         Map<EntityType, Map<Property, Object>> propertyValues = new HashMap<>();
         Map<Property, Object> propertyValuesHouse = new HashMap<>();
         Map<Property, Object> propertyValuesRoom = new HashMap<>();
-        propertyValues.put(ET_HOUSE, propertyValuesHouse);
-        propertyValues.put(ET_ROOM, propertyValuesRoom);
+        propertyValues.put(etHouse, propertyValuesHouse);
+        propertyValues.put(etRoom, propertyValuesRoom);
 
-        propertyValuesHouse.put(ET_HOUSE.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
-        propertyValuesRoom.put(ET_ROOM.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
-        propertyValuesHouse.put(EP_NAME, "myName");
-        propertyValuesRoom.put(EP_NAME, "myName");
-        propertyValuesHouse.put(EP_VALUE, 6);
-        propertyValuesRoom.put(EP_VALUE, 7);
-        propertyValuesRoom.put(EP_TIME, TimeInstant.now());
+        propertyValuesHouse.put(etHouse.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesRoom.put(etRoom.getPrimaryKey().getKeyProperties().get(0), new IntegerConstant(1));
+        propertyValuesHouse.put(epName, "myName");
+        propertyValuesRoom.put(epName, "myName");
+        propertyValuesHouse.put(epValue, 6);
+        propertyValuesRoom.put(epValue, 7);
+        propertyValuesRoom.put(epTime, TimeInstant.now());
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("key1", "value1");
@@ -124,17 +120,17 @@ public class TestModel implements PluginService {
         propertyValuesRoom.put(StandardProperties.EP_SELFLINK, "http://my.self/link");
 
         long nextId = 100;
-        propertyValuesRoom.put(NP_ROOM_HOUSE, new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
+        propertyValuesRoom.put(npRoomHouse, new DefaultEntity(etHouse, PkValue.of(nextId++)));
 
-        EntitySetImpl rooms = new EntitySetImpl(ET_ROOM);
-        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
-        rooms.add(new DefaultEntity(ET_ROOM, PkValue.of(nextId++)));
-        propertyValuesHouse.put(NP_HOUSE_ROOMS, rooms);
+        EntitySetImpl rooms = new EntitySetImpl(etRoom);
+        rooms.add(new DefaultEntity(etRoom, PkValue.of(nextId++)));
+        rooms.add(new DefaultEntity(etRoom, PkValue.of(nextId++)));
+        propertyValuesHouse.put(npHouseRooms, rooms);
 
-        EntitySetImpl houses = new EntitySetImpl(ET_HOUSE);
-        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
-        houses.add(new DefaultEntity(ET_HOUSE, PkValue.of(nextId++)));
-        propertyValuesRoom.put(NP_HOUSE_ROOMS, houses);
+        EntitySetImpl houses = new EntitySetImpl(etHouse);
+        houses.add(new DefaultEntity(etHouse, PkValue.of(nextId++)));
+        houses.add(new DefaultEntity(etHouse, PkValue.of(nextId++)));
+        propertyValuesRoom.put(npHouseRooms, houses);
         return propertyValues;
     }
 

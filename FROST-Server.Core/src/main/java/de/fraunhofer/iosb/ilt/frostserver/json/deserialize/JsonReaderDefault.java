@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
@@ -115,15 +116,13 @@ public class JsonReaderDefault implements JsonReader {
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());
         module.addDeserializer(TimeValue.class, new TimeValueDeserializer());
 
-        ObjectMapper mapper = JsonMapper.builder()
+        return JsonMapper.builder()
                 .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
                 .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
                 .addModule(module)
                 .build();
-
-        return mapper;
     }
 
     /**
@@ -178,7 +177,7 @@ public class JsonReaderDefault implements JsonReader {
     }
 
     @Override
-    public Entity parseEntity(EntityType entityType, String value) throws IOException {
+    public Entity parseEntity(EntityType entityType, String value) throws JacksonException, IOException {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContext dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
@@ -189,7 +188,7 @@ public class JsonReaderDefault implements JsonReader {
     }
 
     @Override
-    public Entity parseEntity(EntityType entityType, Reader value) throws IOException {
+    public Entity parseEntity(EntityType entityType, Reader value) throws JacksonException, IOException {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContext dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
@@ -199,19 +198,19 @@ public class JsonReaderDefault implements JsonReader {
         }
     }
 
-    public <T> T parseObject(Class<T> clazz, String value) throws IOException {
+    public <T> T parseObject(Class<T> clazz, String value) throws JacksonException {
         return mapper.readValue(value, clazz);
     }
 
-    public <T> T parseObject(Class<T> clazz, Reader value) throws IOException {
+    public <T> T parseObject(Class<T> clazz, Reader value) throws JacksonException {
         return mapper.readValue(value, clazz);
     }
 
-    public <T> T parseObject(TypeReference<T> typeReference, String value) throws IOException {
+    public <T> T parseObject(TypeReference<T> typeReference, String value) throws JacksonException {
         return mapper.readValue(value, typeReference);
     }
 
-    public <T> T parseObject(TypeReference<T> typeReference, Reader value) throws IOException {
+    public <T> T parseObject(TypeReference<T> typeReference, Reader value) throws JacksonException {
         return mapper.readValue(value, typeReference);
     }
 

@@ -34,10 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author scf
- */
 class EntityBuilderTest {
 
     /**
@@ -64,7 +60,7 @@ class EntityBuilderTest {
     }
 
     @Test
-    void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void testEntityBuilders() {
         for (EntityType type : modelRegistry.getEntityTypes()) {
             testEntityType(type, type.getProperties());
         }

@@ -35,8 +35,11 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Any;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.settings.Settings;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import net.time4j.Moment;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Condition;
@@ -352,60 +355,69 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         return result;
     }
 
+    private static class PathWalkState {
+
+        int startIdx = 0;
+        int idx;
+        QueryState existsQueryState = null;
+        TableRef lastJoin = null;
+
+    }
+
     @Override
     public QueryState walkAnyPath(final QueryState<?> parentQueryState, Any node, final TableCollection tc) throws IllegalArgumentException {
         final StaMainTable parentMainTable = parentQueryState.getMainTable();
         final EntityType parentEntityType = parentMainTable.getEntityType();
         final Path path = node.getCollection();
         final List<Property> elements = path.getElements();
-        QueryState existsQueryState = null;
-        TableRef lastJoin = null;
+        final PathWalkState pws = new PathWalkState();
+
         Property firstElement = elements.get(0);
-        int startIdx = 0;
+
         if (firstElement instanceof PropertyReference) {
-            startIdx = 1;
+            pws.startIdx = 1;
         }
-        for (int idx = elements.size() - 1; idx >= startIdx; idx--) {
-            Property element = elements.get(idx);
-            if ((lastJoin == null)) {
-                if (element instanceof NavigationPropertyMain.NavigationPropertyEntitySet npes) {
-                    // Last entry in the path: the target collection.
-                    EntityType finalType = npes.getEntityType();
-                    final StaMainTable<?> tableForType = tc.getTableForType(finalType).asSecure(parentQueryState.getNextAlias(), parentQueryState.getPersistenceManager());
-                    existsQueryState = new QueryState(tableForType, parentQueryState, node.getLambdaName());
-                    lastJoin = existsQueryState.getTableRef();
-                } else {
-                    throw new IllegalArgumentException("Path before any() MUST end in an EntitySet. Found: " + element);
-                }
-            }
-            if (element instanceof NavigationPropertyMain npm) {
-                var inverse = npm.getInverse();
-                if (idx == startIdx) {
-                    // First entry in the path: Link to the main table!
-                    if (inverse.getEntityType() != parentEntityType) {
-                        throw new IllegalArgumentException("path of any() did not track back to main entity type. Expected " + parentEntityType + " got " + inverse.getEntityType());
-                    }
-                    lastJoin.createSemiJoin(inverse.getName(), parentMainTable, existsQueryState);
+        for (pws.idx = elements.size() - 1; pws.idx >= pws.startIdx; pws.idx--) {
+            walkElementOfPath(elements, pws, tc, parentQueryState, node, parentEntityType, parentMainTable);
+        }
+        return pws.existsQueryState;
+    }
 
-                } else {
-                    TableRef existingJoin = lastJoin.getJoin(inverse);
-                    if (existingJoin != null) {
-                        lastJoin = existingJoin;
-                    }
-                    lastJoin = lastJoin.createJoin(inverse.getName(), existsQueryState);
-                }
-
-            } else if (element instanceof EntityPropertyCustomLink) {
-                throw new IllegalArgumentException("Path before any() should not contain Custom Links. Found: " + element);
-            } else if (element instanceof EntityPropertyCustom) {
-                throw new IllegalArgumentException("Path before any() should not contain EntityProperties. Found: " + element);
-            } else if (element instanceof EntityPropertyMain) {
-                throw new IllegalArgumentException("Path before any() should not contain EntityProperties. Found: " + element);
+    private void walkElementOfPath(List<Property> elements, PathWalkState pws, TableCollection tc, QueryState<?> parentQueryState, Any node, EntityType parentEntityType, StaMainTable parentMainTable) throws IllegalArgumentException {
+        Property element = elements.get(pws.idx);
+        if ((pws.lastJoin == null)) {
+            if (element instanceof NavigationPropertyMain.NavigationPropertyEntitySet npes) {
+                // Last entry in the path: the target collection.
+                EntityType finalType = npes.getEntityType();
+                final StaMainTable<?> tableForType = tc.getTableForType(finalType).asSecure(parentQueryState.getNextAlias(), parentQueryState.getPersistenceManager());
+                pws.existsQueryState = new QueryState(tableForType, parentQueryState, node.getLambdaName());
+                pws.lastJoin = pws.existsQueryState.getTableRef();
             } else {
-                throw new IllegalArgumentException("Path before any() contains unknown element. Found: " + element);
+                throw new IllegalArgumentException("Path before any() MUST end in an EntitySet. Found: " + element);
             }
         }
-        return existsQueryState;
+        if (element instanceof NavigationPropertyMain npm) {
+            var inverse = npm.getInverse();
+            if (pws.idx == pws.startIdx) {
+                // First entry in the path: Link to the main table!
+                if (inverse.getEntityType() != parentEntityType) {
+                    throw new IllegalArgumentException("path of any() did not track back to main entity type. Expected " + parentEntityType + " got " + inverse.getEntityType());
+                }
+                pws.lastJoin.createSemiJoin(inverse.getName(), parentMainTable, pws.existsQueryState);
+
+            } else {
+                TableRef existingJoin = pws.lastJoin.getJoin(inverse);
+                if (existingJoin != null) {
+                    pws.lastJoin = existingJoin;
+                }
+                pws.lastJoin = pws.lastJoin.createJoin(inverse.getName(), pws.existsQueryState);
+            }
+        } else {
+            Exceptions.illegalArgumentIf(element instanceof EntityPropertyCustomLink, "Path before any() should not contain Custom Links. Found: {}", element);
+            Exceptions.illegalArgumentIf(element instanceof EntityPropertyCustom, "Path before any() should not contain EntityProperties. Found: {}", element);
+            Exceptions.illegalArgumentIf(element instanceof EntityPropertyMain, "Path before any() should not contain EntityProperties. Found: {}", element);
+            throw Exceptions.illegalArgument("Path before any() contains unknown element. Found: {}", element);
+        }
     }
 
 }

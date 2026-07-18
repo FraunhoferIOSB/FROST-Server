@@ -25,6 +25,8 @@ import org.jooq.Table;
 @ConfigurableClass
 public class SecurityWrapperPass implements SecurityTableWrapper {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     public Table wrap(StaMainTable table, JooqPersistenceManager pm) {
         return table;

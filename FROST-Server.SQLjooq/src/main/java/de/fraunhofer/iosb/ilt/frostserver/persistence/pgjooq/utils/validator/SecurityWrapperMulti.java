@@ -31,6 +31,8 @@ import org.jooq.Table;
 @ConfigurableClass
 public class SecurityWrapperMulti implements SecurityTableWrapper {
 
+    private static final long serialVersionUID = 1L;
+
     @ConfigurableClass
     public static class IfConditionThenWrapper implements AnnotatedConfigurable<Void, Void> {
 

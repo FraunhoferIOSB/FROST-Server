@@ -19,14 +19,13 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.configurable.AnnotatedConfigurable;
+import java.io.Serializable;
 
 /**
  * The lowest level definition of a SecurityWrapper. Each Persistence Manager
  * type will have to extend this.
- *
- * @author hylke
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public interface SecurityWrapper extends AnnotatedConfigurable<Void, Void> {
+public interface SecurityWrapper extends AnnotatedConfigurable<Void, Void>, Serializable {
 
 }

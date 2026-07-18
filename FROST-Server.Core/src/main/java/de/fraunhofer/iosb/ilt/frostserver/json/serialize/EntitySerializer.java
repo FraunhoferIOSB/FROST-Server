@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -92,7 +91,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         gen.writeStartObject();
         try {
             writeContent(entity, gen);
-        } catch (IOException | RuntimeException exc) {
+        } catch (RuntimeException exc) {
             LOGGER.error("Failed to serialise entity.", exc);
             throw new StreamWriteException(gen, "could not serialize Entity", exc);
         } finally {
@@ -100,7 +99,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         }
     }
 
-    public void writeContent(Entity entity, JsonGenerator gen) throws IOException {
+    public void writeContent(Entity entity, JsonGenerator gen) throws JacksonException {
         Set<EntityPropertyMain> entityProps;
         Set<NavigationPropertyMain> navigationProps;
         List<Expand> expand;
@@ -144,7 +143,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         }
     }
 
-    public void writeProperty(EntityPropertyMain<?> ep, ComplexValue<?> entity, JsonGenerator gen) throws IOException {
+    public void writeProperty(EntityPropertyMain<?> ep, ComplexValue<?> entity, JsonGenerator gen) throws JacksonException {
         SimplePropertySerializer ser = propertySerializers.get(ep);
         if (ser != null) {
             ser.writeProperty(ep, entity, gen);
@@ -159,16 +158,14 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         writeProperty(value, ep, gen);
     }
 
-    private void writeProperty(final Object value, EntityPropertyMain<?> ep, JsonGenerator gen) throws IOException, JacksonException {
+    private void writeProperty(final Object value, EntityPropertyMain<?> ep, JsonGenerator gen) throws JacksonException {
         if (value instanceof ComplexValueImpl cv) {
             writeComplexValueImpl(ep, cv, gen);
         } else if (value != null || ep.serialiseNull) {
             final String name = ep.getName();
             Collection<String> aliases = ep.getAliases();
-            if (aliases.size() > 1) {
-                if (maybeWriteAlias(aliases, gen, value)) {
-                    return;
-                }
+            if (aliases.size() > 1 && maybeWriteAlias(aliases, gen, value)) {
+                return;
             }
             // Either no aliases, or no matching found.
             gen.writePOJOProperty(name, value);
@@ -177,15 +174,10 @@ public class EntitySerializer extends ValueSerializer<Entity> {
 
     private boolean maybeWriteAlias(Collection<String> aliases, JsonGenerator gen, final Object value) throws JacksonException {
         if (odata) {
-            if (maybeWriteOdata(aliases, gen, value)) {
-                return true;
-            }
+            return maybeWriteOdata(aliases, gen, value);
         } else {
-            if (maybeWriteSta(aliases, gen, value)) {
-                return true;
-            }
+            return maybeWriteSta(aliases, gen, value);
         }
-        return false;
     }
 
     private boolean maybeWriteOdata(Collection<String> aliases, JsonGenerator gen, final Object value) throws JacksonException {
@@ -210,7 +202,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         return false;
     }
 
-    private void writeComplexValueImpl(EntityPropertyMain<?> ep, ComplexValueImpl cv, JsonGenerator gen) throws IOException {
+    private void writeComplexValueImpl(EntityPropertyMain<?> ep, ComplexValueImpl cv, JsonGenerator gen) throws JacksonException {
         gen.writeName(ep.getName());
         gen.writeStartObject();
         for (Map.Entry<Property, Object> entry : cv.getAllProperties().entrySet()) {
@@ -221,7 +213,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         gen.writeEndObject();
     }
 
-    private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws IOException {
+    private void writeExpand(List<Expand> expand, Entity entity, JsonGenerator gen) throws JacksonException {
         final boolean adminUser = entity.getQuery().getPrincipal().isAdmin();
         for (Expand exp : expand) {
             NavigationProperty np = exp.getPath();
@@ -231,7 +223,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         }
     }
 
-    private void writeExpand(Expand exp, Entity entity, NavigationPropertyMain np, JsonGenerator gen) throws IOException {
+    private void writeExpand(Expand exp, Entity entity, NavigationPropertyMain np, JsonGenerator gen) throws JacksonException {
         Object entityOrSet = np.getFrom(entity);
         if (np.isEntitySet()) {
             EntitySet entitySet = (EntitySet) entityOrSet;
@@ -247,7 +239,7 @@ public class EntitySerializer extends ValueSerializer<Entity> {
         }
     }
 
-    private void writeEntitySet(NavigationProperty np, EntitySet entitySet, JsonGenerator gen, Query query) throws IOException {
+    private void writeEntitySet(NavigationProperty np, EntitySet entitySet, JsonGenerator gen, Query query) throws JacksonException {
         String jsonName = np.getJsonName();
         if (entitySet == null) {
             gen.writeArrayPropertyStart(jsonName);
@@ -283,6 +275,6 @@ public class EntitySerializer extends ValueSerializer<Entity> {
 
     public static interface SimplePropertySerializer {
 
-        public void writeProperty(EntityPropertyMain ep, ComplexValue<?> entity, JsonGenerator gen) throws IOException;
+        public void writeProperty(EntityPropertyMain ep, ComplexValue<?> entity, JsonGenerator gen) throws JacksonException;
     }
 }

@@ -27,8 +27,6 @@ import org.jooq.Table;
  * A SecurityTableWrapper wraps a plain table and adds additional joins or
  * filters so that only the data is visible that the current user is allowed to
  * see.
- *
- * @author hylke
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface SecurityTableWrapper extends SecurityWrapper {

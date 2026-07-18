@@ -47,7 +47,6 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import io.prometheus.metrics.core.datapoints.CounterDataPoint;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.GaugeWithCallback;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -266,7 +265,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
                     .topicFilter(topicName)
                     .qos(qosLevel)
                     .send()
-                    .thenApply((ack) -> {
+                    .thenApply(ack -> {
                         switch (ack.getReasonCodes().getFirst()) {
                             case GRANTED_QOS_0:
                             case GRANTED_QOS_1:
@@ -390,7 +389,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
             LOGGER.error("Failed to decode message from bus. Details in DEBUG.");
             LOGGER.debug("Failed to decode message: {}", serialisedEcMessage, ex);
             return;
-        } catch (IOException | RuntimeException ex) {
+        } catch (RuntimeException ex) {
             LOGGER.warn("Non-JSON received on bus.", ex);
             return;
         }

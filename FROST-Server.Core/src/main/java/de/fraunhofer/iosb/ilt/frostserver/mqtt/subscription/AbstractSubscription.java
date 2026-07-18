@@ -155,10 +155,8 @@ public abstract class AbstractSubscription implements Subscription {
                 handleEntitySet(nextPathElement, properties);
                 direct = false;
 
-            } else if (element instanceof PathElementEntity epe) {
-                if (handleEntity(epe, nextPathElement, direct, i, properties, extraFilter)) {
-                    return;
-                }
+            } else if (element instanceof PathElementEntity epe && handleEntity(epe, nextPathElement, direct, i, properties, extraFilter)) {
+                return;
             }
             nextPathElement = element;
         }

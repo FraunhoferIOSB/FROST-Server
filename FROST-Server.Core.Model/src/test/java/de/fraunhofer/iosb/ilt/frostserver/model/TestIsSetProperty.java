@@ -33,11 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author scf
- */
-public class TestIsSetProperty {
+class TestIsSetProperty {
 
     /**
      * The logger for this class.
@@ -49,7 +45,7 @@ public class TestIsSetProperty {
     private Map<EntityType, Map<Property, Object>> propertyValues;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);
@@ -57,7 +53,7 @@ public class TestIsSetProperty {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         propertyValues = testModel.getTestPropertyValues(modelRegistry);
 
         for (EntityType et : modelRegistry.getEntityTypes()) {
@@ -73,7 +69,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void testEntityBuilders() {
         for (EntityType type : modelRegistry.getEntityTypes()) {
             testEntityType(type, type.getProperties());
             testEntityCompare(type, type.getProperties());
@@ -142,7 +138,7 @@ public class TestIsSetProperty {
         addPropertyToObject(entity, property, propertyValues.get(entity.getType()));
     }
 
-    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) {
         Object value = valuesToUse.get(property);
         entity.setProperty(property, value);
     }

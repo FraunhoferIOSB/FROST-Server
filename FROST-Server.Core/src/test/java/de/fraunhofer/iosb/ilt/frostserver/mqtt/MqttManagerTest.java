@@ -82,7 +82,7 @@ class MqttManagerTest {
     private TestModel testModel;
 
     @BeforeEach
-    public void init() {
+    void init() {
         TestMqttServerRegister.getInstance().clear();
         Properties properties = new Properties();
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, "http://localhost/");
@@ -111,17 +111,6 @@ class MqttManagerTest {
         assertThrows(UnknownVersionException.class, () -> {
             MqttManager.getVersionFromTopic(coreSettings, "v1.9/Observations");
         });
-    }
-
-    @Test
-    void testSubscriptions() throws InterruptedException {
-        MqttManager mqttManager = new MqttManager(coreSettings);
-        List<TestMqttServer> mqttServers = TestMqttServerRegister.getInstance().getServers();
-        TestMqttServer mqttServer = mqttServers.get(0);
-        mqttServer.subscribe("int/Houses");
-        mqttServer.subscribe("int/Houses(1)");
-        mqttServer.subscribe("int/Houses(1)/Rooms");
-        mqttServer.subscribe("int/Rooms(1)/House");
     }
 
     @Test
@@ -163,7 +152,7 @@ class MqttManagerTest {
 
         final CountDownLatch barrier = new CountDownLatch(publishCount);
         final AtomicInteger publishedCount = new AtomicInteger();
-        mqttServer.addPublishListener((topic) -> {
+        mqttServer.addPublishListener(topic -> {
             publishedCount.incrementAndGet();
             barrier.countDown();
         });
@@ -174,9 +163,9 @@ class MqttManagerTest {
             EntityChangedMessage ecm = new EntityChangedMessage()
                     .setEventType(EntityChangedMessage.Type.CREATE)
                     .setEntity(
-                            new DefaultEntity(testModel.ET_ROOM, PkValue.of(pubId))
-                                    .setProperty(testModel.EP_NAME, "" + pubId)
-                                    .setProperty(testModel.NP_ROOM_HOUSE, new DefaultEntity(testModel.ET_HOUSE, PkValue.of(topicId))));
+                            new DefaultEntity(testModel.etRoom, PkValue.of(pubId))
+                                    .setProperty(testModel.epName, "" + pubId)
+                                    .setProperty(testModel.npRoomHouse, new DefaultEntity(testModel.etHouse, PkValue.of(topicId))));
             topicId++;
             if (topicId >= subscriptionCount) {
                 topicId = 0;

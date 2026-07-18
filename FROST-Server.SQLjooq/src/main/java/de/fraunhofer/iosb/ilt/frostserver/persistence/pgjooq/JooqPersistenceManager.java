@@ -42,6 +42,7 @@ import org.jooq.AttachableQueryPart;
 import org.jooq.DSLContext;
 import org.jooq.DataType;
 import org.jooq.Name;
+import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.ResultQuery;
 import org.jooq.Table;
@@ -79,21 +80,21 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     ConnectionUtils.ConnectionWrapper getConnectionProvider();
 
-    public <R extends org.jooq.Record> ResultQuery<R> setTimeout(ResultQuery<R> query);
+    public <R extends Record> ResultQuery<R> setTimeout(ResultQuery<R> query);
 
     public default int timeExecute(org.jooq.Query query, String loggedEntityName) {
         return timeExecution(query::execute, query, loggedEntityName);
     }
 
-    public default <R extends org.jooq.Record> Result<R> timeFetch(ResultQuery<R> query, String loggedEntityName) {
+    public default <R extends Record> Result<R> timeFetch(ResultQuery<R> query, String loggedEntityName) {
         return timeExecution(query::fetch, query, loggedEntityName);
     }
 
-    public default <R extends org.jooq.Record> R timeFetchOne(ResultQuery<R> query, String loggedEntityName) {
+    public default <R extends Record> R timeFetchOne(ResultQuery<R> query, String loggedEntityName) {
         return timeExecution(query::fetchOne, query, loggedEntityName);
     }
 
-    public default <R extends org.jooq.Record> R timeFetchAny(ResultQuery<R> query, String loggedEntityName) {
+    public default <R extends Record> R timeFetchAny(ResultQuery<R> query, String loggedEntityName) {
         return timeExecution(query::fetchAny, query, loggedEntityName);
     }
 
@@ -101,9 +102,9 @@ public interface JooqPersistenceManager extends LiquibaseUser, PersistenceManage
 
     DataType<?> getDataTypeFor(String type);
 
-    Table<?> getDbTable(String tableName);
+    public <R extends Record> Table<R> getDbTable(String tableName);
 
-    Table<?> getDbTable(Name tableName);
+    public <R extends Record> Table<R> getDbTable(Name tableName);
 
     DSLContext getDslContext();
 

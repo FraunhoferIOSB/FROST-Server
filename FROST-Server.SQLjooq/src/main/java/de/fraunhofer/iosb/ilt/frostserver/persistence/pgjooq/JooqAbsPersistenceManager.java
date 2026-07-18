@@ -84,6 +84,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SecurityModel.SecurityEntry;
 import de.fraunhofer.iosb.ilt.frostserver.util.SecurityWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.DuplicateIdException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UpgradeFailedException;
@@ -873,29 +874,38 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void registerHooks(DefModel modelDefinition) {
         for (DefEntityType entityTypeDef : modelDefinition.getEntityTypes()) {
-            final EntityType entityType = entityTypeDef.getEntityType();
-            final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
-            for (DefPmHook hookDef : entityTypeDef.getHooks()) {
-                PmHook hook = hookDef.getHook();
-                if (hook instanceof HookPreInsert h) {
-                    table.registerHookPreInsert(hookDef.getPriority(), h);
-                }
-                if (hook instanceof HookPostInsert h) {
-                    table.registerHookPostInsert(hookDef.getPriority(), h);
-                }
-                if (hook instanceof HookPreUpdate h) {
-                    table.registerHookPreUpdate(hookDef.getPriority(), h);
-                }
-                if (hook instanceof HookPostUpdate h) {
-                    table.registerHookPostUpdate(hookDef.getPriority(), h);
-                }
-                if (hook instanceof HookPreDelete h) {
-                    table.registerHookPreDelete(hookDef.getPriority(), h);
-                }
-                if (hook instanceof HookPostDelete h) {
-                    table.registerHookPostDelete(hookDef.getPriority(), h);
-                }
-            }
+            registerHooks(entityTypeDef);
+        }
+    }
+
+    private void registerHooks(DefEntityType entityTypeDef) {
+        final EntityType entityType = entityTypeDef.getEntityType();
+        final StaMainTable table = getOrCreateMainTable(entityType, entityTypeDef.getTable());
+        for (DefPmHook hookDef : entityTypeDef.getHooks()) {
+            registerHook(hookDef, table);
+        }
+    }
+
+    private void registerHook(final DefPmHook hookDef, final StaMainTable table) {
+        final PmHook hook = hookDef.getHook();
+        final double hookPriority = hookDef.getPriority();
+        if (hook instanceof HookPreInsert h) {
+            table.registerHookPreInsert(hookPriority, h);
+        }
+        if (hook instanceof HookPostInsert h) {
+            table.registerHookPostInsert(hookPriority, h);
+        }
+        if (hook instanceof HookPreUpdate h) {
+            table.registerHookPreUpdate(hookPriority, h);
+        }
+        if (hook instanceof HookPostUpdate h) {
+            table.registerHookPostUpdate(hookPriority, h);
+        }
+        if (hook instanceof HookPreDelete h) {
+            table.registerHookPreDelete(hookPriority, h);
+        }
+        if (hook instanceof HookPostDelete h) {
+            table.registerHookPostDelete(hookPriority, h);
         }
     }
 
@@ -918,16 +928,16 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     }
 
     @Override
-    public Table<?> getDbTable(String tableName) {
+    public <R extends Record> Table<R> getDbTable(String tableName) {
         return getDbTable(DSL.name(tableName));
     }
 
     @Override
-    public Table<?> getDbTable(Name tableName) {
+    public <R extends Record> Table<R> getDbTable(Name tableName) {
         return readDbTableFromDb(tableName);
     }
 
-    public Table<?> readDbTableFromDb(Name tableName) {
+    public <R extends Record> Table<R> readDbTableFromDb(Name tableName) {
         if (tableCache.isEmpty()) {
             LOGGER.debug("Filling table cache...");
             final Meta meta = getDslContext().meta();
@@ -950,23 +960,27 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             LOGGER.error("Table {} not found. Please initialise the database!", tableName);
             throw new IllegalArgumentException("Table " + tableName + " not found.");
         }
-        if (tables.size() != 1) {
-            String[] schemas = StringUtils.split(schemaPriority, ',');
-            for (String schema : schemas) {
-                for (Table<?> table : tables) {
-                    final Schema tableSchema = table.getSchema();
-                    if (tableSchema != null && schema.trim().equalsIgnoreCase(tableSchema.getName())) {
-                        LOGGER.warn("Table name {} found {} times, using version from schema {}.", tableName, tables.size(), schema);
-                        return table;
-                    }
+        if (tables.size() == 1) {
+            LOGGER.debug("Returning Table {}", tableName);
+            return (Table<R>) tables.get(0);
+        }
+        return findBestTableMatch(tables, tableName);
+    }
+
+    private <R extends Record> Table<R> findBestTableMatch(List<Table<?>> tables, Name tableName) throws IllegalArgumentException {
+        String[] schemas = StringUtils.split(schemaPriority, ',');
+        for (String schema : schemas) {
+            for (Table<?> table : tables) {
+                final Schema tableSchema = table.getSchema();
+                if (tableSchema != null && schema.trim().equalsIgnoreCase(tableSchema.getName())) {
+                    LOGGER.warn("Table name {} found {} times, using version from schema {}.", tableName, tables.size(), schema);
+                    return (Table<R>) table;
                 }
             }
-            LOGGER.error("Table name {} found {} times, none in schemas '{}'. Use setting {}.{} to specify schema priority.",
-                    tableName, tables.size(), schemaPriority, PREFIX_PERSISTENCE, TAG_DB_SCHEMA_PRIORITY);
-            throw new IllegalArgumentException("Failed to initialise: Table name " + tableName + " found " + tables.size() + " times.");
         }
-        LOGGER.debug("Returning Table {}", tableName);
-        return tables.get(0);
+        LOGGER.error("Table name {} found {} times, none in schemas '{}'. Use setting {}.{} to specify schema priority.",
+                tableName, tables.size(), schemaPriority, PREFIX_PERSISTENCE, TAG_DB_SCHEMA_PRIORITY);
+        throw Exceptions.illegalArgument("Failed to initialise: Table name {} found {} times.", tableName, tables.size());
     }
 
     private StaMainTable getOrCreateMainTable(EntityType entityType, String tableName) {

@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.service;
 
-import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_OK;
-
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;

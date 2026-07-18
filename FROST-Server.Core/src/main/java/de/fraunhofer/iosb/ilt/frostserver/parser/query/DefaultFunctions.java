@@ -102,6 +102,10 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.temporal.Sta
  */
 public class DefaultFunctions {
 
+    private DefaultFunctions() {
+        // Not for instantiation.
+    }
+
     public static void registerDefaultFunctions(FunctionRegistry fr) {
         // Constants
         fr.registerExpression(new BooleanConstant());

@@ -172,15 +172,11 @@ public class CoreSettings implements ConfigDefaults {
      * The set of enabled extensions that are defined in the standard.
      */
     private final Set<Extension> enabledExtensions = EnumSet.noneOf(Extension.class);
+
     /**
      * The Settings object holding the configuration values.
      */
     private Settings settings;
-    /**
-     * Flag indicating things like passwords should be logged completely, not
-     * hidden.
-     */
-    private boolean logSensitiveData;
     /**
      * The MQTT settings.
      */
@@ -273,7 +269,7 @@ public class CoreSettings implements ConfigDefaults {
     }
 
     private void initLocalFields() {
-        logSensitiveData = settings.getBoolean(TAG_LOG_SENSITIVE_DATA, getClass());
+        boolean logSensitiveData = settings.getBoolean(TAG_LOG_SENSITIVE_DATA, getClass());
         settings.setLogSensitiveData(logSensitiveData);
 
         if (!settings.containsName(TAG_TEMP_PATH)) {

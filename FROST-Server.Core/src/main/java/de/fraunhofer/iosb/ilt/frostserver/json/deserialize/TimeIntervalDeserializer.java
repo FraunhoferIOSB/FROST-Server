@@ -42,12 +42,16 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
     @Override
     public TimeInterval deserialize(JsonParser jp, DeserializationContext dc) throws JacksonException {
         JsonToken curToken = jp.currentToken();
-        if (curToken == JsonToken.VALUE_STRING) {
-            return parseStringValue(jp);
-        } else if (curToken == JsonToken.START_OBJECT) {
-            return parseObjectValue(jp);
-        } else {
-            throw new IllegalArgumentException("Could not parse TimeValue, found a " + curToken.name());
+        Exceptions.illegalArgumentIf(null == curToken, "Could not parse TimeInterval, found no token.");
+        switch (curToken) {
+            case VALUE_STRING -> {
+                return parseStringValue(jp);
+            }
+            case START_OBJECT -> {
+                return parseObjectValue(jp);
+            }
+            default ->
+                throw Exceptions.illegalArgument("Could not parse TimeInterval, found a {}", curToken.name());
         }
     }
 
@@ -69,19 +73,18 @@ public class TimeIntervalDeserializer extends StdDeserializer<TimeInterval> {
             Exceptions.illegalArgumentIf(currentToken != JsonToken.VALUE_STRING, "Found {} for {}, expected a string", currentToken, fieldName);
             final String valueAsString = jp.getValueAsString();
             switch (fieldName) {
-                case NAME_INTERVAL_START:
+                case NAME_INTERVAL_START ->
                     start = TimeInstant.parseMoment(valueAsString);
-                    break;
 
-                case NAME_INTERVAL_END:
+                case NAME_INTERVAL_END ->
                     end = TimeInstant.parseMoment(valueAsString);
-                    break;
 
-                default:
-                    throw new IllegalArgumentException("Found field " + fieldName + " expected one of: start, end");
+                default ->
+                    throw Exceptions.illegalArgument("Found field {} expected one of: start, end", fieldName);
             }
             currentToken = jp.nextToken();
         }
+
         if (start == null && end == null) {
             return null;
         }

@@ -52,7 +52,7 @@ class PathParserTest {
     private static TestModel testModel;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         coreSettings.getQueryDefaults()
                 .setUseAbsoluteNavigationLinks(false);
@@ -72,7 +72,7 @@ class PathParserTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etRoom);
         expResult.addPathElement(espe, true, false);
 
         assertEquals(expResult, result);
@@ -84,7 +84,7 @@ class PathParserTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_ROOM);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etRoom);
         expResult.addPathElement(espe, true, false);
         expResult.setRef(true);
 
@@ -97,7 +97,7 @@ class PathParserTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
         expResult.addPathElement(espe, true, false);
 
         assertEquals(expResult, result);
@@ -150,9 +150,9 @@ class PathParserTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
+        PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.etHouse, espe);
         expResult.addPathElement(epe, true, true);
         PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
         expResult.addPathElement(ppe, false, false);
@@ -167,9 +167,9 @@ class PathParserTest {
             String path = "/Houses(1)/properties/property1";
             ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
             ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-            PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+            PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.etHouse, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -181,9 +181,9 @@ class PathParserTest {
             String path = "/Houses(1)/properties/name_two";
             ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
             ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-            PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+            PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.etHouse, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -195,9 +195,9 @@ class PathParserTest {
             String path = "/Houses(1)/properties/property1[2]";
             ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
             ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-            PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+            PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.etHouse, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -211,9 +211,9 @@ class PathParserTest {
             String path = "/Houses(1)/properties/property1[2][3]";
             ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
             ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-            PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+            PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.etHouse, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -229,9 +229,9 @@ class PathParserTest {
             String path = "/Houses(1)/properties/property1[2]/deep[3]";
             ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
             ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-            PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+            PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
             expResult.addPathElement(espe, false, false);
-            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.ET_HOUSE, espe);
+            PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{1L}), testModel.etHouse, espe);
             expResult.addPathElement(epe, true, true);
             PathElementProperty ppe = new PathElementProperty(StandardProperties.EP_PROPERTIES, epe);
             expResult.addPathElement(ppe, false, false);
@@ -280,9 +280,9 @@ class PathParserTest {
         ResourcePath result = PathParser.parsePath(context, Version.INTERNAL, path);
 
         ResourcePath expResult = new ResourcePath(Version.INTERNAL, path);
-        PathElementEntitySet espe = new PathElementEntitySet(testModel.ET_HOUSE);
+        PathElementEntitySet espe = new PathElementEntitySet(testModel.etHouse);
         expResult.addPathElement(espe, false, false);
-        PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{id}), testModel.ET_HOUSE, espe);
+        PathElementEntity epe = new PathElementEntity(new PkValue(new Object[]{id}), testModel.etHouse, espe);
         expResult.addPathElement(epe, true, true);
 
         assertEquals(expResult, result);
