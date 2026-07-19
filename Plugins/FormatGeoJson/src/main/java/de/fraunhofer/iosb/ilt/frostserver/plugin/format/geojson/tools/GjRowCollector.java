@@ -88,14 +88,7 @@ public class GjRowCollector {
             }
         }
         if (isGeom) {
-            if (feature.getGeometry() == null && value instanceof TreeNode tn) {
-                final GeoJsonObject geoJsonObject = GeoHelper.parseGeoJson(tn);
-                if (geoJsonObject instanceof Feature gjf) {
-                    feature.setGeometry(gjf.getGeometry());
-                } else {
-                    feature.setGeometry(geoJsonObject);
-                }
-            }
+            collectGeometry(value);
             return;
         }
         if (value instanceof Map) {
@@ -111,6 +104,17 @@ public class GjRowCollector {
             return;
         }
         feature.setProperty(headerName, value);
+    }
+
+    private void collectGeometry(Object value) {
+        if (feature.getGeometry() == null && value instanceof TreeNode tn) {
+            final GeoJsonObject geoJsonObject = GeoHelper.parseGeoJson(tn);
+            if (geoJsonObject instanceof Feature gjf) {
+                feature.setGeometry(gjf.getGeometry());
+            } else {
+                feature.setGeometry(geoJsonObject);
+            }
+        }
     }
 
     private void flattenMap(Map<String, Object> map, String headerName) {

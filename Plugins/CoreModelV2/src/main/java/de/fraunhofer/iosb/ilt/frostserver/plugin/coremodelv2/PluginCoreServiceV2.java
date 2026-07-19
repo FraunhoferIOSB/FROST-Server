@@ -278,6 +278,16 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
                 }
             }
         }
+        collectFuncionNames();
+        serverSettings.put(KEY_FUNCTIONS, functionNames);
+        // ToDo: endpoint bindings
+        // ToDo: endpoint Settings
+
+        addHttpEndpoint(serverSettings);
+        addMqttEndpoint(serverSettings);
+    }
+
+    private void collectFuncionNames() {
         if (functionNames.isEmpty()) {
             for (var function : coreSettings.getFunctionRegistry().getExpressions()) {
                 if (function instanceof Operator) {
@@ -290,12 +300,6 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             }
             Collections.sort(functionNames);
         }
-        serverSettings.put(KEY_FUNCTIONS, functionNames);
-        // ToDo: endpoint bindings
-        // ToDo: endpoint Settings
-
-        addHttpEndpoint(serverSettings);
-        addMqttEndpoint(serverSettings);
     }
 
     private Map<String, String> createCapability(String name, String url) {

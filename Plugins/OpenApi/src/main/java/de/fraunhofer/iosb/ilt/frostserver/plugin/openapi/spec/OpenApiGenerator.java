@@ -41,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 public class OpenApiGenerator {
 
     private static final String PATH_COMPONENTS_SCHEMAS = "#/components/schemas/";
+    private static final String PATH_COMPONENTS_SCHEMAS_SELF_LINK = "#/components/schemas/selfLink";
     private static final String PATH_COMPONENTS_RESPONSES = "#/components/responses/";
     private static final String PATH_PATHS = "#/paths/";
     private static final String PARAM_FILTER = "filter";
@@ -52,6 +53,8 @@ public class OpenApiGenerator {
     private static final String PARAM_ENTITY_ID = "entityId";
     private static final String[] REPLACE_CHARS = new String[]{"~1", "%28", "%29", "%7B", "%7D"};
     private static final String[] FIND_CHARS = new String[]{"/", "(", ")", "{", "}"};
+
+    private static final String GET_200 = "-get-200";
 
     private OpenApiGenerator() {
         // Only has static methods.
@@ -235,7 +238,7 @@ public class OpenApiGenerator {
 
     private static OAResponse createEntitySetGet200Response(GeneratorContext context, EntityType entityType) {
         OAComponents components = context.getDocument().getComponents();
-        String name = entityType.plural + "-get-200";
+        String name = entityType.plural + GET_200;
         if (!context.getResponseTargets().containsKey(name)) {
             String schemaName = entityType.plural;
             if (!components.hasSchema(schemaName)) {
@@ -341,7 +344,7 @@ public class OpenApiGenerator {
         OAComponents components = context.getDocument().getComponents();
         final PropertyType propertyType = property.getType();
         final String schemaName = property.getJsonName() + "-" + propertyType.getName();
-        String name = schemaName + "-get-200";
+        String name = schemaName + GET_200;
         if (!context.getResponseTargets().containsKey(name)) {
             if (!components.hasSchema(schemaName)) {
                 createPropertySchema(context, property);
@@ -362,7 +365,7 @@ public class OpenApiGenerator {
 
     private static OAResponse createPropertyValueGet200Response(GeneratorContext context, PropertyType propertyType) {
         final String schemaName = propertyType.getName();
-        String name = schemaName + "-get-200";
+        String name = schemaName + GET_200;
         if (!context.getResponseTargets().containsKey(name)) {
             OAResponse resp = new OAResponse();
             OASchema typeSchema = new OASchema(context.getVersion(), propertyType);
@@ -381,7 +384,7 @@ public class OpenApiGenerator {
 
     private static OAResponse createEntityGet200Response(GeneratorContext context, EntityType entityType) {
         OAComponents components = context.getDocument().getComponents();
-        String name = entityType.entityName + "-get-200";
+        String name = entityType.entityName + GET_200;
         if (!context.getResponseTargets().containsKey(name)) {
             String schemaName = entityType.entityName;
             if (!components.hasSchema(schemaName)) {
@@ -436,7 +439,7 @@ public class OpenApiGenerator {
         final OASchema schema = new OASchema(OASchema.Type.OBJECT, null);
         components.addSchema(schemaName, schema);
 
-        schema.addProperty(version.selfLinkName, new OASchema("#/components/schemas/selfLink"));
+        schema.addProperty(version.selfLinkName, new OASchema(PATH_COMPONENTS_SCHEMAS_SELF_LINK));
 
         for (Property property : entityType.getProperties()) {
             String propertyName = property.getJsonName();
@@ -449,7 +452,7 @@ public class OpenApiGenerator {
                 if (StandardProperties.EP_PROPERTIES.equals(epm)) {
                     propSchema = new OASchema("#/components/schemas/properties");
                 } else if (StandardProperties.EP_SELFLINK.equals(epm)) {
-                    propSchema = new OASchema("#/components/schemas/selfLink");
+                    propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS_SELF_LINK);
                 } else {
                     propSchema = new OASchema(context.getVersion(), epm.getType());
                 }
@@ -501,7 +504,7 @@ public class OpenApiGenerator {
             if (StandardProperties.EP_PROPERTIES.equals(epm)) {
                 propSchema = new OASchema("#/components/schemas/properties");
             } else if (StandardProperties.EP_SELFLINK.equals(epm)) {
-                propSchema = new OASchema("#/components/schemas/selfLink");
+                propSchema = new OASchema(PATH_COMPONENTS_SCHEMAS_SELF_LINK);
             } else {
                 propSchema = new OASchema(context.getVersion(), epm.getType());
             }

@@ -18,7 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.modeleditor;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityProperty;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefEntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefModel;
+import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany;
@@ -96,9 +98,11 @@ public class LiquibaseTemplates {
         TableChangelogBuilder clForeignKeys = TableChangelogBuilder.start(date)
                 .setAuthor(author)
                 .setFileName("foreignKeys.xml");
-        MainChangeLogBuilder clMain = MainChangeLogBuilder.start();
+        MainChangeLogBuilder clMain = MainChangeLogBuilder.start()
+                .setAuthor(author)
+                .setDate(date);
         for (var model : models) {
-            createChangelogFor(model, clMain, date, author, clBuilders, clForeignKeys);
+            createChangelogFor(model, clMain, clBuilders, clForeignKeys);
         }
         if (!clForeignKeys.isEmpty()) {
             clBuilders.add(clForeignKeys);
@@ -108,15 +112,15 @@ public class LiquibaseTemplates {
         return clBuilders;
     }
 
-    private static void createChangelogFor(DefModel model, MainChangeLogBuilder clMain, String date, String author, List<ChangeLogBuilder> clBuilders, TableChangelogBuilder clForeignKeys) {
+    private static void createChangelogFor(DefModel model, MainChangeLogBuilder clMain, List<ChangeLogBuilder> clBuilders, TableChangelogBuilder clForeignKeys) {
         for (var et : model.getEntityTypes()) {
             final String etName = et.getName();
             final String tableName = et.getTable();
             final String fileName = "table" + et.getPlural() + ".xml";
             clMain.addFileMainTable(fileName);
             clMain.addPropertyIdType(etName);
-            TableChangelogBuilder clEntityType = TableChangelogBuilder.start(date, tableName)
-                    .setAuthor(author)
+            TableChangelogBuilder clEntityType = TableChangelogBuilder.start(clMain.getDate(), tableName)
+                    .setAuthor(clMain.getAuthor())
                     .setFileName(fileName);
             clBuilders.add(clEntityType);
             ChangesetColumnsBuilder csColumns = ChangesetColumnsBuilder.start();
@@ -126,50 +130,64 @@ public class LiquibaseTemplates {
             }
             clEntityType.addChangesetColumnsBuilder(csColumns);
 
-            for (var ep : et.getNavigationProperties()) {
-                String otherEntityType = ep.getEntityType();
-                for (var handler : ep.getHandlers()) {
-                    if (handler instanceof FieldMapperOneToMany fm) {
-                        String ourColumn = fm.getField();
-                        String otherColumn = fm.getOtherField();
-                        String otherTable = fm.getOtherTable();
-                        if (ourColumn.equals(idField)) {
-                            clEntityType.addChangesetColumnsBuilder(
-                                    ChangesetColumnsBuilder.start()
-                                            .setTableName(otherTable)
-                                            .setTestColumnName(otherColumn)
-                                            .prependColumn(otherColumn, idColumnType(etName), !ep.getInverse().isRequired()));
-                            clForeignKeys.addChangsetForeignKey(otherTable, otherColumn, tableName, ourColumn);
-                            clEntityType.addChangsetIndex(otherTable, otherColumn);
-                        } else {
-                            csColumns.prependColumn(ourColumn, idColumnType(otherEntityType), !ep.isRequired());
-                            if (!csColumns.isTestColumnNameSet()) {
-                                csColumns.setTestColumnName(ourColumn);
-                            }
-                            clForeignKeys.addChangsetForeignKey(tableName, ourColumn, otherTable, otherColumn);
-                            clEntityType.addChangsetIndex(ourColumn);
-                        }
-                    } else if (handler instanceof FieldMapperManyToMany fm) {
-                        String ourField = fm.getField();
-                        String ourType = idColumnType(etName);
-                        String otherType = idColumnType(otherEntityType);
-                        String linkTableOurField = fm.getLinkOurField();
-                        String linkTable = fm.getLinkTable();
-                        String linkTableOtherField = fm.getLinkOtherField();
-                        String otherField = fm.getOtherField();
-                        String otherTable = fm.getOtherTable();
-                        TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(date)
-                                .setAuthor(author)
-                                .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
-                                .addChangsetLinkTable(linkTable, etName, tableName, linkTableOurField, ourType, otherEntityType, otherTable, linkTableOtherField, otherType);
-                        clBuilders.add(clLinkTable);
-                        clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
-                        clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
-                        clMain.addFileLinkTable(clLinkTable.getFileName());
-                    } else if (handler instanceof FieldMapperManyToManyOrdered fm) {
-                        LOGGER.warn("Unknown Handler Type: {}", handler);
+            for (var np : et.getNavigationProperties()) {
+                createChangelogFor(np, et, idField, clMain, clEntityType, clForeignKeys, csColumns, clBuilders);
+            }
+        }
+    }
+
+    private static void createChangelogFor(
+            final DefNavigationProperty np,
+            final DefEntityType et,
+            final String idField,
+            final MainChangeLogBuilder clMain,
+            final TableChangelogBuilder clEntityType,
+            final TableChangelogBuilder clForeignKeys,
+            final ChangesetColumnsBuilder csColumns,
+            final List<ChangeLogBuilder> clBuilders) {
+        final String etName = et.getName();
+        final String tableName = et.getTable();
+        String otherEntityType = np.getEntityType();
+        for (var handler : np.getHandlers()) {
+            if (handler instanceof FieldMapperOneToMany fm) {
+                String ourColumn = fm.getField();
+                String otherColumn = fm.getOtherField();
+                String otherTable = fm.getOtherTable();
+                if (ourColumn.equals(idField)) {
+                    clEntityType.addChangesetColumnsBuilder(
+                            ChangesetColumnsBuilder.start()
+                                    .setTableName(otherTable)
+                                    .setTestColumnName(otherColumn)
+                                    .prependColumn(otherColumn, idColumnType(etName), !np.getInverse().isRequired()));
+                    clForeignKeys.addChangsetForeignKey(otherTable, otherColumn, tableName, ourColumn);
+                    clEntityType.addChangsetIndex(otherTable, otherColumn);
+                } else {
+                    csColumns.prependColumn(ourColumn, idColumnType(otherEntityType), !np.isRequired());
+                    if (!csColumns.isTestColumnNameSet()) {
+                        csColumns.setTestColumnName(ourColumn);
                     }
+                    clForeignKeys.addChangsetForeignKey(tableName, ourColumn, otherTable, otherColumn);
+                    clEntityType.addChangsetIndex(ourColumn);
                 }
+            } else if (handler instanceof FieldMapperManyToMany fm) {
+                String ourField = fm.getField();
+                String ourType = idColumnType(etName);
+                String otherType = idColumnType(otherEntityType);
+                String linkTableOurField = fm.getLinkOurField();
+                String linkTable = fm.getLinkTable();
+                String linkTableOtherField = fm.getLinkOtherField();
+                String otherField = fm.getOtherField();
+                String otherTable = fm.getOtherTable();
+                TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(clMain.getDate())
+                        .setAuthor(clMain.getAuthor())
+                        .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
+                        .addChangsetLinkTable(linkTable, etName, tableName, linkTableOurField, ourType, otherEntityType, otherTable, linkTableOtherField, otherType);
+                clBuilders.add(clLinkTable);
+                clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
+                clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
+                clMain.addFileLinkTable(clLinkTable.getFileName());
+            } else if (handler instanceof FieldMapperManyToManyOrdered fm) {
+                LOGGER.warn("Unknown Handler Type: {}", handler);
             }
         }
     }
@@ -231,11 +249,17 @@ public class LiquibaseTemplates {
 
     public static class MainChangeLogBuilder implements ChangeLogBuilder {
 
+        private static final String TAG_INCLUDE_START = "    <include relativeToChangelogFile=\"true\" file=\"";
+        private static final String TAG_INCLUDE_END = "\" />\n";
+
         private String fileName = "tables.xml";
         private final List<String> filesMainTables = new ArrayList<>();
         private final List<String> filesLinkTables = new ArrayList<>();
         private final List<String> filesKeys = new ArrayList<>();
         private final StringBuilder properties = new StringBuilder();
+
+        private String author;
+        private String date;
 
         public static MainChangeLogBuilder start() {
             return new MainChangeLogBuilder();
@@ -272,17 +296,35 @@ public class LiquibaseTemplates {
             properties.append("    <property name=\"idType-").append(entityTypeName).append("\" value=\"BIGINT\" />\n");
         }
 
+        public String getAuthor() {
+            return author;
+        }
+
+        public MainChangeLogBuilder setAuthor(String author) {
+            this.author = author;
+            return this;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public MainChangeLogBuilder setDate(String date) {
+            this.date = date;
+            return this;
+        }
+
         @Override
         public String build() {
             StringBuilder includes = new StringBuilder();
             for (String file : filesMainTables) {
-                includes.append("    <include relativeToChangelogFile=\"true\" file=\"").append(file).append("\" />\n");
+                includes.append(TAG_INCLUDE_START).append(file).append(TAG_INCLUDE_END);
             }
             for (String file : filesLinkTables) {
-                includes.append("    <include relativeToChangelogFile=\"true\" file=\"").append(file).append("\" />\n");
+                includes.append(TAG_INCLUDE_START).append(file).append(TAG_INCLUDE_END);
             }
             for (String file : filesKeys) {
-                includes.append("    <include relativeToChangelogFile=\"true\" file=\"").append(file).append("\" />\n");
+                includes.append(TAG_INCLUDE_START).append(file).append(TAG_INCLUDE_END);
             }
             String[] searchList = new String[]{
                 S_NAME_BLOCK_COPYRIGHT,

@@ -53,50 +53,51 @@ public class PluginOpenCitySense implements Plugin, ConfigDefaults {
         enabled = pluginSettings.getBoolean(TAG_ENABLE_PDQ, PluginOpenCitySense.class);
         if (enabled) {
             final PluginManager pluginManager = settings.getPluginManager();
-            PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
-            if (pml == null || !pml.isEnabled()) {
-                LOGGER.warn("PluginModelLoader must be enabled first, delaying initialisation...");
-                return INIT_DELAY;
-            }
-            boolean pCoreModelV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
-            boolean pCoreModelV2 = pluginManager.isPluginEnabled(PluginCoreModelV2.class);
-            boolean pActuation = pluginManager.isPluginEnabled(PluginActuation.class);
-            boolean pModelOM_V2 = pluginManager.isPluginEnabled(PluginModelOM.class);
-            if (pCoreModelV1 && !pCoreModelV2) {
-                // Dealing with Model v1.1
-                if (!pActuation) {
-                    LOGGER.warn("Actuation plugin must be enabled, delaying initialisation! (plugins_actuation_enable=true)");
-                    return INIT_DELAY;
-                }
-                pml.addLiquibaseFile("pluginopencitysense/sta1/liquibase/tables.xml");
-                pml.addModelFile("pluginopencitysense/sta1/model/Configuration.json");
-                pml.addModelFile("pluginopencitysense/sta1/model/Decoder.json");
-                pml.addModelFile("pluginopencitysense/sta1/model/DeviceModel.json");
-                pml.addModelFile("pluginopencitysense/sta1/model/DeviceSecret.json");
-                pml.addModelFile("pluginopencitysense/sta1/model/Sensor.json");
-                pml.addModelFile("pluginopencitysense/sta1/model/Thing.json");
-                pml.addModelFile("pluginopencitysense/sta1/model/Task.json");
-            } else if (!pCoreModelV1 && pCoreModelV2) {
-                // Dealing with Model v2.0
-                if (!pActuation) {
-                    LOGGER.warn("Actuation plugin must be enabled, delaying initialisation! (plugins_actuation_enable=true)");
-                    return INIT_DELAY;
-                }
-                if (!pModelOM_V2) {
-                    LOGGER.warn("Model-OM plugin must be enabled, delaying initialisation! (plugins_modelOM_enable=true)");
-                    return INIT_DELAY;
-                }
-                pml.addLiquibaseFile("pluginopencitysense/sta2/liquibase/tables.xml");
-                pml.addModelFile("pluginopencitysense/sta2/model/Configuration.json");
-                pml.addModelFile("pluginopencitysense/sta2/model/Decoder.json");
-                pml.addModelFile("pluginopencitysense/sta2/model/DeviceModel.json");
-                pml.addModelFile("pluginopencitysense/sta2/model/DeviceSecret.json");
-                pml.addModelFile("pluginopencitysense/sta2/model/Thing.json");
-            } else {
-                LOGGER.warn("Either CoreModel with Actuation extension or CoreModelV2 with OM and Actuation Extensions must be enabled, delaying initialisation...");
+            if (init(pluginManager) == INIT_DELAY) {
                 return INIT_DELAY;
             }
             pluginManager.registerPlugin(this);
+        }
+        return INIT_OK;
+    }
+
+    private InitResult init(PluginManager pluginManager) {
+        PluginModelLoader pml = pluginManager.getPlugin(PluginModelLoader.class);
+        if (pml == null || !pml.isEnabled()) {
+            LOGGER.warn("PluginModelLoader must be enabled first, delaying initialisation...");
+            return INIT_DELAY;
+        }
+        boolean pCoreModelV1 = pluginManager.isPluginEnabled(PluginCoreModel.class);
+        boolean pCoreModelV2 = pluginManager.isPluginEnabled(PluginCoreModelV2.class);
+        if (!pluginManager.isPluginEnabled(PluginActuation.class)) {
+            LOGGER.warn("Actuation plugin must be enabled, delaying initialisation! (plugins_actuation_enable=true)");
+            return INIT_DELAY;
+        }
+        if (pCoreModelV1 && !pCoreModelV2) {
+            // Dealing with Model v1.1
+            pml.addLiquibaseFile("pluginopencitysense/sta1/liquibase/tables.xml");
+            pml.addModelFile("pluginopencitysense/sta1/model/Configuration.json");
+            pml.addModelFile("pluginopencitysense/sta1/model/Decoder.json");
+            pml.addModelFile("pluginopencitysense/sta1/model/DeviceModel.json");
+            pml.addModelFile("pluginopencitysense/sta1/model/DeviceSecret.json");
+            pml.addModelFile("pluginopencitysense/sta1/model/Sensor.json");
+            pml.addModelFile("pluginopencitysense/sta1/model/Thing.json");
+            pml.addModelFile("pluginopencitysense/sta1/model/Task.json");
+        } else if (!pCoreModelV1 && pCoreModelV2) {
+            // Dealing with Model v2.0
+            if (!pluginManager.isPluginEnabled(PluginModelOM.class)) {
+                LOGGER.warn("Model-OM plugin must be enabled, delaying initialisation! (plugins_modelOM_enable=true)");
+                return INIT_DELAY;
+            }
+            pml.addLiquibaseFile("pluginopencitysense/sta2/liquibase/tables.xml");
+            pml.addModelFile("pluginopencitysense/sta2/model/Configuration.json");
+            pml.addModelFile("pluginopencitysense/sta2/model/Decoder.json");
+            pml.addModelFile("pluginopencitysense/sta2/model/DeviceModel.json");
+            pml.addModelFile("pluginopencitysense/sta2/model/DeviceSecret.json");
+            pml.addModelFile("pluginopencitysense/sta2/model/Thing.json");
+        } else {
+            LOGGER.warn("Either CoreModel with Actuation extension or CoreModelV2 with OM and Actuation Extensions must be enabled, delaying initialisation...");
+            return INIT_DELAY;
         }
         return INIT_OK;
     }

@@ -50,7 +50,7 @@ public class ConfigFileEditor {
     private File currentFile;
     private String indent = "  ";
 
-    public ConfigFileEditor(Class<?> editorClass) {
+    public <T> ConfigFileEditor(Class<T> editorClass) {
         this.editorClass = editorClass;
     }
 
@@ -163,8 +163,8 @@ public class ConfigFileEditor {
         }
     }
 
-    public ConfigEditor<?> getConfigEditor() {
-        return configEditorModel;
+    public <T> ConfigEditor<T> getConfigEditor() {
+        return (ConfigEditor<T>) configEditorModel;
     }
 
     public void initialize() {
