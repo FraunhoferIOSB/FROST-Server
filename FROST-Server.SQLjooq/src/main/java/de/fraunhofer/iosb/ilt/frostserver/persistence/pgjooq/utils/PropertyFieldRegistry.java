@@ -86,7 +86,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     private final Map<Property, PropertyFields<T>> propFieldsMap;
 
     /**
-     * All select-able fields, by class.
+     * All select-able fields.
      */
     private final List<PropertyFields<T>> propFieldsList;
 
@@ -173,6 +173,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         }
         rs.lastPropCopy.fieldsAll.putAll(rs.lastPropFields.fieldsAll);
         rs.lastPropCopy.fieldsSelect.putAll(rs.lastPropFields.fieldsSelect);
+        rs.lastPropCopy.subFields.putAll(rs.lastPropFields.subFields);
         return mainPropCopy;
     }
 
