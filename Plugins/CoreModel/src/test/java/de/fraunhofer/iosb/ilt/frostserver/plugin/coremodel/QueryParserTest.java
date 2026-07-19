@@ -72,7 +72,7 @@ class QueryParserTest {
     private static ResourcePath path;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         coreSettings.getQueryDefaults()
                 .setAlwaysOrder(false)

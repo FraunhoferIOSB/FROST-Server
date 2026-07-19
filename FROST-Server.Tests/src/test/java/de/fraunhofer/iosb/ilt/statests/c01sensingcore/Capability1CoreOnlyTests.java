@@ -78,7 +78,7 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
     }
 
     @BeforeAll
-    public static void setUp() {
+    static void setUp() {
         LOGGER.info("Setting up.");
     }
 

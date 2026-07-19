@@ -72,7 +72,7 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     }
 
     @BeforeEach
-    public void before() {
+    void before() {
         assumeTrue(
                 serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ),
                 "Conformance level 5 not checked since MultiDatastreams not listed in Service Root.");

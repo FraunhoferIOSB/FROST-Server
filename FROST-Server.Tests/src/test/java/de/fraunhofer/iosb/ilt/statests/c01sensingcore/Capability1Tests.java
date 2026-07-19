@@ -72,7 +72,7 @@ public abstract class Capability1Tests extends AbstractTestClass {
     }
 
     @BeforeAll
-    public static void setUp() {
+    static void setUp() {
         LOGGER.info("Setting up.");
     }
 

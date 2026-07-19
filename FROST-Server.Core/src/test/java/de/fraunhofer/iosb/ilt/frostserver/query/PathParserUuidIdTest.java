@@ -44,10 +44,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/**
- *
- * @author jab
- */
 class PathParserUuidIdTest {
 
     private static CoreSettings coreSettings;
@@ -55,7 +51,7 @@ class PathParserUuidIdTest {
     private static TestModel testModel;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         coreSettings.getQueryDefaults()
                 .setUseAbsoluteNavigationLinks(false);

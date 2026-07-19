@@ -56,7 +56,7 @@ class EntityFormatterTest {
     private static EntityType etMultiDatastream;
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
@@ -73,7 +73,7 @@ class EntityFormatterTest {
     }
 
     @BeforeAll
-    public static void setUp() {
+    static void setUp() {
         PluginResultFormatDataArray.modifyEntityFormatter();
     }
 

@@ -53,7 +53,7 @@ class UrlHelperTest {
     private static PluginCoreModel pluginCoreModelString;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         coreSettings.getQueryDefaults()
                 .setServiceRootUrl(SERVICE_ROOT_URL)

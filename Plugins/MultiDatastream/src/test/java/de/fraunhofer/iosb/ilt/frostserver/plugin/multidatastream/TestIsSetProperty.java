@@ -71,7 +71,7 @@ public class TestIsSetProperty {
     private final Map<Property, Object> propertyValues = new HashMap<>();
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
@@ -99,7 +99,7 @@ public class TestIsSetProperty {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, modelRegistry);
     }
 

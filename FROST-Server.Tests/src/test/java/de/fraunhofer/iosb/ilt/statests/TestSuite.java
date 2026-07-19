@@ -282,7 +282,7 @@ public class TestSuite {
     }
 
     @BeforeAll
-    public static void setUpClass() {
+    static void setUpClass() {
         LOGGER.info("Starting Servers...");
     }
 

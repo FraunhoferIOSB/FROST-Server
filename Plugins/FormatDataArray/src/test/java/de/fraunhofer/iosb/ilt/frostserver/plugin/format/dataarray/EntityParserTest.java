@@ -50,7 +50,7 @@ class EntityParserTest {
     private static EntityType etMultiDatastream;
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");
@@ -69,7 +69,7 @@ class EntityParserTest {
     private JsonReaderDefault entityParser;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         entityParser = new JsonReaderDefault(modelRegistry, PluginCoreService.V_1_1);
     }
 

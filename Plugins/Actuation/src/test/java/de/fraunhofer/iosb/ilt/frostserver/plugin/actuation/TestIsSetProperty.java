@@ -57,7 +57,7 @@ public class TestIsSetProperty {
     private final Map<Property, Object> propertyValues = new HashMap<>();
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");
@@ -73,7 +73,7 @@ public class TestIsSetProperty {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, pluginActuation, modelRegistry);
     }
 

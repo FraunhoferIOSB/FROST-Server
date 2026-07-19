@@ -45,7 +45,7 @@ class SerialisationTest {
     private static TestModel testModel;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         modelRegistry = new ModelRegistry();
         testModel = new TestModel();
         testModel.initModel(modelRegistry, Constants.VALUE_ID_TYPE_LONG);

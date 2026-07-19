@@ -58,7 +58,7 @@ class EntityParserTest {
     private static JsonReaderDefault entityParser;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
         queryDefaults = coreSettings.getQueryDefaults();

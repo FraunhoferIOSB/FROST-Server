@@ -58,7 +58,7 @@ class EntityBuilderTest {
     private final Map<Property, Object> propertyValues = new HashMap<>();
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         coreSettings = new CoreSettings();
         modelRegistry = coreSettings.getModelRegistry();
         queryDefaults = coreSettings.getQueryDefaults();
@@ -69,7 +69,7 @@ class EntityBuilderTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         TestHelper.generateDefaultValues(propertyValues, pluginCoreModel, modelRegistry);
     }
 

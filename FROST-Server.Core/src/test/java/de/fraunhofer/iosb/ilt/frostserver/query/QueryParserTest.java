@@ -79,7 +79,7 @@ class QueryParserTest {
     private static ResourcePath path;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
         coreSettings.getQueryDefaults()

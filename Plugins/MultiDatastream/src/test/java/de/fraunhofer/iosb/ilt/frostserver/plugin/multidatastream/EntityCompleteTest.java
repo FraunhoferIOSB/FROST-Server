@@ -69,7 +69,7 @@ class EntityCompleteTest {
     private static NavigationPropertyEntitySet npMultiDatastreamsThing;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + TAG_ENABLE_MDS_MODEL, "true");

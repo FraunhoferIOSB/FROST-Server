@@ -57,7 +57,7 @@ class EntityFormatterTest {
     private static PluginCoreModel pluginCoreModel;
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         coreSettings = new CoreSettings();
         coreSettings.getQueryDefaults()
                 .setServiceRootUrl("http://example.org/v1.0/")

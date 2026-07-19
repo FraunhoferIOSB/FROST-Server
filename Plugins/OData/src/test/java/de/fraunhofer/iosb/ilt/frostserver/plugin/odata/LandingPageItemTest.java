@@ -22,16 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import org.junit.jupiter.api.Test;
 
-public class LandingPageItemTest {
-
-    public LandingPageItemTest() {
-    }
+class LandingPageItemTest {
 
     /**
      * Test of generateFrom method, of class LandingPageItem.
      */
     @Test
-    public void testGenerateFrom() {
+    void testGenerateFrom() {
         EntityType et = new EntityType("Test", "Tests");
         String path = "http://myserver/myPath/";
         LandingPageItem expResult = new LandingPageItem()
@@ -45,7 +42,7 @@ public class LandingPageItemTest {
      * Test of getName method, of class LandingPageItem.
      */
     @Test
-    public void testGetName() {
+    void testGetName() {
         EntityType et = new EntityType("Test", "Tests");
         String path = "http://myserver/myPath/";
         LandingPageItem instance = LandingPageItem.generateFrom(et, path);
@@ -58,7 +55,7 @@ public class LandingPageItemTest {
      * Test of setName method, of class LandingPageItem.
      */
     @Test
-    public void testSetName() {
+    void testSetName() {
         EntityType et = new EntityType("Test", "Tests");
         String path = "http://myserver/myPath/";
         LandingPageItem instance = LandingPageItem.generateFrom(et, path);
@@ -71,7 +68,7 @@ public class LandingPageItemTest {
      * Test of getUrl method, of class LandingPageItem.
      */
     @Test
-    public void testGetUrl() {
+    void testGetUrl() {
         EntityType et = new EntityType("Test", "Tests");
         String path = "http://myserver/myPath/";
         LandingPageItem instance = LandingPageItem.generateFrom(et, path);
@@ -84,7 +81,7 @@ public class LandingPageItemTest {
      * Test of setUrl method, of class LandingPageItem.
      */
     @Test
-    public void testSetUrl() {
+    void testSetUrl() {
         EntityType et = new EntityType("Test", "Tests");
         String path = "http://myserver/myPath/";
         LandingPageItem instance = LandingPageItem.generateFrom(et, path);
@@ -97,7 +94,7 @@ public class LandingPageItemTest {
      * Test of getTitle and setTitle methods, of class LandingPageItem.
      */
     @Test
-    public void testSetGetTitle() {
+    void testSetGetTitle() {
         EntityType et = new EntityType("Test", "Tests");
         String path = "http://myserver/myPath/";
         String expResult = "notTest";

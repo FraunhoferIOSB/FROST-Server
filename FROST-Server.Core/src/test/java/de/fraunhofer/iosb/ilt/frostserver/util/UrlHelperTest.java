@@ -48,7 +48,7 @@ class UrlHelperTest {
     private static TestModel testModel;
 
     @BeforeAll
-    public static void beforeClass() {
+    static void beforeClass() {
         coreSettings = new CoreSettings();
         DefaultFunctions.registerDefaultFunctions(coreSettings.getFunctionRegistry());
         coreSettings.getQueryDefaults()

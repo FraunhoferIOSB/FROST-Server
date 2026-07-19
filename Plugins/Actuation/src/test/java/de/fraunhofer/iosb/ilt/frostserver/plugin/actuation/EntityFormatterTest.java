@@ -54,7 +54,7 @@ class EntityFormatterTest {
     private static PluginActuation pluginActuation;
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         if (context == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + ActuationModelSettings.TAG_ENABLE_ACTUATION, "true");

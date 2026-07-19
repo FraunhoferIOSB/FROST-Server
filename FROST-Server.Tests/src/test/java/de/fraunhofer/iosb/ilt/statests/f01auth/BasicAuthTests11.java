@@ -19,10 +19,6 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 
-/**
- *
- * @author hylke
- */
 public class BasicAuthTests11 extends BasicAuthTests {
 
     public BasicAuthTests11() {

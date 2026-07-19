@@ -51,7 +51,7 @@ class EntityParserStringIdTest {
     private static EntityType etMultiDatastream;
 
     @BeforeAll
-    public static void initClass() {
+    static void initClass() {
         if (queryDefaults == null) {
             coreSettings = new CoreSettings();
             coreSettings.getSettings().getProperties().put("plugins." + CoreModelSettings.TAG_ID_TYPE_DEFAULT, Constants.VALUE_ID_TYPE_STRING);
@@ -71,7 +71,7 @@ class EntityParserStringIdTest {
     private JsonReaderDefault entityParser;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         entityParser = new JsonReaderDefault(modelRegistry, PluginCoreService.V_1_1);
     }
 
