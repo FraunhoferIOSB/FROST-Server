@@ -75,20 +75,21 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicAbs() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/HistoricalLocations\",\n"
-                + "\"TaskingCapabilities@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/TaskingCapabilities\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "http://example.org/v1.0/Things(1)/Locations",
+                "Datastreams@iot.navigationLink": "http://example.org/v1.0/Things(1)/Datastreams",
+                "HistoricalLocations@iot.navigationLink": "http://example.org/v1.0/Things(1)/HistoricalLocations",
+                "TaskingCapabilities@iot.navigationLink": "http://example.org/v1.0/Things(1)/TaskingCapabilities",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         ServiceContext contextAbs = context.copy();
         contextAbs.setQueryDefaults(contextAbs.getQueryDefaults().copy().setUseAbsoluteNavigationLinks(true));
         ResourcePath path = PathParser.parsePath(contextAbs, PluginCoreService.V_1_0, "/Things(1)");
@@ -107,20 +108,21 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicRel() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations",
+                "TaskingCapabilities@iot.navigationLink": "Things(1)/TaskingCapabilities",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = new Query(context, path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -137,10 +139,11 @@ class EntityFormatterTest {
 
     @Test
     void writeThingSelect() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"name\": \"This thing is an oven.\"\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "name": "This thing is an oven."
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id,name", context, path)
                 .validate();
@@ -158,20 +161,21 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsBasic() throws IOException {
-        String thing = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String thing = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations",
+                "TaskingCapabilities@iot.navigationLink": "Things(1)/TaskingCapabilities",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         String expResult = "{ \"value\":[\n"
                 + thing + ",\n"
                 + thing
@@ -216,41 +220,41 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsWithExpandedDatastream() throws IOException {
-        String thing = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Datastreams@iot.count\":1,\n"
-                + "\"Datastreams\": [\n"
-                + "{\n"
-                + "	\"@iot.id\":1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": {\n"
-                + "		\"name\": \"degree Celsius\",\n"
-                + "		\"symbol\": \"°C\",\n"
-                + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "	\"observedArea\": {\n"
-                + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]\n"
-                + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\""
-                + "}\n"
-                + "],\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "\"TaskingCapabilities@iot.navigationLink\": \"Things(1)/TaskingCapabilities\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String thing = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Datastreams@iot.count":1,
+                "Datastreams": [
+                {
+                    "@iot.id":1,
+                    "@iot.selfLink": "http://example.org/v1.0/Datastreams(1)",
+                    "name": "This is a datastream measuring the temperature in an oven.",
+                    "description": "This is a datastream measuring the temperature in an oven.",
+                    "unitOfMeasurement": {
+                        "name": "degree Celsius",
+                        "symbol": "\u00b0C",
+                        "definition": "http://unitsofmeasure.org/ucum.html#para-30"
+                    },
+                    "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                    "observedArea": {
+                        "type": "Polygon",
+                        "coordinates": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]
+                    },
+                    "phenomenonTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z",
+                    "resultTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"}
+                ],
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations",
+                "TaskingCapabilities@iot.navigationLink": "Things(1)/TaskingCapabilities",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         String expResult = "{ "
                 + "\"@iot.count\": 1,\n"
                 + "\"value\":[\n"

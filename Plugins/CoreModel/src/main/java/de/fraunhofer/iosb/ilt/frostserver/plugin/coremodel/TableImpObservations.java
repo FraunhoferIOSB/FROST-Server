@@ -27,7 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
@@ -516,7 +515,6 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
                 LOGGER.debug("Failed to link Projects to generated FoI, linktable LOCATION_PROJECTS not found.");
                 return;
             }
-            EntitySetImpl projects = new EntitySetImpl(npFeatureProjects);
             TableField fPid = (TableField) tlp.field("PROJECT_ID");
             TableField fLid = (TableField) tlp.field("LOCATION_ID");
             if (fPid == null || fLid == null) {

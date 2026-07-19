@@ -104,20 +104,22 @@ public class JsonBatchResultItem {
     }
 
     public JsonBatchResultItem addHeader(String name, String value) {
+        if ("location".equalsIgnoreCase(name)) {
+            location = value;
+        }
         Object oldVal = headers.get(name);
         if (oldVal instanceof String s) {
             List<String> list = new ArrayList<>();
             list.add(s);
             list.add(value);
             headers.put(name, list);
-        } else if (oldVal instanceof List list) {
+            return this;
+        }
+        if (oldVal instanceof List list) {
             list.add(value);
-        } else {
-            headers.put(name, value);
+            return this;
         }
-        if ("location".equalsIgnoreCase(name)) {
-            location = value;
-        }
+        headers.put(name, value);
         return this;
     }
 

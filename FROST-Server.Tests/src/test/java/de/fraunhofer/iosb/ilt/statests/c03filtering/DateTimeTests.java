@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -191,6 +192,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
         createObservation(r++, datastream, T2017, T2017, null); // 22
         createObservation(r++, datastream, I2015, T2015, I2015); // 23
         createObservation(r++, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
+        Assertions.assertEquals(25, r);
 
         // A second Datastream, with no observations.
         Entity datastream2 = sMdl.newDatastream("Datastream 2", "The second temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
@@ -778,9 +780,9 @@ public abstract class DateTimeTests extends AbstractTestClass {
     void test13Year() throws ServiceFailureException {
         LOGGER.info("  test13Year");
         Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
-        testFilterResults(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
-        testFilterResults(doa, String.format("year(validTime) eq 2015"), getFromList(OBSERVATIONS, 23));
-        testFilterResults(doa, String.format("year(phenomenonTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
+        testFilterResults(doa, "year(resultTime) eq 2015", getFromList(OBSERVATIONS, 21, 23));
+        testFilterResults(doa, "year(validTime) eq 2015", getFromList(OBSERVATIONS, 23));
+        testFilterResults(doa, "year(phenomenonTime) eq 2015", getFromList(OBSERVATIONS, 21, 23));
     }
 
     @Test
@@ -824,29 +826,29 @@ public abstract class DateTimeTests extends AbstractTestClass {
     void test20DateWithTimezone() throws ServiceFailureException {
         LOGGER.info("  test20DateWithTimezone");
         Dao doa = DATASTREAMS.get(2).dao(sMdl.npDatastreamObservations);
-        testFilterResults(doa, String.format("date(resultTime, 'Europe/berlin') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47));
-        testFilterResults(doa, String.format("date(phenomenonTime, 'Europe/Berlin') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47));
+        testFilterResults(doa, "date(resultTime, 'Europe/berlin') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47));
+        testFilterResults(doa, "date(phenomenonTime, 'Europe/Berlin') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47));
 
-        testFilterResults(doa, String.format("date(resultTime, 'UTC') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48));
-        testFilterResults(doa, String.format("date(phenomenonTime, 'UTC') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48));
+        testFilterResults(doa, "date(resultTime, 'UTC') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48));
+        testFilterResults(doa, "date(phenomenonTime, 'UTC') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48));
 
-        testFilterResults(doa, String.format("date(resultTime, 'PST') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
-        testFilterResults(doa, String.format("date(phenomenonTime, 'PST') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(resultTime, 'PST') eq 2020-01-01", getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(phenomenonTime, 'PST') eq 2020-01-01", getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
 
-        testFilterResults(doa, String.format("date(resultTime, '-08:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
-        testFilterResults(doa, String.format("date(resultTime, '-08') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
-        testFilterResults(doa, String.format("date(phenomenonTime, '-8') eq 2020-01-01"), getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(resultTime, '-08:00') eq 2020-01-01", getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(resultTime, '-08') eq 2020-01-01", getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(phenomenonTime, '-8') eq 2020-01-01", getFromList(OBSERVATIONS, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
 
-        testFilterResults(doa, String.format("date(resultTime, '-11:00:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
-        testFilterResults(doa, String.format("date(resultTime, '-11:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
-        testFilterResults(doa, String.format("date(resultTime, '-11') eq 2020-01-01"), getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(resultTime, '-11:00:00') eq 2020-01-01", getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(resultTime, '-11:00') eq 2020-01-01", getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
+        testFilterResults(doa, "date(resultTime, '-11') eq 2020-01-01", getFromList(OBSERVATIONS, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49));
 
-        testFilterResults(doa, String.format("date(resultTime, '+11:00:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
-        testFilterResults(doa, String.format("date(resultTime, '11:00:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
-        testFilterResults(doa, String.format("date(resultTime, '+11:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
-        testFilterResults(doa, String.format("date(resultTime, '11:00') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
-        testFilterResults(doa, String.format("date(resultTime, '+11') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
-        testFilterResults(doa, String.format("date(resultTime, '11') eq 2020-01-01"), getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, "date(resultTime, '+11:00:00') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, "date(resultTime, '11:00:00') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, "date(resultTime, '+11:00') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, "date(resultTime, '11:00') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, "date(resultTime, '+11') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
+        testFilterResults(doa, "date(resultTime, '11') eq 2020-01-01", getFromList(OBSERVATIONS, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37));
     }
 
     @Test

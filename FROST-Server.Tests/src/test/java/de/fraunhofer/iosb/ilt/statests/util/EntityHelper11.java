@@ -47,9 +47,7 @@ import static de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper.propert
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Tasking;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
@@ -62,14 +60,10 @@ import org.geojson.Point;
 public class EntityHelper11 extends EntityHelperAbstract {
 
     private final SensorThingsV11Sensing sMdl;
-    private final SensorThingsV11MultiDatastream mMdl;
-    private final SensorThingsV11Tasking tMdl;
 
     public EntityHelper11(SensorThingsService sSrvc) {
         super(sSrvc);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
-        mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
-        tMdl = sSrvc.getModel(SensorThingsV11Tasking.class);
     }
 
     @Override

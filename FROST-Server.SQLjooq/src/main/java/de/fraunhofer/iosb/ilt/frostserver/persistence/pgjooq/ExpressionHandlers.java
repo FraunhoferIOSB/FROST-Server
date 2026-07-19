@@ -146,6 +146,10 @@ public class ExpressionHandlers {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionHandlers.class.getName());
 
+    private ExpressionHandlers() {
+        // Not for instantiation.
+    }
+
     public interface JooqExpHlpr extends ExpressionHelper {
 
         public QueryBuilder getQueryBuilder();
@@ -235,7 +239,7 @@ public class ExpressionHandlers {
             fr.getExpression(Multiply.class).setHandler((Multiply exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(Not.class).setHandler((Not exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(NotEqual.class).setHandler((NotEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Now.class).setHandler((Now exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            fr.getExpression(Now.class).setHandler((Now exp, ExpressionHelper h) -> ImpTime.handle((JooqExpHlpr) h));
             fr.getExpression(NullConstant.class).setHandler((exp, h) -> new NullWrapper());
             fr.getExpression(Or.class).setHandler((Or exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(Overlaps.class).setHandler((Overlaps exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
@@ -260,7 +264,7 @@ public class ExpressionHandlers {
             fr.getExpression(Subtract.class).setHandler((Subtract exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(Time.class).setHandler((Time exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(TimeConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(TimeObjectConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
+            fr.getExpression(TimeObjectConstant.class).setHandler((exp, h) -> ImpConst.handle());
             fr.getExpression(ToLower.class).setHandler((ToLower exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(TotalOffsetMinutes.class).setHandler((TotalOffsetMinutes exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(ToUpper.class).setHandler((ToUpper exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
@@ -286,6 +290,10 @@ public class ExpressionHandlers {
     }
 
     public static class ImpConst {
+
+        private ImpConst() {
+            // Not for instantiation.
+        }
 
         public static FieldWrapper handle(BooleanConstant node) {
             return new SimpleFieldWrapper(Boolean.TRUE.equals(node.getValue()) ? DSL.condition("TRUE") : DSL.condition("FALSE"));
@@ -318,7 +326,7 @@ public class ExpressionHandlers {
                     value.getEndAsMoment());
         }
 
-        public static FieldWrapper handle(TimeObjectConstant node) {
+        public static FieldWrapper handle() {
             LOGGER.error("TimeObjects should never appear in expressions!");
             throw new IllegalArgumentException("TimeObjects should never appear in expressions!");
         }
@@ -341,6 +349,10 @@ public class ExpressionHandlers {
     }
 
     public static class ImpCmpOps {
+
+        private ImpCmpOps() {
+            // Not for instantiation.
+        }
 
         public static FieldWrapper handle(Equal node, JooqExpHlpr h) {
             List<Expression<?>> params = node.getParameters();
@@ -494,6 +506,10 @@ public class ExpressionHandlers {
 
     public static class ImpLogicOps {
 
+        private ImpLogicOps() {
+            // Not for instantiation.
+        }
+
         public static FieldWrapper handle(And node, JooqExpHlpr h) {
             List<Expression<?>> params = node.getParameters();
             FieldWrapper p1 = h.handle(params.get(0));
@@ -526,6 +542,10 @@ public class ExpressionHandlers {
     }
 
     public static class ImpMath {
+
+        private ImpMath() {
+            // Not for instantiation.
+        }
 
         public static FieldWrapper handle(Add node, JooqExpHlpr h) {
             List<Expression<?>> params = node.getParameters();
@@ -627,6 +647,10 @@ public class ExpressionHandlers {
 
     public static class ImpIntrvls {
 
+        private ImpIntrvls() {
+            // Not for instantiation.
+        }
+
         public static FieldWrapper handle(After node, JooqExpHlpr h) {
             List<Expression<?>> params = node.getParameters();
             FieldWrapper p1 = h.handle(params.get(0));
@@ -703,6 +727,10 @@ public class ExpressionHandlers {
 
         private static final String TIMEZONE_WITH_ISO_OFFSETS = "timezone_with_iso_offsets";
 
+        private ImpTime() {
+            // Not for instantiation.
+        }
+
         public static FieldWrapper handle(Date node, JooqExpHlpr h) {
             List<Expression<?>> params = node.getParameters();
             Expression<?> p1 = params.get(0);
@@ -775,7 +803,7 @@ public class ExpressionHandlers {
             return datePartExtract(DatePart.MONTH, node, h);
         }
 
-        public static FieldWrapper handle(Now node, JooqExpHlpr h) {
+        public static FieldWrapper handle(JooqExpHlpr h) {
             return new StaDateTimeWrapper(DSL.field("now()", Moment.class));
         }
 
@@ -832,6 +860,10 @@ public class ExpressionHandlers {
     }
 
     public static class ImpGeo {
+
+        private ImpGeo() {
+            // Not for instantiation.
+        }
 
         public static FieldWrapper handle(GeoDistance node, JooqExpHlpr h) {
             Expression<?> p1 = node.getParameters().get(0);
@@ -925,6 +957,10 @@ public class ExpressionHandlers {
 
     public static class ImpOther {
 
+        private ImpOther() {
+            // Not for instantiation.
+        }
+
         public static FieldWrapper handle(Path node, JooqExpHlpr h) {
             PathState state = new PathState();
             state.elements = node.getElements();
@@ -981,6 +1017,10 @@ public class ExpressionHandlers {
     }
 
     public static class ImpString {
+
+        private ImpString() {
+            // Not for instantiation.
+        }
 
         public static FieldWrapper handle(Concat node, JooqExpHlpr h) {
             Expression<?> p1 = node.getParameters().get(0);
@@ -1083,6 +1123,10 @@ public class ExpressionHandlers {
 
         private static final String ST_GEOM_FROM_EWKT = "ST_GeomFromEWKT(?)";
 
+        private ImpPostgis() {
+            // Not for instantiation.
+        }
+
         public static FieldWrapper handle(LineStringConstant node) {
             final String wktString = node.getWktWithSrid(4326);
             return new SimpleFieldWrapper(DSL.field(ST_GEOM_FROM_EWKT, PostGisGeometryBinding.dataType(), wktString));
@@ -1103,6 +1147,10 @@ public class ExpressionHandlers {
     public static class ImpMariaDb {
 
         private static final String ST_GEOMFROMTEXT = "ST_GeomFromText(?)";
+
+        private ImpMariaDb() {
+            // Not for instantiation.
+        }
 
         public static FieldWrapper handle(LineStringConstant node) {
             return new SimpleFieldWrapper(DSL.field(ST_GEOMFROMTEXT, PostGisGeometryBinding.dataType(), node.getSource()));

@@ -1454,71 +1454,72 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private static void createEntities() {
         try {
             //First Thing
-            String urlParameters = "{\n"
-                    + "    \"name\": \"thing 1\",\n"
-                    + "    \"description\": \"thing 1\",\n"
-                    + "    \"properties\": {\n"
-                    + "        \"reference\": \"first\"\n"
-                    + "    },\n"
-                    + "    \"Locations\": [\n"
-                    + "        {\n"
-                    + "            \"name\": \"location 1\",\n"
-                    + "            \"description\": \"location 1\",\n"
-                    + "            \"location\": {\n"
-                    + "                \"type\": \"Point\",\n"
-                    + "                \"coordinates\": [\n"
-                    + "                    -117.05,\n"
-                    + "                    51.05\n"
-                    + "                ]\n"
-                    + "            },\n"
-                    + "            \"encodingType\": \"application/vnd.geo+json\"\n"
-                    + "        }\n"
-                    + "    ],\n"
-                    + "    \"Datastreams\": [\n"
-                    + "        {\n"
-                    + "            \"unitOfMeasurement\": {\n"
-                    + "                \"name\": \"Lumen\",\n"
-                    + "                \"symbol\": \"lm\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
-                    + "            },\n"
-                    + "            \"name\": \"datastream 1\",\n"
-                    + "            \"description\": \"datastream 1\",\n"
-                    + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "            \"ObservedProperty\": {\n"
-                    + "                \"name\": \"Luminous Flux\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\n"
-                    + "                \"description\": \"observedProperty 1\"\n"
-                    + "            },\n"
-                    + "            \"Sensor\": {\n"
-                    + "                \"name\": \"sensor 1\",\n"
-                    + "                \"description\": \"sensor 1\",\n"
-                    + "                \"encodingType\": \"application/pdf\",\n"
-                    + "                \"metadata\": \"Light flux sensor\"\n"
-                    + "            }\n"
-                    + "        },\n"
-                    + "        {\n"
-                    + "            \"unitOfMeasurement\": {\n"
-                    + "                \"name\": \"Centigrade\",\n"
-                    + "                \"symbol\": \"C\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
-                    + "            },\n"
-                    + "            \"name\": \"datastream 2\",\n"
-                    + "            \"description\": \"datastream 2\",\n"
-                    + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "            \"ObservedProperty\": {\n"
-                    + "                \"name\": \"Tempretaure\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture\",\n"
-                    + "                \"description\": \"observedProperty 2\"\n"
-                    + "            },\n"
-                    + "            \"Sensor\": {\n"
-                    + "                \"name\": \"sensor 2\",\n"
-                    + "                \"description\": \"sensor 2\",\n"
-                    + "                \"encodingType\": \"application/pdf\",\n"
-                    + "                \"metadata\": \"Tempreture sensor\"\n"
-                    + "            }\n"
-                    + "        }\n"
-                    + "    ]\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                        "name": "thing 1",
+                        "description": "thing 1",
+                        "properties": {
+                            "reference": "first"
+                        },
+                        "Locations": [
+                            {
+                                "name": "location 1",
+                                "description": "location 1",
+                                "location": {
+                                    "type": "Point",
+                                    "coordinates": [
+                                        -117.05,
+                                        51.05
+                                    ]
+                                },
+                                "encodingType": "application/vnd.geo+json"
+                            }
+                        ],
+                        "Datastreams": [
+                            {
+                                "unitOfMeasurement": {
+                                    "name": "Lumen",
+                                    "symbol": "lm",
+                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen"
+                                },
+                                "name": "datastream 1",
+                                "description": "datastream 1",
+                                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                                "ObservedProperty": {
+                                    "name": "Luminous Flux",
+                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux",
+                                    "description": "observedProperty 1"
+                                },
+                                "Sensor": {
+                                    "name": "sensor 1",
+                                    "description": "sensor 1",
+                                    "encodingType": "application/pdf",
+                                    "metadata": "Light flux sensor"
+                                }
+                            },
+                            {
+                                "unitOfMeasurement": {
+                                    "name": "Centigrade",
+                                    "symbol": "C",
+                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen"
+                                },
+                                "name": "datastream 2",
+                                "description": "datastream 2",
+                                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                                "ObservedProperty": {
+                                    "name": "Tempretaure",
+                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture",
+                                    "description": "observedProperty 2"
+                                },
+                                "Sensor": {
+                                    "name": "sensor 2",
+                                    "description": "sensor 2",
+                                    "encodingType": "application/pdf",
+                                    "metadata": "Tempreture sensor"
+                                }
+                            }
+                        ]
+                    }""";
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
             thingId1 = postAndGetId(urlString, urlParameters);
 

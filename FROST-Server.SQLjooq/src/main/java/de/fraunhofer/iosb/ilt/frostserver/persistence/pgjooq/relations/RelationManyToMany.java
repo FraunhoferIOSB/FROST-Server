@@ -94,10 +94,6 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
     }
 
     public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target, boolean symmetrical) {
-        if (source == null) {
-            // Source is only used for finding the generics...
-            LOGGER.error("NULL source");
-        }
         this.navProp = navProp;
         this.linkTable = linkTable;
         this.target = target;

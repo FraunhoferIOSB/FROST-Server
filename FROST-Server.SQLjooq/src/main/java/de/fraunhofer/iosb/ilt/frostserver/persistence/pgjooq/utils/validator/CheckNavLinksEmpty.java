@@ -90,18 +90,21 @@ public class CheckNavLinksEmpty implements ValidationCheck {
 
     private boolean checkNavLink(NavigationPropertyMain targetNp, Entity contextEntity, final boolean emptyRequired, final boolean filledRequired) {
         boolean valid;
-        if (targetNp instanceof NavigationPropertyEntity targetNpEntity) {
-            final Entity targetEntity = contextEntity.getProperty(targetNpEntity);
-            final boolean empty = targetEntity == null;
-            valid = (emptyRequired && empty) || (filledRequired && !empty);
-            LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
-        } else if (targetNp instanceof NavigationPropertyEntitySet targetNpEntitySet) {
-            EntitySet targetEntities = contextEntity.getProperty(targetNpEntitySet);
-            final boolean empty = targetEntities == null || targetEntities.isEmpty();
-            valid = (emptyRequired && empty) || (filledRequired && !empty);
-            LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
-        } else {
-            valid = false;
+        switch (targetNp) {
+            case NavigationPropertyEntity targetNpEntity -> {
+                final Entity targetEntity = contextEntity.getProperty(targetNpEntity);
+                final boolean empty = targetEntity == null;
+                valid = (emptyRequired && empty) || (filledRequired && !empty);
+                LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
+            }
+            case NavigationPropertyEntitySet targetNpEntitySet -> {
+                EntitySet targetEntities = contextEntity.getProperty(targetNpEntitySet);
+                final boolean empty = targetEntities == null || targetEntities.isEmpty();
+                valid = (emptyRequired && empty) || (filledRequired && !empty);
+                LOGGER.debug("  Check on {}.{}: {}", entityType, targetNp, valid);
+            }
+            default ->
+                valid = false;
         }
         return valid;
     }

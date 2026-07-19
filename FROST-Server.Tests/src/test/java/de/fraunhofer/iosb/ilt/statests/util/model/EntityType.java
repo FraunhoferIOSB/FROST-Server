@@ -181,8 +181,8 @@ public enum EntityType {
 
     public List<String> getRelations(Set<Extension> extensions) {
         List<String> value = new ArrayList<>();
-        for (Extension extension : extensions) {
-            value.addAll(relations.getOrDefault(extension, Collections.emptyList()));
+        for (Extension e : extensions) {
+            value.addAll(relations.getOrDefault(e, Collections.emptyList()));
         }
         return value;
     }

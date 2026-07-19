@@ -25,6 +25,7 @@ import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_4
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.typeFromSelfLink;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.JOIN_TIMEOUT;
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,8 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -296,15 +295,6 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     public static PkValue pkFromSelfLink(String selfLink) {
         String idString = selfLink.substring(selfLink.indexOf('(') + 1, selfLink.indexOf(')'));
         return ParserUtils.tryToParse(idString);
-    }
-
-    private String typeFromSelfLink(String selfLink) {
-        Pattern typePattern = Pattern.compile(".*\\/([^/(]+)\\(.*");
-        Matcher matcher = typePattern.matcher(selfLink);
-        if (!matcher.matches()) {
-            LOGGER.error("Unknown entity type for: {}", selfLink);
-        }
-        return matcher.group(1).toLowerCase();
     }
 
     private String postBatch(String body) {

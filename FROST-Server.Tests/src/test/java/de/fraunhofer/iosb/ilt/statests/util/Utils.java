@@ -61,6 +61,7 @@ public class Utils {
         try {
             return URLEncoder.encode(link, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException ex) {
+            LOGGER.warn("Failed to urlencode link");
         }
         return link;
     }
@@ -254,4 +255,13 @@ public class Utils {
         }
     }
 
+    public static String typeFromSelfLink(String selfLink) {
+        int idx1 = selfLink.indexOf('(');
+        int idx2 = selfLink.substring(0, idx1).lastIndexOf('/') + 1;
+        return selfLink.substring(idx2, idx1).toLowerCase();
+    }
+
+    public static String[] nse(String... strings) {
+        return strings;
+    }
 }

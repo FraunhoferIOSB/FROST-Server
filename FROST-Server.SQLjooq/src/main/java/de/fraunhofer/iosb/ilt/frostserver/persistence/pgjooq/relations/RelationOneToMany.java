@@ -90,10 +90,6 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     public RelationOneToMany(NavigationPropertyMain navProp, S source, T target, boolean distinctRequired) {
-        if (source == null) {
-            // Source is only used for finding the generics...
-            LOGGER.error("NULL source");
-        }
         this.navProp = navProp;
         this.source = source;
         this.target = target;

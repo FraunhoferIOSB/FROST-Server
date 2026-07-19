@@ -25,6 +25,10 @@ import org.apache.commons.lang3.Strings;
  */
 public class Exceptions {
 
+    private Exceptions() {
+        // Not for initialisation.
+    }
+
     public static final void illegalArgumentIf(boolean predicate, String message, Object param1) {
         if (predicate) {
             throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1}));

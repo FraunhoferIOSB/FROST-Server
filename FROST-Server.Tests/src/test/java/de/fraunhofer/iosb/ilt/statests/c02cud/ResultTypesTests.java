@@ -258,12 +258,12 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         Dao doa = sSrvc.dao(sMdl.etObservation);
         Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
         ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
-        String resultQualityString = ""
-                + "{\"DQ_Status\":{"
-                + "  \"code\": \"http://id.eaufrance.fr/nsa/446#2\","
-                + "  \"label\": \"Niveau 1\",\n"
-                + "  \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\""
-                + "}}";
+        String resultQualityString = """
+                {"DQ_Status":{
+                  "code": "http://id.eaufrance.fr/nsa/446#2",
+                  "label": "Niveau 1",
+                  "comment": "Donn\u00e9e contr\u00f4l\u00e9e niveau 1 (donn\u00e9es contr\u00f4l\u00e9es)"
+                }}""";
         o1.setProperty(EP_RESULTQUALITY, mapper.readTree(resultQualityString));
         doa.create(o1);
         OBSERVATIONS.add(o1);
@@ -285,25 +285,25 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         Dao doa = sSrvc.dao(sMdl.etObservation);
         Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
         ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
-        String resultQualityString = "[\n"
-                + "    {\n"
-                + "        \"nameOfMeasure\": \"DQ_Status\",\n"
-                + "        \"DQ_Result\": {\n"
-                + "            \"code\": \"http://id.eaufrance.fr/nsa/446#2\",\n"
-                + "            \"label\": \"Niveau 1\",\n"
-                + "            \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\"\n"
-                + "        }\n"
-                + "    },\n"
-                + "    {\n"
-                + "        \"nameOfMeasure\": \"DQ_Qualification\",\n"
-                + "        \"DQ_Result\": {\n"
-                + "            \"code\": \"http://id.eaufrance.fr/nsa/414#1\",\n"
-                + "            \"label\": \"Correcte\",\n"
-                + "            \"comment\": \"Correcte\"\n"
-                + "        }\n"
-                + "    }\n"
-                + "\n"
-                + "]";
+        String resultQualityString = """
+                [
+                    {
+                        "nameOfMeasure": "DQ_Status",
+                        "DQ_Result": {
+                            "code": "http://id.eaufrance.fr/nsa/446#2",
+                            "label": "Niveau 1",
+                            "comment": "Donn\u00e9e contr\u00f4l\u00e9e niveau 1 (donn\u00e9es contr\u00f4l\u00e9es)"
+                        }
+                    },
+                    {
+                        "nameOfMeasure": "DQ_Qualification",
+                        "DQ_Result": {
+                            "code": "http://id.eaufrance.fr/nsa/414#1",
+                            "label": "Correcte",
+                            "comment": "Correcte"
+                        }
+                    }
+                ]""";
         o1.setProperty(EP_RESULTQUALITY, mapper.readTree(resultQualityString));
         doa.create(o1);
         OBSERVATIONS.add(o1);

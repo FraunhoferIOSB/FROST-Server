@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -289,23 +290,19 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     @Test
     void test03ObservationInMultiDatastreamIncorrect() throws ServiceFailureException {
         LOGGER.info("  test03ObservationInMultiDatastreamIncorrect");
-        try {
+        Assertions.assertThrows(ServiceFailureException.class, () -> {
             Entity o = mMdl.newObservation(1, MULTIDATASTREAMS.get(1).withOnlyPk());
             sSrvc.create(o);
-            fail("Service should have rejected posting non-array result to a multidatastream.");
-        } catch (ServiceFailureException e) {
-        }
+        }, "Service should have rejected posting non-array result to a multidatastream.");
 
-        try {
+        Assertions.assertThrows(ServiceFailureException.class, () -> {
             createObservationMds(MULTIDATASTREAMS.get(0).withOnlyPk(), 1, 2);
-            fail("Service should have rejected posting 2 results to a multidatastream with only 1 observed property.");
-        } catch (ServiceFailureException e) {
-        }
-        try {
+        }, "Service should have rejected posting 2 results to a multidatastream with only 1 observed property.");
+
+        Assertions.assertThrows(ServiceFailureException.class, () -> {
             createObservation(MULTIDATASTREAMS.get(1).withOnlyPk(), 1);
-            fail("Service should have rejected posting 1 result to a multidatastream with 2 observed properties.");
-        } catch (ServiceFailureException e) {
-        }
+
+        }, "Service should have rejected posting 1 result to a multidatastream with 2 observed properties.");
     }
 
     private JsonNode getJsonObject(String urlString) {

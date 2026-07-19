@@ -28,10 +28,6 @@ import java.util.regex.Matcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author scf
- */
 public class MixedPart extends Part<MultipartContent> {
 
     /**
@@ -76,6 +72,9 @@ public class MixedPart extends Part<MultipartContent> {
     }
 
     private void addHeader(String line) {
+        if (StringHelper.isNullOrEmpty(line)) {
+            return;
+        }
         Matcher matcher = MixedContent.HEADER_PATTERN.matcher(line);
         if (matcher.find()) {
             String name = matcher.group(1).trim().toLowerCase();

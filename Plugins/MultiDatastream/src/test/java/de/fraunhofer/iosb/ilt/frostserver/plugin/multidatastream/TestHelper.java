@@ -48,6 +48,8 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -55,6 +57,8 @@ import tools.jackson.databind.ObjectMapper;
  * Helper class for testing JSON de-/serialization.
  */
 public class TestHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestHelper.class.getName());
 
     private TestHelper() {
         // Utility class, not to be instantiated.
@@ -237,6 +241,7 @@ public class TestHelper {
         things.add(new DefaultEntity(pluginCoreModel.etThing, PkValue.of(nextId++)));
         propertyValues.put(pluginCoreModel.npThingsLocation, things);
 
+        LOGGER.debug("Final nextId: {}", nextId);
         for (EntityType entityType : modelRegistry.getEntityTypes()) {
             for (EntityPropertyMain ep : entityType.getEntityProperties()) {
                 assertTrue(propertyValues.containsKey(ep), "Missing value for " + ep);

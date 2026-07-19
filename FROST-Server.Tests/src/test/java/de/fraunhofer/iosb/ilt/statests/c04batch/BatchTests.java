@@ -220,12 +220,13 @@ public abstract class BatchTests extends AbstractTestClass {
     void test02BatchRequestWithChangeSetReferencingNewEntities() {
         LOGGER.info("  test02BatchRequestWithChangeSetReferencingNewEntities");
 
-        String post1 = "{\r\n"
-                + "  \"name\": \"DS18B20\",\r\n"
-                + "  \"description\": \"DS18B20 is an air temperature sensor\",\r\n"
-                + "  \"encodingType\": \"application/pdf\",\r\n"
-                + "  \"metadata\": \"http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf\"\r\n"
-                + "}";
+        String post1 = """
+                {\r
+                  "name": "DS18B20",\r
+                  "description": "DS18B20 is an air temperature sensor",\r
+                  "encodingType": "application/pdf",\r
+                  "metadata": "http://datasheets.maxim-ic.com/en/ds/DS18B20.pdf"\r
+                }""";
         String post2 = "{\r\n"
                 + "  \"name\": \"Temperature Thing 5\",\r\n"
                 + "  \"description\": \"The temperature of thing 5\",\r\n"
@@ -296,13 +297,14 @@ public abstract class BatchTests extends AbstractTestClass {
     void test03BatchRequestWithEncodedCharsInUrl() {
         LOGGER.info("  test03BatchRequestWithEncodedCharsInUrl");
 
-        String response = postBatch("batch_test", "--batch_test\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_test--");
+        String response = postBatch("batch_test", """
+                --batch_test\r
+                Content-Type: application/http\r
+                \r
+                GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r
+                \r
+                \r
+                --batch_test--""");
         String batchBoundary = response.split("\n", 2)[0];
         assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"
@@ -374,19 +376,20 @@ public abstract class BatchTests extends AbstractTestClass {
     void test05BatchRequestWithResourcePathRelativeToBatchRequest() {
         LOGGER.info("  test05BatchRequestWithResourcePathRelativeToBatchRequest");
 
-        String response = postBatch("batch_test", "--batch_test\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_test\r\n"
-                + "Content-Type: application/http\r\n"
-                + "\r\n"
-                + "GET Things?$count=true&$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r\n"
-                + "\r\n"
-                + "\r\n"
-                + "--batch_test--");
+        String response = postBatch("batch_test", """
+                --batch_test\r
+                Content-Type: application/http\r
+                \r
+                GET Things?$count=true&$filter=properties/int%20eq%2010&$select=name HTTP/1.1\r
+                \r
+                \r
+                --batch_test\r
+                Content-Type: application/http\r
+                \r
+                GET Things?$count=true&$filter=properties/int%20eq%2011&$select=name HTTP/1.1\r
+                \r
+                \r
+                --batch_test--""");
         String batchBoundary = response.split("\n", 2)[0];
         assertEquals(batchBoundary + "\n"
                 + "Content-Type: application/http\n"

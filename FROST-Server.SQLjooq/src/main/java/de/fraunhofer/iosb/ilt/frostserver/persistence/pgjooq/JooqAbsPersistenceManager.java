@@ -686,14 +686,20 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             }
 
             case SERVER_AND_CLIENT_GENERATED -> {
-                if (!validateClientSuppliedId(entityId)) {
+                if (validateClientSuppliedId(entityId)) {
+                    LOGGER.debug("Using client generated id.");
+                    return true;
+                } else {
                     LOGGER.debug("No valid @iot.id. Using server generated id.");
                     return false;
                 }
             }
 
             case CLIENT_GENERATED_ONLY -> {
-                if (!validateClientSuppliedId(entityId)) {
+                if (validateClientSuppliedId(entityId)) {
+                    LOGGER.debug("Using client generated id.");
+                    return true;
+                } else {
                     LOGGER.error("No @iot.id and idGenerationMode is '{}'", typeIdGenerationMode);
                     throw new IncompleteEntityException("Error: no @iot.id");
                 }
@@ -705,9 +711,6 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
                 throw new IllegalArgumentException("idGenerationMode '" + typeIdGenerationMode.toString() + "' is not implemented.");
             }
         }
-
-        LOGGER.debug("Using client generated id.");
-        return true;
     }
 
     @Override
@@ -752,12 +755,15 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         String tableName = entry.getTableName();
         List<SecurityWrapper> wrappers = entry.getWrappers();
         for (SecurityWrapper wrapper : wrappers) {
-            if (wrapper instanceof SecurityTableWrapper stw) {
-                tableCollection.addSecurityWrapper(tableName, stw);
-            } else if (wrapper instanceof HookValidator hv) {
-                tableCollection.addSecurityValidator(tableName, hv);
-            } else {
-                LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
+            switch (wrapper) {
+                case SecurityTableWrapper stw ->
+                    tableCollection.addSecurityWrapper(tableName, stw);
+
+                case HookValidator hv ->
+                    tableCollection.addSecurityValidator(tableName, hv);
+
+                default ->
+                    LOGGER.error("Unknown SecurityWrapper type: {}", wrapper);
             }
         }
     }
@@ -770,7 +776,6 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         LOGGER.info("Loading Database Mappings...");
 
         getDslContext();
-        final ModelRegistry modelRegistry = settings.getModelRegistry();
 
         LOGGER.info("Reading Database Tables.");
         for (DefModel modelDefinition : modelDefinitions) {

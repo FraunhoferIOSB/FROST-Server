@@ -151,31 +151,31 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         DATASTREAMS.add(datastream);
 
         ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
-        String resultQualityObjectString = ""
-                + "{\"DQ_Status\":{"
-                + "  \"code\": 2,"
-                + "  \"label\": \"Niveau 1\",\n"
-                + "  \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\""
-                + "}}";
-        String resultQualityArrayString = "[\n"
-                + "    {\n"
-                + "        \"nameOfMeasure\": \"DQ_Status\",\n"
-                + "        \"DQ_Result\": {\n"
-                + "            \"code\": 2,\n"
-                + "            \"label\": \"Niveau 1\",\n"
-                + "            \"comment\": \"Donnée contrôlée niveau 1 (données contrôlées)\"\n"
-                + "        }\n"
-                + "    },\n"
-                + "    {\n"
-                + "        \"nameOfMeasure\": \"DQ_Qualification\",\n"
-                + "        \"DQ_Result\": {\n"
-                + "            \"code\": 1,\n"
-                + "            \"label\": \"Correcte\",\n"
-                + "            \"comment\": \"Correcte\"\n"
-                + "        }\n"
-                + "    }\n"
-                + "\n"
-                + "]";
+        String resultQualityObjectString = """
+                {"DQ_Status":{
+                  "code": 2,
+                  "label": "Niveau 1",
+                  "comment": "Donn\u00e9e contr\u00f4l\u00e9e niveau 1 (donn\u00e9es contr\u00f4l\u00e9es)"
+                }}""";
+        String resultQualityArrayString = """
+                [
+                    {
+                        "nameOfMeasure": "DQ_Status",
+                        "DQ_Result": {
+                            "code": 2,
+                            "label": "Niveau 1",
+                            "comment": "Donn\u00e9e contr\u00f4l\u00e9e niveau 1 (donn\u00e9es contr\u00f4l\u00e9es)"
+                        }
+                    },
+                    {
+                        "nameOfMeasure": "DQ_Qualification",
+                        "DQ_Result": {
+                            "code": 1,
+                            "label": "Correcte",
+                            "comment": "Correcte"
+                        }
+                    }
+                ]""";
         TreeNode rqObject = mapper.readTree(resultQualityObjectString);
         JsonNode rqArray = mapper.readTree(resultQualityArrayString);
 

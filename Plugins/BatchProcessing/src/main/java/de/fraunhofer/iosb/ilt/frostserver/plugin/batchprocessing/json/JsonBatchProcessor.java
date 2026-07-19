@@ -200,14 +200,12 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                     groupFailed = true;
                     service.rollbackTransaction();
                 }
-            } else if (parser.currentToken() == JsonToken.END_ARRAY) {
+            } else if (parser.currentToken() == JsonToken.END_ARRAY && !groupFailed) {
                 // We're done.
-                if (!groupFailed) {
-                    service.commitTransaction();
-                }
+                service.commitTransaction();
             }
         } catch (JacksonException ex) {
-            LOGGER.info("Failed to parse json.", ex.getMessage());
+            LOGGER.info("Failed to parse json: {}", ex.getMessage());
             LOGGER.debug("Failed to parse json.", ex);
             service.rollbackTransaction();
             parser = null;
@@ -223,7 +221,9 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             String name = matcher.group(1);
             ContentIdPair pair = ids.get(name);
             if (pair == null) {
-                LOGGER.debug("Not a match: {}", matcher.group(0));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Not a match: {}", matcher.group(0));
+                }
                 return url;
             } else {
                 String value = pair.selfLink();
@@ -250,7 +250,9 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             }
             ContentIdPair pair = ids.get(name);
             if (pair == null) {
-                LOGGER.debug("Not a match: {}", matcher.group(0));
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Not a match: {}", matcher.group(0));
+                }
                 result.append(matcher.group(0));
             } else {
                 result.append(cipHandler.transform(pair, brackets));

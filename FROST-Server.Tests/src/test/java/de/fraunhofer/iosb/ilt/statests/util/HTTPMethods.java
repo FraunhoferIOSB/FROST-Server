@@ -301,7 +301,6 @@ public class HTTPMethods {
         } catch (IOException | RuntimeException e) {
             LOGGER.error("Exception: ", e);
             return null;
-        } finally {
         }
     }
 

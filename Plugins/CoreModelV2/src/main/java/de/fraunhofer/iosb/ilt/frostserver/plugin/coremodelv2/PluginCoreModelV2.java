@@ -47,10 +47,10 @@ public class PluginCoreModelV2 extends ConfigProvider<PluginCoreModelV2> impleme
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginCoreModelV2.class.getName());
 
-    private static final List<String> REQUIREMENTS_CORE_MODEL = Arrays.asList(
-            "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core");
-
     public static final String CONFORMANCE_CLASS_CORE_MODEL = "http://www.opengis.net/spec/sensorthings/2.0/req-class/datamodel/core";
+
+    private static final List<String> REQUIREMENTS_CORE_MODEL = Arrays.asList(
+            CONFORMANCE_CLASS_CORE_MODEL);
 
     public static final String SETTINGS_NAMESPACE = "coreModelV2.";
 

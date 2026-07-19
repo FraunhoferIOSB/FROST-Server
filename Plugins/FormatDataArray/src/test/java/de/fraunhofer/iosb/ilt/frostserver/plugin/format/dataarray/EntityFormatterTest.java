@@ -115,74 +115,75 @@ class EntityFormatterTest {
     }
 
     private String createDataJson() {
-        String expResult = "{\n"
-                + "    \"@iot.count\": 108,\n"
-                + "    \"@iot.nextLink\": \"nextLinkHere\",\n"
-                + "    \"value\": [\n"
-                + "        {\n"
-                + "            \"Datastream@iot.navigationLink\": \"navLinkHere\",\n"
-                + "            \"components\": [\n"
-                + "                \"id\",\n"
-                + "                \"phenomenonTime\",\n"
-                + "                \"result\"],\n"
-                + "            \"dataArray@iot.count\": 2,\n"
-                + "            \"dataArray\": [\n"
-                + "                [\n"
-                + "                    446,\n"
-                + "                    \"2010-12-23T10:20:00.000Z\",\n"
-                + "                    48],\n"
-                + "                [\n"
-                + "                    447,\n"
-                + "                    \"2010-12-23T10:21:00.000Z\",\n"
-                + "                    49\n"
-                + "                ]\n"
-                + "            ]\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"Datastream@iot.navigationLink\": \"navLinkHere\",\n"
-                + "            \"components\": [\n"
-                + "                \"id\",\n"
-                + "                \"phenomenonTime\",\n"
-                + "                \"result\"\n"
-                + "            ],\n"
-                + "            \"dataArray@iot.count\": 2,\n"
-                + "            \"dataArray\": [\n"
-                + "                [\n"
-                + "                    448,\n"
-                + "                    \"2010-12-23T10:20:00.000Z\",\n"
-                + "                    1\n"
-                + "                ],\n"
-                + "                [\n"
-                + "                    449,\n"
-                + "                    \"2010-12-23T10:21:00.000Z\",\n"
-                + "                    2\n"
-                + "                ]\n"
-                + "            ]\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"MultiDatastream@iot.navigationLink\": \"navLinkHere\",\n"
-                + "            \"components\": [\n"
-                + "                \"id\",\n"
-                + "                \"phenomenonTime\",\n"
-                + "                \"result\"\n"
-                + "            ],\n"
-                + "            \"dataArray@iot.count\": 2,\n"
-                + "            \"dataArray\": [\n"
-                + "                [\n"
-                + "                    444,\n"
-                + "                    \"2010-12-23T10:20:00.000Z\",\n"
-                + "                    5\n"
-                + "                ],\n"
-                + "                [\n"
-                + "                    445,\n"
-                + "                    \"2010-12-23T10:21:00.000Z\",\n"
-                + "                    6\n"
-                + "                ]\n"
-                + "            ]\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}\n"
-                + "";
+        String expResult = """
+                {
+                    "@iot.count": 108,
+                    "@iot.nextLink": "nextLinkHere",
+                    "value": [
+                        {
+                            "Datastream@iot.navigationLink": "navLinkHere",
+                            "components": [
+                                "id",
+                                "phenomenonTime",
+                                "result"],
+                            "dataArray@iot.count": 2,
+                            "dataArray": [
+                                [
+                                    446,
+                                    "2010-12-23T10:20:00.000Z",
+                                    48],
+                                [
+                                    447,
+                                    "2010-12-23T10:21:00.000Z",
+                                    49
+                                ]
+                            ]
+                        },
+                        {
+                            "Datastream@iot.navigationLink": "navLinkHere",
+                            "components": [
+                                "id",
+                                "phenomenonTime",
+                                "result"
+                            ],
+                            "dataArray@iot.count": 2,
+                            "dataArray": [
+                                [
+                                    448,
+                                    "2010-12-23T10:20:00.000Z",
+                                    1
+                                ],
+                                [
+                                    449,
+                                    "2010-12-23T10:21:00.000Z",
+                                    2
+                                ]
+                            ]
+                        },
+                        {
+                            "MultiDatastream@iot.navigationLink": "navLinkHere",
+                            "components": [
+                                "id",
+                                "phenomenonTime",
+                                "result"
+                            ],
+                            "dataArray@iot.count": 2,
+                            "dataArray": [
+                                [
+                                    444,
+                                    "2010-12-23T10:20:00.000Z",
+                                    5
+                                ],
+                                [
+                                    445,
+                                    "2010-12-23T10:21:00.000Z",
+                                    6
+                                ]
+                            ]
+                        }
+                    ]
+                }
+                """;
         return expResult;
     }
 

@@ -727,9 +727,9 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     void test13Year() throws ServiceFailureException {
         LOGGER.info("  test13Year");
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        testFilterResults(doa, String.format("year(resultTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
-        testFilterResults(doa, String.format("year(validTime) eq 2015"), getFromList(OBSERVATIONS, 23));
-        testFilterResults(doa, String.format("year(phenomenonTime) eq 2015"), getFromList(OBSERVATIONS, 21, 23));
+        testFilterResults(doa, "year(resultTime) eq 2015", getFromList(OBSERVATIONS, 21, 23));
+        testFilterResults(doa, "year(validTime) eq 2015", getFromList(OBSERVATIONS, 23));
+        testFilterResults(doa, "year(phenomenonTime) eq 2015", getFromList(OBSERVATIONS, 21, 23));
     }
 
     @Test

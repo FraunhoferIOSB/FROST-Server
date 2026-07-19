@@ -221,12 +221,9 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         }
         String internalTopic = topic.substring(version.urlPart.length() + 1);
         internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
-        if (topicAllowPattern != null) {
-            if (!topicAllowPattern.matcher(internalTopic).matches()) {
-                LOGGER.debug("Denied access to {}, user {}, not matching allow pattern.", internalTopic, user);
-                return false;
-            }
-
+        if (topicAllowPattern != null && !topicAllowPattern.matcher(internalTopic).matches()) {
+            LOGGER.debug("Denied access to {}, user {}, not matching allow pattern.", internalTopic, user);
+            return false;
         }
         return validatePath(version, internalTopic, userPrincipal);
     }

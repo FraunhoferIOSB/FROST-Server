@@ -176,12 +176,7 @@ public class BatchResponseJson {
             if (!Objects.equals(location, other.location)) {
                 return false;
             }
-            if (status >= 200 && status < 300) {
-                if (!Objects.equals(body, other.body)) {
-                    return false;
-                }
-            }
-            return true;
+            return (status < 200 || status >= 300) || Objects.equals(body, other.body);
         }
 
     }

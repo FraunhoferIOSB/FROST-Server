@@ -1024,10 +1024,10 @@ class QueryParserTest {
 
     @Test
     void testFilterAnyDupicateName() {
-        String query = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z and r/House/Rooms/any(r : r/time ge 2010-07-01T00:00:00Z))";
+        String queryString = "$filter=Rooms/any(r : r/time le 2010-07-01T00:00:00Z and r/House/Rooms/any(r : r/time ge 2010-07-01T00:00:00Z))";
+        final Query query = QueryParser.parseQuery(queryString, context, path);
         assertThrows(IllegalArgumentException.class, () -> {
-            QueryParser.parseQuery(query, context, path)
-                    .validate(testModel.etHouse);
+            query.validate(testModel.etHouse);
         });
     }
 

@@ -47,7 +47,6 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
-import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Tasking;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
@@ -61,12 +60,10 @@ import org.geojson.Point;
 public class EntityHelper20 extends EntityHelperAbstract {
 
     private final SensorThingsV20Core sMdl;
-    private final SensorThingsV20Tasking tMdl;
 
     public EntityHelper20(SensorThingsService sSrvc) {
         super(sSrvc);
         sMdl = sSrvc.getModel(SensorThingsV20Core.class);
-        tMdl = sSrvc.getModel(SensorThingsV20Tasking.class);
     }
 
     @Override

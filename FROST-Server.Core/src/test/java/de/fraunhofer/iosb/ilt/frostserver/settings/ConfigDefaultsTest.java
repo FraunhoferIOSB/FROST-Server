@@ -169,7 +169,6 @@ class ConfigDefaultsTest {
 
     @Test
     void testDefaultValueLookupClassBoolean() {
-        Class c = MqttMessageBus.class;
         // Test valid boolean properties
         assertEquals(true, ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_USE_ABSOLUTE_NAVIGATION_LINKS));
         assertEquals(false, ConfigUtils.getDefaultValueBoolean(CoreSettings.class, CoreSettings.TAG_AUTH_ALLOW_ANON_READ));
@@ -191,7 +190,6 @@ class ConfigDefaultsTest {
 
     @Test
     void testDefaultValueLookupClassBooleanString() {
-        Class c = MqttMessageBus.class;
         // Test reading boolean properties as strings
         assertEquals(Boolean.TRUE.toString(), ConfigUtils.getDefaultValue(CoreSettings.class, CoreSettings.TAG_USE_ABSOLUTE_NAVIGATION_LINKS));
         assertEquals(Boolean.FALSE.toString(), ConfigUtils.getDefaultValue(CoreSettings.class, CoreSettings.TAG_AUTH_ALLOW_ANON_READ));

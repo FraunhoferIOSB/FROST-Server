@@ -54,7 +54,7 @@ public class GeoHelper {
         try {
             return SimpleJsonMapper.getSimpleObjectMapper().treeToValue(tn, GeoJsonObject.class);
         } catch (JacksonException ex) {
-            LOGGER.debug("Failed to convert to GeoJson: ", tn);
+            LOGGER.debug("Failed to convert to GeoJson: {}", tn);
         }
         return null;
     }

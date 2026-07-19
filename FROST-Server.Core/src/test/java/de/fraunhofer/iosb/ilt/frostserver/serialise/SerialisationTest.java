@@ -78,7 +78,6 @@ class SerialisationTest {
         Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T23:13:20+01:00"));
         Assertions.assertEquals(expected, TimeInstant.parse("2023-11-15T00:13:20+02:00"));
         Assertions.assertEquals(expected, TimeInstant.parse("2023-11-14T21:13:20-01"));
-        // Not supported at the moment: Assertions.assertEquals(expected, TimeInstant.parse("20231114T221320+00:00"));
     }
 
     private boolean jsonEqual(String string1, String string2) {

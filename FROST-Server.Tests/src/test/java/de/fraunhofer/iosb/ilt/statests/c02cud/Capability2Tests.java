@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
+import static de.fraunhofer.iosb.ilt.statests.util.Utils.nse;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForJson;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.quoteForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -145,38 +147,39 @@ public abstract class Capability2Tests extends AbstractTestClass {
     void test01CreateInvalidEntitiesWithDeepInsert() {
         LOGGER.info("  test01CreateInvalidEntitiesWithDeepInsert");
 
-        String urlParameters = "{\n"
-                + "  \"name\": \"Office Building\",\n"
-                + "  \"description\": \"Office Building\",\n"
-                + "  \"properties\": {\n"
-                + "    \"reference\": \"Third Floor\"\n"
-                + "  },\n"
-                + "  \"Locations\": [\n"
-                + "    {\n"
-                + "      \"name\": \"West Roof\",\n"
-                + "      \"description\": \"West Roof\",\n"
-                + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
-                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                + "    }\n"
-                + "  ],\n"
-                + "  \"Datastreams\": [\n"
-                + "    {\n"
-                + "      \"unitOfMeasurement\": {\n"
-                + "        \"name\": \"Lumen\",\n"
-                + "        \"symbol\": \"lm\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                + "      },\n"
-                + "      \"name\": \"Light exposure.\",\n"
-                + "      \"description\": \"Light exposure.\",\n"
-                + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "      \"ObservedProperty\": {\n"
-                + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                + "      }\n"
-                + "    }\n"
-                + "  ]\n"
-                + "}";
+        String urlParameters = """
+                {
+                  "name": "Office Building",
+                  "description": "Office Building",
+                  "properties": {
+                    "reference": "Third Floor"
+                  },
+                  "Locations": [
+                    {
+                      "name": "West Roof",
+                      "description": "West Roof",
+                      "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
+                      "encodingType": "application/vnd.geo+json"
+                    }
+                  ],
+                  "Datastreams": [
+                    {
+                      "unitOfMeasurement": {
+                        "name": "Lumen",
+                        "symbol": "lm",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
+                      },
+                      "name": "Light exposure.",
+                      "description": "Light exposure.",
+                      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                      "ObservedProperty": {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                      }
+                    }
+                  ]
+                }""";
         postInvalidEntity(EntityType.THING, urlParameters);
         List<EntityType> entityTypesToCheck = new ArrayList<>();
         entityTypesToCheck.add(EntityType.THING);
@@ -193,82 +196,90 @@ public abstract class Capability2Tests extends AbstractTestClass {
                 + "}";
         Object thingId = postEntity(EntityType.THING, urlParameters).get("@iot.id");
 
-        urlParameters = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                + "   \"ObservedProperty\": {\n"
-                + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                + "   },\n"
-                + "      \"Observations\": [\n"
-                + "        {\n"
-                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
-                + "          \"result\": 10\n"
-                + "        }\n"
-                + "      ]"
-                + "}";
+        urlParameters = """
+                {
+                  "unitOfMeasurement": {
+                    "name": "Celsius",
+                    "symbol": "degC",
+                    "definition": "http://qudt.org/vocab/unit#DegreeCelsius"
+                  },
+                  "name": "test datastream.",
+                  "description": "test datastream.",
+                  "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                  "Thing": { "@iot.id": quoteForJson(thingId) },
+                   "ObservedProperty": {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                   },
+                      "Observations": [
+                        {
+                          "phenomenonTime": "2015-03-01T00:10:00Z",
+                          "result": 10
+                        }
+                      ]}""";
+        urlParameters = StringUtils.replaceEach(
+                urlParameters,
+                nse("quoteForJson(thingId)"),
+                nse(quoteForJson(thingId)));
         postInvalidEntity(EntityType.DATASTREAM, urlParameters);
 
-        urlParameters = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                + "   \"Sensor\": {        \n"
-                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Light flux sensor\"\n"
-                + "   },\n"
-                + "      \"Observations\": [\n"
-                + "        {\n"
-                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
-                + "          \"result\": 10\n"
-                + "        }\n"
-                + "      ]"
-                + "}";
+        urlParameters = """
+                {
+                  "unitOfMeasurement": {
+                    "name": "Celsius",
+                    "symbol": "degC",
+                    "definition": "http://qudt.org/vocab/unit#DegreeCelsius"
+                  },
+                  "name": "test datastream.",
+                  "description": "test datastream.",
+                  "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                  "Thing": { "@iot.id": quoteForJson(thingId) },
+                   "Sensor": {
+                        "name": "Acme Fluxomatic 1000",
+                        "description": "Acme Fluxomatic 1000",
+                        "encodingType": "application/pdf",
+                        "metadata": "Light flux sensor"
+                   },
+                      "Observations": [
+                        {
+                          "phenomenonTime": "2015-03-01T00:10:00Z",
+                          "result": 10
+                        }
+                      ]}""";
+        urlParameters = StringUtils.replaceEach(
+                urlParameters,
+                nse("quoteForJson(thingId)"),
+                nse(quoteForJson(thingId)));
         postInvalidEntity(EntityType.DATASTREAM, urlParameters);
 
-        urlParameters = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "   \"ObservedProperty\": {\n"
-                + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                + "   },\n"
-                + "   \"Sensor\": {        \n"
-                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Light flux sensor\"\n"
-                + "   },\n"
-                + "      \"Observations\": [\n"
-                + "        {\n"
-                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
-                + "          \"result\": 10\n"
-                + "        }\n"
-                + "      ]"
-                + "}";
+        urlParameters = """
+                {
+                  "unitOfMeasurement": {
+                    "name": "Celsius",
+                    "symbol": "degC",
+                    "definition": "http://qudt.org/vocab/unit#DegreeCelsius"
+                  },
+                  "name": "test datastream.",
+                  "description": "test datastream.",
+                  "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                   "ObservedProperty": {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                   },
+                   "Sensor": {
+                        "name": "Acme Fluxomatic 1000",
+                        "description": "Acme Fluxomatic 1000",
+                        "encodingType": "application/pdf",
+                        "metadata": "Light flux sensor"
+                   },
+                      "Observations": [
+                        {
+                          "phenomenonTime": "2015-03-01T00:10:00Z",
+                          "result": 10
+                        }
+                      ]}""";
         postInvalidEntity(EntityType.DATASTREAM, urlParameters);
 
         entityTypesToCheck.clear();
@@ -280,53 +291,68 @@ public abstract class Capability2Tests extends AbstractTestClass {
         checkNotExisting(entityTypesToCheck);
 
         /* Observation */
-        urlParameters = "{\n"
-                + "  \"unitOfMeasurement\": {\n"
-                + "    \"name\": \"Celsius\",\n"
-                + "    \"symbol\": \"degC\",\n"
-                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                + "  },\n"
-                + "  \"name\": \"test datastream.\",\n"
-                + "  \"description\": \"test datastream.\",\n"
-                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                + "   \"ObservedProperty\": {\n"
-                + "        \"name\": \"Luminous Flux\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                + "   },\n"
-                + "   \"Sensor\": {        \n"
-                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                + "        \"encodingType\": \"application/pdf\",\n"
-                + "        \"metadata\": \"Light flux sensor\"\n"
-                + "   }\n"
-                + "}";
+        urlParameters = """
+                {
+                  "unitOfMeasurement": {
+                    "name": "Celsius",
+                    "symbol": "degC",
+                    "definition": "http://qudt.org/vocab/unit#DegreeCelsius"
+                  },
+                  "name": "test datastream.",
+                  "description": "test datastream.",
+                  "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                  "Thing": { "@iot.id": quoteForJson(thingId) },
+                   "ObservedProperty": {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                   },
+                   "Sensor": {
+                        "name": "Acme Fluxomatic 1000",
+                        "description": "Acme Fluxomatic 1000",
+                        "encodingType": "application/pdf",
+                        "metadata": "Light flux sensor"
+                   }
+                }""";
+        urlParameters = StringUtils.replaceEach(
+                urlParameters,
+                nse("quoteForJson(thingId)"),
+                nse(quoteForJson(thingId)));
         Object datastreamId = postEntity(EntityType.DATASTREAM, urlParameters).get("@iot.id");
 
-        urlParameters = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                + "  \"result\": 100,\n"
-                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
-                + "}";
+        urlParameters = """
+                {
+                  "phenomenonTime": "2015-03-01T00:00:00Z",
+                  "result": 100,
+                  "Datastream":{"@iot.id": quoteForJson(datastreamId) }
+                }""";
+        urlParameters = StringUtils.replaceEach(
+                urlParameters,
+                nse("quoteForJson(datastreamId)"),
+                nse(quoteForJson(datastreamId)));
         postInvalidEntity(EntityType.OBSERVATION, urlParameters);
 
-        urlParameters = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                + "  \"result\": 100,\n"
-                + "  \"FeatureOfInterest\": {\n"
-                + "  \t\"name\": \"A weather station.\",\n"
-                + "  \t\"description\": \"A weather station.\",\n"
-                + "    \"feature\": {\n"
-                + "      \"type\": \"Point\",\n"
-                + "      \"coordinates\": [\n"
-                + "        -114.05,\n"
-                + "        51.05\n"
-                + "      ]\n"
-                + "    }\n"
-                + "  },\n"
-                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
-                + "}";
+        urlParameters = """
+                {
+                  "phenomenonTime": "2015-03-01T00:00:00Z",
+                  "result": 100,
+                  "FeatureOfInterest": {
+                  \t"name": "A weather station.",
+                  \t"description": "A weather station.",
+                    "feature": {
+                      "type": "Point",
+                      "coordinates": [
+                        -114.05,
+                        51.05
+                      ]
+                    }
+                  },
+                  "Datastream":{"@iot.id": quoteForJson(datastreamId)}
+                }""";
+        urlParameters = StringUtils.replaceEach(
+                urlParameters,
+                nse("quoteForJson(datastreamId)"),
+                nse(quoteForJson(datastreamId)));
         postInvalidEntity(EntityType.OBSERVATION, urlParameters);
 
         entityTypesToCheck.clear();
@@ -348,10 +374,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
         LOGGER.info("  test02CreateEntities");
         {
             /* Thing */
-            String urlParameters = "{"
-                    + "\"name\":\"Test Thing\","
-                    + "\"description\":\"This is a Test Thing From TestNG\""
-                    + "}";
+            String urlParameters = """
+                    {
+                    "name":"Test Thing",
+                    "description":"This is a Test Thing From TestNG"
+                    }""";
             JsonNode entity = postEntity(EntityType.THING, urlParameters);
             Object thingId = entity.get(ControlInformation.ID);
             THING_IDS.add(thingId);
@@ -360,12 +387,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
         JsonNode locationEntity;
         {
             /* Location */
-            String urlParameters = "{\n"
-                    + "  \"name\": \"bow river\",\n"
-                    + "  \"description\": \"bow river\",\n"
-                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "  \"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "name": "bow river",
+                      "description": "bow river",
+                      "encodingType": "application/vnd.geo+json",
+                      "location": { "type": "Point", "coordinates": [-114.05, 51.05] }
+                    }""";
             JsonNode entity = postEntity(EntityType.LOCATION, urlParameters);
             Object locationId = entity.get(ControlInformation.ID);
             LOCATION_IDS.add(locationId);
@@ -374,12 +402,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
         }
         {
             /* Sensor */
-            String urlParameters = "{\n"
-                    + "  \"name\": \"Fuguro Barometer\",\n"
-                    + "  \"description\": \"Fuguro Barometer\",\n"
-                    + "  \"encodingType\": \"application/pdf\",\n"
-                    + "  \"metadata\": \"Barometer\"\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "name": "Fuguro Barometer",
+                      "description": "Fuguro Barometer",
+                      "encodingType": "application/pdf",
+                      "metadata": "Barometer"
+                    }""";
             JsonNode entity = postEntity(EntityType.SENSOR, urlParameters);
             Object sensorId = entity.get(ControlInformation.ID);
             SENSOR_IDS.add(sensorId);
@@ -387,11 +416,12 @@ public abstract class Capability2Tests extends AbstractTestClass {
         }
         {
             /* ObservedProperty */
-            String urlParameters = "{\n"
-                    + "  \"name\": \"DewPoint Temperature\",\n"
-                    + "  \"definition\": \"http://dbpedia.org/page/Dew_point\",\n"
-                    + "  \"description\": \"The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects.\"\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "name": "DewPoint Temperature",
+                      "definition": "http://dbpedia.org/page/Dew_point",
+                      "description": "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form. As the grass and other objects near the ground cool to the dewpoint, some of the water vapor in the atmosphere condenses into liquid water on the objects."
+                    }""";
             JsonNode entity = postEntity(EntityType.OBSERVED_PROPERTY, urlParameters);
             Object obsPropId = entity.get(ControlInformation.ID);
             OBSPROP_IDS.add(obsPropId);
@@ -399,18 +429,19 @@ public abstract class Capability2Tests extends AbstractTestClass {
         }
         {
             /* FeatureOfInterest */
-            String urlParameters = "{\n"
-                    + "  \"name\": \"A weather station.\",\n"
-                    + "  \"description\": \"A weather station.\",\n"
-                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "  \"feature\": {\n"
-                    + "    \"type\": \"Point\",\n"
-                    + "    \"coordinates\": [\n"
-                    + "      10,\n"
-                    + "      10\n"
-                    + "    ]\n"
-                    + "  }\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "name": "A weather station.",
+                      "description": "A weather station.",
+                      "encodingType": "application/vnd.geo+json",
+                      "feature": {
+                        "type": "Point",
+                        "coordinates": [
+                          10,
+                          10
+                        ]
+                      }
+                    }""";
             JsonNode entity = postEntity(EntityType.FEATURE_OF_INTEREST, urlParameters);
             Object foiId = entity.get(ControlInformation.ID);
             FOI_IDS.add(foiId);
@@ -418,19 +449,30 @@ public abstract class Capability2Tests extends AbstractTestClass {
         }
         {
             /* Datastream */
-            String urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(THING_IDS.get(0)) + " },\n"
-                    + "  \"ObservedProperty\":{ \"@iot.id\":" + quoteForJson(OBSPROP_IDS.get(0)) + "},\n"
-                    + "  \"Sensor\": { \"@iot.id\": " + quoteForJson(SENSOR_IDS.get(0)) + " }\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "unitOfMeasurement": {
+                        "name": "Celsius",
+                        "symbol": "degC",
+                        "definition": "http://qudt.org/vocab/unit#DegreeCelsius"
+                      },
+                      "name": "test datastream.",
+                      "description": "test datastream.",
+                      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                      "Thing": { "@iot.id": quoteForJson(THING_IDS.get(0)) },
+                      "ObservedProperty":{ "@iot.id":quoteForJson(OBSPROP_IDS.get(0))},
+                      "Sensor": { "@iot.id": quoteForJson(SENSOR_IDS.get(0)) }
+                    }""";
+            urlParameters = StringUtils.replaceEach(
+                    urlParameters,
+                    nse(
+                            "quoteForJson(THING_IDS.get(0))",
+                            "quoteForJson(OBSPROP_IDS.get(0))",
+                            "quoteForJson(SENSOR_IDS.get(0))"),
+                    nse(
+                            quoteForJson(THING_IDS.get(0)),
+                            quoteForJson(OBSPROP_IDS.get(0)),
+                            quoteForJson(SENSOR_IDS.get(0))));
             JsonNode entity = postEntity(EntityType.DATASTREAM, urlParameters);
             Object datastreamId = entity.get(ControlInformation.ID);
             DATASTREAM_IDS.add(datastreamId);
@@ -438,12 +480,21 @@ public abstract class Capability2Tests extends AbstractTestClass {
         }
         {
             /* Observation */
-            String urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:40:00.000Z\",\n"
-                    + "  \"result\": 8,\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(DATASTREAM_IDS.get(0)) + "},\n"
-                    + "  \"FeatureOfInterest\": {\"@iot.id\": " + quoteForJson(FOI_IDS.get(0)) + "}  \n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "phenomenonTime": "2015-03-01T00:40:00.000Z",
+                      "result": 8,
+                      "Datastream":{"@iot.id": quoteForJson(DATASTREAM_IDS.get(0))},
+                      "FeatureOfInterest": {"@iot.id": quoteForJson(FOI_IDS.get(0))}
+                    }""";
+            urlParameters = StringUtils.replaceEach(
+                    urlParameters,
+                    nse(
+                            "quoteForJson(DATASTREAM_IDS.get(0))",
+                            "quoteForJson(FOI_IDS.get(0))"),
+                    nse(
+                            quoteForJson(DATASTREAM_IDS.get(0)),
+                            quoteForJson(FOI_IDS.get(0))));
             JsonNode entity = postEntity(EntityType.OBSERVATION, urlParameters);
             Object obsId1 = entity.get(ControlInformation.ID);
             OBSERVATION_IDS.add(obsId1);
@@ -486,12 +537,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
             // Move the Thing to a new location, create a new observation
             // without FOI, check if a new FOI is created from this new location.
             /* Second Location */
-            String urlParameters = "{\n"
-                    + "  \"name\": \"spear river\",\n"
-                    + "  \"description\": \"spear river\",\n"
-                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "  \"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "name": "spear river",
+                      "description": "spear river",
+                      "encodingType": "application/vnd.geo+json",
+                      "location": { "type": "Point", "coordinates": [114.05, -51.05] }
+                    }""";
             JsonNode entity = postEntity(EntityType.LOCATION, urlParameters);
             Object location2Id = entity.get(ControlInformation.ID);
             LOCATION_IDS.add(location2Id);
@@ -632,81 +684,90 @@ public abstract class Capability2Tests extends AbstractTestClass {
         LOGGER.info("  test03CreateEntitiesWithDeepInsert");
         try {
             /* Thing */
-            String urlParameters = "{\n"
-                    + "  \"name\": \"Office Building\",\n"
-                    + "  \"description\": \"Office Building\",\n"
-                    + "  \"properties\": {\n"
-                    + "    \"reference\": \"Third Floor\"\n"
-                    + "  },\n"
-                    + "  \"Locations\": [\n"
-                    + "    {\n"
-                    + "      \"name\": \"West Roof\",\n"
-                    + "      \"description\": \"West Roof\",\n"
-                    + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
-                    + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                    + "    }\n"
-                    + "  ],\n"
-                    + "  \"Datastreams\": [\n"
-                    + "    {\n"
-                    + "      \"unitOfMeasurement\": {\n"
-                    + "        \"name\": \"Lumen\",\n"
-                    + "        \"symbol\": \"lm\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                    + "      },\n"
-                    + "      \"name\": \"Light exposure.\",\n"
-                    + "      \"description\": \"Light exposure.\",\n"
-                    + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "      \"ObservedProperty\": {\n"
-                    + "        \"name\": \"Luminous Flux\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "      },\n"
-                    + "      \"Sensor\": {        \n"
-                    + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"encodingType\": \"application/pdf\",\n"
-                    + "        \"metadata\": \"Light flux sensor\"\n"
-                    + "      }\n"
-                    + "    }\n"
-                    + "  ]\n"
-                    + "}";
+            String urlParameters = """
+                    {
+                      "name": "Office Building",
+                      "description": "Office Building",
+                      "properties": {
+                        "reference": "Third Floor"
+                      },
+                      "Locations": [
+                        {
+                          "name": "West Roof",
+                          "description": "West Roof",
+                          "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
+                          "encodingType": "application/vnd.geo+json"
+                        }
+                      ],
+                      "Datastreams": [
+                        {
+                          "unitOfMeasurement": {
+                            "name": "Lumen",
+                            "symbol": "lm",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
+                          },
+                          "name": "Light exposure.",
+                          "description": "Light exposure.",
+                          "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                          "ObservedProperty": {
+                            "name": "Luminous Flux",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                            "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                          },
+                          "Sensor": {
+                            "name": "Acme Fluxomatic 1000",
+                            "description": "Acme Fluxomatic 1000",
+                            "encodingType": "application/pdf",
+                            "metadata": "Light flux sensor"
+                          }
+                        }
+                      ]
+                    }""";
             JsonNode entity = postEntity(EntityType.THING, urlParameters);
             Object thingId = entity.get(ControlInformation.ID);
             //Check Datastream
-            JsonNode deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "      \"unitOfMeasurement\": {\n"
-                    + "        \"name\": \"Lumen\",\n"
-                    + "        \"symbol\": \"lm\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                    + "      },\n"
-                    + "      \"name\": \"Light exposure.\",\n"
-                    + "      \"description\": \"Light exposure.\",\n"
-                    + "      \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
-                    + "    }\n");
+            JsonNode deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                          "unitOfMeasurement": {
+                            "name": "Lumen",
+                            "symbol": "lm",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
+                          },
+                          "name": "Light exposure.",
+                          "description": "Light exposure.",
+                          "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
+                        }
+                    """);
             Object datastreamId = checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
             DATASTREAM_IDS.add(datastreamId);
             //Check Location
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "      \"name\": \"West Roof\",\n"
-                    + "      \"description\": \"West Roof\",\n"
-                    + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
-                    + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                    + "    }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                          "name": "West Roof",
+                          "description": "West Roof",
+                          "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
+                          "encodingType": "application/vnd.geo+json"
+                        }
+                    """);
             LOCATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
             //Check Sensor
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"encodingType\": \"application/pdf\",\n"
-                    + "        \"metadata\": \"Light flux sensor\"\n"
-                    + "      }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                            "name": "Acme Fluxomatic 1000",
+                            "description": "Acme Fluxomatic 1000",
+                            "encodingType": "application/pdf",
+                            "metadata": "Light flux sensor"
+                          }
+                    """);
             SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
             //Check ObservedProperty
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "        \"name\": \"Luminous Flux\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "      }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                            "name": "Luminous Flux",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                            "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                          }
+                    """);
             OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             THING_IDS.add(thingId);
 
@@ -742,25 +803,31 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = postEntity(EntityType.DATASTREAM, urlParameters);
             datastreamId = entity.get(ControlInformation.ID);
             //Check Sensor
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"encodingType\": \"application/pdf\",\n"
-                    + "        \"metadata\": \"Light flux sensor\"\n"
-                    + "      }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                            "name": "Acme Fluxomatic 1000",
+                            "description": "Acme Fluxomatic 1000",
+                            "encodingType": "application/pdf",
+                            "metadata": "Light flux sensor"
+                          }
+                    """);
             SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
             //Check ObservedProperty
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "        \"name\": \"Luminous Flux\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "      }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                            "name": "Luminous Flux",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                            "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                          }
+                    """);
             OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
             //Check Observation
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "          \"phenomenonTime\": \"2015-03-01T00:10:00.000Z\",\n"
-                    + "          \"result\": 10\n"
-                    + "        }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                              "phenomenonTime": "2015-03-01T00:10:00.000Z",
+                              "result": 10
+                            }
+                    """);
             OBSERVATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj));
             DATASTREAM_IDS.add(datastreamId);
 
@@ -785,18 +852,20 @@ public abstract class Capability2Tests extends AbstractTestClass {
             entity = postEntity(EntityType.OBSERVATION, urlParameters);
             Object obsId1 = entity.get(ControlInformation.ID);
             //Check FeaturOfInterest
-            deepInsertedObj = Utils.MAPPER.readTree("{\n"
-                    + "  \"name\": \"A weather station.\",\n"
-                    + "  \"description\": \"A weather station.\",\n"
-                    + "  \"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "    \"feature\": {\n"
-                    + "      \"type\": \"Point\",\n"
-                    + "      \"coordinates\": [\n"
-                    + "        -114.05,\n"
-                    + "        51.05\n"
-                    + "      ]\n"
-                    + "    }\n"
-                    + "  }\n");
+            deepInsertedObj = Utils.MAPPER.readTree("""
+                    {
+                      "name": "A weather station.",
+                      "description": "A weather station.",
+                      "encodingType": "application/vnd.geo+json",
+                        "feature": {
+                          "type": "Point",
+                          "coordinates": [
+                            -114.05,
+                            51.05
+                          ]
+                        }
+                      }
+                    """);
             FOI_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
             OBSERVATION_IDS.add(obsId1);
 
@@ -858,10 +927,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
         postInvalidEntity(EntityType.DATASTREAM, urlParameters);
         /* Observation */
         //Create Thing and Datastream
-        urlParameters = "{"
-                + "\"name\":\"This is a Test Thing From TestNG\","
-                + "\"description\":\"This is a Test Thing From TestNG\""
-                + "}";
+        urlParameters = """
+                {
+                "name":"This is a Test Thing From TestNG",
+                "description":"This is a Test Thing From TestNG"
+                }""";
         Object thingId = postEntity(EntityType.THING, urlParameters).get(ControlInformation.ID);
         THING_IDS.add(thingId);
         urlParameters = "{\n"
@@ -968,11 +1038,12 @@ public abstract class Capability2Tests extends AbstractTestClass {
             checkPatch(EntityType.DATASTREAM, entity, updatedEntity, diffs);
             //Second PATCH for UOM
             entity = updatedEntity;
-            urlParameters = "{ \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Entropy2\",\n"
-                    + "    \"symbol\": \"S2\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#Entropy2\"\n"
-                    + "  } }";
+            urlParameters = """
+                    { "unitOfMeasurement": {
+                        "name": "Entropy2",
+                        "symbol": "S2",
+                        "definition": "http://qudt.org/vocab/unit#Entropy2"
+                      } }""";
             diffs = new HashMap<>();
             diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}"));
             updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
@@ -1005,10 +1076,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
             /* Thing */
             Object thingId = THING_IDS.get(0);
             JsonNode entity = getEntity(EntityType.THING, thingId);
-            String urlParameters = "{"
-                    + "\"name\":\"This is a Updated Test Thing From TestNG\","
-                    + "\"description\":\"This is a Updated Test Thing From TestNG\""
-                    + "}";
+            String urlParameters = """
+                    {
+                    "name":"This is a Updated Test Thing From TestNG",
+                    "description":"This is a Updated Test Thing From TestNG"
+                    }""";
             Map<String, Object> diffs = new HashMap<>();
             diffs.put("name", "This is a Updated Test Thing From TestNG");
             diffs.put("description", "This is a Updated Test Thing From TestNG");
@@ -1018,11 +1090,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
             /* Location */
             Object locationId = LOCATION_IDS.get(0);
             entity = getEntity(EntityType.LOCATION, locationId);
-            urlParameters = "{"
-                    + "\"encodingType\":\"application/vnd.geo+json\","
-                    + "\"name\":\"UPDATED NAME\","
-                    + "\"description\":\"UPDATED DESCRIPTION\","
-                    + "\"location\": { \"type\": \"Point\", \"coordinates\": [-114.05, 50] }}";
+            urlParameters = """
+                    {
+                      "encodingType":"application/vnd.geo+json",
+                      "name":"UPDATED NAME",
+                      "description":"UPDATED DESCRIPTION",
+                      "location": { "type": "Point", "coordinates": [-114.05, 50] }
+                    }""";
             diffs = new HashMap<>();
             diffs.put("name", "UPDATED NAME");
             diffs.put("description", "UPDATED DESCRIPTION");
@@ -1089,16 +1163,18 @@ public abstract class Capability2Tests extends AbstractTestClass {
             /* Datastream */
             Object datastreamId = DATASTREAM_IDS.get(0);
             entity = getEntity(EntityType.DATASTREAM, datastreamId);
-            urlParameters = "{\n"
-                    + "  \"name\": \"Data coming from sensor on ISS.\",\n"
-                    + "  \"description\": \"Data coming from sensor on ISS.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation\",\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Entropy\",\n"
-                    + "    \"symbol\": \"S\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#Entropy\"\n"
-                    + "  }\n"
-                    + "}\n";
+            urlParameters = """
+                    {
+                      "name": "Data coming from sensor on ISS.",
+                      "description": "Data coming from sensor on ISS.",
+                      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation",
+                      "unitOfMeasurement": {
+                        "name": "Entropy",
+                        "symbol": "S",
+                        "definition": "http://qudt.org/vocab/unit#Entropy"
+                      }
+                    }
+                    """;
             diffs = new HashMap<>();
             diffs.put("name", "Data coming from sensor on ISS.");
             diffs.put("description", "Data coming from sensor on ISS.");
@@ -1135,22 +1211,25 @@ public abstract class Capability2Tests extends AbstractTestClass {
          * Thing *
          */
         Object thingId = THING_IDS.get(0);
-        String urlParameters = "{\"Locations\": [\n"
-                + "    {\n"
-                + "      \"name\": \"West Roof\",\n"
-                + "      \"description\": \"West Roof\",\n"
-                + "      \"location\": { \"type\": \"Point\", \"coordinates\": [-117.05, 51.05] },\n"
-                + "      \"encodingType\": \"application/vnd.geo+json\"\n"
-                + "    }\n"
-                + "  ]}";
+        String urlParameters = """
+                {"Locations": [
+                    {
+                      "name": "West Roof",
+                      "description": "West Roof",
+                      "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
+                      "encodingType": "application/vnd.geo+json"
+                    }
+                  ]}""";
         invalidPatchEntity(EntityType.THING, urlParameters, thingId);
-        urlParameters = "{\"Datastreams\": [\n"
-                + "    {\n"
-                + "      \"unitOfMeasurement\": {\n"
-                + "        \"name\": \"Lumen\",\n"
-                + "        \"symbol\": \"lm\",\n"
-                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen\"\n"
-                + "      }}]}";
+        urlParameters = """
+                {"Datastreams": [
+                    {
+                      "unitOfMeasurement": {
+                        "name": "Lumen",
+                        "symbol": "lm",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
+                      }
+                    }]}""";
         invalidPatchEntity(EntityType.THING, urlParameters, thingId);
 
         /**
@@ -1185,34 +1264,38 @@ public abstract class Capability2Tests extends AbstractTestClass {
          * Datastream
          */
         Object datastreamId = DATASTREAM_IDS.get(0);
-        urlParameters = "{\"ObservedProperty\": {\n"
-                + "  \t\"name\": \"Count\",\n"
-                + "\t\"definition\": \"http://qudt.org/vocab/unit#Dimensionless\",\n"
-                + "\t\"name\": \"Count is a dimensionless property.\",\n"
-                + "\t\"description\": \"Count is a dimensionless property.\"\n"
-                + "  } }";
+        urlParameters = """
+                {"ObservedProperty": {
+                  \t"name": "Count",
+                \t"definition": "http://qudt.org/vocab/unit#Dimensionless",
+                \t"name": "Count is a dimensionless property.",
+                \t"description": "Count is a dimensionless property."
+                  } }""";
         invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-        urlParameters = "{\"Sensor\": {\n"
-                + "  \t\"name\": \"Acme Traffic 2000\",  \n"
-                + "  \t\"description\": \"Acme Traffic 2000\",  \n"
-                + "  \t\"encodingType\": \"application/pdf\",\n"
-                + "  \t\"metadata\": \"Traffic counting device\"\n"
-                + "  }}";
+        urlParameters = """
+                {"Sensor": {
+                  \t"name": "Acme Traffic 2000",
+                  \t"description": "Acme Traffic 2000",
+                  \t"encodingType": "application/pdf",
+                  \t"metadata": "Traffic counting device"
+                  }}""";
         invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-        urlParameters = "{"
-                + "\"Thing\": {"
-                + "  \"name\": \"test\","
-                + "  \"description\": \"test\""
-                + " }"
-                + "}";
+        urlParameters = """
+                {
+                  "Thing": {
+                    "name": "test",
+                    "description": "test"
+                  }
+                }""";
         invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-        urlParameters = "{\"Observations\": [\n"
-                + "    {\n"
-                + "      \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                + "      \"result\": 92122,\n"
-                + "      \"resultQuality\": \"High\"\n"
-                + "    }\n"
-                + "  ]}";
+        urlParameters = """
+                {"Observations": [
+                    {
+                      "phenomenonTime": "2015-03-01T00:00:00Z",
+                      "result": 92122,
+                      "resultQuality": "High"
+                    }
+                  ]}""";
         invalidPatchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
     }
 
@@ -1717,21 +1800,6 @@ public abstract class Capability2Tests extends AbstractTestClass {
         return -1;
     }
 
-    private void assertParameterEquals(String key, final String expected, final String value, String message) {
-        if (key.toLowerCase().contains("time") && !"null".equals(expected) && !"null".equals(value)) {
-            if (expected.contains("/")) {
-                String[] expParts = expected.split("/");
-                String[] valParts = value.split("/");
-                assertEquals(ZonedDateTime.parse(expParts[0]), ZonedDateTime.parse(valParts[0]), message);
-                assertEquals(ZonedDateTime.parse(expParts[1]), ZonedDateTime.parse(valParts[1]), message);
-            } else {
-                assertEquals(ZonedDateTime.parse(expected), ZonedDateTime.parse(value), message);
-            }
-        } else {
-            assertEquals(expected, value, message);
-        }
-    }
-
     /**
      * Check the Observation have the resultTime even if it is null
      *
@@ -1832,7 +1900,6 @@ public abstract class Capability2Tests extends AbstractTestClass {
             try {
                 String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
                 HttpResponse responseMap = HTTPMethods.doGet(urlString);
-                int responseCode = responseMap.code;
                 JsonNode result = Utils.MAPPER.readTree(responseMap.response);
                 array = result.get("value");
                 for (int i = 0; i < array.size(); i++) {

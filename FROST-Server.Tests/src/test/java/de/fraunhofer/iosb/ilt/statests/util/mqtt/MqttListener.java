@@ -156,7 +156,7 @@ public class MqttListener implements Callable<JsonNode> {
                     mqttClient.setCallback(new MqttCallback() {
                         @Override
                         public void connectionLost(Throwable thrwbl) {
-                            LOGGER.info("Connection lost for {}:", name, thrwbl.getMessage());
+                            LOGGER.info("Connection lost for {}: {}", name, thrwbl.getMessage());
                             notifyError("MQTT connection lost: " + clientId);
                         }
 
@@ -198,12 +198,12 @@ public class MqttListener implements Callable<JsonNode> {
 
                             @Override
                             public void onFailure(IMqttToken imt, Throwable thrwbl) {
-                                LOGGER.debug("Exception during subscribe for {}:", name, thrwbl.getMessage());
+                                LOGGER.debug("Exception during subscribe for {}: {}", name, thrwbl.getMessage());
                                 notifyError("Failed to subscribe to " + topic);
                             }
                         });
                     } catch (MqttException ex) {
-                        LOGGER.debug("Exception for {} during subscribe:", name, ex.getMessage());
+                        LOGGER.debug("Exception for {} during subscribe: {}", name, ex.getMessage());
                         notifyError("Failed to subscribe to " + topic + ": " + ex.getMessage());
                     }
                 }
@@ -232,7 +232,7 @@ public class MqttListener implements Callable<JsonNode> {
                 LOGGER.error("Connect Exception:", ex);
             }
         } catch (MqttException | IllegalArgumentException ex) {
-            LOGGER.info("Exception for {} during connect:", name, ex.getMessage());
+            LOGGER.info("Exception for {} during connect: {}", name, ex.getMessage());
             notifyError("Could not connect to MQTT server: " + ex.getMessage());
         }
         return this;

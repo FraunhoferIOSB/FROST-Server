@@ -148,7 +148,7 @@ public abstract class Capability7Tests extends AbstractTestClass {
             try {
                 relationType = EntityType.getForRelation(key);
             } catch (IllegalArgumentException ex) {
-
+                // not always found, checked next.
             }
             // check if navigationLink or simple property
             if (relationType != null) {

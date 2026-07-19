@@ -131,11 +131,11 @@ class UrlHelperTest {
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
         Entity house2 = testModel.createHouse(2, "House 2", 2.0);
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$top=2",
                 "Houses?$top=2&$skip=2&$skipFilter=(id gt 1)");
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses(5)/Rooms?$top=2",
                 "Houses(5)/Rooms?$top=2&$skip=2&$skipFilter=(id gt 1)");
     }
@@ -145,11 +145,11 @@ class UrlHelperTest {
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
         Entity house2 = testModel.createHouse(2, "House 2", 2.0);
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=id&$top=2",
                 "Houses?$orderby=id&$top=2&$skip=2&$skipFilter=(id gt 1)");
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=id desc&$top=2",
                 "Houses?$orderby=id desc&$top=2&$skip=2&$skipFilter=(id lt 1)");
     }
@@ -159,11 +159,11 @@ class UrlHelperTest {
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
         Entity house2 = testModel.createHouse(2, "House 2", 2.0);
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=name&$top=2",
                 "Houses?$orderby=name&$top=2&$skip=2&$skipFilter=(name gt 'House 1')");
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=name desc&$top=2",
                 "Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1')");
     }
@@ -173,11 +173,11 @@ class UrlHelperTest {
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
         Entity house2 = testModel.createHouse(2, "House 1", 2.0);
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=name&$top=2",
                 "Houses?$orderby=name&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and id gt 1))");
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=name desc&$top=2",
                 "Houses?$orderby=name desc&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and id gt 1))");
     }
@@ -187,11 +187,11 @@ class UrlHelperTest {
         Entity house1 = testModel.createHouse(1, "House 1", 1.0);
         Entity house2 = testModel.createHouse(2, "House 1", 1.0);
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=name,value&$top=2",
                 "Houses?$orderby=name,value&$top=2&$skip=2&$skipFilter=(name gt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
         testNextLink(
-                coreSettings, house1, house2,
+                house1, house2,
                 "Houses?$orderby=name desc,value&$top=2",
                 "Houses?$orderby=name desc,value&$top=2&$skip=2&$skipFilter=(name lt 'House 1' or (name eq 'House 1' and (value gt 1.0 or (value eq 1.0 and id gt 1))))");
     }
@@ -212,7 +212,7 @@ class UrlHelperTest {
         return query.getPath().toString() + "?" + query.toString(false);
     }
 
-    private static void testNextLink(CoreSettings settings, Entity last, Entity next, String baseUrl, String expectedNextUrl) {
+    private static void testNextLink(Entity last, Entity next, String baseUrl, String expectedNextUrl) {
         Query queryBase = null;
         Query queryExpected = null;
         try {

@@ -895,18 +895,6 @@ public class MqttCoreTests20 extends AbstractTestClass {
         };
     }
 
-    private Callable<Object> getInsertActionObs(final CompletableFuture<JsonNode> futureObs, final CompletableFuture<JsonNode> futureFoi) {
-        return () -> {
-            Entity obs = eh.createObservation(eh.getCache(sMdl.etDatastream, 0));
-            JsonNode jsonNode1 = getEntity(obs);
-            futureObs.complete(jsonNode1);
-            JsonNode jsonNode2 = getEntity(obs, sMdl.npObservationProximateFoi);
-            futureFoi.complete(jsonNode2);
-            return null;
-        };
-
-    }
-
     public JsonNode getEntity(Entity entity) {
         final JsonNode jsonNode = eh.getEntity(entity, urlsHttpToMqtt);
         jsonNode.asObject().remove(AT_CONTEXT);

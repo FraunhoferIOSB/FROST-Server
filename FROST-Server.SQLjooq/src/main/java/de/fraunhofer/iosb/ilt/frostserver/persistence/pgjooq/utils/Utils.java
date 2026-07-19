@@ -105,8 +105,8 @@ public class Utils {
         if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             try {
                 return new GeoJsonDeserializier().deserialize(location);
-            } catch (Error | Exception ex) {
-                LOGGER.error("Failed to deserialise geoJson: {}.", location.toString(), ex);
+            } catch (IOException | RuntimeException ex) {
+                LOGGER.error("Failed to deserialise geoJson: {}.", location, ex);
             }
             return location;
         }

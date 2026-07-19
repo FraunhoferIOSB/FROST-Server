@@ -290,12 +290,15 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
     }
 
     public void addEntry(NavigationPropertyMain property, FieldFetcher<T> factory) {
-        if (property instanceof NavigationPropertyEntity navigationPropertyEntity) {
-            addEntry(navigationPropertyEntity, factory);
-        } else if (property instanceof NavigationPropertyEntitySet navigationPropertyEntitySet) {
-            addEntry(navigationPropertyEntitySet, factory);
-        } else {
-            throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
+        switch (property) {
+            case NavigationPropertyEntity npe ->
+                addEntry(npe, factory);
+
+            case NavigationPropertyEntitySet nps ->
+                addEntry(nps, factory);
+
+            default ->
+                throw new IllegalArgumentException("Unknown NavigationProperty type: " + property);
         }
     }
 
@@ -482,7 +485,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         public final Map<EntityProperty, PropertyFields<U>> subFields = new LinkedHashMap<>();
         public final ConverterRecord<U> converter;
 
-        public PropertyFields(Property property, boolean jsonType, ConverterRecord<U> converter) {
+        protected PropertyFields(Property property, boolean jsonType, ConverterRecord<U> converter) {
             this.property = property;
             this.converter = converter;
             this.jsonType = jsonType;

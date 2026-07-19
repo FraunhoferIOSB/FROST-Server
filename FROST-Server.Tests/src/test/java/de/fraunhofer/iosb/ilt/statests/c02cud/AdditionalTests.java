@@ -275,10 +275,11 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
         // POST tests
         url = serverSettings.getServiceUrl(version) + "/Things(" + formatKeyValuesForUrl(thing1) + ")/Datastreams(" + formatKeyValuesForUrl(datastream1) + ")/Observations";
-        String observationJson = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
-                + "  \"result\": 300\n"
-                + "}";
+        String observationJson = """
+                {
+                  "phenomenonTime": "2015-03-01T03:00:00.000Z",
+                  "result": 300
+                }""";
         response = HTTPMethods.doPost(url, observationJson);
         assertEquals(201, response.code, "Post should return 201 Created for url " + url);
 
@@ -290,16 +291,18 @@ public abstract class AdditionalTests extends AbstractTestClass {
     private void testPut(String urlObsGood, String urlObsBad) {
         String observationJson;
         HTTPMethods.HttpResponse response;
-        observationJson = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
-                + "  \"result\": 301\n"
-                + "}";
+        observationJson = """
+                {
+                  "phenomenonTime": "2015-03-01T03:00:00.000Z",
+                  "result": 301
+                }""";
         response = HTTPMethods.doPut(urlObsGood, observationJson);
         assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood + "\n" + response.toString());
-        observationJson = "{\n"
-                + "  \"phenomenonTime\": \"2015-03-01T03:00:00.000Z\",\n"
-                + "  \"result\": 302\n"
-                + "}";
+        observationJson = """
+                {
+                  "phenomenonTime": "2015-03-01T03:00:00.000Z",
+                  "result": 302
+                }""";
         response = HTTPMethods.doPut(urlObsBad, observationJson);
         assertEquals(404, response.code, "Post should return 404 Not Found for url " + urlObsBad);
     }
@@ -308,14 +311,16 @@ public abstract class AdditionalTests extends AbstractTestClass {
         String observationJson;
         HTTPMethods.HttpResponse response;
         // PATCH tests
-        observationJson = "{\n"
-                + "  \"result\": 303\n"
-                + "}";
+        observationJson = """
+                {
+                  "result": 303
+                }""";
         response = HTTPMethods.doPatch(urlObsGood, observationJson);
         assertEquals(200, response.code, "Post should return 200 Ok for url " + urlObsGood);
-        observationJson = "{\n"
-                + "  \"result\": 304\n"
-                + "}";
+        observationJson = """
+                {
+                  "result": 304
+                }""";
         response = HTTPMethods.doPatch(urlObsBad, observationJson);
         assertNotEquals(200, response.code, "Post should not return 200 Ok for url " + urlObsBad);
     }

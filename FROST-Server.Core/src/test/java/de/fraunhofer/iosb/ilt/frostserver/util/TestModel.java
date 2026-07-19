@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 
 public class TestModel implements PluginService {
 
@@ -96,7 +97,7 @@ public class TestModel implements PluginService {
                 .setProperty(epTime, time);
     }
 
-    public Map<EntityType, Map<Property, Object>> getTestPropertyValues(ModelRegistry modelRegistry) {
+    public Map<EntityType, Map<Property, Object>> getTestPropertyValues() {
         Map<EntityType, Map<Property, Object>> propertyValues = new HashMap<>();
         Map<Property, Object> propertyValuesHouse = new HashMap<>();
         Map<Property, Object> propertyValuesRoom = new HashMap<>();
@@ -131,6 +132,8 @@ public class TestModel implements PluginService {
         houses.add(new DefaultEntity(etHouse, PkValue.of(nextId++)));
         houses.add(new DefaultEntity(etHouse, PkValue.of(nextId++)));
         propertyValuesRoom.put(npHouseRooms, houses);
+
+        Assertions.assertEquals(105, nextId);
         return propertyValues;
     }
 

@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeSimplePrimitive;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.IntegerConstant;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 
 public class TestModel {
 
@@ -146,6 +147,7 @@ public class TestModel {
             }
         }
 
+        Assertions.assertEquals(108, nextId);
         return propertyValues;
     }
 }

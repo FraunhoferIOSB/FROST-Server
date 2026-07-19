@@ -74,19 +74,20 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicAbs() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"http://example.org/v1.0/Things(1)/HistoricalLocations\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "http://example.org/v1.0/Things(1)/Locations",
+                "Datastreams@iot.navigationLink": "http://example.org/v1.0/Things(1)/Datastreams",
+                "HistoricalLocations@iot.navigationLink": "http://example.org/v1.0/Things(1)/HistoricalLocations",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         context.getQueryDefaults().setUseAbsoluteNavigationLinks(true);
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = new Query(context, path).validate();
@@ -105,19 +106,20 @@ class EntityFormatterTest {
 
     @Test
     void writeThingBasicRel() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = new Query(context, path).validate();
         DefaultEntity entity = new DefaultEntity(pluginCoreModel.etThing)
@@ -134,10 +136,11 @@ class EntityFormatterTest {
 
     @Test
     void writeThingSelect() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"name\": \"This thing is an oven.\"\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "name": "This thing is an oven."
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id,name", context, path)
                 .validate();
@@ -155,19 +158,20 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsBasic() throws IOException {
-        String thing = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String thing = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         String expResult = "{ \"value\":[\n"
                 + thing + ",\n"
                 + thing
@@ -212,40 +216,40 @@ class EntityFormatterTest {
 
     @Test
     void writeThingsWithExpandedDatastream() throws IOException {
-        String thing = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Datastreams@iot.count\":1,\n"
-                + "\"Datastreams\": [\n"
-                + "{\n"
-                + "	\"@iot.id\":1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": {\n"
-                + "		\"name\": \"degree Celsius\",\n"
-                + "		\"symbol\": \"°C\",\n"
-                + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "	\"observedArea\": {\n"
-                + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]\n"
-                + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\""
-                + "}\n"
-                + "],\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\",\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "}\n"
-                + "}";
+        String thing = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Datastreams@iot.count":1,
+                "Datastreams": [
+                {
+                    "@iot.id":1,
+                    "@iot.selfLink": "http://example.org/v1.0/Datastreams(1)",
+                    "name": "This is a datastream measuring the temperature in an oven.",
+                    "description": "This is a datastream measuring the temperature in an oven.",
+                    "unitOfMeasurement": {
+                        "name": "degree Celsius",
+                        "symbol": "\u00b0C",
+                        "definition": "http://unitsofmeasure.org/ucum.html#para-30"
+                    },
+                    "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                    "observedArea": {
+                        "type": "Polygon",
+                        "coordinates": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]
+                    },
+                    "phenomenonTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z",
+                    "resultTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"}
+                ],
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations",
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                }
+                }""";
         String expResult = "{ "
                 + "\"@iot.count\": 1,\n"
                 + "\"value\":[\n"
@@ -284,20 +288,21 @@ class EntityFormatterTest {
 
     @Test
     void writeThingWithExpandedDatastream1() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Datastreams\": [{\"@iot.id\":123}],\n"
-                + "\"name\": \"This thing is an oven.\",\n"
-                + "\"description\": \"This thing is an oven.\",\n"
-                + "\"properties\": {\n"
-                + "\"owner\": \"John Doe\",\n"
-                + "\"color\": \"Silver\"\n"
-                + "},\n"
-                + "\"Datastreams@iot.navigationLink\": \"Things(1)/Datastreams\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"HistoricalLocations@iot.navigationLink\": \"Things(1)/HistoricalLocations\"\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Datastreams": [{"@iot.id":123}],
+                "name": "This thing is an oven.",
+                "description": "This thing is an oven.",
+                "properties": {
+                "owner": "John Doe",
+                "color": "Silver"
+                },
+                "Datastreams@iot.navigationLink": "Things(1)/Datastreams",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "HistoricalLocations@iot.navigationLink": "Things(1)/HistoricalLocations"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$expand=Datastreams($select=id)", context, path)
                 .validate();
@@ -321,12 +326,13 @@ class EntityFormatterTest {
 
     @Test
     void writeThingWithExpandedDatastream2() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.id\": 1,\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams\": [{\"@iot.id\":123}],\n"
-                + "\"name\": \"This thing is an oven.\"\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.id": 1,
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "Datastreams": [{"@iot.id":123}],
+                "name": "This thing is an oven."
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name,Locations&$expand=Datastreams($select=id)", context, path)
                 .validate();
@@ -349,12 +355,13 @@ class EntityFormatterTest {
 
     @Test
     void writeThingWithExpandedDatastream3() throws IOException {
-        String expResult = "{\n"
-                + "\"@iot.selfLink\": \"http://example.org/v1.0/Things(1)\",\n"
-                + "\"Locations@iot.navigationLink\": \"Things(1)/Locations\",\n"
-                + "\"Datastreams\": [{\"@iot.id\":123, \"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(123)\"}],\n"
-                + "\"name\": \"This thing is an oven.\"\n"
-                + "}";
+        String expResult = """
+                {
+                "@iot.selfLink": "http://example.org/v1.0/Things(1)",
+                "Locations@iot.navigationLink": "Things(1)/Locations",
+                "Datastreams": [{"@iot.id":123, "@iot.selfLink": "http://example.org/v1.0/Datastreams(123)"}],
+                "name": "This thing is an oven."
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=@iot.selfLink,name,Locations&$expand=Datastreams($select=@iot.selfLink,id)", context, path)
                 .validate();
@@ -379,11 +386,12 @@ class EntityFormatterTest {
 
     @Test
     void writeThingWithExpandedDatastream4() throws IOException {
-        String expResult = "{\n"
-                + "  \"@iot.id\": 1,\n"
-                + "  \"Datastreams\": [],\n"
-                + "  \"name\": \"This thing is an oven.\"\n"
-                + "}";
+        String expResult = """
+                {
+                  "@iot.id": 1,
+                  "Datastreams": [],
+                  "name": "This thing is an oven."
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things");
         Query query = QueryParser.parseQuery("$select=id,name&$expand=Datastreams", context, path)
                 .validate();
@@ -404,13 +412,13 @@ class EntityFormatterTest {
     @Test
     void writeLocationBasic() throws IOException {
         {
-            String expResult = "{\n"
-                    + "	\"@iot.id\": 1,\n"
-                    + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                    + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                    + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                    + "	\"encodingType\": \"application/vnd.geo+json\""
-                    + "}";
+            String expResult = """
+                    {
+                        "@iot.id": 1,
+                        "@iot.selfLink": "http://example.org/v1.0/Locations(1)",
+                        "Things@iot.navigationLink": "Locations(1)/Things",
+                        "HistoricalLocations@iot.navigationLink": "Locations(1)/HistoricalLocations",
+                        "encodingType": "application/vnd.geo+json"}""";
             ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("$select=id,@iot.selfLink,encodingType,Things,HistoricalLocations", context, path)
                     .validate();
@@ -423,13 +431,13 @@ class EntityFormatterTest {
             compareJson(expResult, JsonWriter.writeEntity(entity));
         }
         {
-            String expResult = "{\n"
-                    + "	\"@iot.id\": 1,\n"
-                    + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                    + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                    + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                    + "	\"encodingType\": \"application/geo+json\""
-                    + "}";
+            String expResult = """
+                    {
+                        "@iot.id": 1,
+                        "@iot.selfLink": "http://example.org/v1.0/Locations(1)",
+                        "Things@iot.navigationLink": "Locations(1)/Things",
+                        "HistoricalLocations@iot.navigationLink": "Locations(1)/HistoricalLocations",
+                        "encodingType": "application/geo+json"}""";
             ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Locations(1)");
             Query query = QueryParser.parseQuery("", context, path)
                     .validate();
@@ -443,24 +451,24 @@ class EntityFormatterTest {
 
     @Test
     void writeLocationWithGeoJsonLocation() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Locations(1)\",\n"
-                + "	\"Things@iot.navigationLink\": \"Locations(1)/Things\",\n"
-                + "	\"HistoricalLocations@iot.navigationLink\": \"Locations(1)/HistoricalLocations\",\n"
-                + "	\"encodingType\": \"application/geo+json\""
-                + ",\n"
-                + "	\"location\": \n"
-                + "	{\n"
-                + "		\"type\": \"Feature\",\n"
-                + "		\"properties\": {},\n"
-                + "		\"geometry\":\n"
-                + "		{\n"
-                + "			\"type\": \"Point\",\n"
-                + "			\"coordinates\": [-114.06,51.05]\n"
-                + "		}\n"
-                + "	}\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Locations(1)",
+                    "Things@iot.navigationLink": "Locations(1)/Things",
+                    "HistoricalLocations@iot.navigationLink": "Locations(1)/HistoricalLocations",
+                    "encodingType": "application/geo+json",
+                    "location":
+                    {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry":
+                        {
+                            "type": "Point",
+                            "coordinates": [-114.06,51.05]
+                        }
+                    }
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Locations(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -474,13 +482,14 @@ class EntityFormatterTest {
 
     @Test
     void writeHistoricalLocationBasic() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/HistoricalLocations(1)\",\n"
-                + "	\"Locations@iot.navigationLink\": \"HistoricalLocations(1)/Locations\",\n"
-                + "	\"Thing@iot.navigationLink\": \"HistoricalLocations(1)/Thing\",\n"
-                + "	\"time\": \"2015-01-25T19:00:00Z\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/HistoricalLocations(1)",
+                    "Locations@iot.navigationLink": "HistoricalLocations(1)/Locations",
+                    "Thing@iot.navigationLink": "HistoricalLocations(1)/Thing",
+                    "time": "2015-01-25T19:00:00Z"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/HistoricalLocations(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -494,25 +503,26 @@ class EntityFormatterTest {
 
     @Test
     void writeDatastreamBasic() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
-                + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"name\": \"degree Celsius\",\n"
-                + "		\"symbol\": \"°C\",\n"
-                + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Datastreams(1)",
+                    "Thing@iot.navigationLink": "Datastreams(1)/Thing",
+                    "Sensor@iot.navigationLink": "Datastreams(1)/Sensor",
+                    "ObservedProperty@iot.navigationLink": "Datastreams(1)/ObservedProperty",
+                    "Observations@iot.navigationLink": "Datastreams(1)/Observations",
+                    "name": "This is a datastream measuring the temperature in an oven.",
+                    "description": "This is a datastream measuring the temperature in an oven.",
+                    "unitOfMeasurement":
+                    {
+                        "name": "degree Celsius",
+                        "symbol": "\u00b0C",
+                        "definition": "http://unitsofmeasure.org/ucum.html#para-30"
+                    },
+                    "observationType": "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement",
+                    "phenomenonTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z",
+                    "resultTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -533,25 +543,26 @@ class EntityFormatterTest {
 
     @Test
     void writeDatastreamWithEmptyUnitOfMeasurement() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
-                + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"name\": null,\n"
-                + "		\"symbol\": null,\n"
-                + "		\"definition\": null\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Datastreams(1)",
+                    "Thing@iot.navigationLink": "Datastreams(1)/Thing",
+                    "Sensor@iot.navigationLink": "Datastreams(1)/Sensor",
+                    "ObservedProperty@iot.navigationLink": "Datastreams(1)/ObservedProperty",
+                    "Observations@iot.navigationLink": "Datastreams(1)/Observations",
+                    "name": "This is a datastream measuring the temperature in an oven.",
+                    "description": "This is a datastream measuring the temperature in an oven.",
+                    "unitOfMeasurement":
+                    {
+                        "name": null,
+                        "symbol": null,
+                        "definition": null
+                    },
+                    "observationType": "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement",
+                    "phenomenonTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z",
+                    "resultTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -572,30 +583,31 @@ class EntityFormatterTest {
 
     @Test
     void writeDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Datastreams(1)\",\n"
-                + "	\"Thing@iot.navigationLink\": \"Datastreams(1)/Thing\",\n"
-                + "	\"Sensor@iot.navigationLink\": \"Datastreams(1)/Sensor\",\n"
-                + "	\"ObservedProperty@iot.navigationLink\": \"Datastreams(1)/ObservedProperty\",\n"
-                + "	\"Observations@iot.navigationLink\": \"Datastreams(1)/Observations\",\n"
-                + "	\"name\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"description\": \"This is a datastream measuring the temperature in an oven.\",\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"name\": \"degree Celsius\",\n"
-                + "		\"symbol\": \"°C\",\n"
-                + "		\"definition\": \"http://unitsofmeasure.org/ucum.html#para-30\"\n"
-                + "	},\n"
-                + "	\"observationType\": \"http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement\",\n"
-                + "	\"observedArea\": \n"
-                + "	{\n"
-                + "		\"type\": \"Polygon\",\n"
-                + "		\"coordinates\": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]\n"
-                + "	},\n"
-                + "	\"phenomenonTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\",\n"
-                + "	\"resultTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Datastreams(1)",
+                    "Thing@iot.navigationLink": "Datastreams(1)/Thing",
+                    "Sensor@iot.navigationLink": "Datastreams(1)/Sensor",
+                    "ObservedProperty@iot.navigationLink": "Datastreams(1)/ObservedProperty",
+                    "Observations@iot.navigationLink": "Datastreams(1)/Observations",
+                    "name": "This is a datastream measuring the temperature in an oven.",
+                    "description": "This is a datastream measuring the temperature in an oven.",
+                    "unitOfMeasurement":
+                    {
+                        "name": "degree Celsius",
+                        "symbol": "\u00b0C",
+                        "definition": "http://unitsofmeasure.org/ucum.html#para-30"
+                    },
+                    "observationType": "http://www.opengis.net/def/observationType/OGCOM/2.0/OM_Measurement",
+                    "observedArea":
+                    {
+                        "type": "Polygon",
+                        "coordinates": [[[100.0,0.0],[101.0,0.0],[101.0,1.0],[100.0,1.0],[100.0,0.0]]]
+                    },
+                    "phenomenonTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z",
+                    "resultTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Datastreams(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -617,15 +629,16 @@ class EntityFormatterTest {
 
     @Test
     void writeSensorBasic() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Sensors(1)\",\n"
-                + "	\"Datastreams@iot.navigationLink\": \"Sensors(1)/Datastreams\",\n"
-                + "	\"name\": \"TMP36 - Analog Temperature sensor\",\n"
-                + "	\"description\": \"TMP36 - Analog Temperature sensor\",\n"
-                + "	\"encodingType\": \"application/pdf\",\n"
-                + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Sensors(1)",
+                    "Datastreams@iot.navigationLink": "Sensors(1)/Datastreams",
+                    "name": "TMP36 - Analog Temperature sensor",
+                    "description": "TMP36 - Analog Temperature sensor",
+                    "encodingType": "application/pdf",
+                    "metadata": "http://example.org/TMP35_36_37.pdf"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -641,14 +654,14 @@ class EntityFormatterTest {
 
     @Test
     void writeSensorEmptyDatastreamsCollection() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"name\": \"TMP36 - Analog Temperature sensor\",\n"
-                + "	\"description\": \"TMP36 - Analog Temperature sensor\",\n"
-                + "	\"encodingType\": \"application/pdf\",\n"
-                + "	\"metadata\": \"http://example.org/TMP35_36_37.pdf\"\n,"
-                + " \"Datastreams\": []"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "name": "TMP36 - Analog Temperature sensor",
+                    "description": "TMP36 - Analog Temperature sensor",
+                    "encodingType": "application/pdf",
+                    "metadata": "http://example.org/TMP35_36_37.pdf"
+                , "Datastreams": []}""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Sensors(1)");
         Query query = QueryParser.parseQuery("$select=id,name,description,encodingType,metadata&$expand=Datastreams", context, path)
                 .validate();
@@ -664,14 +677,15 @@ class EntityFormatterTest {
 
     @Test
     void writeObservedPropertyBasic() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/ObservedProperties(1)\",\n"
-                + "	\"Datastreams@iot.navigationLink\": \"ObservedProperties(1)/Datastreams\",\n"
-                + "	\"description\": \"The dewpoint temperature bla bla\",\n"
-                + "	\"name\": \"DewPoint Temperature\",\n"
-                + "	\"definition\": \"http://dbpedia.org/page/Dew_point\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/ObservedProperties(1)",
+                    "Datastreams@iot.navigationLink": "ObservedProperties(1)/Datastreams",
+                    "description": "The dewpoint temperature bla bla",
+                    "name": "DewPoint Temperature",
+                    "definition": "http://dbpedia.org/page/Dew_point"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/ObservedProperties(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -686,15 +700,16 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationBasic() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
-                + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
-                + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59Z\",\n"
-                + "	\"resultTime\": \"2014-12-31T19:59:59Z\",\n"
-                + "	\"result\": 70.40\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Observations(1)",
+                    "FeatureOfInterest@iot.navigationLink": "Observations(1)/FeatureOfInterest",
+                    "Datastream@iot.navigationLink":"Observations(1)/Datastream",
+                    "phenomenonTime": "2014-12-31T11:59:59Z",
+                    "resultTime": "2014-12-31T19:59:59Z",
+                    "result": 70.40
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -711,15 +726,16 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationBasicWithNullResult() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
-                + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
-                + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59Z\",\n"
-                + "	\"resultTime\": \"2014-12-31T19:59:59Z\",\n"
-                + "	\"result\": null\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Observations(1)",
+                    "FeatureOfInterest@iot.navigationLink": "Observations(1)/FeatureOfInterest",
+                    "Datastream@iot.navigationLink":"Observations(1)/Datastream",
+                    "phenomenonTime": "2014-12-31T11:59:59Z",
+                    "resultTime": "2014-12-31T19:59:59Z",
+                    "result": null
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -737,15 +753,16 @@ class EntityFormatterTest {
 
     @Test
     void writeObservationWithEmptyResultTime() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/Observations(1)\",\n"
-                + "	\"FeatureOfInterest@iot.navigationLink\": \"Observations(1)/FeatureOfInterest\",\n"
-                + "	\"Datastream@iot.navigationLink\":\"Observations(1)/Datastream\",\n"
-                + "	\"phenomenonTime\": \"2014-12-31T11:59:59Z\",\n"
-                + "	\"resultTime\": null,\n"
-                + "	\"result\": \"70.4\"\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/Observations(1)",
+                    "FeatureOfInterest@iot.navigationLink": "Observations(1)/FeatureOfInterest",
+                    "Datastream@iot.navigationLink":"Observations(1)/Datastream",
+                    "phenomenonTime": "2014-12-31T11:59:59Z",
+                    "resultTime": null,
+                    "result": "70.4"
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Observations(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -762,14 +779,14 @@ class EntityFormatterTest {
 
     @Test
     void writeFeatureOfInterstBasic() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/FeaturesOfInterest(1)\",\n"
-                + "	\"Observations@iot.navigationLink\": \"FeaturesOfInterest(1)/Observations\",\n"
-                + "	\"name\": \"This is a weather station.\",\n"
-                + "	\"description\": \"This is a weather station.\",\n"
-                + "	\"encodingType\": \"application/geo+json\""
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/FeaturesOfInterest(1)",
+                    "Observations@iot.navigationLink": "FeaturesOfInterest(1)/Observations",
+                    "name": "This is a weather station.",
+                    "description": "This is a weather station.",
+                    "encodingType": "application/geo+json"}""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();
@@ -784,25 +801,25 @@ class EntityFormatterTest {
 
     @Test
     void writeFeatureOfInterstWithGeoJsonPointFeature() throws IOException {
-        String expResult = "{\n"
-                + "	\"@iot.id\": 1,\n"
-                + "	\"@iot.selfLink\": \"http://example.org/v1.0/FeaturesOfInterest(1)\",\n"
-                + "	\"Observations@iot.navigationLink\": \"FeaturesOfInterest(1)/Observations\",\n"
-                + "	\"name\": \"This is a weather station.\",\n"
-                + "	\"description\": \"This is a weather station.\",\n"
-                + "	\"encodingType\": \"application/vnd.geo+json\""
-                + ",\n"
-                + "	\"feature\": \n"
-                + "	{\n"
-                + "		\"type\": \"Feature\",\n"
-                + "		\"properties\": {},\n"
-                + "		\"geometry\":\n"
-                + "		{\n"
-                + "			\"type\": \"Point\",\n"
-                + "			\"coordinates\": [-114.06,51.05]\n"
-                + "		}\n"
-                + "	}\n"
-                + "}";
+        String expResult = """
+                {
+                    "@iot.id": 1,
+                    "@iot.selfLink": "http://example.org/v1.0/FeaturesOfInterest(1)",
+                    "Observations@iot.navigationLink": "FeaturesOfInterest(1)/Observations",
+                    "name": "This is a weather station.",
+                    "description": "This is a weather station.",
+                    "encodingType": "application/vnd.geo+json",
+                    "feature":
+                    {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry":
+                        {
+                            "type": "Point",
+                            "coordinates": [-114.06,51.05]
+                        }
+                    }
+                }""";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/FeaturesOfInterest(1)");
         Query query = QueryParser.parseQuery("", context, path)
                 .validate();

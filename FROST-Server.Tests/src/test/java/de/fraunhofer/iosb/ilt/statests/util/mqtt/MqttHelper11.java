@@ -773,10 +773,7 @@ public class MqttHelper11 {
                 LOGGER.debug("  Checking creation for {}", name);
                 createdEntity = eh.getEntityWithRetry(et, filterCreator.create(name), null, readRetries);
                 LOGGER.debug("  Analysing result for {}", name);
-                if (createdEntity == null && !expectSuccess) {
-                    success = true;
-                    message = "Success";
-                } else if (createdEntity != null && expectSuccess) {
+                if (createdEntity == null && !expectSuccess || createdEntity != null && expectSuccess) {
                     success = true;
                     message = "Success";
                 } else {
