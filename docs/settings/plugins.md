@@ -19,17 +19,36 @@ Which plugins are loaded is controlled by two parameters:
 Besides these configuration options telling FROST which plugins exist, each plugin
 usually has a separate option that controls whether the plugin is active or not.
 
+See the CoreModel and CoreModelV2 sections below.
 
 ## Data Model Plugins
 
 These plugins implement the data models  are provided with FROST-Server by default.
+
+### SensorThings V1.1 & v2.0
+
+The SensorThings API and its datamodel are plugins in FROST.
+There are separate plugins for the v1.1 data model, the v2.0 data model, the v1.1 API and the v2.0 API.
+
+* **plugins.coreModel.enable:** Since 2.0.0  
+  Toggle indicating the version 1.1 data model plugin should be enabled. Default: `true`.
+* **plugins.coreService.enable:** Since 2.0.0  
+  Toggle indicating the version 1.1 API plugin should be enabled. Default: `true`.
+* **plugins.coreModelV2.enable:** Since 2.8.0  
+  Toggle indicating the version 2.0 data model plugin should be enabled. Default: `false`.
+* **plugins.coreServiceV2.enable:** Since 2.8.0  
+  Toggle indicating the version 2.0 API plugin should be enabled. Default: `false`.
+
+Not that both API plugins can be enabled at the same time, but only one of the data model plugins.
+The V2 data model plugin requires the ModelLoader plugin.
 
 
 ### Actuation
 
 The actuation plugin implements the standard OGC SensorThings API - Part 2: Actuation.
 It adds the entity types described in this specification.
-This plugin requires the CoreModel plugin.
+This plugin requires either the CoreModel or the coreModelV2 plugin.
+If the coreModelV2 plugin is active, the actuation plugin will use the Actuation extension from the draft [OGC 24-046, OGC SensorThings API 2.0 Extensions](https://hylkevds.github.io/24-046/24-046.html#actuation-extension).
 
 * **plugins.actuation.enable:**  
   Toggle indicating the Actuation plugin should be enabled. Default: `false`.
@@ -79,6 +98,18 @@ It adds the entity types described in this specification and their behaviour.
   The type of the primary key column of the Thing table. Defaults to the value of **plugins.coreModel.idType**.
 
 
+### CoreModelV2
+
+The Core Model plugin implements the data model of the standard OGC SensorThings API 2.0.
+It adds the entity types described in this specification and their behaviour.
+This plugin inherits the **plugins.modelLoader.idType.`<EntityTypeName>`:** settings from the ModelLoader plugin.
+
+* **plugins.coreModelV2.enable:** Since 2.8.0  
+  Toggle indicating the version 2.0 data model plugin should be enabled. Default: `false`.
+* **plugins.coreServiceV2.enable:** Since 2.8.0  
+  Toggle indicating the version 2.0 API plugin should be enabled. Default: `false`.
+
+
 ### MultiDatastream
 
 The MultiDatastream plugin implements the MultiDatastream extendion of the OGC
@@ -105,15 +136,15 @@ Therefore, we strongly recommend you contact us for support if your use case req
 
 * **plugins.modelLoader.enable:** Since 2.0.0  
   Toggle indicating the ModelLoader plugin should be enabled. Default: `false`.
-* **plugins.modelLoader.idType.<EntityTypeName>:**  
+* **plugins.modelLoader.idType.`<EntityTypeName>`:**  
   The type of the primary key column of the table for the given Entity Type. Defaults to the value of **plugins.coreModel.idType**.
-* **plugins.modelLoader.modelPath:** 2.0.0  
+* **plugins.modelLoader.modelPath:** Since 2.0.0  
   The file path where model definition files are located. This path is prepended to each entry in **plugins.modelLoader.modelFiles**.
-* **plugins.modelLoader.modelFiles:** 2.0.0  
+* **plugins.modelLoader.modelFiles:** Since 2.0.0  
   A comma-separated list of model files to load. Each entry is prefixed with **plugins.modelLoader.modelPath**.
-* **plugins.modelLoader.liquibasePath:** 2.0.0  
+* **plugins.modelLoader.liquibasePath:** Since 2.0.0  
   The file path where Liquibase (database definition) files are located. This path is prepended to each entry in **plugins.modelLoader.liquibaseFiles**.
-* **plugins.modelLoader.liquibaseFiles:** 2.0.0  
+* **plugins.modelLoader.liquibaseFiles:** Since 2.0.0  
   A comma-separated list of Liquibase (database definition) files to load. Each entry is prefixed with **plugins.modelLoader.liquibasePath**.
 * **plugins.modelLoader.securityPath:** Since 2.2.0  
   The file path where security definition files are located. This path is prepended to each entry in **plugins.modelLoader.securityFiles**.
@@ -130,7 +161,7 @@ Therefore, we strongly recommend you contact us for support if your use case req
 ### Projects
 
 The [Projects plugin](../extensions/DataModel-Projects.md) extends the standard data model with a Project class and User/Role classes that allow fine-grained access control.
-This plugin requires the CoreModel and ModelLoader plugins.
+This plugin requires the ModelLoader and either CoreModel or CoreModelV2 plugins.
 
 * **plugins.projects.enable:**  
   Toggle indicating the Projects plugin should be enabled. Default: `false`.

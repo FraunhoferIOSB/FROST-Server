@@ -30,7 +30,7 @@ public final class ModelLoaderSettings extends ConfigProvider<ModelLoaderSetting
 
     public static final String PLUGIN_NAME = "modelLoader.";
 
-    @DefaultValueBoolean(false)
+    @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_MODELLOADER = "enable";
     @DefaultValue("")
     public static final String TAG_MODEL_PATH = "modelPath";
