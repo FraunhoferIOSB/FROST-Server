@@ -45,14 +45,14 @@ public class CsdlItemComplexType implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, CsdlProperty> properties = new LinkedHashMap<>();
 
-    public CsdlItemComplexType generateFrom(CsdlDocument doc, String nameSpace, TypeComplex tc) {
+    public CsdlItemComplexType generateFrom(CsdlDocument doc, TypeComplex tc) {
         description = tc.getDescription();
         openType = tc.isOpenType();
         for (Entry<String, Property> entry : tc.getPropertiesByName().entrySet()) {
             final String name = entry.getKey();
             final Property prop = entry.getValue();
             final boolean nullable = prop.isNullable();
-            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, nameSpace, prop.getType(), nullable));
+            properties.put(name, new CsdlPropertyEntity().generateFrom(doc, prop.getType(), nullable));
         }
         return this;
     }

@@ -210,7 +210,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     public void loadModelFile(String fullPathString) {
         File fullFile = new File(fullPathString);
-        LOGGER.info("Loading model definition from {}", fullFile.toString());
+        LOGGER.info("Loading model definition from {}", fullFile);
         DefModel modelDefinition = loadfile(fullPathString, DefModel.class);
         if (modelDefinition == null) {
             LOGGER.error("Failed to load model definition from {}", fullPathString);
@@ -304,7 +304,7 @@ public class PluginModelLoader implements PluginRootDocument, PluginModel, Liqui
 
     private Map<String, Object> loadExtraMetadataFile(String fileName) {
         final File fullFile = new File(metadataPath, fileName);
-        LOGGER.info("Loading extra landing page meta data from {}", fullFile.toString());
+        LOGGER.info("Loading extra landing page meta data from {}", fullFile);
         String data;
         try {
             ObjectMapper objectMapper = new ObjectMapper();

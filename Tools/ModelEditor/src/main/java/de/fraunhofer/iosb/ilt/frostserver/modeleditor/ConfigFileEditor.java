@@ -112,12 +112,7 @@ public class ConfigFileEditor {
         configEditorModel.setConfig(json);
     }
 
-    public void saveModelWithChooser(String title, Window window) {
-        JsonElement json = configEditorModel.getConfig();
-        saveToFileWithChooser(json, title, window);
-    }
-
-    public void saveToFileWithChooser(JsonElement json, String title, Window window) {
+    public void saveToFileWithChooser(String title, Window window) {
         fileChooser.setTitle(title);
         File file = fileChooser.showSaveDialog(window);
         if (file == null) {

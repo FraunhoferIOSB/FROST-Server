@@ -303,7 +303,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                                 List<ComplexValue> units = ParserUtils.parseComplexValueList(SimpleJsonMapper.getSimpleObjectMapper(), StandardProperties.TYPE_UOM, fieldJsonValue.getStringValue());
                                 entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, units);
                             } catch (IOException ex) {
-                                LOGGER.error("Failed to parse stored UnitOfMeasure List.", ex.getMessage());
+                                LOGGER.error("Failed to parse stored UnitOfMeasure List: {}", ex.getMessage());
                                 LOGGER.debug("Failed to parse stored UnitOfMeasure List.", ex);
                             }
                         },

@@ -20,12 +20,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.constrai
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.util.UnitOfMeasurement;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SWE Class AllowedTimes constraint implementation.
  */
 public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AllowedTimes.class.getName());
     /**
      * Value
      *
@@ -67,10 +70,7 @@ public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
         if (!Objects.equals(this.intervals, other.intervals)) {
             return false;
         }
-        if (!Objects.equals(this.significantFigures, other.significantFigures)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.significantFigures, other.significantFigures);
     }
 
     /**
@@ -108,6 +108,7 @@ public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
     }
 
     public boolean isValid(String input, UnitOfMeasurement uom) {
+        LOGGER.warn("isValid not implemented yet on AllowedTimes, input: {}, {}", input, uom);
         return true;
     }
 

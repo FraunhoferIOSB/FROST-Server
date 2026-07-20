@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools.GjRowColle
 import de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,10 +41,6 @@ import org.geojson.GeoJsonObject;
  * Formats as GeoJSON.
  */
 public class ResultFormatterGeoJson implements ResultFormatter {
-
-    private static class FeatureList extends ArrayList<GeoJsonObject> {
-        // Nothing to override.
-    }
 
     private static class FeatureListDynamic implements Iterable<GeoJsonObject> {
 

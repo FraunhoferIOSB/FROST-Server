@@ -33,8 +33,6 @@ import org.geojson.jackson.CrsType;
 
 /**
  * Helper class for testing JSON de-/serialization.
- *
- * @author jab
  */
 public class TestHelper {
 

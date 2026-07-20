@@ -108,7 +108,7 @@ public class GjElementSet {
                         SpecialNames.AT_IOT_ID.equals(propName) ? "id" : propName,
                         property));
             } else if (property == StandardProperties.EP_SELFLINK) {
-                elements.add(new GjSelfLinkProperty(query, serviceRootUrl, version, StandardProperties.EP_SELFLINK.getName()));
+                elements.add(new GjSelfLinkProperty(serviceRootUrl, StandardProperties.EP_SELFLINK.getName()));
             } else if (property instanceof EntityPropertyMain epm) {
                 initFrom(epm);
             } else if (property instanceof EntityPropertyCustomSelect epcs) {

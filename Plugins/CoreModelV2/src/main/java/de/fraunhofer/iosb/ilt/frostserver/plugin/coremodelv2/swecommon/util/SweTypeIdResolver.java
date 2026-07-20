@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.AbstractSWE;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.AbstractSWEIdentifiable;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.constraint.AbstractConstraint;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -94,10 +95,9 @@ public class SweTypeIdResolver implements TypeIdResolver {
 
     @Override
     public JavaType typeFromId(DatabindContext context, String id) throws JacksonException {
-        if (!annnotatedClasses.containsKey(id)) {
-            throw new RuntimeException(String.format("unkown type '%s'", id));
-        }
-        return context.constructSpecializedType(superType, annnotatedClasses.get(id));
+        final Class<?> clazz = annnotatedClasses.get(id);
+        Exceptions.illegalArgumentIf(clazz == null, "unkown type '{}'", id);
+        return context.constructSpecializedType(superType, clazz);
     }
 
     @Override

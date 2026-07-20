@@ -82,7 +82,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         if (EntitySet.class.isAssignableFrom(result.getClass())) {
             EntitySet entitySet = (EntitySet) result;
             if (entitySet.getEntityType() == pluginCoreModel.etObservation) {
-                return target -> JsonWriter.writeObject(target, getDataArray(path, query, entitySet));
+                return target -> JsonWriter.writeObject(target, getDataArray(query, entitySet));
             }
         }
         throw new IllegalArgumentException(OBSERVATIONS_ONLY);
@@ -121,7 +121,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
 
         public VisibleComponents(PluginCoreModel pCoreModel, Set<Property> select) {
             this.pluginCoreModel = pCoreModel;
-            id = select.contains(pCoreModel.etObservation.getPrimaryKey());
+            id = select.contains(pCoreModel.etObservation.getPrimaryKey().getKeyProperty(0));
             phenomenonTime = select.contains(pCoreModel.epPhenomenonTime);
             result = select.contains(pCoreModel.epResult);
             resultTime = select.contains(pCoreModel.epResultTime);
@@ -183,7 +183,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
         }
     }
 
-    private DataArrayResult getDataArray(ResourcePath path, Query query, EntitySet entitySet) {
+    private DataArrayResult getDataArray(Query query, EntitySet entitySet) {
         VisibleComponents visComps;
         if (query == null || query.getSelect().isEmpty()) {
             visComps = new VisibleComponents(pluginCoreModel, true);
@@ -197,7 +197,7 @@ public class ResultFormatterDataArray implements ResultFormatter {
             String dataArrayId = DataArrayValue.dataArrayIdFor(obs, pluginCoreModel.npDatastreamObservation, npMultiDatastream);
             DataArrayValue dataArray = dataArraySet.computeIfAbsent(
                     dataArrayId,
-                    k -> new DataArrayValue(path, obs, components, pluginCoreModel.npDatastreamObservation, npMultiDatastream));
+                    k -> new DataArrayValue(obs, components, pluginCoreModel.npDatastreamObservation, npMultiDatastream));
             dataArray.getDataArray().add(visComps.fromObservation(obs));
         }
 

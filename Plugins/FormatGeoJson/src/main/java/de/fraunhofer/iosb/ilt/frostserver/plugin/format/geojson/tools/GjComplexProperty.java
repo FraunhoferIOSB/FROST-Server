@@ -25,10 +25,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- *
- * @author scf
- */
 public class GjComplexProperty implements GjEntityEntry {
 
     private final String name;
@@ -48,16 +44,19 @@ public class GjComplexProperty implements GjEntityEntry {
     @Override
     public void writeData(GjRowCollector collector, Entity source, String namePrefix) {
         Object value = source.getProperty(property);
-        if (value instanceof ComplexValue complexValue) {
-            for (Map.Entry<String, String> entry : subProperties.entrySet()) {
-                collector.collectEntry(namePrefix + entry.getKey(), complexValue.getProperty(entry.getValue()), null);
+        switch (value) {
+            case ComplexValue complexValue -> {
+                for (Map.Entry<String, String> entry : subProperties.entrySet()) {
+                    collector.collectEntry(namePrefix + entry.getKey(), complexValue.getProperty(entry.getValue()), null);
+                }
             }
-        } else if (value instanceof Map mapValue) {
-            for (Map.Entry<String, String> entry : subProperties.entrySet()) {
-                collector.collectEntry(namePrefix + entry.getKey(), mapValue.get(entry.getValue()), null);
+            case Map mapValue -> {
+                for (Map.Entry<String, String> entry : subProperties.entrySet()) {
+                    collector.collectEntry(namePrefix + entry.getKey(), mapValue.get(entry.getValue()), null);
+                }
             }
-        } else {
-            collector.collectEntry(namePrefix + name, property.getFrom(source), null);
+            default ->
+                collector.collectEntry(namePrefix + name, property.getFrom(source), null);
         }
     }
 

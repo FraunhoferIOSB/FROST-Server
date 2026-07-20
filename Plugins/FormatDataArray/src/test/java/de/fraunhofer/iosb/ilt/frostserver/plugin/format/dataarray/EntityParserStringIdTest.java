@@ -50,6 +50,8 @@ class EntityParserStringIdTest {
     private static PluginMultiDatastream pluginMultiDatastream;
     private static EntityType etMultiDatastream;
 
+    private JsonReaderDefault entityParser;
+
     @BeforeAll
     static void initClass() {
         if (queryDefaults == null) {
@@ -67,8 +69,6 @@ class EntityParserStringIdTest {
             etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
         }
     }
-
-    private JsonReaderDefault entityParser;
 
     @BeforeEach
     void setUp() {
@@ -129,77 +129,78 @@ class EntityParserStringIdTest {
     }
 
     private String createDataJson() {
-        String json = "[\n"
-                + "  {\n"
-                + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": \"A\"\n"
-                + "    },\n"
-                + "    \"components\": [\n"
-                + "      \"phenomenonTime\",\n"
-                + "      \"result\",\n"
-                + "      \"FeatureOfInterest/id\"\n"
-                + "    ],\n"
-                + "    \"dataArray@iot.count\":2,\n"
-                + "    \"dataArray\": [\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:20:00-0700\",\n"
-                + "        20,\n"
-                + "        \"A\"\n"
-                + "      ],\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:21:00-0700\",\n"
-                + "        30,\n"
-                + "        \"B\"\n"
-                + "      ]\n"
-                + "    ]\n"
-                + "  },\n"
-                + "  {\n"
-                + "    \"Datastream\": {\n"
-                + "      \"@iot.id\": \"B\"\n"
-                + "    },\n"
-                + "    \"components\": [\n"
-                + "      \"phenomenonTime\",\n"
-                + "      \"result\",\n"
-                + "      \"FeatureOfInterest/id\"\n"
-                + "    ],\n"
-                + "    \"dataArray@iot.count\":2,\n"
-                + "    \"dataArray\": [\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:20:00-0700\",\n"
-                + "        65,\n"
-                + "        \"C\"\n"
-                + "      ],\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:21:00-0700\",\n"
-                + "        60,\n"
-                + "        \"D\"\n"
-                + "      ]\n"
-                + "    ]\n"
-                + "  },\n"
-                + "  {\n"
-                + "    \"MultiDatastream\": {\n"
-                + "      \"@iot.id\": \"A\"\n"
-                + "    },\n"
-                + "    \"components\": [\n"
-                + "      \"phenomenonTime\",\n"
-                + "      \"result\",\n"
-                + "      \"FeatureOfInterest/id\"\n"
-                + "    ],\n"
-                + "    \"dataArray@iot.count\":2,\n"
-                + "    \"dataArray\": [\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:20:00-0700\",\n"
-                + "        65,\n"
-                + "        \"A\"\n"
-                + "      ],\n"
-                + "      [\n"
-                + "        \"2010-12-23T10:21:00-0700\",\n"
-                + "        60,\n"
-                + "        \"A\"\n"
-                + "      ]\n"
-                + "    ]\n"
-                + "  }\n"
-                + "]";
+        String json = """
+                [
+                  {
+                    "Datastream": {
+                      "@iot.id": "A"
+                    },
+                    "components": [
+                      "phenomenonTime",
+                      "result",
+                      "FeatureOfInterest/id"
+                    ],
+                    "dataArray@iot.count":2,
+                    "dataArray": [
+                      [
+                        "2010-12-23T10:20:00-0700",
+                        20,
+                        "A"
+                      ],
+                      [
+                        "2010-12-23T10:21:00-0700",
+                        30,
+                        "B"
+                      ]
+                    ]
+                  },
+                  {
+                    "Datastream": {
+                      "@iot.id": "B"
+                    },
+                    "components": [
+                      "phenomenonTime",
+                      "result",
+                      "FeatureOfInterest/id"
+                    ],
+                    "dataArray@iot.count":2,
+                    "dataArray": [
+                      [
+                        "2010-12-23T10:20:00-0700",
+                        65,
+                        "C"
+                      ],
+                      [
+                        "2010-12-23T10:21:00-0700",
+                        60,
+                        "D"
+                      ]
+                    ]
+                  },
+                  {
+                    "MultiDatastream": {
+                      "@iot.id": "A"
+                    },
+                    "components": [
+                      "phenomenonTime",
+                      "result",
+                      "FeatureOfInterest/id"
+                    ],
+                    "dataArray@iot.count":2,
+                    "dataArray": [
+                      [
+                        "2010-12-23T10:20:00-0700",
+                        65,
+                        "A"
+                      ],
+                      [
+                        "2010-12-23T10:21:00-0700",
+                        60,
+                        "A"
+                      ]
+                    ]
+                  }
+                ]""";
         return json;
     }
 

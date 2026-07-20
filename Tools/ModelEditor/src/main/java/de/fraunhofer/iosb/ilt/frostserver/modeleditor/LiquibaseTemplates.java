@@ -27,6 +27,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.F
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,8 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * Templating tools for generating Liquibase files.
  */
 public class LiquibaseTemplates {
 
@@ -93,7 +93,7 @@ public class LiquibaseTemplates {
     public static List<ChangeLogBuilder> CreateChangeLogsFor(List<DefModel> models, String date, String author) {
         List<ChangeLogBuilder> clBuilders = new ArrayList<>();
         if (StringHelper.isNullOrEmpty(date)) {
-            date = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now());
+            date = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.systemDefault()));
         }
         TableChangelogBuilder clForeignKeys = TableChangelogBuilder.start(date)
                 .setAuthor(author)
@@ -194,20 +194,23 @@ public class LiquibaseTemplates {
 
     private static String handleEntityProperty(DefEntityProperty ep, String idField, TableChangelogBuilder clEntityType, final String etName, ChangesetColumnsBuilder csColumns) {
         for (var handler : ep.getHandlers()) {
-            if (handler instanceof FieldMapperId fm) {
-                idField = fm.getField();
-                clEntityType.addChangeLogsIds(idField, etName);
-            } else if (handler instanceof FieldMapper fm) {
-                for (var entry : fm.getFieldTypes().entrySet()) {
-                    final String colName = entry.getKey();
-                    final String colType = entry.getValue();
-                    csColumns.addColumn(colName, colType, true);
-                    if (!csColumns.isTestColumnNameSet()) {
-                        csColumns.setTestColumnName(colName);
+            switch (handler) {
+                case FieldMapperId fm -> {
+                    idField = fm.getField();
+                    clEntityType.addChangeLogsIds(idField, etName);
+                }
+                case FieldMapper fm -> {
+                    for (var entry : fm.getFieldTypes().entrySet()) {
+                        final String colName = entry.getKey();
+                        final String colType = entry.getValue();
+                        csColumns.addColumn(colName, colType, true);
+                        if (!csColumns.isTestColumnNameSet()) {
+                            csColumns.setTestColumnName(colName);
+                        }
                     }
                 }
-            } else {
-                LOGGER.warn("Unknown Handler Type: {}", handler);
+                default ->
+                    LOGGER.warn("Unknown Handler Type: {}", handler);
             }
         }
         return idField;

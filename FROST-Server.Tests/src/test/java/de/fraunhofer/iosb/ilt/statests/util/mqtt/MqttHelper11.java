@@ -54,7 +54,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -780,7 +779,7 @@ public class MqttHelper11 {
                     success = false;
                     message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
                 }
-            } catch (JacksonException | ServiceFailureException ex) {
+            } catch (RuntimeException | ServiceFailureException ex) {
                 LOGGER.error("Failed to create JSON or fetch entity");
                 message = "Exception for " + name + " " + ex.getMessage();
             }

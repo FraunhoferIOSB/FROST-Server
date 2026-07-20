@@ -115,6 +115,10 @@ public class SweCommonValidator implements EntityValidator {
         return this;
     }
 
+    public EntityPropertyMain<TreeNode> getEpEncoding() {
+        return epEncoding;
+    }
+
     public String getNameStructure() {
         return nameStructure;
     }
@@ -122,6 +126,10 @@ public class SweCommonValidator implements EntityValidator {
     public SweCommonValidator setNameStructure(String nameStructure) {
         this.nameStructure = nameStructure;
         return this;
+    }
+
+    public EntityPropertyMain<TreeNode> getEpStructure() {
+        return epStructure;
     }
 
     public String getNameDefinitions() {

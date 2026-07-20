@@ -57,12 +57,10 @@ public class PluginCoreModelV2 extends ConfigProvider<PluginCoreModelV2> impleme
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE = "enable";
 
-    private CoreSettings coreSettings;
     private boolean enabled;
 
     @Override
     public InitResult init(CoreSettings settings) {
-        this.coreSettings = settings;
         setSettings(settings.getPluginSettings().getSubSettings(SETTINGS_NAMESPACE));
 
         PluginManager pluginManager = settings.getPluginManager();

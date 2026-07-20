@@ -96,18 +96,18 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                 LOGGER.warn("PluginCoreModel or PluginCoreModelV2 must be enabled before the Projects plugin, delaying initialisation...");
                 return INIT_DELAY;
             }
-            if (pCoreModelV1 && !pCoreModelV2) {
+            if (pCoreModelV1 && pCoreModelV2) {
+                LOGGER.warn("Either CoreModel or CoreModelV2 must be enabled, not both! delaying initialisation...");
+                return INIT_DELAY;
+            }
+            if (pCoreModelV1) {
                 // Dealing with Model v1.1
                 fixSettings(pluginSettings, coreSettings);
                 initForCoreModelV1(pml, multiDatastream, actuation, rules, pluginSettings);
-            } else if (!pCoreModelV1 && pCoreModelV2) {
-                // Dealing with Model v2.0
-                LOGGER.error("Projects plugin is not ready for V2 yet!");
-                fixSettings(pluginSettings, coreSettings);
-                initForCoreModelV2(pml, multiDatastream, actuation, rules, pluginSettings);
             } else {
-                LOGGER.warn("Either CoreModel or CoreModelV2 must be enabled, delaying initialisation...");
-                return INIT_DELAY;
+                // Dealing with Model v2.0
+                fixSettings(pluginSettings, coreSettings);
+                initForCoreModelV2(pml, actuation, rules, pluginSettings);
             }
             pluginManager.registerPlugin(this);
         }
@@ -171,7 +171,7 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
         autoUpdateFeatures = pluginSettings.getBoolean(TAG_UPDATE_FEATURE_WITH_LOCATION, PluginProjects.class);
     }
 
-    public void initForCoreModelV2(PluginModelLoader pml, boolean multiDatastream, boolean actuation, boolean rules, Settings pluginSettings) {
+    public void initForCoreModelV2(PluginModelLoader pml, boolean actuation, boolean rules, Settings pluginSettings) {
         pml.addLiquibaseFile("pluginprojects/sta2/liquibase/tables.xml");
 
         pml.addModelFile("pluginprojects/sta2/model/Project.json");

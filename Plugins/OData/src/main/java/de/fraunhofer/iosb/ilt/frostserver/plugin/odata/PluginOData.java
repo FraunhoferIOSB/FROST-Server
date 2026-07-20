@@ -196,45 +196,37 @@ public class PluginOData implements PluginService, ConfigDefaults {
     @Override
     public ServiceResponse execute(Service mainService, ServiceRequest request, ServiceResponse response) {
         ODataVersion version;
-        boolean isOdata401 = false;
         if (request.getVersion() == VERSION_ODATA_40) {
             version = ODataVersion.V4_0;
         } else {
-            isOdata401 = true;
             version = ODataVersion.V4_01;
         }
         response.addHeader("OData-Version", version.identifier);
         request.getContext()
                 .setJsonReader(new JsonReaderOData(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
-            case REQUEST_TYPE_METADATA:
+            case REQUEST_TYPE_METADATA -> {
                 return new MetaDataGenerator(settings)
                         .setVersion(version)
                         .generateMetaData(request, response);
+            }
 
-            case CREATE:
+            case CREATE, UPDATE_ALL, UPDATE_CHANGES, UPDATE_CHANGESET -> {
                 if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
                     request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
                 }
                 return mainService.execute(request, response);
-
-            case UPDATE_ALL:
-            case UPDATE_CHANGES:
-            case UPDATE_CHANGESET:
-                if (Constants.VALUE_RETURN_MINIMAL.equalsIgnoreCase(request.getParameter(TAG_PREFER_RETURN))) {
-                    request.addParameter(REQUEST_PARAM_FORMAT, FORMAT_NAME_EMPTY);
-                }
-                return mainService.execute(request, response);
-
-            case READ:
+            }
+            case READ -> {
                 String path = request.getUrlPath();
                 if (path.isEmpty() || "/".equals(path)) {
                     return executeGetCapabilities(request, response);
                 }
                 return mainService.execute(request, response);
-
-            default:
+            }
+            default -> {
                 return mainService.execute(request, response);
+            }
         }
     }
 

@@ -181,7 +181,7 @@ public class CsdlDocument {
             nameSpaces.put(namespace, schema);
             lastNamespace = namespace;
         }
-        schema.addSchemaItem("FrostService", new CsdlItemEntityContainer().generateFrom(lastNamespace, mr));
+        schema.addSchemaItem("FrostService", new CsdlItemEntityContainer().generateFrom(mr));
         entityContainer = ModelRegistry.fullName(lastNamespace, "FrostService");
         return this;
     }

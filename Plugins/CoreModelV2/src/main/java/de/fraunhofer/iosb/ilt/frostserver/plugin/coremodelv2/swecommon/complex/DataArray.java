@@ -61,13 +61,17 @@ public class DataArray extends AbstractDataComponent<DataArray, List<Object>> {
 
     @Override
     public boolean validate(Object input) {
-        if (input instanceof List list) {
-            return validate(list);
-        } else if (input instanceof JsonNode jn) {
-            return validate(jn);
-        } else {
-            LOGGER.error("Input is not a List or JsonArray");
-            return false;
+        switch (input) {
+            case List list -> {
+                return validate(list);
+            }
+            case JsonNode jn -> {
+                return validate(jn);
+            }
+            default -> {
+                LOGGER.error("Input is not a List or JsonArray");
+                return false;
+            }
         }
     }
 

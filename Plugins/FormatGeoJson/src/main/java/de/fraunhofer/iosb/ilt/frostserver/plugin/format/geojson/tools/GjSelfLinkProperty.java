@@ -19,25 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.geojson.tools;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
-import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 
-/**
- *
- * @author scf
- */
 public class GjSelfLinkProperty implements GjEntityEntry {
 
-    private final Query query;
     private final String name;
     private final String serviceRootUrl;
-    private final Version version;
 
-    public GjSelfLinkProperty(Query query, String serviceRootUrl, Version version, String name) {
-        this.query = query;
+    public GjSelfLinkProperty(String serviceRootUrl, String name) {
         this.name = name;
         this.serviceRootUrl = serviceRootUrl;
-        this.version = version;
     }
 
     @Override

@@ -64,8 +64,6 @@ class EntityCompleteTest {
     private static NavigationPropertyEntity npSensorMds;
     private static NavigationPropertyEntitySet npObservedPropertiesMds;
     private static NavigationPropertyEntitySet npObservationsMds;
-    private static NavigationPropertyEntitySet npMultiDatastreamsSensor;
-    private static NavigationPropertyEntitySet npMultiDatastreamsObsProp;
     private static NavigationPropertyEntitySet npMultiDatastreamsThing;
 
     @BeforeAll
@@ -92,8 +90,6 @@ class EntityCompleteTest {
 
             npMultiDatastreamObservation = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
             npMultiDatastreamsThing = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
-            npMultiDatastreamsSensor = (NavigationPropertyEntitySet) pluginCoreModel.etSensor.getNavigationProperty("MultiDatastreams");
-            npMultiDatastreamsObsProp = (NavigationPropertyEntitySet) pluginCoreModel.etObservedProperty.getNavigationProperty("MultiDatastreams");
         }
     }
 

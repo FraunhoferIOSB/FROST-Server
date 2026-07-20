@@ -239,7 +239,7 @@ public class ExpressionHandlers {
             fr.getExpression(Multiply.class).setHandler((Multiply exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(Not.class).setHandler((Not exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(NotEqual.class).setHandler((NotEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Now.class).setHandler((Now exp, ExpressionHelper h) -> ImpTime.handle((JooqExpHlpr) h));
+            fr.getExpression(Now.class).setHandler((Now exp, ExpressionHelper h) -> ImpTime.handle());
             fr.getExpression(NullConstant.class).setHandler((exp, h) -> new NullWrapper());
             fr.getExpression(Or.class).setHandler((Or exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
             fr.getExpression(Overlaps.class).setHandler((Overlaps exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
@@ -803,7 +803,7 @@ public class ExpressionHandlers {
             return datePartExtract(DatePart.MONTH, node, h);
         }
 
-        public static FieldWrapper handle(JooqExpHlpr h) {
+        public static FieldWrapper handle() {
             return new StaDateTimeWrapper(DSL.field("now()", Moment.class));
         }
 

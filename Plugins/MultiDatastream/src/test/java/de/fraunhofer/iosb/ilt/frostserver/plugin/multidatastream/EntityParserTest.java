@@ -61,7 +61,6 @@ class EntityParserTest {
     private static EntityPropertyMain epMultiObservationDataTypes;
     private static EntityPropertyMain epUnitOfMeasurements;
     private static NavigationPropertyEntity npMultiDatastreamObservation;
-    private static NavigationPropertyEntity npThingMds;
     private static NavigationPropertyEntity npSensorMds;
     private static NavigationPropertyEntitySet npObservedPropertiesMds;
     private static NavigationPropertyEntitySet npMultiDatastreamsSensor;
@@ -86,7 +85,6 @@ class EntityParserTest {
             epMultiObservationDataTypes = etMultiDatastream.getEntityProperty("multiObservationDataTypes");
             epUnitOfMeasurements = etMultiDatastream.getEntityProperty("unitOfMeasurements");
 
-            npThingMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Thing");
             npSensorMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Sensor");
             npObservedPropertiesMds = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("ObservedProperties");
 
@@ -100,18 +98,18 @@ class EntityParserTest {
     @Test
     void readDatastreamBasic() throws IOException {
         String json = "{\n"
-                + "	\"unitOfMeasurement\": \n"
-                + "	{\n"
-                + "		\"symbol\": \"%\",\n"
-                + "		\"name\": \"Percentage\",\n"
-                + "		\"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html\"\n"
-                + "	},\n"
-                + "	\"observationType\":\"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "	\"name\": \"Temperature measurement\",\n"
-                + "	\"description\": \"Temperature measurement\",\n"
-                + "	\"Thing\": {\"@iot.id\": 5394817},\n"
-                + "	\"ObservedProperty\": {\"@iot.id\": 5394816},\n"
-                + "	\"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
+                + "    \"unitOfMeasurement\": \n"
+                + "    {\n"
+                + "        \"symbol\": \"%\",\n"
+                + "        \"name\": \"Percentage\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html\"\n"
+                + "    },\n"
+                + "    \"observationType\":\"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "    \"name\": \"Temperature measurement\",\n"
+                + "    \"description\": \"Temperature measurement\",\n"
+                + "    \"Thing\": {\"@iot.id\": 5394817},\n"
+                + "    \"ObservedProperty\": {\"@iot.id\": 5394816},\n"
+                + "    \"Sensor\": {\"@iot.id\": " + Long.MAX_VALUE + "}\n"
                 + "}";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etDatastream)
                 .setProperty(pluginCoreModel.epUnitOfMeasurement,
@@ -136,44 +134,45 @@ class EntityParserTest {
 
     @Test
     void readMultiDatastreamWithObservedPropertyAndSensor() throws IOException {
-        String json = "{\n"
-                + "    \"unitOfMeasurements\": [\n"
-                + "        {\n"
-                + "            \"name\": \"DegreeAngle\",\n"
-                + "            \"symbol\": \"deg\",\n"
-                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"name\": \"MeterPerSecond\",\n"
-                + "            \"symbol\": \"m/s\",\n"
-                + "            \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond\"\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"name\": \"Wind\",\n"
-                + "    \"description\": \"Wind direction and speed\",\n"
-                + "    \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation\",\n"
-                + "    \"multiObservationDataTypes\": [\n"
-                + "        \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                + "        \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\"\n"
-                + "    ],\n"
-                + "    \"ObservedProperties\": [\n"
-                + "        {\n"
-                + "            \"name\": \"Wind Direction\",\n"
-                + "            \"definition\": \"SomeDefinition\",\n"
-                + "            \"description\": \"Direction the wind blows, 0=North, 90=East.\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"name\": \"Wind Speed\",\n"
-                + "            \"definition\": \"SomeDefinition\",\n"
-                + "            \"description\": \"Wind Speed\"\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"Sensor\": {\n"
-                + "        \"description\": \"Wind Sensor 101\",\n"
-                + "        \"encodingType\": \"http://schema.org/description\",\n"
-                + "        \"metadata\": \"Calibration date:  2011-11-11\"\n"
-                + "    }\n"
-                + "}";
+        String json = """
+                {
+                    "unitOfMeasurements": [
+                        {
+                            "name": "DegreeAngle",
+                            "symbol": "deg",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"
+                        },
+                        {
+                            "name": "MeterPerSecond",
+                            "symbol": "m/s",
+                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"
+                        }
+                    ],
+                    "name": "Wind",
+                    "description": "Wind direction and speed",
+                    "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_ComplexObservation",
+                    "multiObservationDataTypes": [
+                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                        "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
+                    ],
+                    "ObservedProperties": [
+                        {
+                            "name": "Wind Direction",
+                            "definition": "SomeDefinition",
+                            "description": "Direction the wind blows, 0=North, 90=East."
+                        },
+                        {
+                            "name": "Wind Speed",
+                            "definition": "SomeDefinition",
+                            "description": "Wind Speed"
+                        }
+                    ],
+                    "Sensor": {
+                        "description": "Wind Sensor 101",
+                        "encodingType": "http://schema.org/description",
+                        "metadata": "Calibration date:  2011-11-11"
+                    }
+                }""";
         List<ComplexValueImpl> unitsOfMeasurement = new ArrayList<>();
         unitsOfMeasurement.add(UnitOfMeasurement.create("DegreeAngle", "deg", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeAngle"));
         unitsOfMeasurement.add(UnitOfMeasurement.create("MeterPerSecond", "m/s", "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#MeterPerSecond"));
@@ -203,17 +202,18 @@ class EntityParserTest {
 
     @Test
     void readObservationWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
-                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
-                + "  \"result\" : 38,\n"
-                + "  \"Datastream\":{\"@iot.id\":100},\n"
-                + "  \"FeatureOfInterest\":{\"@iot.id\": 14269},\n"
-                + "  \"parameters\":{\"param1\": \"some value1\", \"param2\": \"some value2\"},\n"
-                + "  \"phenomenonTime\": \"2015-09-01T14:22:05.149Z\",\n"
-                + "  \"resultQuality\": \"none\",\n"
-                + "  \"validTime\": \"2014-03-01T13:00:00Z/2015-05-11T15:30:00Z\"\n"
-                + "}";
+        String json = """
+                {
+                  "phenomenonTime": "2015-04-13T00:00:00Z",
+                  "resultTime" : "2015-04-13T00:00:05Z",
+                  "result" : 38,
+                  "Datastream":{"@iot.id":100},
+                  "FeatureOfInterest":{"@iot.id": 14269},
+                  "parameters":{"param1": "some value1", "param2": "some value2"},
+                  "phenomenonTime": "2015-09-01T14:22:05.149Z",
+                  "resultQuality": "none",
+                  "validTime": "2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"
+                }""";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
         assertTrue(result.isSetProperty(pluginCoreModel.epPhenomenonTime)
                 && result.isSetProperty(pluginCoreModel.epResultTime)
@@ -243,12 +243,13 @@ class EntityParserTest {
 
     @Test
     void readObservationWithLinks() throws IOException {
-        String json = "{\n"
-                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
-                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
-                + "  \"result\" : 38,\n"
-                + "  \"Datastream\":{\"@iot.id\":100}\n"
-                + "}";
+        String json = """
+                {
+                  "phenomenonTime": "2015-04-13T00:00:00Z",
+                  "resultTime" : "2015-04-13T00:00:05Z",
+                  "result" : 38,
+                  "Datastream":{"@iot.id":100}
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
                 .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
@@ -257,12 +258,13 @@ class EntityParserTest {
                         .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservation, json));
 
-        json = "{\n"
-                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
-                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
-                + "  \"result\" : 38,\n"
-                + "  \"MultiDatastream\":{\"@iot.id\":100}\n"
-                + "}";
+        json = """
+                {
+                  "phenomenonTime": "2015-04-13T00:00:00Z",
+                  "resultTime" : "2015-04-13T00:00:05Z",
+                  "result" : 38,
+                  "MultiDatastream":{"@iot.id":100}
+                }""";
         expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
                 .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
@@ -274,12 +276,13 @@ class EntityParserTest {
 
     @Test
     void readObservationWithLinkedFeatureOfInterest() throws IOException {
-        String json = "{\n"
-                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
-                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
-                + "  \"result\" : 38,\n"
-                + "  \"FeatureOfInterest\":{\"@iot.id\": 14269}\n"
-                + "}";
+        String json = """
+                {
+                  "phenomenonTime": "2015-04-13T00:00:00Z",
+                  "resultTime" : "2015-04-13T00:00:05Z",
+                  "result" : 38,
+                  "FeatureOfInterest":{"@iot.id": 14269}
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
                 .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
@@ -291,19 +294,19 @@ class EntityParserTest {
 
     @Test
     void readObservationWithFeatureOfInterest() throws IOException {
-        String json = "{\n"
-                + "  \"phenomenonTime\": \"2015-04-13T00:00:00Z\",\n"
-                + "  \"resultTime\" : \"2015-04-13T00:00:05Z\",\n"
-                //                + "  \"resultQuality\" : \"Very Good\",\n"
-                + "  \"result\" : 99,\n"
-                + "  \"FeatureOfInterest\": {\n"
-                + "    \"name\": \"Turn 5, track surface temperature\",\n"
-                + "    \"description\": \"Turn 5, track surface temperature\",\n"
-                + "    \"encodingType\": \"http://example.org/measurement_types#Measure\",\n"
-                + "    \"feature\": \"tarmac\"\n"
-                + "  },\n"
-                + "  \"Datastream\":{\"@iot.id\": 14314}\n"
-                + "}";
+        String json = """
+                {
+                  "phenomenonTime": "2015-04-13T00:00:00Z",
+                  "resultTime" : "2015-04-13T00:00:05Z",
+                  "result" : 99,
+                  "FeatureOfInterest": {
+                    "name": "Turn 5, track surface temperature",
+                    "description": "Turn 5, track surface temperature",
+                    "encodingType": "http://example.org/measurement_types#Measure",
+                    "feature": "tarmac"
+                  },
+                  "Datastream":{"@iot.id": 14314}
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservation)
                 .setProperty(pluginCoreModel.epPhenomenonTime, new TimeValue(createTimeInstantUTC(2015, 04, 13, 0, 0, 0)))
                 .setProperty(pluginCoreModel.epResultTime, createTimeInstantUTC(2015, 04, 13, 0, 0, 05))
@@ -322,11 +325,12 @@ class EntityParserTest {
 
     @Test
     void readObservedPropertyBasic() throws IOException {
-        String json = "{\n"
-                + "  \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "  \"description\": \"http://schema.org/description\",\n"
-                + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
-                + "}";
+        String json = """
+                {
+                  "name": "ObservedPropertyUp Tempomatic 2000",
+                  "description": "http://schema.org/description",
+                  "definition": "Calibration date:  Jan 1, 2014"
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
@@ -336,14 +340,15 @@ class EntityParserTest {
 
     @Test
     void readObservedPropertyWithLinks() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "    \"description\": \"http://schema.org/description\",\n"
-                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "ObservedPropertyUp Tempomatic 2000",
+                    "description": "http://schema.org/description",
+                    "definition": "Calibration date:  Jan 1, 2014",
+                    "Datastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
@@ -352,14 +357,15 @@ class EntityParserTest {
                         .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
-        json = "{\n"
-                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "    \"description\": \"http://schema.org/description\",\n"
-                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        json = """
+                {
+                    "name": "ObservedPropertyUp Tempomatic 2000",
+                    "description": "http://schema.org/description",
+                    "definition": "Calibration date:  Jan 1, 2014",
+                    "MultiDatastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
@@ -368,17 +374,18 @@ class EntityParserTest {
                         .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etObservedProperty, json));
 
-        json = "{\n"
-                + "    \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "    \"description\": \"http://schema.org/description\",\n"
-                + "    \"definition\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ],\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        json = """
+                {
+                    "name": "ObservedPropertyUp Tempomatic 2000",
+                    "description": "http://schema.org/description",
+                    "definition": "Calibration date:  Jan 1, 2014",
+                    "Datastreams": [
+                        {"@iot.id":100}
+                    ],
+                    "MultiDatastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         expectedResult = new DefaultEntity(pluginCoreModel.etObservedProperty)
                 .setProperty(pluginCoreModel.epName, "ObservedPropertyUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "http://schema.org/description")
@@ -396,11 +403,12 @@ class EntityParserTest {
 
     @Test
     void readObservedPropertyWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "  \"name\": \"ObservedPropertyUp Tempomatic 2000\",\n"
-                + "  \"description\": \"http://schema.org/description\",\n"
-                + "  \"definition\": \"Calibration date:  Jan 1, 2014\"\n"
-                + "}";
+        String json = """
+                {
+                  "name": "ObservedPropertyUp Tempomatic 2000",
+                  "description": "http://schema.org/description",
+                  "definition": "Calibration date:  Jan 1, 2014"
+                }""";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
         assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
@@ -418,12 +426,13 @@ class EntityParserTest {
 
     @Test
     void readSensorBasic() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
-                + "}";
+        String json = """
+                {
+                    "name": "SensorUp Tempomatic 2000",
+                    "description": "SensorUp Tempomatic 2000",
+                    "encodingType": "http://schema.org/description",
+                    "metadata": "Calibration date:  Jan 1, 2014"
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
@@ -434,15 +443,16 @@ class EntityParserTest {
 
     @Test
     void readSensorWithLinks() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "SensorUp Tempomatic 2000",
+                    "description": "SensorUp Tempomatic 2000",
+                    "encodingType": "http://schema.org/description",
+                    "metadata": "Calibration date:  Jan 1, 2014",
+                    "Datastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
@@ -454,16 +464,17 @@ class EntityParserTest {
                                 .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
-        json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100},\n"
-                + "        {\"@iot.id\":101}\n"
-                + "    ]\n"
-                + "}";
+        json = """
+                {
+                    "name": "SensorUp Tempomatic 2000",
+                    "description": "SensorUp Tempomatic 2000",
+                    "encodingType": "http://schema.org/description",
+                    "metadata": "Calibration date:  Jan 1, 2014",
+                    "Datastreams": [
+                        {"@iot.id":100},
+                        {"@iot.id":101}
+                    ]
+                }""";
         expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
@@ -479,15 +490,16 @@ class EntityParserTest {
                                 .setPrimaryKeyValues(PkValue.of(101L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
-        json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        json = """
+                {
+                    "name": "SensorUp Tempomatic 2000",
+                    "description": "SensorUp Tempomatic 2000",
+                    "encodingType": "http://schema.org/description",
+                    "metadata": "Calibration date:  Jan 1, 2014",
+                    "MultiDatastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
@@ -499,18 +511,19 @@ class EntityParserTest {
                                 .setPrimaryKeyValues(PkValue.of(100L)));
         assertEquals(expectedResult, entityParser.parseEntity(pluginCoreModel.etSensor, json));
 
-        json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\",\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ],\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        json = """
+                {
+                    "name": "SensorUp Tempomatic 2000",
+                    "description": "SensorUp Tempomatic 2000",
+                    "encodingType": "http://schema.org/description",
+                    "metadata": "Calibration date:  Jan 1, 2014",
+                    "Datastreams": [
+                        {"@iot.id":100}
+                    ],
+                    "MultiDatastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         expectedResult = new DefaultEntity(pluginCoreModel.etSensor)
                 .setProperty(pluginCoreModel.epName, "SensorUp Tempomatic 2000")
                 .setProperty(pluginCoreModel.epDescription, "SensorUp Tempomatic 2000")
@@ -529,12 +542,13 @@ class EntityParserTest {
 
     @Test
     void readSensorWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"description\": \"SensorUp Tempomatic 2000\",\n"
-                + "    \"encodingType\": \"http://schema.org/description\",\n"
-                + "    \"metadata\": \"Calibration date:  Jan 1, 2014\"\n"
-                + "}";
+        String json = """
+                {
+                    "name": "SensorUp Tempomatic 2000",
+                    "description": "SensorUp Tempomatic 2000",
+                    "encodingType": "http://schema.org/description",
+                    "metadata": "Calibration date:  Jan 1, 2014"
+                }""";
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
         assertTrue(result.isSetProperty(pluginCoreModel.epDescription)
                 && result.isSetProperty(pluginCoreModel.epName)
@@ -554,15 +568,16 @@ class EntityParserTest {
 
     @Test
     void readThingBasic() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    }\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    }
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
@@ -576,15 +591,16 @@ class EntityParserTest {
 
     @Test
     void readThingWithAllValuesPresent() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    }\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    }
+                }""";
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertTrue(result.isSetProperty(pluginCoreModel.epName)
                 && result.isSetProperty(pluginCoreModel.epDescription)
@@ -602,18 +618,19 @@ class EntityParserTest {
 
     @Test
     void readThingWithNestedProperties() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": {\n"
-                + "			\"someNestedProperty\": 10,\n"
-                + "			\"someOtherNestedProperty\": \"someValue\"\n"
-                + "		} 		\n"
-                + "    }\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": {
+                \t\t\t"someNestedProperty": 10,
+                \t\t\t"someOtherNestedProperty": "someValue"
+                \t\t} \t\t
+                    }
+                }""";
         Map<String, Object> property3 = new HashMap<>();
         property3.put("someNestedProperty", 10);
         property3.put("someOtherNestedProperty", "someValue");
@@ -630,27 +647,28 @@ class EntityParserTest {
 
     @Test
     void readThingWithLocation() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"Locations\": [\n"
-                + "        {\n"
-                + "            \"name\": \"my backyard\",\n"
-                + "            \"description\": \"my backyard\",\n"
-                + "            \"encodingType\": \"application/vnd.geo+json\",\n"
-                + "            \"location\": {\n"
-                + "                \"type\": \"Point\",\n"
-                + "                \"coordinates\": [-117.123,\n"
-                + "                54.123]\n"
-                + "            }\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    },
+                    "Locations": [
+                        {
+                            "name": "my backyard",
+                            "description": "my backyard",
+                            "encodingType": "application/vnd.geo+json",
+                            "location": {
+                                "type": "Point",
+                                "coordinates": [-117.123,
+                                54.123]
+                            }
+                        }
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
@@ -671,18 +689,19 @@ class EntityParserTest {
 
     @Test
     void readThingWithLinks1() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"Locations\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    },
+                    "Locations": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
@@ -700,18 +719,19 @@ class EntityParserTest {
 
     @Test
     void readThingWithLinks2() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    },
+                    "Datastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
@@ -729,18 +749,19 @@ class EntityParserTest {
 
     @Test
     void readThingWithLinks3() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    },
+                    "MultiDatastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")
@@ -758,21 +779,22 @@ class EntityParserTest {
 
     @Test
     void readThingWithLinks4() throws IOException {
-        String json = "{\n"
-                + "    \"name\": \"camping lantern\",\n"
-                + "    \"description\": \"camping lantern\",\n"
-                + "    \"properties\": {\n"
-                + "        \"property1\": \"it’s waterproof\",\n"
-                + "        \"property2\": \"it glows in the dark\",\n"
-                + "        \"property3\": \"it repels insects\"\n"
-                + "    },\n"
-                + "    \"Datastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ],\n"
-                + "    \"MultiDatastreams\": [ \n"
-                + "        {\"@iot.id\":100}\n"
-                + "    ]\n"
-                + "}";
+        String json = """
+                {
+                    "name": "camping lantern",
+                    "description": "camping lantern",
+                    "properties": {
+                        "property1": "it\u2019s waterproof",
+                        "property2": "it glows in the dark",
+                        "property3": "it repels insects"
+                    },
+                    "Datastreams": [
+                        {"@iot.id":100}
+                    ],
+                    "MultiDatastreams": [
+                        {"@iot.id":100}
+                    ]
+                }""";
         Entity expectedResult = new DefaultEntity(pluginCoreModel.etThing)
                 .setProperty(pluginCoreModel.epName, "camping lantern")
                 .setProperty(pluginCoreModel.epDescription, "camping lantern")

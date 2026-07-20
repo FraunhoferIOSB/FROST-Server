@@ -148,15 +148,20 @@ public class DataRecord extends AbstractDataComponent<DataRecord, Map<String, Ob
 
     @Override
     public boolean validate(Object input) {
-        if (input instanceof Map mapValue) {
-            return validate(mapValue);
-        } else if (input instanceof List list) {
-            return validate(list);
-        } else if (input instanceof JsonNode jsonValue) {
-            return validate(jsonValue);
-        } else {
-            LOGGER.debug("Value is not a Map or JsonNode: {}", input);
-            return false;
+        switch (input) {
+            case Map mapValue -> {
+                return validate(mapValue);
+            }
+            case List list -> {
+                return validate(list);
+            }
+            case JsonNode jsonValue -> {
+                return validate(jsonValue);
+            }
+            default -> {
+                LOGGER.debug("Value is not a Map or JsonNode: {}", input);
+                return false;
+            }
         }
     }
 

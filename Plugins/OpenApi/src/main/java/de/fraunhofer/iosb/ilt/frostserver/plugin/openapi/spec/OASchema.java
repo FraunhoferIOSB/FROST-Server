@@ -183,16 +183,20 @@ public final class OASchema {
                 break;
 
             default:
-                if (propertyType instanceof TypeComplex typeComplex) {
-                    type = Type.OBJECT;
-                    addSubtypeComplex(version, typeComplex);
-                } else if (propertyType instanceof TypeSimpleSet typeSimpleSet) {
-                    type = Type.ARRAY;
-                    setItems(new OASchema(version, typeSimpleSet.getContaintedType()));
-                } else {
-                    type = Type.STRING;
+                switch (propertyType) {
+                    case TypeComplex typeComplex -> {
+                        type = Type.OBJECT;
+                        addSubtypeComplex(version, typeComplex);
+                    }
+                    case TypeSimpleSet typeSimpleSet -> {
+                        type = Type.ARRAY;
+                        setItems(new OASchema(version, typeSimpleSet.getContaintedType()));
+                    }
+                    default ->
+                        type = Type.STRING;
                 }
                 break;
+
         }
     }
 

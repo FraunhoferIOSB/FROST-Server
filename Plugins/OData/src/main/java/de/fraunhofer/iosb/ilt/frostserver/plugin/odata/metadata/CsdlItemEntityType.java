@@ -47,7 +47,7 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlItemEntityType generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, String nameSpace, EntityType et) {
+    public CsdlItemEntityType generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, EntityType et) {
         final PrimaryKey primaryKey = et.getPrimaryKey();
         for (var property : primaryKey.getKeyProperties()) {
             String keyName = property.getName();
@@ -64,10 +64,10 @@ public class CsdlItemEntityType implements CsdlSchemaItem {
             if ("@iot.id".equals(propertyName)) {
                 propertyName = "id";
             }
-            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, nameSpace, et, ep));
+            properties.put(propertyName, new CsdlPropertyEntity().generateFrom(doc, version, et, ep));
         }
         for (NavigationPropertyMain np : et.getNavigationProperties()) {
-            properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(doc, nameSpace, np));
+            properties.put(np.getJsonName(), new CsdlPropertyNavigation().generateFrom(doc, np));
         }
         for (Annotation an : et.getAnnotations()) {
             annotations.add(new CsdlAnnotation().generateFrom(doc, an));

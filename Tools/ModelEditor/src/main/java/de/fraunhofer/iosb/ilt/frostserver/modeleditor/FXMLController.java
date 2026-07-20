@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class FXMLController implements Initializable {
         FileData fd = listViewEntityTypes.getSelectionModel().getSelectedItem();
         ConfigFileEditor cfe = fd.getEditor();
         cfe.setIndent(indentText);
-        cfe.saveModelWithChooser("Save Data Model", getWindow());
+        cfe.saveToFileWithChooser("Save Data Model", getWindow());
         fd.updateFileName();
     }
 
@@ -174,7 +175,7 @@ public class FXMLController implements Initializable {
     @FXML
     private void actionCloseAll(ActionEvent event) {
         for (Iterator<FileData> it = listViewEntityTypes.getItems().iterator(); it.hasNext();) {
-            FileData fd = it.next();
+            it.next();
             it.remove();
         }
     }
@@ -190,7 +191,7 @@ public class FXMLController implements Initializable {
 
     @FXML
     private void actionSaveSec(ActionEvent event) {
-        cfeSecurity.saveModelWithChooser("Save Security Model", getWindow());
+        cfeSecurity.saveToFileWithChooser("Save Security Model", getWindow());
         labelFileSec.setText(cfeSecurity.getCurrentFile().getAbsolutePath());
     }
 
@@ -274,7 +275,7 @@ public class FXMLController implements Initializable {
         listViewEntityTypes.getSelectionModel().selectedItemProperty().addListener((ov, oldItem, newItem) -> showModel(newItem));
         makeDropTarget(bpEntityModel, this::loadFromFile);
         makeDropTarget(bpSecurityModel, this::loadSecFromFile);
-        textFieldDate.setText(DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now()));
+        textFieldDate.setText(DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.systemDefault())));
         textFieldLiquibasePath.setText("../liquibase");
     }
 

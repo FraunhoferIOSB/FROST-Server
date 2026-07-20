@@ -57,7 +57,7 @@ public class CsdlPropertyNavigation implements CsdlProperty {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlPropertyNavigation generateFrom(CsdlDocument doc, String nameSpace, NavigationPropertyMain<?> np) {
+    public CsdlPropertyNavigation generateFrom(CsdlDocument doc, NavigationPropertyMain<?> np) {
         final PropertyType targetType = np.getType();
         type = ModelRegistry.fullName(targetType.getNamespace(), targetType.getName());
         final NavigationPropertyMain inverse = np.getInverse();

@@ -53,7 +53,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
     @JsonIgnore
     private final List<CsdlAnnotation> annotations = new ArrayList<>();
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, String namespaceSchema, EntityType et, EntityPropertyMain<?> ep) {
+    public <P> CsdlPropertyEntity generateFrom(CsdlDocument doc, CsdlDocument.ODataVersion version, EntityType et, EntityPropertyMain<P> ep) {
         final PropertyType pt = ep.getType();
         String namespace = pt.getNamespace();
         final String name = pt.getName();
@@ -78,7 +78,7 @@ public class CsdlPropertyEntity implements CsdlProperty {
         return this;
     }
 
-    public CsdlPropertyEntity generateFrom(CsdlDocument doc, String namespaceSchema, PropertyType pt, boolean nullable) {
+    public CsdlPropertyEntity generateFrom(CsdlDocument doc, PropertyType pt, boolean nullable) {
         String namespace = pt.getNamespace();
         final String name = pt.getName();
         String fullName = ModelRegistry.fullName(namespace, name);

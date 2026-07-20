@@ -103,21 +103,23 @@ public class Count extends AbstractSimpleComponent<Count, Number> {
         if (input == null) {
             return isOptional() || isSecret();
         }
-        if (input instanceof Double || input instanceof Float || input instanceof BigDecimal) {
-            if (input.doubleValue() != input.longValue()) {
-                LOGGER.debug("Non-integer value {} for Count!", input);
-                return false;
-            }
+        if ((input instanceof Double || input instanceof Float || input instanceof BigDecimal) && input.doubleValue() != input.longValue()) {
+            LOGGER.debug("Non-integer value {} for Count!", input);
+            return false;
         }
         if (constraint == null) {
             return true;
         }
-        if (input instanceof BigInteger bi) {
-            return constraint.isValid(new BigDecimal(bi));
-        } else if (input instanceof BigDecimal bd) {
-            return constraint.isValid(bd);
-        } else {
-            return constraint.isValid(new BigDecimal(input.longValue()));
+        switch (input) {
+            case BigInteger bi -> {
+                return constraint.isValid(new BigDecimal(bi));
+            }
+            case BigDecimal bd -> {
+                return constraint.isValid(bd);
+            }
+            default -> {
+                return constraint.isValid(new BigDecimal(input.longValue()));
+            }
         }
     }
 
@@ -126,8 +128,7 @@ public class Count extends AbstractSimpleComponent<Count, Number> {
         int hash = 5;
         hash = 79 * hash + Objects.hashCode(this.value);
         hash = 79 * hash + Objects.hashCode(this.constraint);
-        hash = 79 * hash + super.hashCode();
-        return hash;
+        return 79 * hash + super.hashCode();
     }
 
     @Override

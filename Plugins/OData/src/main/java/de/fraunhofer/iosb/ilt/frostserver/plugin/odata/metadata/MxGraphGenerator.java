@@ -174,10 +174,8 @@ public class MxGraphGenerator {
     private void recurseComplexType(TypeComplex tc, Set<String> complexTypes) {
         for (EntityPropertyMain ep : tc.getEntityProperties()) {
             final PropertyType type = ep.getType();
-            if (type instanceof TypeComplex subTc) {
-                if (complexTypes.add(type.getName())) {
-                    recurseComplexType(subTc, complexTypes);
-                }
+            if (type instanceof TypeComplex subTc && complexTypes.add(type.getName())) {
+                recurseComplexType(subTc, complexTypes);
             }
         }
     }

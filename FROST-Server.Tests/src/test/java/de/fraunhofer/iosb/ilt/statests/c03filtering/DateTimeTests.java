@@ -235,7 +235,7 @@ public abstract class DateTimeTests extends AbstractTestClass {
         createObservation(r++, datastream3, T2020_22, T2020_22, null); // 47
         createObservation(r++, datastream3, T2020_23, T2020_23, null); // 48
         createObservation(r++, datastream3, T2020_24, T2020_24, null); // 49
-
+        LOGGER.debug("Created {} Observations", r);
     }
 
     private static void createObservation(double result, Entity ds, TimeInterval pt, ZonedDateTime rt, TimeInterval vt) throws ServiceFailureException {

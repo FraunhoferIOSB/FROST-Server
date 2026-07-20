@@ -42,10 +42,6 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-/**
- *
- * @author jab
- */
 class EntityFormatterTest {
 
     private static CoreSettings coreSettings;
@@ -70,10 +66,6 @@ class EntityFormatterTest {
             coreSettings.getPluginManager().initPlugins(null);
             etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
         }
-    }
-
-    @BeforeAll
-    static void setUp() {
         PluginResultFormatDataArray.modifyEntityFormatter();
     }
 

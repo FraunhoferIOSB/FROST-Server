@@ -40,7 +40,7 @@ public class CsdlItemEntityContainer implements CsdlSchemaItem {
     @JsonAnySetter
     public Map<String, ContainerItem> properties = new LinkedHashMap<>();
 
-    public CsdlItemEntityContainer generateFrom(String nameSpace, ModelRegistry mr) {
+    public CsdlItemEntityContainer generateFrom(ModelRegistry mr) {
         for (EntityType et : mr.getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             properties.put(et.plural, new ContainerItem().generateFrom(et));
         }

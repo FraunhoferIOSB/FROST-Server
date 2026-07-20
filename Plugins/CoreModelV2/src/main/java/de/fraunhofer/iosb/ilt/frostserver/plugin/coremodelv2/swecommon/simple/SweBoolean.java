@@ -79,10 +79,6 @@ public class SweBoolean extends AbstractSimpleComponent<SweBoolean, Boolean> {
         return true;
     }
 
-    public boolean validate(Boolean value) {
-        return true;
-    }
-
     @Override
     public int hashCode() {
         int hash = 5;

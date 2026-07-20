@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
-import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
@@ -69,10 +68,6 @@ class EntityFormatterTest {
     private static NavigationPropertyEntity npMultiDatastreamObservation;
     private static NavigationPropertyEntity npThingMds;
     private static NavigationPropertyEntity npSensorMds;
-    private static NavigationPropertyEntitySet npObservedPropertiesMds;
-    private static NavigationPropertyEntitySet npMultiDatastreamsSensor;
-    private static NavigationPropertyEntitySet npMultiDatastreamsObsProp;
-    private static NavigationPropertyEntitySet npMultiDatastreamsThing;
 
     @BeforeAll
     static void initClass() {
@@ -98,12 +93,8 @@ class EntityFormatterTest {
 
             npThingMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Thing");
             npSensorMds = (NavigationPropertyEntity) etMultiDatastream.getNavigationProperty("Sensor");
-            npObservedPropertiesMds = (NavigationPropertyEntitySet) etMultiDatastream.getNavigationProperty("ObservedProperties");
 
             npMultiDatastreamObservation = (NavigationPropertyEntity) pluginCoreModel.etObservation.getNavigationProperty("MultiDatastream");
-            npMultiDatastreamsThing = (NavigationPropertyEntitySet) pluginCoreModel.etThing.getNavigationProperty("MultiDatastreams");
-            npMultiDatastreamsSensor = (NavigationPropertyEntitySet) pluginCoreModel.etSensor.getNavigationProperty("MultiDatastreams");
-            npMultiDatastreamsObsProp = (NavigationPropertyEntitySet) pluginCoreModel.etObservedProperty.getNavigationProperty("MultiDatastreams");
         }
     }
 

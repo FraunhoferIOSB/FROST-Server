@@ -50,7 +50,7 @@ public class CsdlSchema {
         this.namespace = namespace;
         for (EntityType entityType : mr.getEntityTypes(PrincipalExtended.getLocalPrincipal().isAdmin())) {
             if (namespace.equals(entityType.getNamespace())) {
-                schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, namespace, entityType));
+                schemaItems.put(entityType.entityName, new CsdlItemEntityType().generateFrom(doc, version, entityType));
             }
         }
         for (Entry<String, PropertyType> entry : mr.getPropertyTypes().entrySet()) {
@@ -59,14 +59,15 @@ public class CsdlSchema {
                 continue;
             }
             String name = value.getName();
-            if (value instanceof TypeComplex tc) {
-                schemaItems.put(name, new CsdlItemComplexType().generateFrom(doc, namespace, tc));
-            } else if (value instanceof TypeSimpleCustom tc) {
-                schemaItems.put(name, new CsdlItemTypeDefinition().generateFrom(tc));
-            } else if (value instanceof TypeEnumeration te) {
-                schemaItems.put(name, new CsdlItemEnumType().generateFrom(te));
-            } else {
-                LOGGER.debug("Unknown PropertyType {}", value);
+            switch (value) {
+                case TypeComplex tc ->
+                    schemaItems.put(name, new CsdlItemComplexType().generateFrom(doc, tc));
+                case TypeSimpleCustom tc ->
+                    schemaItems.put(name, new CsdlItemTypeDefinition().generateFrom(tc));
+                case TypeEnumeration te ->
+                    schemaItems.put(name, new CsdlItemEnumType().generateFrom(te));
+                default ->
+                    LOGGER.debug("Unknown PropertyType {}", value);
             }
         }
 
