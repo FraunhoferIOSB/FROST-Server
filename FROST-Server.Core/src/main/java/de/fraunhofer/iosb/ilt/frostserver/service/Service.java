@@ -58,6 +58,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.DuplicateIdException;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.ForbiddenException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
@@ -152,6 +153,9 @@ public class Service implements AutoCloseable {
 
     public String getRequestType(HttpMethod method, Version version, String path, String contentType) {
         PluginService plugin = settings.getPluginManager().getServiceForPath(version, path);
+        if (plugin == null) {
+            throw Exceptions.illegalArgument("Unhandled request; Method {}, path {}", method, StringHelper.cleanForLogging(path));
+        }
         return PluginManager.decodeRequestType(plugin, version, path, method, contentType);
     }
 
@@ -969,7 +973,7 @@ public class Service implements AutoCloseable {
         PersistenceManager pm = null;
         try {
             PathElementEntity mainEntity = (PathElementEntity) path.getMainElement();
-            if (mainEntity != path.getLastElement()) {
+            if (path.isEmpty() || mainEntity != path.getLastElement()) {
                 return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "DELETE not allowed on properties.");
             }
             if (!mainEntity.primaryKeyFullySet()) {

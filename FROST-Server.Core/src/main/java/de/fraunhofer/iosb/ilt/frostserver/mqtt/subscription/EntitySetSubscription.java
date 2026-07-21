@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended.ANO
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
+import de.fraunhofer.iosb.ilt.frostserver.path.PathElement;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
@@ -32,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.net.URLDecoder;
@@ -60,7 +62,10 @@ public class EntitySetSubscription extends AbstractSubscription {
     }
 
     private void init() {
-        entityType = ((PathElementEntitySet) path.getLastElement()).getEntityType();
+        Exceptions.illegalArgumentIf(path.isEmpty(), "Path is empty!");
+        final PathElement lastElement = path.getLastElement();
+        Exceptions.illegalArgumentIf(!(lastElement instanceof PathElementEntitySet), "Path is not an EntitySet!");
+        entityType = ((PathElementEntitySet) lastElement).getEntityType();
 
         String queryString = SubscriptionFactory.getQueryFromTopic(topic);
         query = parseQuery(queryString)

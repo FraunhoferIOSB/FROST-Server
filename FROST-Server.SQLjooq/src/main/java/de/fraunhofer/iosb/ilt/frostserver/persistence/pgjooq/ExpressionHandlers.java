@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.PropertyReference;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Expression;
+import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.FunctionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Path;
@@ -193,93 +194,106 @@ public class ExpressionHandlers {
         }
     }
 
+    private static <R, T extends Expression<T>> void setHandlerOn(FunctionRegistry fr, Class<T> clazz, ExpressionHandler<T, ExpressionHelper, R> handler) {
+        T e = fr.getExpression(clazz);
+        if (e == null) {
+            LOGGER.error("Unknown expression class: {}", clazz);
+            return;
+        }
+        e.setHandler(handler);
+    }
+
     public static void addExpressionHandlers(FunctionRegistry fr, PersistenceManager pm) {
         if (pm instanceof JooqPersistenceManager) {
-            fr.getExpression(Add.class).setHandler((Add exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(After.class).setHandler((After exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(And.class).setHandler((And exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Any.class).setHandler((Any exp, ExpressionHelper h) -> ImpOther.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Before.class).setHandler((Before exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(BooleanConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(Ceiling.class).setHandler((Ceiling exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Concat.class).setHandler((Concat exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(ConstantList.class).setHandler((Expression expression, ExpressionHelper helper) -> new ArrayConstandFieldWrapper((ConstantList) expression));
-            fr.getExpression(Date.class).setHandler((Date exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(DateConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(DateTimeConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(Day.class).setHandler((Day exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Divide.class).setHandler((Divide exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(DoubleConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(DurationConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(During.class).setHandler((During exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(EndsWith.class).setHandler((EndsWith exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Equal.class).setHandler((Equal exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Finishes.class).setHandler((Finishes exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Floor.class).setHandler((Floor exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(FractionalSeconds.class).setHandler((FractionalSeconds exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(GeoDistance.class).setHandler((GeoDistance exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(GeoIntersects.class).setHandler((GeoIntersects exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(GeoLength.class).setHandler((GeoLength exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(GreaterEqual.class).setHandler((GreaterEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(GreaterThan.class).setHandler((GreaterThan exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Hour.class).setHandler((Hour exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(In.class).setHandler((In exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(IndexOf.class).setHandler((IndexOf exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(IntegerConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(IntervalConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(Length.class).setHandler((Length exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(LessEqual.class).setHandler((LessEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(LessThan.class).setHandler((LessThan exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(MaxDateTime.class).setHandler((exp, h) -> new StaDateTimeWrapper(JooqAbsPersistenceManager.DATETIME_MAX, true));
-            fr.getExpression(Meets.class).setHandler((Meets exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(MinDateTime.class).setHandler((exp, h) -> new StaDateTimeWrapper(JooqAbsPersistenceManager.DATETIME_MIN, true));
-            fr.getExpression(Minute.class).setHandler((Minute exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Modulo.class).setHandler((Modulo exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Month.class).setHandler((Month exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Multiply.class).setHandler((Multiply exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Not.class).setHandler((Not exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(NotEqual.class).setHandler((NotEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Now.class).setHandler((Now exp, ExpressionHelper h) -> ImpTime.handle());
-            fr.getExpression(NullConstant.class).setHandler((exp, h) -> new NullWrapper());
-            fr.getExpression(Or.class).setHandler((Or exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Overlaps.class).setHandler((Overlaps exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Path.class).setHandler((Path exp, ExpressionHelper h) -> ImpOther.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(PrincipalName.class).setHandler((exp, h) -> ImpOther.handle(exp));
-            fr.getExpression(Round.class).setHandler((Round exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Second.class).setHandler((Second exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Starts.class).setHandler((Starts exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(StartsWith.class).setHandler((StartsWith exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STContains.class).setHandler((STContains exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STCrosses.class).setHandler((STCrosses exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STDisjoint.class).setHandler((STDisjoint exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STEquals.class).setHandler((STEquals exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STIntersects.class).setHandler((STIntersects exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STOverlaps.class).setHandler((STOverlaps exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STRelate.class).setHandler((STRelate exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(StringConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(STTouches.class).setHandler((STTouches exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(STWithin.class).setHandler((STWithin exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Substring.class).setHandler((Substring exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(SubstringOf.class).setHandler((SubstringOf exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Subtract.class).setHandler((Subtract exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Time.class).setHandler((Time exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(TimeConstant.class).setHandler((exp, h) -> ImpConst.handle(exp));
-            fr.getExpression(TimeObjectConstant.class).setHandler((exp, h) -> ImpConst.handle());
-            fr.getExpression(ToLower.class).setHandler((ToLower exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(TotalOffsetMinutes.class).setHandler((TotalOffsetMinutes exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(ToUpper.class).setHandler((ToUpper exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Trim.class).setHandler((Trim exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
-            fr.getExpression(Year.class).setHandler((Year exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            final ConstantList cle = fr.getExpression(ConstantList.class);
+            if (cle != null) {
+                cle.setHandler((Expression expression, ExpressionHelper helper) -> new ArrayConstandFieldWrapper((ConstantList) expression));
+            }
+
+            setHandlerOn(fr, Add.class, (Add exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, After.class, (After exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, And.class, (And exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Any.class, (Any exp, ExpressionHelper h) -> ImpOther.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Before.class, (Before exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, BooleanConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, Ceiling.class, (Ceiling exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Concat.class, (Concat exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Date.class, (Date exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, DateConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, DateTimeConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, Day.class, (Day exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Divide.class, (Divide exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, DoubleConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, DurationConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, During.class, (During exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, EndsWith.class, (EndsWith exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Equal.class, (Equal exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Finishes.class, (Finishes exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Floor.class, (Floor exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, FractionalSeconds.class, (FractionalSeconds exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, GeoDistance.class, (GeoDistance exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, GeoIntersects.class, (GeoIntersects exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, GeoLength.class, (GeoLength exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, GreaterEqual.class, (GreaterEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, GreaterThan.class, (GreaterThan exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Hour.class, (Hour exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, In.class, (In exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, IndexOf.class, (IndexOf exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, IntegerConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, IntervalConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, Length.class, (Length exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, LessEqual.class, (LessEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, LessThan.class, (LessThan exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, MaxDateTime.class, (exp, h) -> new StaDateTimeWrapper(JooqAbsPersistenceManager.DATETIME_MAX, true));
+            setHandlerOn(fr, Meets.class, (Meets exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, MinDateTime.class, (exp, h) -> new StaDateTimeWrapper(JooqAbsPersistenceManager.DATETIME_MIN, true));
+            setHandlerOn(fr, Minute.class, (Minute exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Modulo.class, (Modulo exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Month.class, (Month exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Multiply.class, (Multiply exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Not.class, (Not exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, NotEqual.class, (NotEqual exp, ExpressionHelper h) -> ImpCmpOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Now.class, (Now exp, ExpressionHelper h) -> ImpTime.handle());
+            setHandlerOn(fr, NullConstant.class, (exp, h) -> new NullWrapper());
+            setHandlerOn(fr, Or.class, (Or exp, ExpressionHelper h) -> ImpLogicOps.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Overlaps.class, (Overlaps exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Path.class, (Path exp, ExpressionHelper h) -> ImpOther.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, PrincipalName.class, (exp, h) -> ImpOther.handle(exp));
+            setHandlerOn(fr, Round.class, (Round exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Second.class, (Second exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Starts.class, (Starts exp, ExpressionHelper h) -> ImpIntrvls.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, StartsWith.class, (StartsWith exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STContains.class, (STContains exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STCrosses.class, (STCrosses exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STDisjoint.class, (STDisjoint exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STEquals.class, (STEquals exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STIntersects.class, (STIntersects exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STOverlaps.class, (STOverlaps exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STRelate.class, (STRelate exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, StringConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, STTouches.class, (STTouches exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, STWithin.class, (STWithin exp, ExpressionHelper h) -> ImpGeo.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Substring.class, (Substring exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, SubstringOf.class, (SubstringOf exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Subtract.class, (Subtract exp, ExpressionHelper h) -> ImpMath.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Time.class, (Time exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, TimeConstant.class, (exp, h) -> ImpConst.handle(exp));
+            setHandlerOn(fr, TimeObjectConstant.class, (exp, h) -> ImpConst.handle());
+            setHandlerOn(fr, ToLower.class, (ToLower exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, TotalOffsetMinutes.class, (TotalOffsetMinutes exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, ToUpper.class, (ToUpper exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Trim.class, (Trim exp, ExpressionHelper h) -> ImpString.handle(exp, (JooqExpHlpr) h));
+            setHandlerOn(fr, Year.class, (Year exp, ExpressionHelper h) -> ImpTime.handle(exp, (JooqExpHlpr) h));
         }
         if (pm instanceof PostgresPersistenceManager) {
-            fr.getExpression(LineStringConstant.class).setHandler((exp, h) -> ImpPostgis.handle(exp));
-            fr.getExpression(PointConstant.class).setHandler((exp, h) -> ImpPostgis.handle(exp));
-            fr.getExpression(PolygonConstant.class).setHandler((exp, h) -> ImpPostgis.handle(exp));
+            setHandlerOn(fr, LineStringConstant.class, (exp, h) -> ImpPostgis.handle(exp));
+            setHandlerOn(fr, PointConstant.class, (exp, h) -> ImpPostgis.handle(exp));
+            setHandlerOn(fr, PolygonConstant.class, (exp, h) -> ImpPostgis.handle(exp));
         }
         if (pm instanceof MariadbPersistenceManager) {
-            fr.getExpression(LineStringConstant.class).setHandler((exp, h) -> ImpMariaDb.handle(exp));
-            fr.getExpression(PointConstant.class).setHandler((exp, h) -> ImpMariaDb.handle(exp));
-            fr.getExpression(PolygonConstant.class).setHandler((exp, h) -> ImpMariaDb.handle(exp));
+            setHandlerOn(fr, LineStringConstant.class, (exp, h) -> ImpMariaDb.handle(exp));
+            setHandlerOn(fr, PointConstant.class, (exp, h) -> ImpMariaDb.handle(exp));
+            setHandlerOn(fr, PolygonConstant.class, (exp, h) -> ImpMariaDb.handle(exp));
         }
         for (Expression<?> e : fr.getExpressions()) {
             if (!e.hasHandler()) {
