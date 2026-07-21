@@ -90,7 +90,7 @@ public abstract class DatabaseHandler {
     public static DatabaseHandler getInstance(CoreSettings coreSettings) {
         DatabaseHandler instance = INSTANCES.get(coreSettings);
         if (instance == null) {
-            LOGGER.error("DatabaseHandler not initialised.");
+            instance = createInstance(coreSettings);
         }
         return instance;
     }
