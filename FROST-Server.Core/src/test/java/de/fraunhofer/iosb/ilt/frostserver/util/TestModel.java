@@ -60,8 +60,12 @@ public class TestModel implements PluginService {
 
     public final NavigationPropertyEntitySet npHouses = new NavigationPropertyEntitySet("Houses");
 
+    public final NavigationPropertyEntitySet npRoomSafes = new NavigationPropertyEntitySet("Safes");
+    public final NavigationPropertyEntitySet npSafeRoom = new NavigationPropertyEntitySet("Room", npRoomSafes);
+
     public final EntityType etHouse = new EntityType("House", "Houses");
     public final EntityType etRoom = new EntityType("Room", "Rooms");
+    public final EntityType etSafe = new EntityType("Safe", "Safes", true);
 
     public void initModel(ModelRegistry modelRegistry, String idType) {
         modelRegistry.registerEntityType(etHouse);
@@ -78,6 +82,9 @@ public class TestModel implements PluginService {
                 .registerProperty(StandardProperties.EP_PROPERTIES)
                 .registerProperty(npHouseRooms)
                 .registerProperty(npRoomHouse);
+        modelRegistry.registerEntityType(etSafe);
+        etSafe.registerProperty(new EntityPropertyMain<>(AT_IOT_ID, modelRegistry.getPropertyType(idType)).setAliases("id"))
+                .registerProperty(epName);
     }
 
     public Entity createHouse(long id, String name, double value) {

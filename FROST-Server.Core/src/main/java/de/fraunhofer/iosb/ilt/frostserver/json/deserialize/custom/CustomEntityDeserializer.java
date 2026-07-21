@@ -118,7 +118,7 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
         }
         UrlHelper.TypeAndKey typeAndKey = UrlHelper.parseSelfLinkToTypeAndKey(selfLink, modelRegistry, true);
         if (!typeAndKey.entityType().equals(target.getType())) {
-            final String message = "Selflink is for a " + typeAndKey.entityType() + ". Expected " + target.getType();
+            final String message = "Selflink is for a " + typeAndKey + ". Expected " + target.getType();
             throw MismatchedInputException.from(parser, DefaultEntity.class, message);
         }
         target.setPrimaryKeyValues(typeAndKey.pkValue());

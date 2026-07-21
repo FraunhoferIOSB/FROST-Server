@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.model.core;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,9 +41,7 @@ public class EntityReferenceList {
         return value.stream()
                 .map(r -> {
                     final Entity e = r.resolve(mr, isAdmin);
-                    if (reqType != e.getType()) {
-                        throw new IllegalArgumentException("Entity of type " + e.getType() + " can not be added to set of " + reqType);
-                    }
+                    Exceptions.illegalArgumentIf(reqType != e.getType(), "Entity of type {} can not be added to set of {}", e.getType(), reqType);
                     return e;
                 })
                 .toList();

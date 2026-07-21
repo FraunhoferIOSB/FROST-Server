@@ -29,25 +29,25 @@ public class Exceptions {
         // Not for initialisation.
     }
 
-    public static final void illegalArgumentIf(boolean predicate, String message, Object param1) {
+    public static final void illegalArgumentIf(boolean predicate, String message, Object param1) throws IllegalArgumentException {
         if (predicate) {
             throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1}));
         }
     }
 
-    public static final void illegalArgumentIf(boolean predicate, String message, Object param1, Object param2) {
+    public static final void illegalArgumentIf(boolean predicate, String message, Object param1, Object param2) throws IllegalArgumentException {
         if (predicate) {
             throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1, param2}));
         }
     }
 
-    public static final void illegalArgumentIf(boolean predicate, String message, Object... params) {
+    public static final void illegalArgumentIf(boolean predicate, String message, Object... params) throws IllegalArgumentException {
         if (predicate) {
             throw new IllegalArgumentException(replacePlaceholders(message, params));
         }
     }
 
-    public static final void illegalArgumentIf(boolean predicate, Supplier<String> message) {
+    public static final void illegalArgumentIf(boolean predicate, Supplier<String> message) throws IllegalArgumentException {
         if (predicate) {
             throw new IllegalArgumentException(message == null ? "Expected false." : message.get());
         }
@@ -55,6 +55,34 @@ public class Exceptions {
 
     public static final IllegalArgumentException illegalArgument(String message, Object... params) {
         return new IllegalArgumentException(replacePlaceholders(message, params));
+    }
+
+    public static final void invalidSelfLinkIf(boolean predicate, String message, Object param1) throws InvalidSelfLinkException {
+        if (predicate) {
+            throw new InvalidSelfLinkException(replacePlaceholders(message, new Object[]{param1}));
+        }
+    }
+
+    public static final void invalidSelfLinkIf(boolean predicate, String message, Object param1, Object param2) throws InvalidSelfLinkException {
+        if (predicate) {
+            throw new InvalidSelfLinkException(replacePlaceholders(message, new Object[]{param1, param2}));
+        }
+    }
+
+    public static final void invalidSelfLinkIf(boolean predicate, String message, Object... params) throws InvalidSelfLinkException {
+        if (predicate) {
+            throw new InvalidSelfLinkException(replacePlaceholders(message, params));
+        }
+    }
+
+    public static final void invalidSelfLinkIf(boolean predicate, Supplier<String> message) throws InvalidSelfLinkException {
+        if (predicate) {
+            throw new InvalidSelfLinkException(message == null ? "Expected false." : message.get());
+        }
+    }
+
+    public static final InvalidSelfLinkException invalidSelfLink(String message, Object... params) {
+        return new InvalidSelfLinkException(replacePlaceholders(message, params));
     }
 
     public static final String replacePlaceholders(String line, Object... params) {

@@ -41,6 +41,8 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.comparison.L
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.And;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.logical.Or;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.InvalidSelfLinkException;
 import java.net.URLDecoder;
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -255,32 +257,28 @@ public class UrlHelper {
         // Empty by design.
     }
 
-    public static TypeAndKey parseSelfLinkToTypeAndKey(String selfLink, ModelRegistry mr, boolean isAdmin) {
+    public static TypeAndKey parseSelfLinkToTypeAndKey(String selfLink, ModelRegistry mr, boolean isAdmin) throws InvalidSelfLinkException {
         int idxType = selfLink.lastIndexOf('/');
         String lastPart = idxType >= 0 ? selfLink.substring(idxType + 1) : selfLink;
         int idxPk = lastPart.indexOf('(');
-        if (idxPk < 0) {
-            throw new IllegalArgumentException("SelfLink must contain a primary key in brackets.");
-        }
+        Exceptions.invalidSelfLinkIf(idxPk < 0, "SelfLink must contain a primary key in brackets.");
+
         String entityTypeName = lastPart.substring(0, idxPk);
         String pk = lastPart.substring(idxPk + 1, lastPart.length() - 1);
         EntityType entityType = mr.getEntityTypeForName(entityTypeName, isAdmin);
-        PkValue pkValue = entityType.getPrimaryKey().parsePrimaryKey(pk);
-        return new TypeAndKey(entityType, pkValue);
+        Exceptions.invalidSelfLinkIf(entityType == null, "Unknown entity type: {}", entityTypeName);
+
+        try {
+            PkValue pkValue = entityType.getPrimaryKey().parsePrimaryKey(pk);
+            return new TypeAndKey(entityType, pkValue);
+        } catch (RuntimeException exc) {
+            throw Exceptions.invalidSelfLink("Failed to parse primary key '{}': {}", pk, exc.getMessage());
+        }
     }
 
-    public static Entity parseSelfLink(String selfLink, ModelRegistry mr, boolean isAdmin) {
-        int idxType = selfLink.lastIndexOf('/');
-        String lastPart = idxType >= 0 ? selfLink.substring(idxType + 1) : selfLink;
-        int idxPk = lastPart.indexOf('(');
-        if (idxPk < 0) {
-            throw new IllegalArgumentException("SelfLink must contain a primary key in brackets.");
-        }
-        String entityTypeName = lastPart.substring(0, idxPk);
-        String pk = lastPart.substring(idxPk + 1, lastPart.length() - 1);
-        EntityType entityType = mr.getEntityTypeForName(entityTypeName, isAdmin);
-        PkValue pkValue = entityType.getPrimaryKey().parsePrimaryKey(pk);
-        return new DefaultEntity(entityType, pkValue);
+    public static Entity parseSelfLink(String selfLink, ModelRegistry mr, boolean isAdmin) throws InvalidSelfLinkException {
+        TypeAndKey typeKey = parseSelfLinkToTypeAndKey(selfLink, mr, isAdmin);
+        return new DefaultEntity(typeKey.entityType, typeKey.pkValue);
     }
 
     /**

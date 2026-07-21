@@ -20,17 +20,21 @@ package de.fraunhofer.iosb.ilt.frostserver.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper.TypeAndKey;
 import de.fraunhofer.iosb.ilt.frostserver.query.Expand;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.InvalidSelfLinkException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -111,6 +115,38 @@ class UrlHelperTest {
 
         String selfLink = house1.getSelfLink();
         assertEquals("Houses(1)", selfLink);
+    }
+
+    @Test
+    void testSelfLinkParse() {
+        testSelfLinkParse("Houses(1)", testModel.etHouse, PkValue.of(1L));
+        testSelfLinkParseAdmin("Houses(1)", testModel.etHouse, PkValue.of(1L));
+
+        testSelfLinkParse("Houses()", null, null);
+        testSelfLinkParseAdmin("Houses()", null, null);
+
+        testSelfLinkParse("Safes(1)", null, null);
+        testSelfLinkParseAdmin("Safes(1)", testModel.etSafe, PkValue.of(1L));
+
+        testSelfLinkParse("Houses", null, null);
+        testSelfLinkParseAdmin("Houses", null, null);
+    }
+
+    private void testSelfLinkParse(String path, EntityType type, PkValue key) {
+        testSelfLinkParse(path, type, key, false);
+    }
+
+    private void testSelfLinkParseAdmin(String path, EntityType type, PkValue key) {
+        testSelfLinkParse(path, type, key, true);
+    }
+
+    private void testSelfLinkParse(String path, EntityType type, PkValue key, boolean admin) {
+        if (type == null) {
+            assertThrows(InvalidSelfLinkException.class, () -> UrlHelper.parseSelfLinkToTypeAndKey(path, coreSettings.getModelRegistry(), admin));
+        } else {
+            TypeAndKey typeAndKey = UrlHelper.parseSelfLinkToTypeAndKey(path, coreSettings.getModelRegistry(), admin);
+            assertEquals(new TypeAndKey(type, key), typeAndKey, "SelfLink parse failed.");
+        }
     }
 
     @Test
