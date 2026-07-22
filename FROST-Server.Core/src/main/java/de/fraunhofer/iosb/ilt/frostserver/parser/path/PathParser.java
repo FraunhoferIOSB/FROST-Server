@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.Node.Visitor;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.PParser;
 import de.fraunhofer.iosb.ilt.frostserver.util.pathparser.ParseException;
@@ -91,9 +92,7 @@ public class PathParser extends Visitor {
     }
 
     private void addAsEntitySet(EntityType type) {
-        if (resourcePath.getLastElement() != null) {
-            throw new IllegalArgumentException("Adding a set by type should only happen on an empty path. Add a set by NavigationProperty instead." + resourcePath);
-        }
+        Exceptions.illegalArgumentIf(!resourcePath.isEmpty(), "Adding a set by type should only happen on an empty path. Add a set by NavigationProperty instead. {}", resourcePath);
         PathElementEntitySet espa = new PathElementEntitySet(type);
         resourcePath.addPathElement(espa, true, false);
     }
@@ -157,8 +156,7 @@ public class PathParser extends Visitor {
 
     public void visit(T_NAME node) {
         final String name = node.getImage();
-        final PathElement parent = resourcePath.getLastElement();
-        if (parent == null) {
+        if (resourcePath.isEmpty()) {
             final EntityType entityType = modelRegistry.getEntityTypeForName(name, adminUser);
             if (entityType == null) {
                 throw new IllegalArgumentException("Unknown EntityType: '" + StringHelper.cleanForLogging(name) + "'");
@@ -173,6 +171,7 @@ public class PathParser extends Visitor {
             throw new IllegalArgumentException("Second element should be an ID or $ref, not " + StringHelper.cleanForLogging(node.toString()));
         }
 
+        final PathElement parent = resourcePath.getLastElement();
         if (parent instanceof PathElementEntitySet) {
             throw new IllegalArgumentException("A property name can not follow a set: " + StringHelper.cleanForLogging(node.toString()));
         }

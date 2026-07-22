@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.path;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -179,9 +180,7 @@ public class ResourcePath {
      * @return The last element in the path.
      */
     public PathElement getLastElement() {
-        if (pathElements.isEmpty()) {
-            return null;
-        }
+        Exceptions.illegalArgumentIf(pathElements.isEmpty(), "Path is empty!");
         return pathElements.get(pathElements.size() - 1);
     }
 
