@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class CheckStandaloneQuery implements ValidationCheck, UserCondition {
 
     private void init(JooqPersistenceManager pm) {
         entityType = pm.getCoreSettings().getModelRegistry().getEntityTypeForName(entityTypeName, true);
+        Exceptions.unknownEntityTypeIf(entityType == null, "Unknown entity type: {}", entityTypeName);
         final CoreSettings coreSettings = pm.getCoreSettings();
         final ServiceContext serviceContext = new ServiceContext()
                 .setFunctionRegistry(coreSettings.getFunctionRegistry())

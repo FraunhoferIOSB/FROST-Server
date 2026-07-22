@@ -143,6 +143,34 @@ public class Exceptions {
         return new BadPathException(replacePlaceholders(message, params));
     }
 
+    public static final void unknownEntityTypeIf(boolean predicate, String message, Object param1) throws UnknownEntityTypeException {
+        if (predicate) {
+            throw new UnknownEntityTypeException(replacePlaceholders(message, new Object[]{param1}));
+        }
+    }
+
+    public static final void unknownEntityTypeIf(boolean predicate, String message, Object param1, Object param2) throws UnknownEntityTypeException {
+        if (predicate) {
+            throw new UnknownEntityTypeException(replacePlaceholders(message, new Object[]{param1, param2}));
+        }
+    }
+
+    public static final void unknownEntityTypeIf(boolean predicate, String message, Object... params) throws UnknownEntityTypeException {
+        if (predicate) {
+            throw new UnknownEntityTypeException(replacePlaceholders(message, params));
+        }
+    }
+
+    public static final void unknownEntityTypeIf(boolean predicate, Supplier<String> message) throws UnknownEntityTypeException {
+        if (predicate) {
+            throw new UnknownEntityTypeException(message == null ? PREDICATE_FAILED : message.get());
+        }
+    }
+
+    public static final UnknownEntityTypeException unknownEntityType(String message, Object... params) {
+        return new UnknownEntityTypeException(replacePlaceholders(message, params));
+    }
+
     public static final String replacePlaceholders(String line, Object... params) {
         StringBuilder replaced = new StringBuilder();
         int idx = 0;
