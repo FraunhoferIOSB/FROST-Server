@@ -77,6 +77,9 @@ public class ConfigFileEditor {
     public void loadFromFileWithChooser(String title, Window window) {
         fileChooser.setTitle(title);
         File file = fileChooser.showOpenDialog(window);
+        if (file == null) {
+            return;
+        }
         loadFromFile(file);
     }
 

@@ -58,7 +58,6 @@ class EntityBuilderTest {
     private static ModelRegistry modelRegistry;
     private static PluginCoreModel pluginCoreModel;
     private static PluginMultiDatastream pluginMultiDatastream;
-    private static EntityType etMultiDatastream;
 
     private final Map<Property, Object> propertyValues = new HashMap<>();
     private final Map<Property, Object> propertyValuesAlternative = new HashMap<>();
@@ -76,7 +75,6 @@ class EntityBuilderTest {
             pluginMultiDatastream = new PluginMultiDatastream();
             pluginMultiDatastream.init(coreSettings);
             coreSettings.getPluginManager().initPlugins(null);
-            etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
         }
     }
 

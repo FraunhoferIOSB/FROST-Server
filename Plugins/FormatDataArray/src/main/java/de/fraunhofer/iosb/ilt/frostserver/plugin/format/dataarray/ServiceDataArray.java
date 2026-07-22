@@ -82,7 +82,7 @@ public class ServiceDataArray {
                 .setQueryDefaults(settings.getQueryDefaults());
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
         npMultiDatastream = (NavigationPropertyEntity) settings.getModelRegistry()
-                .getEntityTypeForName("Observation")
+                .getEntityTypeForName("Observation", true)
                 .getNavigationProperty("MultiDatastream");
         arrayValueHandlers = new ArrayValueHandlers();
     }

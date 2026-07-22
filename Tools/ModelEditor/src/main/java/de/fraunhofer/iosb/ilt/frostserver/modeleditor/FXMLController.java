@@ -202,6 +202,9 @@ public class FXMLController implements Initializable {
     }
 
     private void loadFromFile(File file) {
+        if (file == null) {
+            return;
+        }
         ConfigFileEditor cfe = new ConfigFileEditor(DefModel.class);
         cfe.loadFromFile(file);
         addToList(cfe);
@@ -209,11 +212,17 @@ public class FXMLController implements Initializable {
 
     private void loadSecWithSelector() {
         cfeSecurity.loadFromFileWithChooser("Load Security Model", getWindow());
+        if (cfeSecurity.getCurrentFile() == null) {
+            return;
+        }
         labelFileSec.setText(cfeSecurity.getCurrentFile().getAbsolutePath());
         replaceSecEditor(cfeSecurity.getConfigEditor());
     }
 
     private void loadSecFromFile(File file) {
+        if (file == null) {
+            return;
+        }
         cfeSecurity.loadFromFile(file);
         labelFileSec.setText(cfeSecurity.getCurrentFile().getAbsolutePath());
         replaceSecEditor(cfeSecurity.getConfigEditor());
