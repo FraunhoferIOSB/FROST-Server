@@ -28,21 +28,22 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
 
 /**
+ * The abstract class for link tables.
  *
- * @author hylke
  * @param <T> The exact type of the implementing class.
  */
 public abstract class StaLinkTable<T extends StaLinkTable<T>> extends TableImpl<Record> implements StaTable<T> {
 
-    private List<CustomField> customFields;
+    private final List<CustomField> customFields;
+
+    protected StaLinkTable(Name alias) {
+        super(alias, null, null);
+        customFields = new ArrayList<>();
+    }
 
     protected StaLinkTable(Name alias, StaLinkTable<T> aliased) {
         super(alias, null, aliased);
-        if (aliased == null) {
-            customFields = new ArrayList<>();
-        } else {
-            customFields = aliased.customFields;
-        }
+        customFields = aliased.customFields;
     }
 
     @Override

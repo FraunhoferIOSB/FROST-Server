@@ -20,8 +20,7 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables;
 import org.jooq.Name;
 
 /**
- *
- * @author hylke
+ * The dynamic class for link tables.
  */
 public class StaLinkTableDynamic extends StaLinkTable<StaLinkTableDynamic> {
 
@@ -29,7 +28,7 @@ public class StaLinkTableDynamic extends StaLinkTable<StaLinkTableDynamic> {
     private int idFieldIdx;
 
     public StaLinkTableDynamic(Name tableName) {
-        super(tableName, null);
+        super(tableName);
         this.tableName = tableName;
     }
 

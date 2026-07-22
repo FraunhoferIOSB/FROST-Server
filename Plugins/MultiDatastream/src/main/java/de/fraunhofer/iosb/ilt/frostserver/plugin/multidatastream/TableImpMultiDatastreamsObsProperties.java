@@ -57,7 +57,7 @@ public class TableImpMultiDatastreamsObsProperties extends StaLinkTable<TableImp
      * in the actual database.
      */
     public <I> TableImpMultiDatastreamsObsProperties(DataType<I> idTypeMds, DataType<?> idTypeObsProp) {
-        super(DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"), null);
+        super(DSL.name("MULTI_DATASTREAMS_OBS_PROPERTIES"));
         colMultiDatastreamId = createField(DSL.name("MULTI_DATASTREAM_ID"), idTypeMds);
         colObsPropertyId = createField(DSL.name("OBS_PROPERTY_ID"), idTypeObsProp);
     }

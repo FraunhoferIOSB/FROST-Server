@@ -52,7 +52,7 @@ public class TableImpThingsLocations extends StaLinkTable<TableImpThingsLocation
      * the actual database.
      */
     public <I> TableImpThingsLocations(DataType<I> idTypeThing, DataType<I> idTypeLocation) {
-        super(DSL.name(NAME_TABLE), null);
+        super(DSL.name(NAME_TABLE));
         colThingId = createField(DSL.name(NAME_COL_TL_THINGID), idTypeThing);
         colLocationId = createField(DSL.name(NAME_COL_TL_LOCATIONID), idTypeLocation);
     }

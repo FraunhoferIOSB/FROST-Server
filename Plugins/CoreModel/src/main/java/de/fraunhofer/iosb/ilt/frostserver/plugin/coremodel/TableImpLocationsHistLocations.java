@@ -51,7 +51,7 @@ public class TableImpLocationsHistLocations extends StaLinkTable<TableImpLocatio
      * in the actual database.
      */
     public <I> TableImpLocationsHistLocations(DataType<I> idTypeLocation, DataType<?> idTypeHistLoc) {
-        super(DSL.name(NAME_TABLE), null);
+        super(DSL.name(NAME_TABLE));
         colLocationId = createField(DSL.name(NAME_COL_LOCATIONID), idTypeLocation);
         colHistLocationId = createField(DSL.name(NAME_COL_HISTLOCATIONID), idTypeHistLoc);
     }
