@@ -19,6 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.query.expression;
 
 import de.fraunhofer.iosb.ilt.frostserver.query.PropertyPlaceholder;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.function.Function;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnregisteredExpressionException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,11 +62,9 @@ public class FunctionRegistry {
         return Collections.unmodifiableCollection(expressionsByName.values());
     }
 
-    public <T extends Expression<T>> T getExpression(Class<T> clazz) {
+    public <T extends Expression<T>> T getExpression(Class<T> clazz) throws UnregisteredExpressionException {
         final Expression<?> expression = expressionsByClass.get(clazz);
-        if (expression == null) {
-            LOGGER.error("Unknown expression class: {}", clazz);
-        }
+        Exceptions.unregisteredExpressionIf(expression == null, "Unknown expression class: {}", clazz);
         return (T) expression;
     }
 

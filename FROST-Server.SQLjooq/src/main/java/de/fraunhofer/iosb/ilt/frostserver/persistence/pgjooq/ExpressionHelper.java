@@ -103,7 +103,6 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
     public FieldWrapper handle(Expression<?> e) {
         if (!e.hasHandler()) {
             final Expression registeredExpression = settings.getFunctionRegistry().getExpression(e.getClass());
-            Exceptions.illegalArgumentIf(registeredExpression == null, "Unknown expression: {}", e);
             final ExpressionHandler handler = registeredExpression.getHandler();
             Exceptions.illegalArgumentIf(handler == null, "No handler found for {}", e);
             e.setHandler(handler);

@@ -85,6 +85,34 @@ public class Exceptions {
         return new InvalidSelfLinkException(replacePlaceholders(message, params));
     }
 
+    public static final void unregisteredExpressionIf(boolean predicate, String message, Object param1) throws UnregisteredExpressionException {
+        if (predicate) {
+            throw new UnregisteredExpressionException(replacePlaceholders(message, new Object[]{param1}));
+        }
+    }
+
+    public static final void unregisteredExpressionIf(boolean predicate, String message, Object param1, Object param2) throws UnregisteredExpressionException {
+        if (predicate) {
+            throw new UnregisteredExpressionException(replacePlaceholders(message, new Object[]{param1, param2}));
+        }
+    }
+
+    public static final void unregisteredExpressionIf(boolean predicate, String message, Object... params) throws UnregisteredExpressionException {
+        if (predicate) {
+            throw new UnregisteredExpressionException(replacePlaceholders(message, params));
+        }
+    }
+
+    public static final void unregisteredExpressionIf(boolean predicate, Supplier<String> message) throws UnregisteredExpressionException {
+        if (predicate) {
+            throw new UnregisteredExpressionException(message == null ? "Expected false." : message.get());
+        }
+    }
+
+    public static final UnregisteredExpressionException unregisteredExpression(String message, Object... params) {
+        return new UnregisteredExpressionException(replacePlaceholders(message, params));
+    }
+
     public static final String replacePlaceholders(String line, Object... params) {
         StringBuilder replaced = new StringBuilder();
         int idx = 0;
