@@ -25,6 +25,8 @@ import org.apache.commons.lang3.Strings;
  */
 public class Exceptions {
 
+    private static final String PREDICATE_FAILED = "Predicate failed.";
+
     private Exceptions() {
         // Not for initialisation.
     }
@@ -49,7 +51,7 @@ public class Exceptions {
 
     public static final void illegalArgumentIf(boolean predicate, Supplier<String> message) throws IllegalArgumentException {
         if (predicate) {
-            throw new IllegalArgumentException(message == null ? "Expected false." : message.get());
+            throw new IllegalArgumentException(message == null ? PREDICATE_FAILED : message.get());
         }
     }
 
@@ -77,7 +79,7 @@ public class Exceptions {
 
     public static final void invalidSelfLinkIf(boolean predicate, Supplier<String> message) throws InvalidSelfLinkException {
         if (predicate) {
-            throw new InvalidSelfLinkException(message == null ? "Expected false." : message.get());
+            throw new InvalidSelfLinkException(message == null ? PREDICATE_FAILED : message.get());
         }
     }
 
@@ -105,12 +107,40 @@ public class Exceptions {
 
     public static final void unregisteredExpressionIf(boolean predicate, Supplier<String> message) throws UnregisteredExpressionException {
         if (predicate) {
-            throw new UnregisteredExpressionException(message == null ? "Expected false." : message.get());
+            throw new UnregisteredExpressionException(message == null ? PREDICATE_FAILED : message.get());
         }
     }
 
     public static final UnregisteredExpressionException unregisteredExpression(String message, Object... params) {
         return new UnregisteredExpressionException(replacePlaceholders(message, params));
+    }
+
+    public static final void badPathIf(boolean predicate, String message, Object param1) throws BadPathException {
+        if (predicate) {
+            throw new BadPathException(replacePlaceholders(message, new Object[]{param1}));
+        }
+    }
+
+    public static final void badPathIf(boolean predicate, String message, Object param1, Object param2) throws BadPathException {
+        if (predicate) {
+            throw new BadPathException(replacePlaceholders(message, new Object[]{param1, param2}));
+        }
+    }
+
+    public static final void badPathIf(boolean predicate, String message, Object... params) throws BadPathException {
+        if (predicate) {
+            throw new BadPathException(replacePlaceholders(message, params));
+        }
+    }
+
+    public static final void badPathIf(boolean predicate, Supplier<String> message) throws BadPathException {
+        if (predicate) {
+            throw new BadPathException(message == null ? PREDICATE_FAILED : message.get());
+        }
+    }
+
+    public static final BadPathException badPath(String message, Object... params) {
+        return new BadPathException(replacePlaceholders(message, params));
     }
 
     public static final String replacePlaceholders(String line, Object... params) {

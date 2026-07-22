@@ -44,6 +44,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.CountMode;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +138,9 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     @Override
     public void visit(PathElementEntity element) {
-        Result<Record> results = pm.timeFetch(sqlQuery, path.getMainElementType().entityName);
+        final EntityType mainElementType = path.getMainElementType();
+        Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+        Result<Record> results = pm.timeFetch(sqlQuery, mainElementType.entityName);
         if (results.size() > 1) {
             throw new IllegalStateException("Expecting an element, yet more than 1 result. Got " + results.size() + " results.");
         }
@@ -234,12 +237,16 @@ public class ResultBuilder implements ResourcePathVisitor {
     }
 
     private int timeCountQueryRecord(ResultQuery<Record> query) {
-        return pm.timeExecution(query::fetchOne, query, path.getMainElementType().entityName)
+        final EntityType mainElementType = path.getMainElementType();
+        Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+        return pm.timeExecution(query::fetchOne, query, mainElementType.entityName)
                 .get(0, Integer.class);
     }
 
     private int timeCountQuery(ResultQuery<Record1<Integer>> query) {
-        return pm.timeExecution(query::fetchOne, query, path.getMainElementType().entityName)
+        final EntityType mainElementType = path.getMainElementType();
+        Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+        return pm.timeExecution(query::fetchOne, query, mainElementType.entityName)
                 .component1();
     }
 
@@ -247,7 +254,9 @@ public class ResultBuilder implements ResourcePathVisitor {
     public void visit(PathElementEntitySet element) {
         final EntitySet entitySet;
         if (staQuery.getTopOrDefault() > 0) {
-            final Cursor<Record> results = pm.timeExecution(sqlQuery::fetchLazy, sqlQuery, path.getMainElementType().entityName);
+            final EntityType mainElementType = path.getMainElementType();
+            Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+            final Cursor<Record> results = pm.timeExecution(sqlQuery::fetchLazy, sqlQuery, mainElementType.entityName);
             entitySet = sqlQueryBuilder
                     .getQueryState()
                     .createSetFromRecords(results, this);

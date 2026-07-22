@@ -602,14 +602,18 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     public void doDelete(ResourcePath path, Query query) {
         init();
         query.clearSelect();
-        query.addSelect(path.getMainElementType().getEntityProperty("id"));
+        final EntityType mainElementType = path.getMainElementType();
+        if (mainElementType == null) {
+            return;
+        }
+        query.addSelect(mainElementType.getEntityProperty("id"));
         QueryBuilder psb = new QueryBuilder(this)
                 .forPath(path)
                 .usingQuery(query);
 
         Delete sqlDelete = psb.buildDelete((PathElementEntitySet) path.getLastElement());
 
-        long rowCount = timeExecute(sqlDelete, path.getMainElementType().entityName);
+        long rowCount = timeExecute(sqlDelete, mainElementType.entityName);
         LOGGER.debug("Deleted {} rows using query {}", rowCount, sqlDelete);
     }
 
@@ -826,7 +830,8 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
     private void validateMapping(PropertyFieldRegistry.PropertyFields<? extends StaMainTable<?>> pf, String parent, final StaMainTable<?> tableForType) {
         if (pf == null || pf.converter == null) {
-            LOGGER.error("Property {}/{} is not backed by table {}.", parent, pf.property.getName(), tableForType.getName());
+            LOGGER.error("Property {}/{} is not backed by table {}.", parent, pf, tableForType.getName());
+            return;
         }
         for (var subPf : pf.subFields.values()) {
             validateMapping(subPf, parent, tableForType);
