@@ -147,15 +147,18 @@ public class TypeSimplePrimitive extends TypeSimple {
     }
 
     private TypeSimplePrimitive(String name, String description, TypeReference typeReference) {
-        super(name, description, typeReference);
+        super(name.substring(4), description, typeReference);
+        setNamespace("Edm");
     }
 
     private TypeSimplePrimitive(String name, String description, TypeReference typeReference, Parser parser) {
-        super(name, description, typeReference, parser);
+        super(name.substring(4), description, typeReference, parser);
+        setNamespace("Edm");
     }
 
     private TypeSimplePrimitive(String name, String description, ValueDeserializer deserializer, Parser parser) {
-        super(name, description, deserializer, parser);
+        super(name.substring(4), description, deserializer, parser);
+        setNamespace("Edm");
     }
 
     @Override

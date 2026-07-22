@@ -40,10 +40,6 @@ public class PropertyType implements Annotatable {
     private final List<Annotation> annotations = new ArrayList<>();
 
     public PropertyType(String name, String description, ValueDeserializer deserializer, ValueSerializer serializer) {
-        if (name.startsWith("Edm.")) {
-            namespace = "Edm";
-            name = name.substring(4);
-        }
         this.name = name;
         this.description = description;
         this.deserializer = deserializer;
