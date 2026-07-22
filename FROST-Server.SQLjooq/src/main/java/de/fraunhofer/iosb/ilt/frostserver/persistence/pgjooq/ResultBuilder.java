@@ -68,6 +68,7 @@ public class ResultBuilder implements ResourcePathVisitor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultBuilder.class);
     private static final String ESTIMATE_COUNT = "Estimate: {}, Count: {}";
+    private static final String ERROR_PATH_NO_MAIN_ELEMENT = "Path does not have a main element {}";
 
     private final JooqPersistenceManager pm;
     private final PersistenceSettings persistenceSettings;
@@ -139,7 +140,7 @@ public class ResultBuilder implements ResourcePathVisitor {
     @Override
     public void visit(PathElementEntity element) {
         final EntityType mainElementType = path.getMainElementType();
-        Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+        Exceptions.badPathIf(mainElementType == null, ERROR_PATH_NO_MAIN_ELEMENT, path);
         Result<Record> results = pm.timeFetch(sqlQuery, mainElementType.entityName);
         if (results.size() > 1) {
             throw new IllegalStateException("Expecting an element, yet more than 1 result. Got " + results.size() + " results.");
@@ -238,14 +239,14 @@ public class ResultBuilder implements ResourcePathVisitor {
 
     private int timeCountQueryRecord(ResultQuery<Record> query) {
         final EntityType mainElementType = path.getMainElementType();
-        Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+        Exceptions.badPathIf(mainElementType == null, ERROR_PATH_NO_MAIN_ELEMENT, path);
         return pm.timeExecution(query::fetchOne, query, mainElementType.entityName)
                 .get(0, Integer.class);
     }
 
     private int timeCountQuery(ResultQuery<Record1<Integer>> query) {
         final EntityType mainElementType = path.getMainElementType();
-        Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+        Exceptions.badPathIf(mainElementType == null, ERROR_PATH_NO_MAIN_ELEMENT, path);
         return pm.timeExecution(query::fetchOne, query, mainElementType.entityName)
                 .component1();
     }
@@ -255,7 +256,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         final EntitySet entitySet;
         if (staQuery.getTopOrDefault() > 0) {
             final EntityType mainElementType = path.getMainElementType();
-            Exceptions.badPathIf(mainElementType == null, "Path does not have a main element {}", path);
+            Exceptions.badPathIf(mainElementType == null, ERROR_PATH_NO_MAIN_ELEMENT, path);
             final Cursor<Record> results = pm.timeExecution(sqlQuery::fetchLazy, sqlQuery, mainElementType.entityName);
             entitySet = sqlQueryBuilder
                     .getQueryState()

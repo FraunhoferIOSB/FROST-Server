@@ -178,10 +178,12 @@ public class LiquibaseTemplates {
                 String linkTableOtherField = fm.getLinkOtherField();
                 String otherField = fm.getOtherField();
                 String otherTable = fm.getOtherTable();
+                final EntityTableColumn etc1 = new EntityTableColumn(etName, tableName, linkTableOurField, ourType);
+                final EntityTableColumn etc2 = new EntityTableColumn(otherEntityType, otherTable, linkTableOtherField, otherType);
                 TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(clMain.getDate())
                         .setAuthor(clMain.getAuthor())
                         .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
-                        .addChangsetLinkTable(linkTable, etName, tableName, linkTableOurField, ourType, otherEntityType, otherTable, linkTableOtherField, otherType);
+                        .addChangsetLinkTable(linkTable, etc1, etc2);
                 clBuilders.add(clLinkTable);
                 clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
                 clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
@@ -435,18 +437,12 @@ public class LiquibaseTemplates {
             return addChangeset(createChangsetIndex(author, date, tableName, columnName));
         }
 
-        public TableChangelogBuilder addChangsetLinkTable(
-                String entityName1, String tableName1, String columnName1, String columnType1,
-                String entityName2, String tableName2, String columnName2, String columnType2) {
-            return addChangsetLinkTable(tableName, entityName1, tableName1, columnName1, columnType1, entityName2, tableName2, columnName2, columnType2);
+        public TableChangelogBuilder addChangsetLinkTable(EntityTableColumn etc1, EntityTableColumn etc2) {
+            return addChangsetLinkTable(tableName, etc1, etc2);
         }
 
-        public TableChangelogBuilder addChangsetLinkTable(String tableName,
-                String entityName1, String tableName1, String columnName1, String columnType1,
-                String entityName2, String tableName2, String columnName2, String columnType2) {
-            return addChangeset(createChangsetLinkTable(author, date, tableName,
-                    entityName1, tableName1, columnName1, columnType1,
-                    entityName2, tableName2, columnName2, columnType2));
+        public TableChangelogBuilder addChangsetLinkTable(String tableName, EntityTableColumn etc1, EntityTableColumn etc2) {
+            return addChangeset(createChangsetLinkTable(author, date, tableName, etc1, etc2));
         }
 
         public TableChangelogBuilder addChangsetForeignKey(String columnName, String otherTableName, String otherColumnName) {
@@ -660,8 +656,8 @@ public class LiquibaseTemplates {
     }
 
     public static String createChangsetLinkTable(String author, String date, String tableName,
-            String entityName1, String tableName1, String columnName1, String columnType1,
-            String entityName2, String tableName2, String columnName2, String columnType2) {
+            EntityTableColumn etc1,
+            EntityTableColumn etc2) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
@@ -679,14 +675,14 @@ public class LiquibaseTemplates {
             author,
             date,
             tableName,
-            entityName1,
-            tableName1,
-            columnName1,
-            columnType1,
-            entityName2,
-            tableName2,
-            columnName2,
-            columnType2
+            etc1.entityName,
+            etc1.tableName,
+            etc1.columnName,
+            etc1.columnType,
+            etc2.entityName,
+            etc2.tableName,
+            etc2.columnName,
+            etc2.columnType
         };
         return StringUtils.replaceEach(BLOCK_CHANGESET_LINKTABLE, searchList, replacementList);
     }
@@ -713,6 +709,11 @@ public class LiquibaseTemplates {
 
     public static String idColumnType(String entityType) {
         return "${idType-" + entityType + "}";
+    }
+
+    private record EntityTableColumn(String entityName, String tableName, String columnName, String columnType) {
+
+        // No content
     }
 
     public static final String BLOCK_COPYRIGHT = """

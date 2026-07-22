@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.parser.path.PathParser;
@@ -141,10 +142,11 @@ class UrlHelperTest {
     }
 
     private void testSelfLinkParse(String path, EntityType type, PkValue key, boolean admin) {
+        final ModelRegistry modelRegistry = coreSettings.getModelRegistry();
         if (type == null) {
-            assertThrows(InvalidSelfLinkException.class, () -> UrlHelper.parseSelfLinkToTypeAndKey(path, coreSettings.getModelRegistry(), admin));
+            assertThrows(InvalidSelfLinkException.class, () -> UrlHelper.parseSelfLinkToTypeAndKey(path, modelRegistry, admin));
         } else {
-            TypeAndKey typeAndKey = UrlHelper.parseSelfLinkToTypeAndKey(path, coreSettings.getModelRegistry(), admin);
+            TypeAndKey typeAndKey = UrlHelper.parseSelfLinkToTypeAndKey(path, modelRegistry, admin);
             assertEquals(new TypeAndKey(type, key), typeAndKey, "SelfLink parse failed.");
         }
     }
