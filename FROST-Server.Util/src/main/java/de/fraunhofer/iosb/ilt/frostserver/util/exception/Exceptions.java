@@ -171,6 +171,34 @@ public class Exceptions {
         return new UnknownEntityTypeException(replacePlaceholders(message, params));
     }
 
+    public static final void unknownPropertyIf(boolean predicate, String message, Object param1) throws UnknownPropertyException {
+        if (predicate) {
+            throw new UnknownPropertyException(replacePlaceholders(message, new Object[]{param1}));
+        }
+    }
+
+    public static final void unknownPropertyIf(boolean predicate, String message, Object param1, Object param2) throws UnknownPropertyException {
+        if (predicate) {
+            throw new UnknownPropertyException(replacePlaceholders(message, new Object[]{param1, param2}));
+        }
+    }
+
+    public static final void unknownPropertyIf(boolean predicate, String message, Object... params) throws UnknownPropertyException {
+        if (predicate) {
+            throw new UnknownPropertyException(replacePlaceholders(message, params));
+        }
+    }
+
+    public static final void unknownPropertyIf(boolean predicate, Supplier<String> message) throws UnknownPropertyException {
+        if (predicate) {
+            throw new UnknownPropertyException(message == null ? PREDICATE_FAILED : message.get());
+        }
+    }
+
+    public static final UnknownPropertyException unknownProperty(String message, Object... params) {
+        return new UnknownPropertyException(replacePlaceholders(message, params));
+    }
+
     public static final String replacePlaceholders(String line, Object... params) {
         StringBuilder replaced = new StringBuilder();
         int idx = 0;

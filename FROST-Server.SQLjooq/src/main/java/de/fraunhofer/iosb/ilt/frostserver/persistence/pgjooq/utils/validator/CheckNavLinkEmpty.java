@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +95,8 @@ public class CheckNavLinkEmpty implements ValidationCheck {
 
     private void init(Entity contextEntity) {
         entityType = contextEntity.getType();
-        targetNp = entityType.getNavigationProperty(getTargetNavLink());
+        targetNp = entityType.getNavigationProperty(targetNavLink);
+        Exceptions.unknownPropertyIf(targetNp == null, "EntityType {} has no navigation property {}", entityType, targetNavLink);
         targetType = targetNp.getEntityType();
         LOGGER.info("Initialised check on {}.{}", entityType, targetNp);
     }

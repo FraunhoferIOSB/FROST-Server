@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.DynamicContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,8 @@ public class CheckNavLinkQuery implements ValidationCheck {
         }
         try {
             entityType = contextEntity.getType();
-            targetNp = entityType.getNavigationProperty(getTargetNavLink());
+            targetNp = entityType.getNavigationProperty(targetNavLink);
+            Exceptions.unknownPropertyIf(targetNp == null, "EntityType {} has no navigation property {}", entityType, targetNavLink);
             targetType = targetNp.getEntityType();
             final CoreSettings coreSettings = pm.getCoreSettings();
             final ServiceContext serviceContext = new ServiceContext()

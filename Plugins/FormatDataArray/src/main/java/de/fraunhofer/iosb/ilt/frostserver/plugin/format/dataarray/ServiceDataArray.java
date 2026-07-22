@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat.FORM
 import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.DefaultEntity;
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
@@ -38,6 +39,7 @@ import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
@@ -81,9 +83,10 @@ public class ServiceDataArray {
                 .setModelRegistry(settings.getModelRegistry())
                 .setQueryDefaults(settings.getQueryDefaults());
         pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        npMultiDatastream = (NavigationPropertyEntity) settings.getModelRegistry()
-                .getEntityTypeForName("Observation", true)
-                .getNavigationProperty("MultiDatastream");
+        EntityType entityType = settings.getModelRegistry()
+                .getEntityTypeForName("Observation", true);
+        Exceptions.unknownEntityTypeIf(entityType == null, "Unknown EntityType: Observation");
+        npMultiDatastream = entityType.getNavigationPropertyEntity("MultiDatastream");
         arrayValueHandlers = new ArrayValueHandlers();
     }
 
