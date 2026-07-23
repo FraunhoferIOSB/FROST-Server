@@ -136,9 +136,13 @@ public class MqttHelper11 {
                 connOpts.setPassword(mqttConfig.getPassword().toCharArray());
             }
             connOpts.setCleanSession(true);
+            LOGGER.debug("  {} Connecting publisher...", clientId);
             client.connect(connOpts).waitForCompletion(MQTT_CONNECT_TIMEOUT);
+            LOGGER.debug("  {} Publishing...", clientId);
             client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(MQTT_PUBLISH_TIMEOUT);
+            LOGGER.debug("  {} Disconnecting publisher...", clientId);
             client.disconnectForcibly();
+            LOGGER.debug("  {} Done.", clientId);
         } catch (RuntimeException | MqttException ex) {
             if (expectedExceptions.contains(ex.getClass())) {
                 LOGGER.debug("Got expected exception {}", ex.getClass());
