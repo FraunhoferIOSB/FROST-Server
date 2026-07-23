@@ -141,7 +141,7 @@ public class MqttHelper11 {
             LOGGER.debug("  {} Publishing...", clientId);
             client.publish(topic, message.getBytes(), qos, retained).waitForCompletion(MQTT_PUBLISH_TIMEOUT);
             LOGGER.debug("  {} Disconnecting publisher...", clientId);
-            client.disconnectForcibly();
+            client.disconnect();
             LOGGER.debug("  {} Done.", clientId);
         } catch (RuntimeException | MqttException ex) {
             if (expectedExceptions.contains(ex.getClass())) {
