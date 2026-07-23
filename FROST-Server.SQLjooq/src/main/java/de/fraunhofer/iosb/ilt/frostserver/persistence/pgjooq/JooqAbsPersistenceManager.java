@@ -955,7 +955,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             for (Table<?> table : tables) {
                 final Name name = table.getUnqualifiedName();
                 LOGGER.debug("  Found {}", name);
-                List<Table<?>> list = tableCache.computeIfAbsent(name, (t) -> new ArrayList<>());
+                List<Table<?>> list = tableCache.computeIfAbsent(name, t -> new ArrayList<>());
                 list.add(table);
             }
             LOGGER.debug("Filling table cache Done.");

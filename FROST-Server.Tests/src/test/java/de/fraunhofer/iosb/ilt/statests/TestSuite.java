@@ -293,12 +293,12 @@ public class TestSuite {
         getInstance().stopAllServers();
     }
 
-    public ServerSettings getServerSettings(Map<String, String> parameters) throws IOException, InterruptedException {
+    public ServerSettings getServerSettings(Map<String, String> parameters) throws IOException {
         int key = maybeStartServers(parameters);
         return serverSettings.get(key);
     }
 
-    public Server getServer(Map<String, String> parameters) throws IOException, InterruptedException {
+    public Server getServer(Map<String, String> parameters) throws IOException {
         int key = maybeStartServers(parameters);
         return httpServers.get(key);
     }
@@ -310,13 +310,13 @@ public class TestSuite {
         return keycloak;
     }
 
-    private synchronized void maybeStartMessagebus() throws InterruptedException, UnsupportedOperationException, IOException {
+    private synchronized void maybeStartMessagebus() {
         if (!mqttBus.isRunning()) {
             mqttBus.start();
         }
     }
 
-    private synchronized int maybeStartServers(Map<String, String> parameters) throws IOException, InterruptedException {
+    private synchronized int maybeStartServers(Map<String, String> parameters) throws IOException {
         int key = keyFromProperties(parameters);
         LOGGER.debug("Checking for parameters key {}", key);
         if (!serverSettings.containsKey(key)) {
@@ -329,12 +329,12 @@ public class TestSuite {
         return Objects.hashCode(props);
     }
 
-    private synchronized void startServers(int key, Map<String, String> parameters) throws IOException, InterruptedException {
+    private synchronized void startServers(int key, Map<String, String> parameters) throws IOException {
         if (serverSettings.containsKey(key)) {
             return;
         }
         maybeStartMessagebus();
-        parameters.computeIfAbsent(KEY_DB_NAME, (t) -> "db" + nextDbId.incrementAndGet());
+        parameters.computeIfAbsent(KEY_DB_NAME, t -> "db" + nextDbId.incrementAndGet());
         try {
             LOGGER.info("Testing if Mosquitto works...");
             MqttClient client = new MqttClient(
@@ -361,7 +361,7 @@ public class TestSuite {
         serverSettings.put(key, serverSetting);
 
         Map<String, String> paramsMap = new HashMap<>();
-        parameters.forEach((t, u) -> paramsMap.put(t, u));
+        paramsMap.putAll(parameters);
 
         Server myServer = new Server(0);
         ContextHandlerCollection contextHandlerCollection = new ContextHandlerCollection(true);

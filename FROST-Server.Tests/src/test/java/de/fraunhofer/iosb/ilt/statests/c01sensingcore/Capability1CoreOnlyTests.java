@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -391,57 +392,49 @@ public abstract class Capability1CoreOnlyTests extends AbstractTestClass {
     @Test
     void checkServiceRootUri() {
         LOGGER.info("  checkServiceRootUri");
-        try {
-            String response = getEntities(null);
-            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
-            JsonNode entities = jsonResponse.get("value");
-            Map<String, Boolean> addedLinks = new HashMap<>();
-            addedLinks.put("Things", false);
-            addedLinks.put("Locations", false);
-            addedLinks.put("HistoricalLocations", false);
-            addedLinks.put("Datastreams", false);
-            addedLinks.put("Sensors", false);
-            addedLinks.put("Observations", false);
-            addedLinks.put("ObservedProperties", false);
-            addedLinks.put("FeaturesOfInterest", false);
-            if (serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
-                addedLinks.put("MultiDatastreams", false);
+        String response = getEntities(null);
+        JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+        JsonNode entities = jsonResponse.get("value");
+        Map<String, Boolean> addedLinks = new HashMap<>();
+        addedLinks.put("Things", false);
+        addedLinks.put("Locations", false);
+        addedLinks.put("HistoricalLocations", false);
+        addedLinks.put("Datastreams", false);
+        addedLinks.put("Sensors", false);
+        addedLinks.put("Observations", false);
+        addedLinks.put("ObservedProperties", false);
+        addedLinks.put("FeaturesOfInterest", false);
+        if (serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
+            addedLinks.put("MultiDatastreams", false);
+        }
+        if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
+            addedLinks.put("Actuators", false);
+            addedLinks.put("TaskingCapabilities", false);
+            addedLinks.put("Tasks", false);
+        }
+        for (int i = 0; i < entities.size(); i++) {
+            JsonNode entity = entities.get(i);
+            if (!entity.has("name") || !entity.has("url")) {
+                fail("Service root URI component does not have proper JSON keys: name and value.");
             }
-            if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
-                addedLinks.put("Actuators", false);
-                addedLinks.put("TaskingCapabilities", false);
-                addedLinks.put("Tasks", false);
+            String name = entity.get("name").stringValue();
+            String nameUrl = entity.get("url").stringValue();
+            addedLinks.put(name, true);
+            if ("MultiDatastreams".equals(name)) {
+                // TODO: MultiDatastreams are not in the entity list yet.
+                String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
+                assertEquals(serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl, message);
+            } else {
+                Assertions.assertDoesNotThrow(() -> {
+                    EntityType entityType = EntityType.getForRelation(name);
+                    String message = "The URL for " + entityType.plural + " in Service Root URI is not compliant to SensorThings API.";
+                    assertEquals(serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl, message);
+                }, "There is a component in Service Root URI response that is not in SensorThings API : " + name);
             }
-            for (int i = 0; i < entities.size(); i++) {
-                JsonNode entity = entities.get(i);
-                if (!entity.has("name") || !entity.has("url")) {
-                    fail("Service root URI component does not have proper JSON keys: name and value.");
-                }
-                String name = entity.get("name").stringValue();
-                String nameUrl = entity.get("url").stringValue();
-                addedLinks.put(name, true);
-                if ("MultiDatastreams".equals(name)) {
-                    // TODO: MultiDatastreams are not in the entity list yet.
-                    String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
-                    assertEquals(serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl, message);
-                } else {
-                    try {
-                        EntityType entityType = EntityType.getForRelation(name);
-                        String message = "The URL for " + entityType.plural + " in Service Root URI is not compliant to SensorThings API.";
-                        assertEquals(serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl, message);
-                    } catch (IllegalArgumentException exc) {
-                        fail("There is a component in Service Root URI response that is not in SensorThings API : " + name);
-                    }
-                }
-            }
-            for (String key : addedLinks.keySet()) {
-                String message = "The Service Root URI response does not contain " + key;
-                assertTrue(addedLinks.get(key), message);
-            }
-
-        } catch (Exception e) {
-            LOGGER.error("An Exception occurred during testing!", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        }
+        for (String key : addedLinks.keySet()) {
+            String message = "The Service Root URI response does not contain " + key;
+            assertTrue(addedLinks.get(key), message);
         }
     }
 

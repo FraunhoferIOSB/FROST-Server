@@ -27,12 +27,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_S
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_SEND_WORKER_COUNT;
 import static de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus.TAG_TOPIC_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class ConfigDefaultsTest {
@@ -93,25 +93,15 @@ class ConfigDefaultsTest {
     void testDefaultValueLookupInvalid() {
         MqttMessageBus b = new MqttMessageBus();
         // Test invalid properties
-        try {
-            b.defaultValueInt("NOT_A_VALID_INT_PROPERTY");
-            fail("Should have thrown an exception for a non-existing default value.");
-        } catch (IllegalArgumentException exc) {
-            // This should happen.
-        }
-        try {
-            b.defaultValue("NOT_A_VALID_STR_PROPERTY");
-            fail("Should have thrown an exception for a non-existing default value.");
-        } catch (IllegalArgumentException exc) {
-            // This should happen.
-        }
-        try {
-            b.defaultValueBoolean("NOT_A_VALID_BOOL_PROPERTY");
-            fail("Should have thrown an exception for a non-existing default value.");
-        } catch (IllegalArgumentException exc) {
-            // This should happen.
-        }
-
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> b.defaultValueInt("NOT_A_VALID_INT_PROPERTY"),
+                "Should have thrown an exception for a non-existing default value.");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> b.defaultValue("NOT_A_VALID_STR_PROPERTY"),
+                "Should have thrown an exception for a non-existing default value.");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> b.defaultValueBoolean("NOT_A_VALID_BOOL_PROPERTY"),
+                "Should have thrown an exception for a non-existing default value.");
     }
 
     @Test
@@ -200,24 +190,15 @@ class ConfigDefaultsTest {
     void testDefaultValueLookupClassInvalid() {
         Class c = MqttMessageBus.class;
         // Test invalid properties
-        try {
-            ConfigUtils.getDefaultValueInt(c, "NOT_A_VALID_INT_PROPERTY");
-            fail("Should have thrown an exception for a non-existing default value.");
-        } catch (IllegalArgumentException exc) {
-            // This should happen.
-        }
-        try {
-            ConfigUtils.getDefaultValue(c, "NOT_A_VALID_STR_PROPERTY");
-            fail("Should have thrown an exception for a non-existing default value.");
-        } catch (IllegalArgumentException exc) {
-            // This should happen.
-        }
-        try {
-            ConfigUtils.getDefaultValue(c, "NOT_A_VALID_STR_PROPERTY");
-            fail("Should have thrown an exception for a non-existing default value.");
-        } catch (IllegalArgumentException exc) {
-            // This should happen.
-        }
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> de.fraunhofer.iosb.ilt.settings.ConfigUtils.getDefaultValueInt(c, "NOT_A_VALID_INT_PROPERTY"),
+                "Should have thrown an exception for a non-existing default value.");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> de.fraunhofer.iosb.ilt.settings.ConfigUtils.getDefaultValue(c, "NOT_A_VALID_STR_PROPERTY"),
+                "Should have thrown an exception for a non-existing default value.");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> de.fraunhofer.iosb.ilt.settings.ConfigUtils.getDefaultValue(c, "NOT_A_VALID_STR_PROPERTY"),
+                "Should have thrown an exception for a non-existing default value.");
     }
 
     @Test

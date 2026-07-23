@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.statests;
 
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class ServerSettings {
 
     private String mqttUrl = "";
 
-    private final Map<ServerVersion, Set<Requirement>> implementedRequirements = new HashMap<>();
+    private final Map<ServerVersion, Set<Requirement>> implementedRequirements = new EnumMap(ServerVersion.class);
     private final Set<ServerVersion> implementedVersions = new LinkedHashSet<>();
 
     private final Set<Extension> extensions = EnumSet.noneOf(Extension.class);

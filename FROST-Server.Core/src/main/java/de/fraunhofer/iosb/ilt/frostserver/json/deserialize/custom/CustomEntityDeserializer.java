@@ -147,9 +147,8 @@ public class CustomEntityDeserializer extends ValueDeserializer<Entity> {
                 deserializeNavigationProperty(parser, ctxt, npe, target);
             case NavigationPropertyEntitySet npes ->
                 deserializeNavigationProperty(parser, ctxt, npes, target);
-            default -> {
+            default ->
                 LOGGER.warn("Unknown property type: {}", property);
-            }
         }
     }
 

@@ -97,7 +97,7 @@ public abstract class AbstractTestClass {
                 }
                 setUpVersion();
             }
-        } catch (RuntimeException | ServiceFailureException | URISyntaxException | IOException | InterruptedException ex) {
+        } catch (RuntimeException | ServiceFailureException | URISyntaxException | IOException ex) {
             LOGGER.error("init failed.", ex);
         }
     }

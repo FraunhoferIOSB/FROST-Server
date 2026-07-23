@@ -476,7 +476,7 @@ public class PropertyFieldRegistry<T extends StaMainTable<T>> {
         public Field get(U table);
     }
 
-    public static abstract class PropertyFields<U extends StaMainTable<U>> {
+    public abstract static class PropertyFields<U extends StaMainTable<U>> {
 
         public final Property property;
         public final boolean jsonType;

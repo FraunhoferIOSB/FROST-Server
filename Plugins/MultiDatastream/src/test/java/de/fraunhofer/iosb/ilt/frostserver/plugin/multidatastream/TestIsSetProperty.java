@@ -118,26 +118,19 @@ public class TestIsSetProperty {
     }
 
     private void testEntityCompare(EntityType type, Set<Property> collectedProperties) {
-        try {
-
-            Entity entity = new DefaultEntity(type);
-            for (Property p : collectedProperties) {
-                addPropertyToObject(entity, p);
-            }
-            Entity entityEmpty = new DefaultEntity(type);
-
-            EntityChangedMessage message = new EntityChangedMessage();
-            entityEmpty.setEntityPropertiesSet(entity, message);
-            testPropertiesChanged(message, collectedProperties, entity, true);
-
-            message = new EntityChangedMessage();
-            entityEmpty.setEntityPropertiesSet(entityEmpty, message);
-            testPropertiesChanged(message, collectedProperties, entityEmpty, false);
-
-        } catch (NoSuchMethodException ex) {
-            LOGGER.error("Failed to access property.", ex);
-            fail("Failed to access property: " + ex.getMessage());
+        Entity entity = new DefaultEntity(type);
+        for (Property p : collectedProperties) {
+            addPropertyToObject(entity, p);
         }
+        Entity entityEmpty = new DefaultEntity(type);
+
+        EntityChangedMessage message = new EntityChangedMessage();
+        entityEmpty.setEntityPropertiesSet(entity, message);
+        testPropertiesChanged(message, collectedProperties, entity, true);
+
+        message = new EntityChangedMessage();
+        entityEmpty.setEntityPropertiesSet(entityEmpty, message);
+        testPropertiesChanged(message, collectedProperties, entityEmpty, false);
     }
 
     private void testPropertiesChanged(EntityChangedMessage message, Set<Property> collectedProperties, Entity entity, boolean shouldBeChanged) {
@@ -162,11 +155,11 @@ public class TestIsSetProperty {
         }
     }
 
-    private void addPropertyToObject(Entity entity, Property property) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property) {
         addPropertyToObject(entity, property, propertyValues);
     }
 
-    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) throws NoSuchMethodException {
+    private void addPropertyToObject(Entity entity, Property property, Map<Property, Object> valuesToUse) {
         Object value = valuesToUse.get(property);
         entity.setProperty(property, value);
     }

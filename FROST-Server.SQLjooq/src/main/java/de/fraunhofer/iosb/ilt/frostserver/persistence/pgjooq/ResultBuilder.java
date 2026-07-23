@@ -194,7 +194,7 @@ public class ResultBuilder implements ResourcePathVisitor {
         }
 
         Query subQuery = expand.getSubQuery();
-        if (firstNp instanceof NavigationPropertyEntitySet npes) {
+        if (firstNp instanceof NavigationPropertyEntitySet) {
             createExpandedElement(entity, firstNp, subQuery);
         } else if (existing == null) {
             // Nothing to expand.

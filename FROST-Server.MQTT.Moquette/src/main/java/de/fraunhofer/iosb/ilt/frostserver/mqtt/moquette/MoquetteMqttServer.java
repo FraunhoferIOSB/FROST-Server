@@ -450,7 +450,6 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             LOGGER.trace("      Client disconnected: {}", clientId);
             clientSubscriptions
                     .getOrDefault(clientId, Collections.emptySet())
-                    .stream()
                     .forEach(subscribedTopic -> fireUnsubscribe(new SubscriptionEvent(clientId, subscribedTopic, null)));
             clientSubscriptions.remove(clientId);
         }
