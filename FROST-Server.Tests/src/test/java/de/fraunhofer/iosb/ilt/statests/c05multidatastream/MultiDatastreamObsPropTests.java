@@ -79,7 +79,7 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
@@ -112,7 +112,7 @@ public abstract class MultiDatastreamObsPropTests extends AbstractTestClass {
      * @throws ServiceFailureException
      * @throws URISyntaxException
      */
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
         sSrvc.create(location);
         LOCATIONS.add(location);

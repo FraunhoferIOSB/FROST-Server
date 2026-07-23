@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
-import java.io.IOException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.TreeNode;
@@ -28,7 +27,7 @@ import tools.jackson.databind.DeserializationContext;
  */
 public interface CustomDeserializer {
 
-    public Object deserialize(TreeNode json) throws IOException;
+    public Object deserialize(TreeNode json) throws JacksonException;
 
     public Object deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException;
 }

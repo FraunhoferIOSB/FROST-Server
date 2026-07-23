@@ -78,7 +78,7 @@ class EntityBuilderTest {
     }
 
     @Test
-    void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void testEntityBuilders() {
         final Set<EntityType> entityTypes = modelRegistry.getEntityTypes();
         assertTrue(entityTypes.contains(pluginActuation.etActuator), "Actuation entities not registered.");
         for (EntityType type : entityTypes) {

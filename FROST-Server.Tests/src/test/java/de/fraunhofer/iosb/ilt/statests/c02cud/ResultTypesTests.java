@@ -30,9 +30,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +59,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
@@ -84,7 +82,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         }
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         THINGS.add(thing);
         Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
@@ -253,7 +251,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
-    void testResultQualityObject() throws ServiceFailureException, IOException {
+    void testResultQualityObject() throws ServiceFailureException {
         LOGGER.info("  testResultQualityObject");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
@@ -280,7 +278,7 @@ public abstract class ResultTypesTests extends AbstractTestClass {
      * @throws ServiceFailureException if the sSrvc connection fails.
      */
     @Test
-    void testResultQualityArray() throws ServiceFailureException, IOException {
+    void testResultQualityArray() throws ServiceFailureException {
         LOGGER.info("  testResultQualityArray");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));

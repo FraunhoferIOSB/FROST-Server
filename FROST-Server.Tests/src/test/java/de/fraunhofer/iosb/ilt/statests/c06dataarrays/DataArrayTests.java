@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +86,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
@@ -101,7 +100,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Test
-    void test01GetDataArray() throws ServiceFailureException {
+    void test01GetDataArray() {
         LOGGER.info("  test01GetDataArray");
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=3&$resultFormat=dataArray");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
@@ -112,7 +111,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     @Test
-    void test02GetDataArraySelect() throws ServiceFailureException {
+    void test02GetDataArraySelect() {
         LOGGER.info("  test02GetDataArraySelect");
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=4&$resultFormat=dataArray&$select=result,phenomenonTime&$orderby=phenomenonTime%20desc");
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
@@ -418,7 +417,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
         FEATURES.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         sSrvc.create(thing);
         THINGS.add(thing);

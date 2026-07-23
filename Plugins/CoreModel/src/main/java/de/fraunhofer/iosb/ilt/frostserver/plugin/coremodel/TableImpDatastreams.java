@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.Sec
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.util.GeoHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import net.time4j.Moment;
@@ -230,7 +229,7 @@ public class TableImpDatastreams extends StaTableAbstract<TableImpDatastreams> {
                                 try {
                                     GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
                                     entity.setProperty(pluginCoreModel.epObservedArea, area);
-                                } catch (IOException e) {
+                                } catch (RuntimeException e) {
                                     // It's not a polygon, probably a point or a line.
                                 }
                             }

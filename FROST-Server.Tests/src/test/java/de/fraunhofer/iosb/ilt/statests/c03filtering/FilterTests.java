@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public abstract class FilterTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
@@ -94,7 +93,7 @@ public abstract class FilterTests extends AbstractTestClass {
         OBSERVATIONS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         sSrvc.create(thing);
         THINGS.add(thing);
@@ -225,7 +224,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testIndirectFilter() throws ServiceFailureException {
+    void testIndirectFilter() {
         LOGGER.info("  testIndirectFilter");
         Dao doa = sSrvc.dao(sMdl.etThing);
         testFilterResults(doa, "Locations/name eq 'Location 2'", getFromList(THINGS, 1));
@@ -239,7 +238,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testDeepIndirection() throws ServiceFailureException {
+    void testDeepIndirection() {
         LOGGER.info("  testDeepIndirection");
         Dao doa = sSrvc.dao(sMdl.etObservedProperty);
 
@@ -253,7 +252,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testSubString() throws ServiceFailureException {
+    void testSubString() {
         LOGGER.info("  testSubString");
         Dao doa = sSrvc.dao(sMdl.etThing);
 
@@ -269,7 +268,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testEqualsNull() throws ServiceFailureException {
+    void testEqualsNull() {
         LOGGER.info("  testEqualsNull");
         Dao doa = sSrvc.dao(sMdl.etThing);
 
@@ -285,7 +284,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testNotEqualsNull() throws ServiceFailureException {
+    void testNotEqualsNull() {
         LOGGER.info("  testNotEqualsNull");
         Dao doa = sSrvc.dao(sMdl.etThing);
 
@@ -347,7 +346,7 @@ public abstract class FilterTests extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testAnyFilter() throws ServiceFailureException {
+    void testAnyFilter() {
         LOGGER.info("  testAnyFilter");
         Dao doa = sSrvc.dao(sMdl.etThing);
         testFilterResults(doa, "Locations/any(l:l/name eq 'Location 2')", getFromList(THINGS, 1));

@@ -21,7 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ComplexValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import tools.jackson.core.JacksonException;
@@ -29,6 +28,7 @@ import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.core.TreeNode;
+import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ObjectMapper;
@@ -212,23 +212,23 @@ public class ParserUtils {
         }
     }
 
-    public static ComplexValue parseComplexValue(ObjectMapper mapper, TypeComplex type, String value) throws IOException {
+    public static ComplexValue parseComplexValue(ObjectMapper mapper, TypeComplex type, String value) {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContext dsc = mapper._deserializationContext();
             return ParserUtils.getComplexTypeDeserializer(type)
                     .deserialize(parser, dsc);
         } catch (StackOverflowError err) {
-            throw new IOException("Json is too deeply nested.");
+            throw new StreamReadException("Json is too deeply nested.");
         }
     }
 
-    public static List<ComplexValue> parseComplexValueList(ObjectMapper mapper, TypeComplex type, String value) throws IOException {
+    public static List<ComplexValue> parseComplexValueList(ObjectMapper mapper, TypeComplex type, String value) {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContext dsc = mapper._deserializationContext();
             return ParserUtils.getComplexTypeListDeserializer(type)
                     .deserialize(parser, dsc);
         } catch (StackOverflowError err) {
-            throw new IOException("Json is too deeply nested.");
+            throw new StreamReadException("Json is too deeply nested.");
         }
     }
 

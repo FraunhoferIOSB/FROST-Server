@@ -43,8 +43,6 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,7 +89,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
             createEntities();
         } catch (StatusCodeException ex) {
             LOGGER.error("Failed to set up; {}.\n{}", ex.getStatusCode(), ex.getReturnedContent(), ex);
-        } catch (ServiceFailureException | URISyntaxException | IOException ex) {
+        } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to set up.", ex);
         }
     }
@@ -112,7 +110,7 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         OBSERVATIONS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException, IOException {
+    private static void createEntities() throws ServiceFailureException {
         for (int i = 0; i < 4; i++) {
             MapValue properties = CollectionsHelper.propertiesBuilder()
                     .addItem("string", generateString(i, 10))

@@ -33,7 +33,6 @@ import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.WAIT_AFTER_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
@@ -297,7 +296,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_00_TriggerInit() throws IOException {
+    void test_00_TriggerInit() {
         LOGGER.info("  test_00_TriggerInit");
         EntityCreator creator = (user) -> mdlSensing.newSensor(
                 user + " MQTT-Sensor",
@@ -544,7 +543,7 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_04d_ThingCreateForProject1Mqtt() throws JsonProcessingException {
+    void test_04d_ThingCreateForProject1Mqtt() {
         LOGGER.info("  test_04d_ThingCreateForProject1Mqtt");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
                 .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk());

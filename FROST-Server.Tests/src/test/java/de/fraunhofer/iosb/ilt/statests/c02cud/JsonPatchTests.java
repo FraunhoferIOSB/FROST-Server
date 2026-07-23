@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.statests.c02cud;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.github.fge.jackson.jsonpointer.JsonPointerException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
@@ -34,8 +33,6 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import jakarta.json.Json;
 import jakarta.json.JsonPatch;
 import jakarta.json.JsonValue;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
@@ -69,7 +66,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         EntityUtils.deleteAll(sSrvc);
@@ -89,8 +86,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * This method is run after all the tests of this class is run and clean the
      * database.
      *
-     * @throws
-     * de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
+     * @throws ServiceFailureException
      */
     @AfterAll
     public static void deleteEverything() throws ServiceFailureException {
@@ -98,7 +94,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         cleanup();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         {
             Entity thing = sMdl.newThing("Thing 1", "The first thing.")
                     .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("key0", "zero").build());
@@ -153,11 +149,9 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * Tests if JSON-Patch is working on Things.
      *
      * @throws ServiceFailureException if the sSrvc connection fails.
-     * @throws JsonPointerException if the patch is invalid.
-     * @throws IOException if the patch is invalid.
      */
     @Test
-    void jsonPatchThingTest() throws ServiceFailureException, JsonPointerException, IOException {
+    void jsonPatchThingTest() throws ServiceFailureException {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
         JsonPatch patch = Json.createPatchBuilder()
@@ -190,7 +184,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     }
 
     @Test
-    void jsonPatchThingNoOpTest() throws ServiceFailureException, JsonPointerException, IOException {
+    void jsonPatchThingNoOpTest() throws ServiceFailureException {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
         JsonPatch patch = Json.createPatchBuilder()
@@ -218,11 +212,9 @@ public abstract class JsonPatchTests extends AbstractTestClass {
      * Tests if JSON-Patch is working on Datastreams.
      *
      * @throws ServiceFailureException if the sSrvc connection fails.
-     * @throws JsonPointerException if the patch is invalid.
-     * @throws IOException if the patch is invalid.
      */
     @Test
-    void jsonPatchDatastreamTest() throws ServiceFailureException, JsonPointerException, IOException {
+    void jsonPatchDatastreamTest() throws ServiceFailureException {
         LOGGER.info("  jsonPatchDatastreamTest");
         Entity dsOnlyId = DATASTREAMS.get(0).withOnlyPk();
         JsonPatch patch = Json.createPatchBuilder()

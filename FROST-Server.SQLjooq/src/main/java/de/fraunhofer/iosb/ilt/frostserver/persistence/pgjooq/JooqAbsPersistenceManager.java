@@ -126,6 +126,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -451,7 +452,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             newEntity = entityParser.parseEntity(original.getType(), newNode.toString());
             // Make sure the id is not changed by the patch.
             newEntity.setPrimaryKeyValues(id);
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to parse JSON after patch.");
             throw new IllegalArgumentException("Exception", ex);
         }

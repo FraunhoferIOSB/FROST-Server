@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,14 +52,14 @@ class SerialisationTest {
     }
 
     @Test
-    void serialiseDate() throws IOException {
+    void serialiseDate() {
         String expResult = "\"1987-06-05\"";
         final String result = JsonWriter.writeObject(new Date(87, 5, 5));
         assertTrue(jsonEqual(expResult, result), "Date not serialised correctly.");
     }
 
     @Test
-    void serialiseEmptyProperties() throws IOException {
+    void serialiseEmptyProperties() {
         String expResult = "{\"foo\":\"bar\"}";
         Map<String, String> props = new HashMap<>();
         props.put("foo", "bar");

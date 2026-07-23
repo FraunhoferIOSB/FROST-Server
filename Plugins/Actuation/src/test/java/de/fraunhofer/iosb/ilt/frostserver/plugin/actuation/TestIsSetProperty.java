@@ -78,7 +78,7 @@ public class TestIsSetProperty {
     }
 
     @Test
-    void testEntityBuilders() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void testEntityBuilders() {
         for (EntityType type : modelRegistry.getEntityTypes()) {
             Set<Property> properties = type.getProperties().stream().filter(t -> !t.isReadOnly()).collect(Collectors.toSet());
             testEntityType(type, properties);

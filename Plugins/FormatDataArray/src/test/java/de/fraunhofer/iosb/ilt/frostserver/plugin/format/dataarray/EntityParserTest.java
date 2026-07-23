@@ -32,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArray
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +73,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationDataArray() throws IOException {
+    void readObservationDataArray() {
         String json = createDataJson();
         List<DataArrayValue> expectedResult = new ArrayList<>();
 

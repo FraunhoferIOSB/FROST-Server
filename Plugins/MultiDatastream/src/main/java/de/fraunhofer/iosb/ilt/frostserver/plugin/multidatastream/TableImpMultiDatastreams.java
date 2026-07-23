@@ -54,7 +54,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import net.time4j.Moment;
@@ -273,7 +272,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                                 try {
                                     GeoJsonObject area = GeoHelper.parseGeoJson(observedArea);
                                     entity.setProperty(pluginCoreModel.epObservedArea, area);
-                                } catch (IOException e) {
+                                } catch (RuntimeException e) {
                                     // It's not a polygon, probably a point or a line.
                                 }
                             }
@@ -302,7 +301,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                             try {
                                 List<ComplexValue> units = ParserUtils.parseComplexValueList(SimpleJsonMapper.getSimpleObjectMapper(), StandardProperties.TYPE_UOM, fieldJsonValue.getStringValue());
                                 entity.setProperty(pluginMultiDatastream.epUnitOfMeasurements, units);
-                            } catch (IOException ex) {
+                            } catch (RuntimeException ex) {
                                 LOGGER.error("Failed to parse stored UnitOfMeasure List: {}", ex.getMessage());
                                 LOGGER.debug("Failed to parse stored UnitOfMeasure List.", ex);
                             }

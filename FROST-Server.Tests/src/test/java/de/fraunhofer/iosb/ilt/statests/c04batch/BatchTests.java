@@ -39,7 +39,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.IdType;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +80,7 @@ public abstract class BatchTests extends AbstractTestClass {
         eh2 = new EntityHelper11(sSrvc);
         try {
             createEntities();
-        } catch (ServiceFailureException | URISyntaxException ex) {
+        } catch (ServiceFailureException ex) {
             LOGGER.error("Failed to set up.", ex);
         }
     }
@@ -98,7 +97,7 @@ public abstract class BatchTests extends AbstractTestClass {
         OBSERVED_PROPS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         for (int i = 0; i < 6; i++) {
             MapValue properties = CollectionsHelper.propertiesBuilder()
                     .addItem("int", i + 8)

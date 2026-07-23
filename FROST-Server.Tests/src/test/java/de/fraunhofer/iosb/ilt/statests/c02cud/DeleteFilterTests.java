@@ -107,7 +107,7 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
         }
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         THINGS.add(thing);
         Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));

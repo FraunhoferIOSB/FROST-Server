@@ -32,7 +32,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.IOException;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -80,7 +79,7 @@ public class EntitySubscription extends AbstractSubscription {
     }
 
     @Override
-    public String doFormatMessage(Entity entity) throws IOException {
+    public String doFormatMessage(Entity entity) {
         PrincipalExtended oldLocalPrincipal = PrincipalExtended.getLocalPrincipal();
         try {
             PrincipalExtended.setLocalPrincipal(userPrincipal);

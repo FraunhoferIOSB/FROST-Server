@@ -39,7 +39,6 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,7 +86,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         createEntities();
@@ -110,7 +109,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         OBSERVATIONS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         createLocations();
         createThings();
     }
@@ -256,7 +255,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     @Test
-    void testCustomLinksFilter1() throws ServiceFailureException {
+    void testCustomLinksFilter1() {
         LOGGER.info("  testCustomLinksFilter1");
         EntityUtils.testFilterResults(sSrvc.dao(sMdl.etThing), "properties/alternate.Location/name eq 'Location 1.0'", Utils.getFromList(THINGS, 0, 1));
     }

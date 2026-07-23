@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiData
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,7 +69,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeObservationDataArray() throws IOException {
+    void writeObservationDataArray() {
         String expResult = createDataJson();
 
         List<String> components = new ArrayList<>();

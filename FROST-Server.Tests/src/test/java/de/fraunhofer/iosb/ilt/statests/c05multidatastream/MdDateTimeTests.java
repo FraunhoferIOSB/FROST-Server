@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
-import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -104,7 +103,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
@@ -124,7 +123,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
         OBSERVATIONS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         THINGS.add(thing);
         Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
@@ -292,7 +291,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test01Lt() throws ServiceFailureException {
+    void test01Lt() {
         LOGGER.info("  test01Lt");
         String op = "lt";
         testTimeOpValue(op,
@@ -328,7 +327,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test02Gt() throws ServiceFailureException {
+    void test02Gt() {
         LOGGER.info("  test02Gt");
         String op = "gt";
         testTimeOpValue(op,
@@ -364,7 +363,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test03Le() throws ServiceFailureException {
+    void test03Le() {
         LOGGER.info("  test03Le");
         String op = "le";
         testTimeOpValue(op,
@@ -400,7 +399,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test04Ge() throws ServiceFailureException {
+    void test04Ge() {
         LOGGER.info("  test04Ge");
         String op = "ge";
         testTimeOpValue(op,
@@ -436,7 +435,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test05Eq() throws ServiceFailureException {
+    void test05Eq() {
         LOGGER.info("  test05Eq");
         String op = "eq";
         testTimeOpValue(op,
@@ -472,7 +471,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test06Before() throws ServiceFailureException {
+    void test06Before() {
         LOGGER.info("  test06Before");
         String tpl = "before(%s,%s)";
         testTimeValue(tpl,
@@ -508,7 +507,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test07After() throws ServiceFailureException {
+    void test07After() {
         LOGGER.info("  test07After");
         String tpl = "after(%s,%s)";
         testTimeValue(tpl,
@@ -544,7 +543,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test08Meets() throws ServiceFailureException {
+    void test08Meets() {
         LOGGER.info("  test08Meets");
         String tpl = "meets(%s,%s)";
         testTimeValue(tpl,
@@ -580,7 +579,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test09During() throws ServiceFailureException {
+    void test09During() {
         LOGGER.info("  test09During");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         filterForException(doa, String.format("during(resultTime,%s)", T700), 400);
@@ -616,7 +615,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test10Overlaps() throws ServiceFailureException {
+    void test10Overlaps() {
         LOGGER.info("  test10Overlaps");
         String tpl = "overlaps(%s,%s)";
         testTimeValue(tpl,
@@ -652,7 +651,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test11Starts() throws ServiceFailureException {
+    void test11Starts() {
         LOGGER.info("  test11Starts");
         String tpl = "starts(%s,%s)";
         testTimeValue(tpl,
@@ -688,7 +687,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test12Finishes() throws ServiceFailureException {
+    void test12Finishes() {
         LOGGER.info("  test12Finishes");
         String tpl = "finishes(%s,%s)";
         testTimeValue(tpl,
@@ -724,7 +723,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test13Year() throws ServiceFailureException {
+    void test13Year() {
         LOGGER.info("  test13Year");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, "year(resultTime) eq 2015", getFromList(OBSERVATIONS, 21, 23));
@@ -733,7 +732,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test14Durations() throws ServiceFailureException {
+    void test14Durations() {
         LOGGER.info("  test14Durations");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         // Durations
@@ -761,7 +760,7 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     @Test
-    void test15AlternativeOverlaps() throws ServiceFailureException {
+    void test15AlternativeOverlaps() {
         LOGGER.info("  test15AlternativeOverlaps");
         Dao doa = sSrvc.dao(sMdl.etObservation);
         testFilterResults(doa, String.format("not resultTime lt %s and not resultTime ge %s", T700, T800), getFromList(OBSERVATIONS, 2, 3, 4));

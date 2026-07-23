@@ -382,7 +382,7 @@ public abstract class EntityHelperAbstract {
 
     public abstract List<String> changeEntity(Entity original) throws IllegalArgumentException;
 
-    public final Entity putEntity(Entity original) throws ServiceFailureException {
+    public final Entity putEntity(Entity original) {
         changeEntity(original);
         sendHttpPutEntity(original);
         return original;

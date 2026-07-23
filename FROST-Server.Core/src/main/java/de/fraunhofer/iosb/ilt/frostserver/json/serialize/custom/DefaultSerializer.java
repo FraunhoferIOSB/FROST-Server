@@ -18,7 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
 
 /**
  *
@@ -27,7 +27,7 @@ import java.io.IOException;
 class DefaultSerializer implements CustomSerializer {
 
     @Override
-    public String serialize(Object object) throws IOException {
+    public String serialize(Object object) throws JacksonException {
         if (object == null) {
             return null;
         }

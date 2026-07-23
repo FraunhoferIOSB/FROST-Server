@@ -85,7 +85,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         mMdl = sSrvc.getModel(SensorThingsV11MultiDatastream.class);
@@ -118,7 +118,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
      * @throws ServiceFailureException
      * @throws URISyntaxException
      */
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
         sSrvc.create(location);
         LOCATIONS.add(location);
@@ -288,7 +288,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     }
 
     @Test
-    void test03ObservationInMultiDatastreamIncorrect() throws ServiceFailureException {
+    void test03ObservationInMultiDatastreamIncorrect() {
         LOGGER.info("  test03ObservationInMultiDatastreamIncorrect");
         Assertions.assertThrows(ServiceFailureException.class, () -> {
             Entity o = mMdl.newObservation(1, MULTIDATASTREAMS.get(1).withOnlyPk());
@@ -349,7 +349,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     }
 
     @Test
-    void test04Json() throws ServiceFailureException {
+    void test04Json() {
         LOGGER.info("  test04Json");
         JsonNode json = getJsonValue(serverSettings.getServiceUrl(version) + "/Things");
         entitiesHaveOneOf(json, "Things", "MultiDatastreams@iot.navigationLink");
@@ -475,7 +475,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     }
 
     @Test
-    void test12IncorrectObservation() throws ServiceFailureException {
+    void test12IncorrectObservation() {
         LOGGER.info("  test12IncorrectObservation");
         // Try to give Observation 1 a MultiDatastream without removing the Datastream. Should give an error.
         Entity modifiedObservation = OBSERVATIONS.get(0).withOnlyPk();
@@ -484,7 +484,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     }
 
     @Test
-    void test13IncorrectObservedProperty() throws ServiceFailureException {
+    void test13IncorrectObservedProperty() {
         LOGGER.info("  test13IncorrectObservedProperty");
         // Try to add a MultiDatastream to an ObservedProperty. Should give an error.
         Entity modifiedObservedProp = OBSERVED_PROPS.get(1).withOnlyPk();

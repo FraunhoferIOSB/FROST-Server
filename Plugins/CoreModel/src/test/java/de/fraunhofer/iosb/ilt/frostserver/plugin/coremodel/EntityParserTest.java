@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +69,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readDatastreamBasic() throws IOException {
+    void readDatastreamBasic() {
         String json = "{\n"
                 + "    \"unitOfMeasurement\": \n"
                 + "    {\n"
@@ -107,7 +106,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readDatastreamWithAllValuesPresent() throws IOException {
+    void readDatastreamWithAllValuesPresent() {
         String json = """
                 {
                     "unitOfMeasurement":
@@ -143,7 +142,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readDatastreamWithAllValuesMissing() throws IOException {
+    void readDatastreamWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etDatastream, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epUnitOfMeasurement)
@@ -159,7 +158,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readDatastreamWithObservedAreaGeoJsonPolygon() throws IOException {
+    void readDatastreamWithObservedAreaGeoJsonPolygon() {
         final String json = """
                 {
                     "unitOfMeasurement":
@@ -203,7 +202,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readDatastreamWithObservedPropertyAndSensor() throws IOException {
+    void readDatastreamWithObservedPropertyAndSensor() {
         String json = """
                 {
                     "unitOfMeasurement": {
@@ -245,7 +244,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readFeatureOfInterstBasic() throws IOException {
+    void readFeatureOfInterstBasic() {
         {
             String json = """
                     {
@@ -285,7 +284,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readFeatureOfInterstWithAllValuesPresent() throws IOException {
+    void readFeatureOfInterstWithAllValuesPresent() {
         String json = """
                 {
                     "name": "Underground Air Quality in NYC train tunnels",
@@ -304,7 +303,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readFeatureOfInterstWithAllValuesMissing() throws IOException {
+    void readFeatureOfInterstWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etFeatureOfInterest, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
@@ -314,7 +313,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readLocationBasic() throws IOException {
+    void readLocationBasic() {
         String json = """
                 {
                     "name": "my backyard",
@@ -335,7 +334,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readLocationWithAllValuesPresent() throws IOException {
+    void readLocationWithAllValuesPresent() {
         String json = """
                 {
                     "name": "my backyard",
@@ -355,7 +354,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readLocationWithAllValuesMissing() throws IOException {
+    void readLocationWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etLocation, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
@@ -365,7 +364,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readLocationWithLinkedThings() throws IOException {
+    void readLocationWithLinkedThings() {
         String json = """
                 {
                     "name": "my backyard",
@@ -391,7 +390,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationWithAllValuesPresent() throws IOException {
+    void readObservationWithAllValuesPresent() {
         String json = """
                 {
                   "phenomenonTime": "2015-04-13T00:00:00Z",
@@ -417,7 +416,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationWithAllValuesMissing() throws IOException {
+    void readObservationWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservation, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epPhenomenonTime)
@@ -432,7 +431,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationWithLinks() throws IOException {
+    void readObservationWithLinks() {
         String json = """
                 {
                   "phenomenonTime": "2015-04-13T00:00:00Z",
@@ -450,7 +449,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationWithIncorrectLink() throws IOException {
+    void readObservationWithIncorrectLink() {
         String json = """
                 {
                   "phenomenonTime": "2015-04-13T00:00:00Z",
@@ -462,7 +461,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationWithLinkedFeatureOfInterest() throws IOException {
+    void readObservationWithLinkedFeatureOfInterest() {
         String json = """
                 {
                   "phenomenonTime": "2015-04-13T00:00:00Z",
@@ -480,7 +479,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationWithFeatureOfInterest() throws IOException {
+    void readObservationWithFeatureOfInterest() {
         String json = """
                 {
                   "phenomenonTime": "2015-04-13T00:00:00Z",
@@ -509,7 +508,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservationPrecision() throws IOException {
+    void readObservationPrecision() {
         String json = """
                 {
                   "result" : 100.00
@@ -530,7 +529,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservedPropertyBasic() throws IOException {
+    void readObservedPropertyBasic() {
         String json = """
                 {
                   "name": "ObservedPropertyUp Tempomatic 2000",
@@ -545,7 +544,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservedPropertyWithLinks() throws IOException {
+    void readObservedPropertyWithLinks() {
         String json = """
                 {
                     "name": "ObservedPropertyUp Tempomatic 2000",
@@ -567,7 +566,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservedPropertyWithAllValuesPresent() throws IOException {
+    void readObservedPropertyWithAllValuesPresent() {
         String json = """
                 {
                   "name": "ObservedPropertyUp Tempomatic 2000",
@@ -581,7 +580,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readObservedPropertyWithAllValuesMissing() throws IOException {
+    void readObservedPropertyWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etObservedProperty, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epName)
@@ -590,7 +589,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readSensorBasic() throws IOException {
+    void readSensorBasic() {
         String json = """
                 {
                     "name": "SensorUp Tempomatic 2000",
@@ -607,7 +606,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readSensorWithLinks() throws IOException {
+    void readSensorWithLinks() {
         String json = """
                 {
                     "name": "SensorUp Tempomatic 2000",
@@ -657,7 +656,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readSensorWithBadLink() throws IOException {
+    void readSensorWithBadLink() {
         final String json = """
                 {
                     "name": "SensorUp Tempomatic 2000",
@@ -680,7 +679,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readSensorWithAllValuesPresent() throws IOException {
+    void readSensorWithAllValuesPresent() {
         String json = """
                 {
                     "name": "SensorUp Tempomatic 2000",
@@ -696,7 +695,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readSensorWithAllValuesMissing() throws IOException {
+    void readSensorWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etSensor, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epDescription)
@@ -706,7 +705,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingBasic() throws IOException {
+    void readThingBasic() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -729,7 +728,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithAllValuesPresent() throws IOException {
+    void readThingWithAllValuesPresent() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -747,7 +746,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithAllValuesMissing() throws IOException {
+    void readThingWithAllValuesMissing() {
         String json = "{}";
         Entity result = entityParser.parseEntity(pluginCoreModel.etThing, json);
         assertTrue(!result.isSetProperty(pluginCoreModel.epName)
@@ -756,7 +755,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithNestedProperties() throws IOException {
+    void readThingWithNestedProperties() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -785,7 +784,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithLocation() throws IOException {
+    void readThingWithLocation() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -827,7 +826,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithLinks1() throws IOException {
+    void readThingWithLinks1() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -857,7 +856,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithLinks2() throws IOException {
+    void readThingWithLinks2() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -887,7 +886,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readThingWithLocationAndDatastream() throws IOException {
+    void readThingWithLocationAndDatastream() {
         String json = """
                 {
                     "name": "camping lantern",
@@ -1033,7 +1032,7 @@ class EntityParserTest {
     }
 
     @Test
-    void readEntityLongId() throws IOException {
+    void readEntityLongId() {
         final PrimaryKey thingPrimaryKey = pluginCoreModel.etThing.getPrimaryKey();
         final EntityPropertyMain thingIdProperty = thingPrimaryKey.getKeyProperties().get(0);
         {

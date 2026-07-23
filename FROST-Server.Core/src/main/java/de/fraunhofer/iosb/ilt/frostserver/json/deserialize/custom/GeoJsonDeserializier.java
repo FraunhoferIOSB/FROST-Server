@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom;
 
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,7 +49,7 @@ public class GeoJsonDeserializier implements CustomDeserializer {
     }
 
     @Override
-    public Object deserialize(TreeNode json) throws IOException {
+    public Object deserialize(TreeNode json) throws JacksonException {
         return SimpleJsonMapper.getSimpleObjectMapper().treeToValue(json, GeoJsonObject.class);
     }
 }

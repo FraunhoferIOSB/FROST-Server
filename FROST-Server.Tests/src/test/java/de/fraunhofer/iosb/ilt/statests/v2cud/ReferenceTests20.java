@@ -24,8 +24,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROP
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.fge.jackson.jsonpointer.JsonPointerException;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
@@ -46,7 +44,6 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -100,7 +97,7 @@ public class ReferenceTests20 extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV20Core.class);
         try {
@@ -141,7 +138,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         cleanup();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         {
             Entity thing = sMdl.newThing("Thing 1", "The first thing.");
             sSrvc.create(thing);
@@ -231,7 +228,7 @@ public class ReferenceTests20 extends AbstractTestClass {
      * Tests if we can PUT on Datastream(x)/UltimateFeatureOfInterest/$ref.
      */
     @Test
-    void test01_editRefEntity() throws ServiceFailureException, JsonPointerException, IOException {
+    void test01_editRefEntity() throws ServiceFailureException {
         LOGGER.info("  test01_editRefEntity");
         final Entity ds0 = DATASTREAMS.get(0);
         putEntityRefAndTest(ds0, sMdl.npDatastreamProximateFoi, FEATURES.get(0), true);
@@ -253,7 +250,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         }
     }
 
-    private void putEntityRefAndTest(Entity source, NavigationPropertyEntity np, Entity target, boolean abs) throws ServiceFailureException, JsonProcessingException {
+    private void putEntityRefAndTest(Entity source, NavigationPropertyEntity np, Entity target, boolean abs) throws ServiceFailureException {
         String selfLinkSrc = source.getSelfLink();
         String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
         String selfLinkTrgt = target.getSelfLink(abs);
@@ -275,7 +272,7 @@ public class ReferenceTests20 extends AbstractTestClass {
      * Tests if we can PUT on Feature(x)/FeaturesTypes/$ref.
      */
     @Test
-    void test02_editRefEntitySet() throws ServiceFailureException, JsonPointerException, IOException {
+    void test02_editRefEntitySet() {
         LOGGER.info("  test02_editRefEntitySet");
         final Entity f0 = FEATURES.get(0);
         putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 0));
@@ -297,7 +294,7 @@ public class ReferenceTests20 extends AbstractTestClass {
     }
 
     @Test
-    void test03_editRefEntitySet() throws ServiceFailureException, JsonPointerException, IOException {
+    void test03_editRefEntitySet() {
         LOGGER.info("  test03_editRefEntitySet");
         final Entity f0 = FEATURES.get(0);
         putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 0, 1, 2));
@@ -323,7 +320,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, true, FEATURE_TYPES.get(0), getFromList(FEATURE_TYPES, 0, 1, 2));
     }
 
-    private void putEntitySetRefsAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) throws ServiceFailureException, JsonProcessingException {
+    private void putEntitySetRefsAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) {
         String selfLinkSrc = source.getSelfLink();
         String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
 
@@ -346,7 +343,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         EntityUtils.testFilterResults(source.dao(np), "", targets);
     }
 
-    private void postEntitySetRefAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, Entity target, List<Entity> expected) throws ServiceFailureException, JsonProcessingException {
+    private void postEntitySetRefAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, Entity target, List<Entity> expected) {
         String selfLinkSrc = source.getSelfLink();
         String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
 

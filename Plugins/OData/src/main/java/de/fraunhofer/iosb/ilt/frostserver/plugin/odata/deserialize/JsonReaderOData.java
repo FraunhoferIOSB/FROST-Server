@@ -36,11 +36,11 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.request.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import tools.jackson.core.JsonParser;
+import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
@@ -180,40 +180,40 @@ public class JsonReaderOData implements JsonReader {
     }
 
     @Override
-    public Entity parseEntity(EntityType entityType, String value) throws IOException {
+    public Entity parseEntity(EntityType entityType, String value) {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
-            throw new IOException("Json is too deeply nested.");
+            throw new StreamReadException("Json is too deeply nested.");
         }
     }
 
     @Override
-    public Entity parseEntity(EntityType entityType, Reader value) throws IOException {
+    public Entity parseEntity(EntityType entityType, Reader value) {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
-            throw new IOException("Json is too deeply nested.");
+            throw new StreamReadException("Json is too deeply nested.");
         }
     }
 
-    public <T> T parseObject(Class<T> clazz, String value) throws IOException {
+    public <T> T parseObject(Class<T> clazz, String value) {
         return mapper.readValue(value, clazz);
     }
 
-    public <T> T parseObject(Class<T> clazz, Reader value) throws IOException {
+    public <T> T parseObject(Class<T> clazz, Reader value) {
         return mapper.readValue(value, clazz);
     }
 
-    public <T> T parseObject(TypeReference<T> typeReference, String value) throws IOException {
+    public <T> T parseObject(TypeReference<T> typeReference, String value) {
         return mapper.readValue(value, typeReference);
     }
 
-    public <T> T parseObject(TypeReference<T> typeReference, Reader value) throws IOException {
+    public <T> T parseObject(TypeReference<T> typeReference, Reader value) {
         return mapper.readValue(value, typeReference);
     }
 

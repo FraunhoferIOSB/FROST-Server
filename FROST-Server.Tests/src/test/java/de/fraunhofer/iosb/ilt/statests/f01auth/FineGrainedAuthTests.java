@@ -79,7 +79,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -305,7 +304,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_00_TriggerInit() throws IOException {
+    void test_00_TriggerInit() {
         LOGGER.info("  test_00_TriggerInit");
         EntityCreator creator = (user) -> mdlSensing.newSensor(
                 user + " MQTT-Sensor",
@@ -506,7 +505,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_06d_ThingCreateForProject1Mqtt() throws JacksonException {
+    void test_06d_ThingCreateForProject1Mqtt() {
         LOGGER.info("  test_06d_ThingCreateForProject1Mqtt");
         EntityCreator creator = (user) -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
@@ -749,7 +748,7 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
         }
     }
 
-    private JsonNode getRootUrl() throws JacksonException, ParseException, IOException {
+    private JsonNode getRootUrl() throws IOException {
         String urlString = serverSettings.getServiceUrl(version);
         HTTPMethods.HttpResponse responseMap = HTTPMethods.doGet(serviceAdmin, urlString);
         assertEquals(200, responseMap.code, () -> "Error fetching root URI: " + urlString);

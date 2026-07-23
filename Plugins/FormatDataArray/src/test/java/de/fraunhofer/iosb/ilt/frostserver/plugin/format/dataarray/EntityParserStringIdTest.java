@@ -34,7 +34,6 @@ import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiData
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -76,7 +75,7 @@ class EntityParserStringIdTest {
     }
 
     @Test
-    void readObservationDataArray() throws IOException {
+    void readObservationDataArray() {
         String json = createDataJson();
         List<DataArrayValue> expectedResult = new ArrayList<>();
 

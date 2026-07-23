@@ -567,9 +567,6 @@ public class Service implements AutoCloseable {
         } catch (IncompleteEntityException | IllegalStateException | JacksonException ex) {
             LOGGER.trace("Post failed.", ex);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON + " " + ex.getMessage());
-        } catch (IOException ex) {
-            LOGGER.info("Post failed.", ex);
-            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, ex.getMessage());
         }
 
         try {
@@ -651,7 +648,7 @@ public class Service implements AutoCloseable {
         } catch (IllegalArgumentException exc) {
             LOGGER.trace("Path not valid for patch.", exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
-        } catch (IOException | JsonParseException | JacksonException exc) {
+        } catch (JsonParseException | JacksonException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON + " " + exc.getMessage());
         } catch (IncompleteEntityException | NoSuchEntityException exc) {
@@ -918,9 +915,6 @@ public class Service implements AutoCloseable {
         } catch (JacksonException exc) {
             LOGGER.trace(COULD_NOT_PARSE_JSON, exc);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, COULD_NOT_PARSE_JSON);
-        } catch (IOException ex) {
-            LOGGER.info("Put failed.", ex);
-            return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Internal Error.");
         }
 
         try {
@@ -1305,7 +1299,7 @@ public class Service implements AutoCloseable {
         body.put("message", cleanMessage);
         try {
             return response.setStatus(code, JsonWriter.writeObject(body));
-        } catch (IOException ex) {
+        } catch (JacksonException ex) {
             LOGGER.error("Failed to serialise error response.", ex);
         }
         return response.setStatus(code, cleanMessage);

@@ -273,7 +273,7 @@ public abstract class AbstractSubscription implements Subscription {
         return parentId;
     }
 
-    public abstract String doFormatMessage(Entity entity) throws IOException;
+    public abstract String doFormatMessage(Entity entity);
 
     @Override
     public int hashCode() {

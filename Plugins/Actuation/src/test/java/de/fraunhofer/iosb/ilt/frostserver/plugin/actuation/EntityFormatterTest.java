@@ -37,7 +37,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,7 +73,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingBasicAbs() throws IOException {
+    void writeThingBasicAbs() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -107,7 +106,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingBasicRel() throws IOException {
+    void writeThingBasicRel() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -138,7 +137,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingSelect() throws IOException {
+    void writeThingSelect() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -160,7 +159,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingsBasic() throws IOException {
+    void writeThingsBasic() {
         String thing = """
                 {
                 "@iot.id": 1,
@@ -198,7 +197,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingOnlyId() throws IOException {
+    void writeThingOnlyId() {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", context, path)
@@ -219,7 +218,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingsWithExpandedDatastream() throws IOException {
+    void writeThingsWithExpandedDatastream() {
         String thing = """
                 {
                 "@iot.id": 1,

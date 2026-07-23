@@ -17,13 +17,12 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.serialize.custom;
 
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
 
 /**
- *
- * @author jab
+ * Custom serialiser interface.
  */
 public interface CustomSerializer {
 
-    public String serialize(Object object) throws IOException;
+    public String serialize(Object object) throws JacksonException;
 }

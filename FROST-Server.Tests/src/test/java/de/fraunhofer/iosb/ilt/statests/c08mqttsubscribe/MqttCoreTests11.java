@@ -864,7 +864,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
         };
     }
 
-    private Entity putEntity(EntityType et) throws ServiceFailureException {
+    private Entity putEntity(EntityType et) {
         Entity original = eh2.getCache(et, 0);
         return eh2.putEntity(original);
     }

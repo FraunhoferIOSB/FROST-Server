@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.util;
 
-import java.io.IOException;
 import org.geojson.GeoJsonObject;
 import org.geojson.Point;
 import org.slf4j.Logger;
@@ -46,7 +45,7 @@ public class GeoHelper {
         return new Point(values[0].doubleValue(), values[1].doubleValue(), values[2].doubleValue());
     }
 
-    public static GeoJsonObject parseGeoJson(String geoJsonString) throws IOException {
+    public static GeoJsonObject parseGeoJson(String geoJsonString) {
         return SimpleJsonMapper.getSimpleObjectMapper().readValue(geoJsonString, GeoJsonObject.class);
     }
 

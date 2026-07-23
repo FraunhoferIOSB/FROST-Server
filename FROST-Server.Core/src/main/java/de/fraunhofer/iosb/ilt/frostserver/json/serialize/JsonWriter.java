@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
-import java.io.IOException;
 import java.io.Writer;
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -114,7 +113,7 @@ public class JsonWriter {
         getObjectMapper().writeValue(writer, object);
     }
 
-    public static String writeObject(Object object) throws IOException {
+    public static String writeObject(Object object) throws JacksonException {
         return getObjectMapper().writeValueAsString(object);
     }
 }

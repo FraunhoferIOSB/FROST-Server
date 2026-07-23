@@ -56,7 +56,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -90,7 +89,7 @@ public class GeoTests20 extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV20Core.class);
         createEntities();
@@ -120,7 +119,7 @@ public class GeoTests20 extends AbstractTestClass {
         OBSERVATIONS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         createThings();
         createSensor();
         createObsProp();
@@ -159,7 +158,7 @@ public class GeoTests20 extends AbstractTestClass {
         SENSORS.add(sensor);
     }
 
-    private static void createObsProp() throws ServiceFailureException, URISyntaxException {
+    private static void createObsProp() throws ServiceFailureException {
         Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
@@ -362,7 +361,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testGeoDistance() throws ServiceFailureException {
+    void testGeoDistance() {
         LOGGER.info("  testGeoDistance");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.distance(location, geography'POINT(8 54.1)') lt 1", getFromList(LOCATIONS, 3));
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.distance(location, geography'POINT(8 54.1)') gt 1", getFromList(LOCATIONS, 0, 1, 2, 4, 5, 6, 7));
@@ -377,7 +376,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testGeoIntersects() throws ServiceFailureException {
+    void testGeoIntersects() {
         LOGGER.info("  testGeoIntersects");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         testFilterResults(sSrvc.dao(sMdl.etFeature), "geo.intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURES, 4, 7));
@@ -396,7 +395,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testGeoLength() throws ServiceFailureException {
+    void testGeoLength() {
         LOGGER.info("  testGeoLength");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.length(location) gt 1", getFromList(LOCATIONS, 6, 7));
         testFilterResults(sSrvc.dao(sMdl.etLocation), "geo.length(location) ge 1", getFromList(LOCATIONS, 5, 6, 7));
@@ -418,7 +417,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStContains() throws ServiceFailureException {
+    void testStContains() {
         LOGGER.info("  testStContains");
         testFilterResults(sSrvc.dao(sMdl.etLocation),
                 "st_contains(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
@@ -437,7 +436,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStCrosses() throws ServiceFailureException {
+    void testStCrosses() {
         LOGGER.info("  testStCrosses");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', location)", getFromList(LOCATIONS, 4, 7));
         testFilterResults(sSrvc.dao(sMdl.etFeature), "st_crosses(geography'LINESTRING(7.5 51.5, 7.5 53.5)', feature)", getFromList(FEATURES, 4, 7));
@@ -449,7 +448,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStDisjoint() throws ServiceFailureException {
+    void testStDisjoint() {
         LOGGER.info("  testStDisjoint");
         testFilterResults(sSrvc.dao(sMdl.etLocation),
                 "st_disjoint(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
@@ -465,7 +464,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStEquals() throws ServiceFailureException {
+    void testStEquals() {
         LOGGER.info("  testStEquals");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "st_equals(location, geography'POINT(8 53)')", getFromList(LOCATIONS, 2));
         testFilterResults(sSrvc.dao(sMdl.etFeature), "st_equals(feature, geography'POINT(8 53)')", getFromList(FEATURES, 2));
@@ -477,7 +476,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStIntersects() throws ServiceFailureException {
+    void testStIntersects() {
         LOGGER.info("  testStIntersects");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "st_intersects(location, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(LOCATIONS, 4, 7));
         testFilterResults(sSrvc.dao(sMdl.etFeature), "st_intersects(feature, geography'LINESTRING(7.5 51, 7.5 54)')", getFromList(FEATURES, 4, 7));
@@ -492,7 +491,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStOverlaps() throws ServiceFailureException {
+    void testStOverlaps() {
         LOGGER.info("  testStOverlaps");
         testFilterResults(sSrvc.dao(sMdl.etLocation),
                 "st_overlaps(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location)",
@@ -508,7 +507,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStRelate() throws ServiceFailureException {
+    void testStRelate() {
         LOGGER.info("  testStRelate");
         testFilterResults(sSrvc.dao(sMdl.etLocation),
                 "st_relate(geography'POLYGON((7.5 51.5, 7.5 53.5, 8.5 53.5, 8.5 51.5, 7.5 51.5))', location, 'T********')",
@@ -524,7 +523,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStTouches() throws ServiceFailureException {
+    void testStTouches() {
         LOGGER.info("  testStTouches");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', location)", getFromList(LOCATIONS, 2, 4));
         testFilterResults(sSrvc.dao(sMdl.etFeature), "st_touches(geography'POLYGON((8 53, 7.5 54.5, 8.5 54.5, 8 53))', feature)", getFromList(FEATURES, 2, 4));
@@ -536,7 +535,7 @@ public class GeoTests20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void testStWithin() throws ServiceFailureException {
+    void testStWithin() {
         LOGGER.info("  testStWithin");
         testFilterResults(sSrvc.dao(sMdl.etLocation), "st_within(geography'POINT(7.5 52.75)', location)", getFromList(LOCATIONS, 4));
         testFilterResults(sSrvc.dao(sMdl.etFeature), "st_within(geography'POINT(7.5 52.75)', feature)", getFromList(FEATURES, 4));
@@ -569,7 +568,7 @@ public class GeoTests20 extends AbstractTestClass {
      * Test GeoJSON result format.
      */
     @Test
-    void testGeoJsonFormat() throws JacksonException, IOException {
+    void testGeoJsonFormat() throws IOException {
         LOGGER.info("  testGeoJsonFormat");
         String geoJsonExpected = IOUtils.resourceToString("geoJsonResult.json", StandardCharsets.UTF_8, getClass().getClassLoader());
         JsonNode expected = SimpleJsonMapper.getSimpleObjectMapper().readTree(geoJsonExpected);

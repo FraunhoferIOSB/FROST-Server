@@ -26,7 +26,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
 import de.fraunhofer.iosb.ilt.frostserver.query.OrderBy;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +104,7 @@ public class Utils {
         if (GeoJsonDeserializier.ENCODINGS.contains(encodingType.toLowerCase())) {
             try {
                 return new GeoJsonDeserializier().deserialize(location);
-            } catch (IOException | RuntimeException ex) {
+            } catch (RuntimeException ex) {
                 LOGGER.error("Failed to deserialise geoJson: {}.", location, ex);
             }
             return location;
@@ -120,7 +119,7 @@ public class Utils {
         // We have to guess, since encodingType is not loaded.
         try {
             return new GeoJsonDeserializier().deserialize(locationString);
-        } catch (IOException ex) {
+        } catch (RuntimeException ex) {
             LOGGER.trace("Not geoJson.", ex);
         }
         return locationString;

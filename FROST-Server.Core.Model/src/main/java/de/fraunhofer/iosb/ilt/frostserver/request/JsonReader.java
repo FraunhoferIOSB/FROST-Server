@@ -19,8 +19,8 @@ package de.fraunhofer.iosb.ilt.frostserver.request;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
-import java.io.IOException;
 import java.io.Reader;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -48,9 +48,9 @@ public interface JsonReader {
      * @param entityType The type of entity to read.
      * @param value The String to parse.
      * @return An entity of the given type, created from the given string.
-     * @throws IOException If parsing fails.
+     * @throws JacksonException If parsing fails.
      */
-    public Entity parseEntity(EntityType entityType, String value) throws IOException;
+    public Entity parseEntity(EntityType entityType, String value) throws JacksonException;
 
     /**
      * Parse an entity of the given type from the given Reader.
@@ -59,8 +59,8 @@ public interface JsonReader {
      * @param value The Reader to read data from.
      * @return An entity of the given type, created from the data in the given
      * reader.
-     * @throws IOException If parsing fails.
+     * @throws JacksonException If parsing fails.
      */
-    public Entity parseEntity(EntityType entityType, Reader value) throws IOException;
+    public Entity parseEntity(EntityType entityType, Reader value) throws JacksonException;
 
 }

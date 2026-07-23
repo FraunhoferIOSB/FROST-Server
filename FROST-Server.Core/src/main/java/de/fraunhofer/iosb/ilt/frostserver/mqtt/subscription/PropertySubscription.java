@@ -31,7 +31,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -87,7 +86,7 @@ public class PropertySubscription extends AbstractSubscription {
     }
 
     @Override
-    public String doFormatMessage(Entity entity) throws IOException {
+    public String doFormatMessage(Entity entity) {
         entity.setQuery(query);
         return settings.getFormatter(query.getVersion(), FORMAT_NAME_DEFAULT).format(path, query, entity).getFormatted();
     }

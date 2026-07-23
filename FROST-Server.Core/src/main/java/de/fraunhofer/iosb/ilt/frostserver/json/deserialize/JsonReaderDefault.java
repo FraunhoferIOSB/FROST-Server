@@ -33,12 +33,12 @@ import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.request.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
+import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.DeserializationFeature;
@@ -177,24 +177,24 @@ public class JsonReaderDefault implements JsonReader {
     }
 
     @Override
-    public Entity parseEntity(EntityType entityType, String value) throws JacksonException, IOException {
+    public Entity parseEntity(EntityType entityType, String value) throws JacksonException {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContext dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
-            throw new IOException("Json is too deeply nested.");
+            throw new StreamReadException("Json is too deeply nested.");
         }
     }
 
     @Override
-    public Entity parseEntity(EntityType entityType, Reader value) throws JacksonException, IOException {
+    public Entity parseEntity(EntityType entityType, Reader value) throws JacksonException {
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContext dsc = mapper._deserializationContext();
             return CustomEntityDeserializer.getInstance(modelRegistry, entityType, version)
                     .deserializeFull(parser, dsc);
         } catch (StackOverflowError err) {
-            throw new IOException("Json is too deeply nested.");
+            throw new StreamReadException("Json is too deeply nested.");
         }
     }
 

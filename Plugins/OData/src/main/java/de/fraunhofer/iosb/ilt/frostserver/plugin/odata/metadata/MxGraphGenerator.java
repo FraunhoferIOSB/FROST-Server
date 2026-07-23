@@ -28,7 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
-import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -80,11 +79,11 @@ public class MxGraphGenerator {
     private int maxWidth = 1;
     private int etCount = 0;
 
-    public void generate(Writer writer, ModelRegistry model) throws IOException {
+    public void generate(Writer writer, ModelRegistry model) {
         generate(writer, model, false);
     }
 
-    public void generate(Writer writer, ModelRegistry model, boolean isAdmin) throws IOException {
+    public void generate(Writer writer, ModelRegistry model, boolean isAdmin) {
         Root root = new Root();
         MxCell cellZero = new MxCell()
                 .setId("0");

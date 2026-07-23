@@ -98,7 +98,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws ServiceFailureException, URISyntaxException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV20Core.class);
         createEntities();
@@ -128,7 +128,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         OBSERVATIONS.clear();
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         createThings();
         createSensor();
         createObsProp();
@@ -161,7 +161,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         SENSORS.add(sensor);
     }
 
-    private static void createObsProp() throws ServiceFailureException, URISyntaxException {
+    private static void createObsProp() throws ServiceFailureException {
         Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
@@ -239,7 +239,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
      * @throws ServiceFailureException If the sSrvc doesn't respond.
      */
     @Test
-    void test01_ReadLandingPage() throws ServiceFailureException {
+    void test01_ReadLandingPage() {
         LOGGER.info("  test01_ReadLandingPage");
         URI mqttUri = URI.create(serverSettings.getMqttUrl());
         Mqtt5BlockingClient client = Mqtt5Client.builder()
@@ -299,7 +299,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
     }
 
     @Test
-    void test02_ReadThings() throws ServiceFailureException {
+    void test02_ReadThings() {
         LOGGER.info("  test02_ReadThings");
         URI mqttUri = URI.create(serverSettings.getMqttUrl());
         Mqtt5BlockingClient client = Mqtt5Client.builder()

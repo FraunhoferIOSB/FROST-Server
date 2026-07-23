@@ -43,7 +43,6 @@ import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.SimpleJsonMapper;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
@@ -99,7 +98,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingBasicAbs() throws IOException {
+    void writeThingBasicAbs() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -132,7 +131,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingBasicRel() throws IOException {
+    void writeThingBasicRel() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -163,7 +162,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingSelect() throws IOException {
+    void writeThingSelect() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -185,7 +184,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingsBasic() throws IOException {
+    void writeThingsBasic() {
         String thing = """
                 {
                 "@iot.id": 1,
@@ -223,7 +222,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingOnlyId() throws IOException {
+    void writeThingOnlyId() {
         String expResult = "{\"@iot.id\": 1}";
         ResourcePath path = PathParser.parsePath(context, PluginCoreService.V_1_0, "/Things(1)");
         Query query = QueryParser.parseQuery("$select=id", context, path)
@@ -242,7 +241,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingsWithExpandedDatastream() throws IOException {
+    void writeThingsWithExpandedDatastream() {
         String thing = """
                 {
                 "@iot.id": 1,
@@ -313,7 +312,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingWithExpandedDatastream1() throws IOException {
+    void writeThingWithExpandedDatastream1() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -350,7 +349,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingWithExpandedDatastream2() throws IOException {
+    void writeThingWithExpandedDatastream2() {
         String expResult = """
                 {
                 "@iot.id": 1,
@@ -377,7 +376,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingWithExpandedDatastream3() throws IOException {
+    void writeThingWithExpandedDatastream3() {
         String expResult = """
                 {
                 "@iot.selfLink": "http://example.org/v1.0/Things(1)",
@@ -406,7 +405,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeThingWithExpandedDatastream4() throws IOException {
+    void writeThingWithExpandedDatastream4() {
         String expResult = """
                 {
                   "@iot.id": 1,
@@ -431,7 +430,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeMultiDatastreamBasic() throws IOException {
+    void writeMultiDatastreamBasic() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -485,7 +484,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeSensorBasic() throws IOException {
+    void writeSensorBasic() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -511,7 +510,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeSensorEmptyDatastreamsCollection() throws IOException {
+    void writeSensorEmptyDatastreamsCollection() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -534,7 +533,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeObservedPropertyBasic() throws IOException {
+    void writeObservedPropertyBasic() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -558,7 +557,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeObservationBasicDs() throws IOException {
+    void writeObservationBasicDs() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -584,7 +583,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeObservationBasicMds() throws IOException {
+    void writeObservationBasicMds() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -610,7 +609,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeObservationBasicWithNullResult() throws IOException {
+    void writeObservationBasicWithNullResult() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -636,7 +635,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeObservationWithEmptyResultTime() throws IOException {
+    void writeObservationWithEmptyResultTime() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -662,7 +661,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeFeatureOfInterstBasic() throws IOException {
+    void writeFeatureOfInterstBasic() {
         String expResult = """
                 {
                 \t"@iot.id": 1,
@@ -684,7 +683,7 @@ class EntityFormatterTest {
     }
 
     @Test
-    void writeFeatureOfInterstWithGeoJsonPointFeature() throws IOException {
+    void writeFeatureOfInterstWithGeoJsonPointFeature() {
         String expResult = """
                 {
                 \t"@iot.id": 1,

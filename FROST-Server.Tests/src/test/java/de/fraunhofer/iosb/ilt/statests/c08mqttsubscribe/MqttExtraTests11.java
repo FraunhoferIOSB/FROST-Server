@@ -35,7 +35,6 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
-import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -71,7 +70,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
     }
 
     @Override
-    protected void setUpVersion() throws URISyntaxException, ServiceFailureException {
+    protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         sMdl = sSrvc.getModel(SensorThingsV11Sensing.class);
         eh = new EntityHelper11(sSrvc);
@@ -93,7 +92,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
         mqttHelper = null;
     }
 
-    private static void createEntities() throws ServiceFailureException, URISyntaxException {
+    private static void createEntities() throws ServiceFailureException {
         Entity thing = sMdl.newThing("Thing 1", "The first thing.");
         sSrvc.create(thing);
         eh.cache(thing);

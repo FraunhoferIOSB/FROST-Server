@@ -30,7 +30,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
@@ -56,7 +55,7 @@ class MessageSerialisationTest {
     }
 
     @Test
-    void serialiseMessageSimpleThing() throws IOException {
+    void serialiseMessageSimpleThing() {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setPrimaryKeyValues(PkValue.of(123456L))
@@ -74,7 +73,7 @@ class MessageSerialisationTest {
     }
 
     @Test
-    void serialiseMessageLocation() throws IOException {
+    void serialiseMessageLocation() {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etLocation)
                 .setPrimaryKeyValues(PkValue.of(123456L))
@@ -94,7 +93,7 @@ class MessageSerialisationTest {
     }
 
     @Test
-    void serialiseMessageThingWithFields() throws IOException {
+    void serialiseMessageThingWithFields() {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etThing)
                 .setPrimaryKeyValues(PkValue.of(123456L))
@@ -115,7 +114,7 @@ class MessageSerialisationTest {
     }
 
     @Test
-    void serialiseMessageSimpleObservation() throws IOException {
+    void serialiseMessageSimpleObservation() {
         EntityChangedMessage message = new EntityChangedMessage();
         Entity entity = new DefaultEntity(pluginCoreModel.etObservation)
                 .setPrimaryKeyValues(PkValue.of(123456L))
