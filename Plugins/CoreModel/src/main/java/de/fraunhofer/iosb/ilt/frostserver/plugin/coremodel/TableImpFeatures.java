@@ -172,7 +172,7 @@ public class TableImpFeatures extends StaTableAbstract<TableImpFeatures> {
                 pm.getDslContext()
                         .update(tLoc)
                         .setNull(tLoc.getGenFoiId())
-                        .where(((TableField) tLoc.getGenFoiId()).eq(entityId.get(0))),
+                        .where((tLoc.getGenFoiId()).eq(entityId.get(0))),
                 pluginCoreModel.etLocation.entityName);
     }
 

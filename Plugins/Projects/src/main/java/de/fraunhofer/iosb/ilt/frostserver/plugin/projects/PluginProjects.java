@@ -253,7 +253,7 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                     jpm.getDslContext()
                             .select(ql.colGenFoiId, lRestricted)
                             .from(ql)
-                            .where(((TableField) ql.getId()).equal(locationId)),
+                            .where((ql.getId()).equal(locationId)),
                     ql.getEntityType().entityName);
             if (fetchAny == null) {
                 LOGGER.error("Location not found in table for id {}", entity.getPrimaryKeyValues());
@@ -271,7 +271,7 @@ public class PluginProjects implements PluginModel, ConfigDefaults {
                     jpm.getDslContext()
                             .update(tf)
                             .set(fRestricted, fetchAny.component2())
-                            .where(((TableField) tf.getId()).eq(genFoiId)),
+                            .where((tf.getId()).eq(genFoiId)),
                     "FeatureOfInterest");
             if (updated != 1) {
                 LOGGER.warn("Update of generated FoI resulted in {} changed rows!", updated);

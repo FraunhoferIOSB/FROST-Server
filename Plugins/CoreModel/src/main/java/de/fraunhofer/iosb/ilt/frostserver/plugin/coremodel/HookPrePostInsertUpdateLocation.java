@@ -50,8 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author hylke
+ * A hook creating a HistoricalLocation when the Things of a Location changes.
  */
 public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostInsert, HookPreUpdate, HookPostUpdate {
 
@@ -170,7 +169,7 @@ public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostI
                 Object histLocationId = pm.timeFetchOne(
                         dslContext.insertInto(thl)
                                 .set((TableField) thl.field(ttlThingIdName), thingId)
-                                .set((TableField) thl.field(thlTimeName), Moment.nowInSystemTime())
+                                .set(thl.field(thlTimeName), Moment.nowInSystemTime())
                                 .returningResult(thl.getPkFields().get(0)),
                         etHistLoc.entityName).get(0);
                 LOGGER.debug(EntityFactories.CREATED_HL, histLocationId);
@@ -180,7 +179,7 @@ public class HookPrePostInsertUpdateLocation implements HookPreInsert, HookPostI
                 pm.timeExecute(
                         dslContext.insertInto(tlhl)
                                 .set((TableField) tlhl.field(tlhlHistLocationIdName), histLocationId)
-                                .set((TableField) tlhl.field(ttlLocationIdName), locationId),
+                                .set(tlhl.field(ttlLocationIdName), locationId),
                         LINK_TABLE);
                 LOGGER.debug(EntityFactories.LINKED_L_TO_HL, locationId, histLocationId);
 

@@ -404,10 +404,10 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
 
         SelectConditionStep<Record3<Object, Object, String>> query = dslContext.select((TableField) ql.getId(), (TableField) ql.getGenFoiId(), ql.colEncodingType)
                 .from(ql)
-                .innerJoin(qtl).on(((TableField) ql.getId()).eq(qtl.getLocationId()))
-                .innerJoin(qt).on(((TableField) qt.getId()).eq(qtl.getThingId()))
-                .innerJoin(qd).on(((TableField) qd.getThingId()).eq(qt.getId()))
-                .where(((TableField) qd.getId()).eq(dsId));
+                .innerJoin(qtl).on((ql.getId()).eq(qtl.getLocationId()))
+                .innerJoin(qt).on((qt.getId()).eq(qtl.getThingId()))
+                .innerJoin(qd).on((qd.getThingId()).eq(qt.getId()))
+                .where((qd.getId()).eq(dsId));
         return generateFeatureOfInterest(pm, query);
     }
 
@@ -454,11 +454,11 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         if (fRestricted == null || epRestricted == null) {
             query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties)
                     .from(ql)
-                    .where(((TableField) ql.getId()).eq(locationId));
+                    .where((ql.getId()).eq(locationId));
         } else {
             query2 = dslContext.select((TableField) ql.getId(), ql.colEncodingType, ql.colLocation, ql.colName, ql.colDescription, ql.colProperties, fRestricted)
                     .from(ql)
-                    .where(((TableField) ql.getId()).eq(locationId));
+                    .where((ql.getId()).eq(locationId));
         }
         Record tuple = pm.timeFetchOne(query2, ql.getEntityType().entityName);
         if (tuple == null) {
@@ -501,7 +501,7 @@ public class TableImpObservations extends StaTableAbstract<TableImpObservations>
         pm.timeExecute(
                 dslContext.update(ql)
                         .set(((TableField) ql.getGenFoiId()), foiId)
-                        .where(((TableField) ql.getId()).eq(locationId)),
+                        .where((ql.getId()).eq(locationId)),
                 pluginCoreModel.etLocation.entityName);
         LOGGER.debug("Generated foi {} from Location {}.", foiId, locationId);
         return foi;

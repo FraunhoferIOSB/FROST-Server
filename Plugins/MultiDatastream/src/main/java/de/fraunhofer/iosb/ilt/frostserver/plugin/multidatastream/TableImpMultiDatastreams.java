@@ -362,10 +362,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                     pm.getDslContext()
                             .delete(tMd)
                             .where(
-                                    ((TableField) tMd.getId()).in(
+                                    (tMd.getId()).in(
                                             DSL.select(tMdOp.getMultiDatastreamId())
                                                     .from(tMdOp)
-                                                    .where(((TableField) tMdOp.getObsPropertyId()).eq(entityId.get(0))))),
+                                                    .where((tMdOp.getObsPropertyId()).eq(entityId.get(0))))),
                     pluginMultiDatastream.etMultiDatastream.entityName);
             LOGGER.debug("Deleted {} MultiDatastreams.", count);
         });
@@ -390,7 +390,7 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
                         pm.getDslContext()
                                 .selectCount()
                                 .from(tableMdsOps)
-                                .where(((TableField) tableMdsOps.getMultiDatastreamId()).eq(mdsId)),
+                                .where((tableMdsOps.getMultiDatastreamId()).eq(mdsId)),
                         LINK_TABLE).component1();
                 if (count != list.size()) {
                     throw new IllegalArgumentException("Size of result array (" + list.size() + ") must match number of observed properties (" + count + ") in the MultiDatastream.");
@@ -471,10 +471,10 @@ public class TableImpMultiDatastreams extends StaTableAbstract<TableImpMultiData
 
         SelectConditionStep<Record3<Object, Object, String>> query = dslContext.select((TableField) tl.getId(), (TableField) tl.getGenFoiId(), tl.colEncodingType)
                 .from(tl)
-                .innerJoin(ttl).on(((TableField) tl.getId()).eq(ttl.getLocationId()))
-                .innerJoin(tt).on(((TableField) tt.getId()).eq(ttl.getThingId()))
-                .innerJoin(tmd).on(((TableField) tmd.getThingId()).eq(tt.getId()))
-                .where(((TableField) tmd.getId()).eq(dsId));
+                .innerJoin(ttl).on((tl.getId()).eq(ttl.getLocationId()))
+                .innerJoin(tt).on((tt.getId()).eq(ttl.getThingId()))
+                .innerJoin(tmd).on((tmd.getThingId()).eq(tt.getId()))
+                .where((tmd.getId()).eq(dsId));
         TableImpObservations tblObs = tableCollection.getTableForClass(TableImpObservations.class);
         return tblObs.generateFeatureOfInterest(pm, query);
     }
