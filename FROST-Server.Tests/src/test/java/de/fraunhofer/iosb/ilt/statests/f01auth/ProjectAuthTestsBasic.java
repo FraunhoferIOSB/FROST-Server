@@ -110,9 +110,9 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
     @Test
     void test_99_ChangePassword() {
         LOGGER.info("  test_99_ChangePassword");
-        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changed = user -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .setProperty(EP_USERPASS, user + "2");
-        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changedCopy = user -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .withOnlyPk()
                 .setProperty(EP_USERPASS, user + "2");
 
