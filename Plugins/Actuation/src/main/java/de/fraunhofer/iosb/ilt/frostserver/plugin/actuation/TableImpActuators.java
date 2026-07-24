@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.actuation;
 
-import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaTableAbstract.TYPE_JSONB;
 import static de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.TableImpSensors.NAME_COL_METADATA;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;

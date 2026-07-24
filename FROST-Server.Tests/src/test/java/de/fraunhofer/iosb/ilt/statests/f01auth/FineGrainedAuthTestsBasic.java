@@ -18,12 +18,6 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceAdminProject1;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceAdminProject2;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceObsCreaterProject1;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceObsCreaterProject2;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceRead;
-import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceWrite;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERPASS;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
