@@ -247,9 +247,13 @@ public abstract class EntityHelperAbstract {
                 return entity;
             }
             retry++;
+            // We have to retry, thus decrement the count by one.
+            HTTPMethods.decrementCountGet();
             LOGGER.debug("No data yet. Retries: {}, URL: {}", retry, entityType);
             MqttHelper11.waitMillis(MqttHelper11.WAIT_AFTER_INSERT);
         }
+        // All attempts failed and were not counted. Do count one!
+        HTTPMethods.incrementCountGet();
         LOGGER.debug("Failed to read an entity from url after {} tries: {}", retries, entityType);
         return null;
     }

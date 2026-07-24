@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.http.Consts;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -59,11 +60,11 @@ public class HTTPMethods {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPMethods.class);
 
-    private static int countDelete = 0;
-    private static int countGet = 0;
-    private static int countPost = 0;
-    private static int countPatch = 0;
-    private static int countPut = 0;
+    private static AtomicInteger countDelete = new AtomicInteger();
+    private static AtomicInteger countGet = new AtomicInteger();
+    private static AtomicInteger countPost = new AtomicInteger();
+    private static AtomicInteger countPatch = new AtomicInteger();
+    private static AtomicInteger countPut = new AtomicInteger();
 
     public static class HttpResponse {
 
@@ -90,11 +91,11 @@ public class HTTPMethods {
     }
 
     public static void resetStats() {
-        countDelete = 0;
-        countGet = 0;
-        countPatch = 0;
-        countPost = 0;
-        countPut = 0;
+        countDelete.set(0);
+        countGet.set(0);
+        countPatch.set(0);
+        countPost.set(0);
+        countPut.set(0);
     }
 
     public static void logStats() {
@@ -102,23 +103,31 @@ public class HTTPMethods {
     }
 
     public static int getCountDelete() {
-        return countDelete;
+        return countDelete.get();
     }
 
     public static int getCountGet() {
-        return countGet;
+        return countGet.get();
+    }
+
+    public static void incrementCountGet() {
+        countGet.incrementAndGet();
+    }
+
+    public static void decrementCountGet() {
+        countGet.decrementAndGet();
     }
 
     public static int getCountPatch() {
-        return countPatch;
+        return countPatch.get();
     }
 
     public static int getCountPost() {
-        return countPost;
+        return countPost.get();
     }
 
     public static int getCountPut() {
-        return countPut;
+        return countPut.get();
     }
 
     /**
@@ -153,7 +162,7 @@ public class HTTPMethods {
      */
     public static HttpResponse doGet(final CloseableHttpClient httpClient, String urlString) throws ParseException, IOException {
         LOGGER.debug("Getting: {}", urlString);
-        countGet++;
+        countGet.incrementAndGet();
         HttpGet request = new HttpGet(urlString);
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
@@ -168,7 +177,7 @@ public class HTTPMethods {
 
     public static HttpResponse doGet(final SensorThingsService service, String urlString) throws ParseException, IOException {
         LOGGER.debug("Getting: {}", urlString);
-        countGet++;
+        countGet.incrementAndGet();
         HttpGet request = new HttpGet(urlString);
         try (CloseableHttpResponse response = service.execute(request)) {
             HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
@@ -183,7 +192,7 @@ public class HTTPMethods {
 
     public static HttpResponse doHead(final SensorThingsService service, String urlString) throws IOException {
         LOGGER.debug("Heading: {}", urlString);
-        countGet++;
+        countGet.incrementAndGet();
         HttpHead request = new HttpHead(urlString);
         try (CloseableHttpResponse response = service.execute(request)) {
             return new HttpResponse(response.getStatusLine().getStatusCode());
@@ -240,7 +249,7 @@ public class HTTPMethods {
         HttpURLConnection connection = null;
         try {
             LOGGER.debug("Posting: {}", urlString);
-            countPost++;
+            countPost.incrementAndGet();
             //Create connection
             URL url = new URI(urlString).toURL();
             byte[] postData = postBody.getBytes(StandardCharsets.UTF_8);
@@ -290,7 +299,7 @@ public class HTTPMethods {
     public static HttpResponse doPost(SensorThingsService service, String urlString, String postBody, String contentType) {
         try {
             LOGGER.debug("Posting: {}", urlString);
-            countPost++;
+            countPost.incrementAndGet();
 
             HttpPost httpPost = new HttpPost(urlString);
             httpPost.setEntity(new StringEntity(postBody));
@@ -335,7 +344,7 @@ public class HTTPMethods {
      */
     public static HttpResponse doPut(String urlString, String putBody) {
         LOGGER.debug("Putting: {}", urlString);
-        countPut++;
+        countPut.incrementAndGet();
         HttpResponse result;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             URI uri = new URI(urlString);
@@ -369,7 +378,7 @@ public class HTTPMethods {
         HttpResponse result;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             LOGGER.debug("Deleting: {}", urlString);
-            countDelete++;
+            countDelete.incrementAndGet();
 
             URI uri = new URI(urlString);
             HttpDelete request = new HttpDelete(uri);
@@ -399,10 +408,10 @@ public class HTTPMethods {
      * will be empty.
      */
     public static HttpResponse doPatch(String urlString, String patchBody) {
-        URI uri = null;
+        URI uri;
         try {
             LOGGER.debug("Patching: {}", urlString);
-            countPatch++;
+            countPatch.incrementAndGet();
             uri = new URI(urlString);
 
             HttpResponse result;
@@ -439,7 +448,7 @@ public class HTTPMethods {
     public static HttpResponse doJsonPatch(String urlString, String patchBody) {
         URI uri;
         LOGGER.debug("Patching: {}", urlString);
-        countPatch++;
+        countPatch.incrementAndGet();
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             uri = new URI(urlString);
