@@ -33,13 +33,13 @@ public class Exceptions {
 
     public static final void illegalArgumentIf(boolean predicate, String message, Object param1) throws IllegalArgumentException {
         if (predicate) {
-            throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1}));
+            throw new IllegalArgumentException(replacePlaceholders(message, param1));
         }
     }
 
     public static final void illegalArgumentIf(boolean predicate, String message, Object param1, Object param2) throws IllegalArgumentException {
         if (predicate) {
-            throw new IllegalArgumentException(replacePlaceholders(message, new Object[]{param1, param2}));
+            throw new IllegalArgumentException(replacePlaceholders(message, param1, param2));
         }
     }
 
@@ -61,13 +61,13 @@ public class Exceptions {
 
     public static final void invalidSelfLinkIf(boolean predicate, String message, Object param1) throws InvalidSelfLinkException {
         if (predicate) {
-            throw new InvalidSelfLinkException(replacePlaceholders(message, new Object[]{param1}));
+            throw new InvalidSelfLinkException(replacePlaceholders(message, param1));
         }
     }
 
     public static final void invalidSelfLinkIf(boolean predicate, String message, Object param1, Object param2) throws InvalidSelfLinkException {
         if (predicate) {
-            throw new InvalidSelfLinkException(replacePlaceholders(message, new Object[]{param1, param2}));
+            throw new InvalidSelfLinkException(replacePlaceholders(message, param1, param2));
         }
     }
 
@@ -89,13 +89,13 @@ public class Exceptions {
 
     public static final void unregisteredExpressionIf(boolean predicate, String message, Object param1) throws UnregisteredExpressionException {
         if (predicate) {
-            throw new UnregisteredExpressionException(replacePlaceholders(message, new Object[]{param1}));
+            throw new UnregisteredExpressionException(replacePlaceholders(message, param1));
         }
     }
 
     public static final void unregisteredExpressionIf(boolean predicate, String message, Object param1, Object param2) throws UnregisteredExpressionException {
         if (predicate) {
-            throw new UnregisteredExpressionException(replacePlaceholders(message, new Object[]{param1, param2}));
+            throw new UnregisteredExpressionException(replacePlaceholders(message, param1, param2));
         }
     }
 
@@ -117,13 +117,13 @@ public class Exceptions {
 
     public static final void badPathIf(boolean predicate, String message, Object param1) throws BadPathException {
         if (predicate) {
-            throw new BadPathException(replacePlaceholders(message, new Object[]{param1}));
+            throw new BadPathException(replacePlaceholders(message, param1));
         }
     }
 
     public static final void badPathIf(boolean predicate, String message, Object param1, Object param2) throws BadPathException {
         if (predicate) {
-            throw new BadPathException(replacePlaceholders(message, new Object[]{param1, param2}));
+            throw new BadPathException(replacePlaceholders(message, param1, param2));
         }
     }
 
@@ -145,13 +145,13 @@ public class Exceptions {
 
     public static final void unknownEntityTypeIf(boolean predicate, String message, Object param1) throws UnknownEntityTypeException {
         if (predicate) {
-            throw new UnknownEntityTypeException(replacePlaceholders(message, new Object[]{param1}));
+            throw new UnknownEntityTypeException(replacePlaceholders(message, param1));
         }
     }
 
     public static final void unknownEntityTypeIf(boolean predicate, String message, Object param1, Object param2) throws UnknownEntityTypeException {
         if (predicate) {
-            throw new UnknownEntityTypeException(replacePlaceholders(message, new Object[]{param1, param2}));
+            throw new UnknownEntityTypeException(replacePlaceholders(message, param1, param2));
         }
     }
 
@@ -173,13 +173,13 @@ public class Exceptions {
 
     public static final void unknownPropertyIf(boolean predicate, String message, Object param1) throws UnknownPropertyException {
         if (predicate) {
-            throw new UnknownPropertyException(replacePlaceholders(message, new Object[]{param1}));
+            throw new UnknownPropertyException(replacePlaceholders(message, param1));
         }
     }
 
     public static final void unknownPropertyIf(boolean predicate, String message, Object param1, Object param2) throws UnknownPropertyException {
         if (predicate) {
-            throw new UnknownPropertyException(replacePlaceholders(message, new Object[]{param1, param2}));
+            throw new UnknownPropertyException(replacePlaceholders(message, param1, param2));
         }
     }
 
