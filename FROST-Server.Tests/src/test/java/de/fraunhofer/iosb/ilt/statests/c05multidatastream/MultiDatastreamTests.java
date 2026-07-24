@@ -333,10 +333,10 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         return value;
     }
 
-    private void entitiesHaveOneOf(JsonNode value, String EntityName, String... properties) {
+    private void entitiesHaveOneOf(JsonNode value, String entityName, String... properties) {
         for (JsonNode valueItem : value) {
             if (!valueItem.isObject()) {
-                fail("item in " + EntityName + " array is not an object.");
+                fail("item in " + entityName + " array is not an object.");
                 return;
             }
             for (String property : properties) {
@@ -344,7 +344,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
                     return;
                 }
             }
-            fail("item in " + EntityName + " array does not contain any of " + Arrays.toString(properties));
+            fail("item in " + entityName + " array does not contain any of " + Arrays.toString(properties));
         }
     }
 

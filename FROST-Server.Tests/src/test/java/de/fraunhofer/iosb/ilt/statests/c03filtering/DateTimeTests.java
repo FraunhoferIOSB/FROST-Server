@@ -70,8 +70,8 @@ public abstract class DateTimeTests extends AbstractTestClass {
     private static final ZonedDateTime T800 = ZonedDateTime.parse("2016-01-01T08:00:00.000Z");
     private static final ZonedDateTime T801 = ZonedDateTime.parse("2016-01-01T08:01:00.000Z");
     private static final ZonedDateTime T900 = ZonedDateTime.parse("2016-01-01T09:00:00.000Z");
-    private static final ZonedDateTime T2017 = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
-    private static final ZonedDateTime T2017_2 = T2017.plus(1, ChronoUnit.HOURS);
+    private static final ZonedDateTime T2017A = ZonedDateTime.parse("2017-01-01T09:00:00.000Z");
+    private static final ZonedDateTime T2017B = T2017A.plus(1, ChronoUnit.HOURS);
     private static final ZonedDateTime T2018 = ZonedDateTime.parse("2018-01-01T09:00:00.000Z");
     private static final TimeInterval I2015 = TimeInterval.create(T2015.toInstant(), T2015.plus(1, ChronoUnit.HOURS).toInstant());
     private static final TimeInterval I600_659 = TimeInterval.create(T600.toInstant(), T659.toInstant());
@@ -87,13 +87,13 @@ public abstract class DateTimeTests extends AbstractTestClass {
     private static final TimeInterval I700_801 = TimeInterval.create(T700.toInstant(), T801.toInstant());
     private static final TimeInterval I659_800 = TimeInterval.create(T659.toInstant(), T800.toInstant());
     private static final TimeInterval I701_800 = TimeInterval.create(T701.toInstant(), T800.toInstant());
-    private static final TimeInterval I2017 = TimeInterval.create(T2017.toInstant(), T2017_2.toInstant());
+    private static final TimeInterval I2017 = TimeInterval.create(T2017A.toInstant(), T2017B.toInstant());
     private static final TimeInterval I2014_2015 = TimeInterval.create(T2014.toInstant(), T2015.toInstant());
-    private static final TimeInterval I2014_2017_2 = TimeInterval.create(T2014.toInstant(), T2017_2.toInstant());
+    private static final TimeInterval I2014_2017B = TimeInterval.create(T2014.toInstant(), T2017B.toInstant());
     private static final TimeInterval I2014_2018 = TimeInterval.create(T2014.toInstant(), T2018.toInstant());
-    private static final TimeInterval I2015_2017_2 = TimeInterval.create(T2015.toInstant(), T2017_2.toInstant());
+    private static final TimeInterval I2015_2017B = TimeInterval.create(T2015.toInstant(), T2017B.toInstant());
     private static final TimeInterval I2015_2018 = TimeInterval.create(T2015.toInstant(), T2018.toInstant());
-    private static final TimeInterval I2017_2_2018 = TimeInterval.create(T2017_2.toInstant(), T2018.toInstant());
+    private static final TimeInterval I2017B_2018 = TimeInterval.create(T2017B.toInstant(), T2018.toInstant());
 
     private static final ZonedDateTime T2020_00 = ZonedDateTime.parse("2020-01-01T00:00:00.000Z");
     private static final ZonedDateTime T2020_01 = ZonedDateTime.parse("2020-01-01T01:00:00.000Z");
@@ -188,9 +188,9 @@ public abstract class DateTimeTests extends AbstractTestClass {
         createObservation(r++, datastream, I701_800, null, I701_800); // 20
 
         createObservation(r++, datastream, T2015, T2015, null); // 21
-        createObservation(r++, datastream, T2017, T2017, null); // 22
+        createObservation(r++, datastream, T2017A, T2017A, null); // 22
         createObservation(r++, datastream, I2015, T2015, I2015); // 23
-        createObservation(r++, datastream, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
+        createObservation(r++, datastream, I2017, T2017A.plus(1, ChronoUnit.HOURS), I2017); // 24
         Assertions.assertEquals(25, r);
 
         // A second Datastream, with no observations.
@@ -265,28 +265,28 @@ public abstract class DateTimeTests extends AbstractTestClass {
             List<Entity> t2014,
             List<Entity> t2015,
             List<Entity> t700,
-            List<Entity> t2017_2,
+            List<Entity> t2017b,
             List<Entity> t2018,
             List<Entity> i78,
-            List<Entity> i2014_2015,
-            List<Entity> i2014_2017_2,
-            List<Entity> i2014_2018,
-            List<Entity> i2015_2017_2,
-            List<Entity> i2015_2018,
-            List<Entity> i2017_2_2018) {
+            List<Entity> i2014x2015,
+            List<Entity> i2014x2017b,
+            List<Entity> i2014x2018,
+            List<Entity> i2015x2017b,
+            List<Entity> i2015x2018,
+            List<Entity> i2017bx2018) {
         Dao dsDoa = sSrvc.dao(sMdl.etDatastream);
         testFilterResultsDs(dsDoa, String.format(tpl, T2014), t2014);
         testFilterResultsDs(dsDoa, String.format(tpl, T2015), t2015);
         testFilterResultsDs(dsDoa, String.format(tpl, T700), t700);
-        testFilterResultsDs(dsDoa, String.format(tpl, T2017_2), t2017_2);
+        testFilterResultsDs(dsDoa, String.format(tpl, T2017B), t2017b);
         testFilterResultsDs(dsDoa, String.format(tpl, T2018), t2018);
         testFilterResultsDs(dsDoa, String.format(tpl, I700_800), i78);
-        testFilterResultsDs(dsDoa, String.format(tpl, I2014_2015), i2014_2015);
-        testFilterResultsDs(dsDoa, String.format(tpl, I2014_2017_2), i2014_2017_2);
-        testFilterResultsDs(dsDoa, String.format(tpl, I2014_2018), i2014_2018);
-        testFilterResultsDs(dsDoa, String.format(tpl, I2015_2017_2), i2015_2017_2);
-        testFilterResultsDs(dsDoa, String.format(tpl, I2015_2018), i2015_2018);
-        testFilterResultsDs(dsDoa, String.format(tpl, I2017_2_2018), i2017_2_2018);
+        testFilterResultsDs(dsDoa, String.format(tpl, I2014_2015), i2014x2015);
+        testFilterResultsDs(dsDoa, String.format(tpl, I2014_2017B), i2014x2017b);
+        testFilterResultsDs(dsDoa, String.format(tpl, I2014_2018), i2014x2018);
+        testFilterResultsDs(dsDoa, String.format(tpl, I2015_2017B), i2015x2017b);
+        testFilterResultsDs(dsDoa, String.format(tpl, I2015_2018), i2015x2018);
+        testFilterResultsDs(dsDoa, String.format(tpl, I2017B_2018), i2017bx2018);
     }
 
     public void testTimeValue(String tpl,

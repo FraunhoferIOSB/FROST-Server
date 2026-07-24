@@ -817,10 +817,10 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs0);
             obsFuture0.complete(obs0);
-            JsonNode entityJson0_1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture0Json1.complete(entityJson0_1);
-            JsonNode entityJson0_2 = ehAdminProject2.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture0Json2.complete(entityJson0_2);
+            JsonNode entityJson0a = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture0Json1.complete(entityJson0a);
+            JsonNode entityJson0b = ehAdminProject2.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture0Json2.complete(entityJson0b);
 
             Entity obs1 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -830,8 +830,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs1);
             obsFuture1.complete(obs1);
-            JsonNode entityJson1_1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture1Json1.complete(entityJson1_1);
+            JsonNode entityJson1a = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture1Json1.complete(entityJson1a);
 
             Entity obs2 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -841,8 +841,8 @@ public abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs2);
             obsFuture2.complete(obs2);
-            JsonNode entityJson2_1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture2Json1.complete(entityJson2_1);
+            JsonNode entityJson2a = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture2Json1.complete(entityJson2a);
 
             Entity origThing0 = ehAdmin.getCache(mdlSensing.etThing, 0);
             Entity updateThing0 = origThing0.withOnlyPk()
