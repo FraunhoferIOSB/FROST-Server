@@ -87,7 +87,7 @@ public abstract class AbstractTestClass {
                 }
                 version = serverVersion;
                 LOGGER.info("Setting up for version {}.\n\n", version.urlPart);
-                TestSuite suite = TestSuite.getInstance();
+                TestCore suite = TestCore.getInstance();
                 serverSettings = suite.getServerSettings(properties);
                 try {
                     sSrvc = null;

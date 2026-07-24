@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERNAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.SensorThingsUserModel.EP_USERPASS;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
@@ -27,7 +27,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.EntityCreator;
 import java.io.IOException;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Runs the Project Auth Tests using BasicAuth.
  */
-public class ProjectAuthTestsBasic extends ProjectAuthTests {
+abstract class ProjectAuthTestsBasic extends ProjectAuthTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectAuthTestsBasic.class.getName());
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
@@ -59,16 +59,16 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         final String dbName = "projectAuthBasic";
         final String dbDriver = "org.postgresql.Driver";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.db.username", TestCore.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestCore.VAL_PG_PASS);
         SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
     }
 
-    public ProjectAuthTestsBasic(ServerVersion version) {
+    protected ProjectAuthTestsBasic(ServerVersion version) {
         super(version, SERVER_PROPERTIES, false);
     }
 

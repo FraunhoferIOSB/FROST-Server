@@ -41,11 +41,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestIsSetProperty {
+class TestIsSetProperty {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(TestIsSetProperty.class);
 
     private static CoreSettings coreSettings;

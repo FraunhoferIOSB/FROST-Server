@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceAdminProject1;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceAdminProject2;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.FineGrainedAuthTests.serviceObsCreaterProject1;
@@ -33,7 +33,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.EntityCreator;
 import java.io.IOException;
@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Runs the FineGrained Auth Tests using BasicAuth.
  */
-public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
+abstract class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FineGrainedAuthTestsBasic.class.getName());
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
@@ -65,16 +65,16 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         final String dbName = "fineGrainedAuthBasic";
         final String dbDriver = "org.postgresql.Driver";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.db.username", TestCore.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestCore.VAL_PG_PASS);
         SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
     }
 
-    public FineGrainedAuthTestsBasic(ServerVersion version) {
+    protected FineGrainedAuthTestsBasic(ServerVersion version) {
         super(version, SERVER_PROPERTIES, false);
     }
 

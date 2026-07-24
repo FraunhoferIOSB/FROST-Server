@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * Abstract class for authorisation tests.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public abstract class AbstractAuthTests extends AbstractTestClass {
+abstract class AbstractAuthTests extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAuthTests.class);
 
@@ -159,7 +159,7 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     public abstract SensorThingsService getServiceAnonymous();
 
     @AfterAll
-    public static void tearDown() throws ServiceFailureException {
+    static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
         sMdl = null;

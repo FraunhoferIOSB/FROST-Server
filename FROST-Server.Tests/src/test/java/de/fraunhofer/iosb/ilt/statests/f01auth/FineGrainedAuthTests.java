@@ -83,7 +83,7 @@ import tools.jackson.databind.JsonNode;
  * Tests for access rights checking with Basic Authentication.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public abstract class FineGrainedAuthTests extends AbstractTestClass {
+abstract class FineGrainedAuthTests extends AbstractTestClass {
 
     private final int H200 = HTTP_CODE_200_OK;
     private final int H401 = HTTP_CODE_401_UNAUTHORIZED;

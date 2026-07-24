@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,7 +34,7 @@ import org.apache.commons.io.IOUtils;
 /**
  * Runs the Project Auth Tests using BasicAuth.
  */
-public class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
+abstract class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
 
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
@@ -46,16 +46,16 @@ public class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         final String dbName = "projectAuthBasicAnon";
         final String dbDriver = "org.postgresql.Driver";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.db.username", TestCore.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestCore.VAL_PG_PASS);
         SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
     }
 
-    public ProjectAuthTestsBasicAnon(ServerVersion version) {
+    protected ProjectAuthTestsBasicAnon(ServerVersion version) {
         super(version, SERVER_PROPERTIES, true);
     }
 

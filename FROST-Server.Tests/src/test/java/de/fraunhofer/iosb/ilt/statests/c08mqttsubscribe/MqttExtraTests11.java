@@ -84,7 +84,7 @@ public class MqttExtraTests11 extends AbstractTestClass {
     }
 
     @AfterAll
-    public static void tearDown() throws ServiceFailureException {
+    static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         EntityUtils.deleteAll(sSrvc);
         eh.clearCaches();

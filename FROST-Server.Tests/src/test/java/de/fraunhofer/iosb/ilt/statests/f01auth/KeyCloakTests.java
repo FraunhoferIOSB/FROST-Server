@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Tests for access rights checking with KeyCloak Authentication.
  */
-public abstract class KeyCloakTests extends AbstractAuthTests {
+abstract class KeyCloakTests extends AbstractAuthTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyCloakTests.class);
 
@@ -77,14 +77,14 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     static {
         final String dbName = "keycloakauth";
         final String dbDriver = "org.postgresql.Driver";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.db.username", TestCore.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestCore.VAL_PG_PASS);
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
         SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
-        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
+        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestCore.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
         SERVER_PROPERTIES.put("auth.keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
         SERVER_PROPERTIES.put("auth.registerUserLocally", "true");
@@ -159,7 +159,7 @@ public abstract class KeyCloakTests extends AbstractAuthTests {
     }
 
     public static SensorThingsService setAuth(SensorThingsService service, String username, String password) {
-        KeycloakContainer keycloak = TestSuite.getInstance().getKeycloak();
+        KeycloakContainer keycloak = TestCore.getInstance().getKeycloak();
         service.setTokenManager(
                 new TokenManagerOpenIDConnect()
                         .setTokenServerUrl(keycloak.getAuthServerUrl() + KEYCLOAK_TOKEN_PATH)

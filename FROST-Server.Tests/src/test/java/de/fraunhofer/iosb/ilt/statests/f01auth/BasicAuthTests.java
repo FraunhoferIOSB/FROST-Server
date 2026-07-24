@@ -17,11 +17,11 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Tests for access rights checking with Basic Authentication.
  */
-public abstract class BasicAuthTests extends AbstractAuthTests {
+abstract class BasicAuthTests extends AbstractAuthTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthTests.class);
 
@@ -42,10 +42,10 @@ public abstract class BasicAuthTests extends AbstractAuthTests {
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         final String dbName = "basicauth";
         final String dbDriver = "org.postgresql.Driver";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.db.username", TestCore.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestCore.VAL_PG_PASS);
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
     }
 

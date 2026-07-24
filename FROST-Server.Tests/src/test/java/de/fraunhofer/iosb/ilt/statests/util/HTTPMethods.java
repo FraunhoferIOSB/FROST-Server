@@ -101,6 +101,26 @@ public class HTTPMethods {
         LOGGER.info("Calls: {} Get, {} Post, {} Patch, {} Put, {} Delete", countGet, countPost, countPatch, countPut, countDelete);
     }
 
+    public static int getCountDelete() {
+        return countDelete;
+    }
+
+    public static int getCountGet() {
+        return countGet;
+    }
+
+    public static int getCountPatch() {
+        return countPatch;
+    }
+
+    public static int getCountPost() {
+        return countPost;
+    }
+
+    public static int getCountPut() {
+        return countPut;
+    }
+
     /**
      * Send HTTP GET request to the urlString and return response code and
      * response body

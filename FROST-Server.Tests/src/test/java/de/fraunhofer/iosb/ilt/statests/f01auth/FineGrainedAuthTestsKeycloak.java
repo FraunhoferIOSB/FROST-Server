@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
-import static de.fraunhofer.iosb.ilt.statests.TestSuite.KEY_DB_NAME;
+import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests.KEYCLOAK_FROST_CLIENT_ID;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests.KEYCLOAK_FROST_CONFIG_SECRET;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.KeyCloakTests.KEYCLOAK_TOKEN_PATH;
@@ -28,7 +28,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.projects.ProjectRoleDecoder;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Runs the FineGrained Auth Tests using Keycloak Auth.
  */
-public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
+abstract class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FineGrainedAuthTestsKeycloak.class.getName());
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
@@ -54,16 +54,16 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
         FineGrainedAuthTests.addCommonProperties(SERVER_PROPERTIES);
         final String dbName = "fineGrainedAuthKeycloak";
         final String dbDriver = "org.postgresql.Driver";
-        SERVER_PROPERTIES.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbName));
+        SERVER_PROPERTIES.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbName));
         SERVER_PROPERTIES.put("auth.db.driver", dbDriver);
-        SERVER_PROPERTIES.put("auth.db.username", TestSuite.VAL_PG_USER);
-        SERVER_PROPERTIES.put("auth.db.password", TestSuite.VAL_PG_PASS);
+        SERVER_PROPERTIES.put("auth.db.username", TestCore.VAL_PG_USER);
+        SERVER_PROPERTIES.put("auth.db.password", TestCore.VAL_PG_PASS);
         SERVER_PROPERTIES.put("auth.plainTextPassword", "false");
         SERVER_PROPERTIES.put("auth.autoUpdateDatabase", "true");
         SERVER_PROPERTIES.put(KEY_DB_NAME, dbName);
 
         SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
-        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
+        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestCore.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
         SERVER_PROPERTIES.put("auth.keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "false");
         SERVER_PROPERTIES.put("auth.authenticateOnly", "true");
@@ -72,12 +72,12 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
 
         final String dbNameAnon = "fineGrainedAuthKeycloakAnon";
         SERVER_PROPERTIES_ANON.putAll(SERVER_PROPERTIES);
-        SERVER_PROPERTIES_ANON.put("auth.db.url", TestSuite.createDbUrl(dbDriver, dbNameAnon));
+        SERVER_PROPERTIES_ANON.put("auth.db.url", TestCore.createDbUrl(dbDriver, dbNameAnon));
         SERVER_PROPERTIES_ANON.put(KEY_DB_NAME, dbNameAnon);
         SERVER_PROPERTIES_ANON.put("auth_allowAnonymousRead", "true");
     }
 
-    public FineGrainedAuthTestsKeycloak(ServerVersion version, boolean anonymousReadAllowed) {
+    protected FineGrainedAuthTestsKeycloak(ServerVersion version, boolean anonymousReadAllowed) {
         super(version,
                 anonymousReadAllowed ? SERVER_PROPERTIES_ANON : SERVER_PROPERTIES,
                 anonymousReadAllowed);
@@ -139,7 +139,7 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
     }
 
     public static SensorThingsService setAuth(SensorThingsService service, String username, String password) {
-        KeycloakContainer keycloak = TestSuite.getInstance().getKeycloak();
+        KeycloakContainer keycloak = TestCore.getInstance().getKeycloak();
         service.setTokenManager(
                 new TokenManagerOpenIDConnect()
                         .setTokenServerUrl(keycloak.getAuthServerUrl() + KEYCLOAK_TOKEN_PATH)

@@ -21,7 +21,7 @@ import dasniko.testcontainers.keycloak.KeycloakContainer;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
-import de.fraunhofer.iosb.ilt.statests.TestSuite;
+import de.fraunhofer.iosb.ilt.statests.TestCore;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,10 +31,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Tests for access rights checking with KeyCloak Authentication with anonymous
  * read.
- *
- * @author Hylke van der Schaaf
  */
-public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
+abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
 
     /**
      * The logger for this class.
@@ -49,7 +47,7 @@ public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
 
     static {
         SERVER_PROPERTIES.put("auth.provider", "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider");
-        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestSuite.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
+        SERVER_PROPERTIES.put("auth.keycloakConfigUrl", TestCore.getInstance().getKeycloak().getAuthServerUrl() + "/realms/FROST-Test/clients-registrations/install/" + KEYCLOAK_FROST_CLIENT_ID);
         SERVER_PROPERTIES.put("auth.keycloakConfigSecret", KEYCLOAK_FROST_CONFIG_SECRET);
         SERVER_PROPERTIES.put("auth.allowAnonymousRead", "true");
     }
@@ -85,7 +83,7 @@ public abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
     }
 
     public static SensorThingsService setAuth(SensorThingsService service, String username, String password) {
-        KeycloakContainer keycloak = TestSuite.getInstance().getKeycloak();
+        KeycloakContainer keycloak = TestCore.getInstance().getKeycloak();
         service.setTokenManager(
                 new TokenManagerOpenIDConnect()
                         .setTokenServerUrl(keycloak.getAuthServerUrl() + KEYCLOAK_TOKEN_PATH)

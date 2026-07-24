@@ -103,7 +103,7 @@ public class GeoTests20 extends AbstractTestClass {
     }
 
     @AfterAll
-    public static void tearDown() throws ServiceFailureException {
+    static void tearDown() throws ServiceFailureException {
         LOGGER.info("Tearing down.");
         cleanup();
     }
