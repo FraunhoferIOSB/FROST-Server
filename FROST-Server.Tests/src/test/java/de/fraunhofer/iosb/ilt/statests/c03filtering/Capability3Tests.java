@@ -354,28 +354,23 @@ public abstract class Capability3Tests extends AbstractTestClass {
     @Test
     void checkQueriesPriorityOrdering() {
         LOGGER.info("  checkQueriesPriorityOrdering");
-        try {
-            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, null, null, "?$count=true&$top=1&$skip=2&$orderby=phenomenonTime%20asc&$filter=result%20gt%20'3'");
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
-            String message = "There is problem for GET Observations using multiple Query Options! HTTP status code: " + responseMap.code;
-            assertEquals(200, responseMap.code, message);
+        String message = "There is problem for GET Observations using multiple Query Options! HTTP status code: " + responseMap.code;
+        assertEquals(200, responseMap.code, message);
 
-            String response = responseMap.response;
-            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+        String response = responseMap.response;
+        JsonNode array = Utils.MAPPER.readTree(response).get("value");
 
-            message = "The query order of execution is not correct. The expected count is 6. The service returned " + Utils.MAPPER.readTree(response).get("@iot.count").asLong();
-            assertEquals(6, Utils.MAPPER.readTree(response).get("@iot.count").asLong(), message);
+        message = "The query order of execution is not correct. The expected count is 6. The service returned " + Utils.MAPPER.readTree(response).get("@iot.count").asLong();
+        assertEquals(6, Utils.MAPPER.readTree(response).get("@iot.count").asLong(), message);
 
-            message = "The query asked for top 1. The service rerurned " + array.size() + " entities.";
-            assertEquals(1, array.size(), message);
+        message = "The query asked for top 1. The service rerurned " + array.size() + " entities.";
+        assertEquals(1, array.size(), message);
 
-            message = "The query order of execution is not correct. The expected Observation result is 6. It is " + array.get(0).get("result").toString();
-            assertEquals("6", array.get(0).get("result").toString(), message);
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
+        message = "The query order of execution is not correct. The expected Observation result is 6. It is " + array.get(0).get("result").toString();
+        assertEquals("6", array.get(0).get("result").toString(), message);
     }
 
     /**
@@ -459,28 +454,23 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * expected value. The actual count or result is appended to the message.
      */
     private void checkResults(String urlString, int expectedCount, String expectedResult, String fetchError, String resultError) {
-        try {
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
 
-            String message = fetchError + ": " + responseMap.code;
-            assertEquals(200, responseMap.code, message);
+        String message = fetchError + ": " + responseMap.code;
+        assertEquals(200, responseMap.code, message);
 
-            String response = responseMap.response;
-            JsonNode array = Utils.MAPPER.readTree(response).get("value");
-            int length = array.size();
+        String response = responseMap.response;
+        JsonNode array = Utils.MAPPER.readTree(response).get("value");
+        int length = array.size();
 
-            message = resultError + " Expected " + expectedCount + " Observations. got " + length + ".";
-            assertEquals(expectedCount, length, message);
+        message = resultError + " Expected " + expectedCount + " Observations. got " + length + ".";
+        assertEquals(expectedCount, length, message);
 
-            for (int i = 0; i < length; i++) {
-                JsonNode obs = array.get(i);
-                String result = obs.get("result").toString();
-                String msg = resultError + " The expected Observation result is " + expectedResult + ", but the given result is " + result;
-                assertEquals(expectedResult, result, msg);
-            }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        for (int i = 0; i < length; i++) {
+            JsonNode obs = array.get(i);
+            String result = obs.get("result").toString();
+            String msg = resultError + " The expected Observation result is " + expectedResult + ", but the given result is " + result;
+            assertEquals(expectedResult, result, msg);
         }
     }
 
@@ -491,183 +481,71 @@ public abstract class Capability3Tests extends AbstractTestClass {
      */
     private void checkOrderbyForEntityTypeRelations(EntityType entityType) {
         List<String> relations = entityType.getRelations(serverSettings.getExtensions());
-        try {
-            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            String response = responseMap.response;
-            JsonNode array = Utils.MAPPER.readTree(response).get("value");
-            if (array.size() == 0) {
-                return;
-            }
-            Object id = array.get(0).get(ControlInformation.ID);
-
-            for (String relation : relations) {
-                if (!EntityType.isPlural(relation)) {
-                    continue;
-                }
-                EntityType relationEntityType = EntityType.getForRelation(relation);
-                List<EntityType.EntityProperty> properties = relationEntityType.getProperties();
-                //single orderby
-                for (EntityType.EntityProperty property : properties) {
-                    if (!property.canSort) {
-                        continue;
-                    }
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name);
-                    responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.response;
-                    array = Utils.MAPPER.readTree(response).get("value");
-                    for (int i = 1; i < array.size(); i++) {
-                        String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
-                        compareWithPrevious(i, array, property.name, Compare.LE, message);
-                    }
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
-                    responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.response;
-                    array = Utils.MAPPER.readTree(response).get("value");
-                    for (int i = 1; i < array.size(); i++) {
-                        String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
-                        compareWithPrevious(i, array, property.name, Compare.LE, message);
-                    }
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
-                    responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.response;
-                    array = Utils.MAPPER.readTree(response).get("value");
-                    for (int i = 1; i < array.size(); i++) {
-                        String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + property;
-                        compareWithPrevious(i, array, property.name, Compare.GE, message);
-                    }
-                }
-
-                //multiple orderby
-                List<String> orderbyPropeties = new ArrayList<>();
-                StringBuilder orderby = new StringBuilder("?$orderby=");
-                StringBuilder orderbyAsc = new StringBuilder("?$orderby=");
-                StringBuilder orderbyDesc = new StringBuilder("?$orderby=");
-                boolean first = true;
-                for (EntityType.EntityProperty property : properties) {
-                    if (!property.canSort) {
-                        continue;
-                    }
-                    if (!first) {
-                        orderby.append(",");
-                    }
-                    orderby.append(property.name);
-                    orderbyPropeties.add(property.name);
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderby.toString());
-                    responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.response;
-                    array = Utils.MAPPER.readTree(response).get("value");
-                    for (int i = 1; i < array.size(); i++) {
-                        for (String orderProperty : orderbyPropeties) {
-                            String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
-                            int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
-                            if (compare != 0) {
-                                break;
-                            }
-                        }
-                    }
-                    if (!first) {
-                        orderbyAsc.append(",");
-                    }
-                    orderbyAsc.append(property).append("%20asc");
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyAsc.toString());
-                    responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.response;
-                    array = Utils.MAPPER.readTree(response).get("value");
-                    for (int i = 1; i < array.size(); i++) {
-                        for (String orderProperty : orderbyPropeties) {
-                            String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
-                            int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
-                            if (compare != 0) {
-                                break;
-                            }
-                        }
-                    }
-                    if (first) {
-                        first = false;
-                    } else {
-                        orderbyDesc.append(",");
-                    }
-                    orderbyDesc.append(property).append("%20desc");
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyDesc.toString());
-                    responseMap = HTTPMethods.doGet(urlString);
-                    response = responseMap.response;
-                    array = Utils.MAPPER.readTree(response).get("value");
-                    for (int i = 1; i < array.size(); i++) {
-                        for (String orderProperty : orderbyPropeties) {
-                            String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
-                            int compare = compareWithPrevious(i, array, orderProperty, Compare.GE, message);
-                            if (compare != 0) {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String response = responseMap.response;
+        JsonNode array = Utils.MAPPER.readTree(response).get("value");
+        if (array.size() == 0) {
+            return;
         }
+        Object id = array.get(0).get(ControlInformation.ID);
 
-    }
-
-    /**
-     * This helper method is checking $orderby for a collection.
-     *
-     * @param entityType Entity type from EntityType enum list
-     */
-    private void checkOrderbyForEntityType(EntityType entityType) {
-        List<EntityType.EntityProperty> properties = entityType.getProperties();
-        try {
+        for (String relation : relations) {
+            if (!EntityType.isPlural(relation)) {
+                continue;
+            }
+            EntityType relationEntityType = EntityType.getForRelation(relation);
+            List<EntityType.EntityProperty> properties = relationEntityType.getProperties();
             //single orderby
             for (EntityType.EntityProperty property : properties) {
                 if (!property.canSort) {
                     continue;
                 }
-                String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name);
-                HttpResponse responseMap = HTTPMethods.doGet(urlString);
-                String response = responseMap.response;
-                JsonNode array = Utils.MAPPER.readTree(response).get("value");
-                for (int i = 1; i < array.size(); i++) {
-                    String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
-                    compareWithPrevious(i, array, property.name, Compare.LE, msg);
-                }
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20asc");
+                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name);
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = Utils.MAPPER.readTree(response).get("value");
                 for (int i = 1; i < array.size(); i++) {
-                    String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
-                    compareWithPrevious(i, array, property.name, Compare.LE, msg);
+                    String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + property;
+                    compareWithPrevious(i, array, property.name, Compare.LE, message);
                 }
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20desc");
+                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20asc");
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = Utils.MAPPER.readTree(response).get("value");
                 for (int i = 1; i < array.size(); i++) {
-                    String msg = "The descending ordering is not correct for EntityType " + entityType + " orderby desc property " + property.name;
-                    compareWithPrevious(i, array, property.name, Compare.GE, msg);
+                    String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + property;
+                    compareWithPrevious(i, array, property.name, Compare.LE, message);
+                }
+                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, "?$orderby=" + property.name + "%20desc");
+                responseMap = HTTPMethods.doGet(urlString);
+                response = responseMap.response;
+                array = Utils.MAPPER.readTree(response).get("value");
+                for (int i = 1; i < array.size(); i++) {
+                    String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + property;
+                    compareWithPrevious(i, array, property.name, Compare.GE, message);
                 }
             }
 
             //multiple orderby
             List<String> orderbyPropeties = new ArrayList<>();
-            String orderby = "?$orderby=";
-            String orderbyAsc = "?$orderby=";
-            String orderbyDesc = "?$orderby=";
+            StringBuilder orderby = new StringBuilder("?$orderby=");
+            StringBuilder orderbyAsc = new StringBuilder("?$orderby=");
+            StringBuilder orderbyDesc = new StringBuilder("?$orderby=");
+            boolean first = true;
             for (EntityType.EntityProperty property : properties) {
                 if (!property.canSort) {
                     continue;
                 }
-                if (orderby.charAt(orderby.length() - 1) != '=') {
-                    orderby += ",";
+                if (!first) {
+                    orderby.append(",");
                 }
-                orderby += property.name;
+                orderby.append(property.name);
                 orderbyPropeties.add(property.name);
-                String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderby);
-                HttpResponse responseMap = HTTPMethods.doGet(urlString);
-                String response = responseMap.response;
-                JsonNode array = Utils.MAPPER.readTree(response).get("value");
+                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderby.toString());
+                responseMap = HTTPMethods.doGet(urlString);
+                response = responseMap.response;
+                array = Utils.MAPPER.readTree(response).get("value");
                 for (int i = 1; i < array.size(); i++) {
                     for (String orderProperty : orderbyPropeties) {
                         String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
@@ -677,11 +555,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                         }
                     }
                 }
-                if (orderbyAsc.charAt(orderbyAsc.length() - 1) != '=') {
-                    orderbyAsc += ",";
+                if (!first) {
+                    orderbyAsc.append(",");
                 }
-                orderbyAsc += property + "%20asc";
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyAsc);
+                orderbyAsc.append(property).append("%20asc");
+                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyAsc.toString());
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = Utils.MAPPER.readTree(response).get("value");
@@ -694,11 +572,13 @@ public abstract class Capability3Tests extends AbstractTestClass {
                         }
                     }
                 }
-                if (orderbyDesc.charAt(orderbyDesc.length() - 1) != '=') {
-                    orderbyDesc += ",";
+                if (first) {
+                    first = false;
+                } else {
+                    orderbyDesc.append(",");
                 }
-                orderbyDesc += property + "%20desc";
-                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyDesc);
+                orderbyDesc.append(property).append("%20desc");
+                urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyDesc.toString());
                 responseMap = HTTPMethods.doGet(urlString);
                 response = responseMap.response;
                 array = Utils.MAPPER.readTree(response).get("value");
@@ -712,11 +592,109 @@ public abstract class Capability3Tests extends AbstractTestClass {
                     }
                 }
             }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing " + entityType + ":\n" + e.getMessage());
+        }
+    }
+
+    /**
+     * This helper method is checking $orderby for a collection.
+     *
+     * @param entityType Entity type from EntityType enum list
+     */
+    private void checkOrderbyForEntityType(EntityType entityType) {
+        List<EntityType.EntityProperty> properties = entityType.getProperties();
+        //single orderby
+        for (EntityType.EntityProperty property : properties) {
+            if (!property.canSort) {
+                continue;
+            }
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            String response = responseMap.response;
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 1; i < array.size(); i++) {
+                String msg = "The default ordering is not correct for EntityType " + entityType + " orderby property " + property.name;
+                compareWithPrevious(i, array, property.name, Compare.LE, msg);
+            }
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20asc");
+            responseMap = HTTPMethods.doGet(urlString);
+            response = responseMap.response;
+            array = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 1; i < array.size(); i++) {
+                String msg = "The ascending ordering is not correct for EntityType " + entityType + " orderby asc property " + property.name;
+                compareWithPrevious(i, array, property.name, Compare.LE, msg);
+            }
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, "?$orderby=" + property.name + "%20desc");
+            responseMap = HTTPMethods.doGet(urlString);
+            response = responseMap.response;
+            array = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 1; i < array.size(); i++) {
+                String msg = "The descending ordering is not correct for EntityType " + entityType + " orderby desc property " + property.name;
+                compareWithPrevious(i, array, property.name, Compare.GE, msg);
+            }
         }
 
+        //multiple orderby
+        List<String> orderbyPropeties = new ArrayList<>();
+        String orderby = "?$orderby=";
+        String orderbyAsc = "?$orderby=";
+        String orderbyDesc = "?$orderby=";
+        for (EntityType.EntityProperty property : properties) {
+            if (!property.canSort) {
+                continue;
+            }
+            if (orderby.charAt(orderby.length() - 1) != '=') {
+                orderby += ",";
+            }
+            orderby += property.name;
+            orderbyPropeties.add(property.name);
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderby);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            String response = responseMap.response;
+            JsonNode array = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 1; i < array.size(); i++) {
+                for (String orderProperty : orderbyPropeties) {
+                    String message = "The ordering is not correct for EntityType " + entityType + " orderby property " + orderProperty;
+                    int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
+                    if (compare != 0) {
+                        break;
+                    }
+                }
+            }
+            if (orderbyAsc.charAt(orderbyAsc.length() - 1) != '=') {
+                orderbyAsc += ",";
+            }
+            orderbyAsc += property + "%20asc";
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyAsc);
+            responseMap = HTTPMethods.doGet(urlString);
+            response = responseMap.response;
+            array = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 1; i < array.size(); i++) {
+                for (String orderProperty : orderbyPropeties) {
+                    String message = "The ordering is not correct for EntityType " + entityType + " orderby asc property " + orderProperty;
+                    int compare = compareWithPrevious(i, array, orderProperty, Compare.LE, message);
+                    if (compare != 0) {
+                        break;
+                    }
+                }
+            }
+            if (orderbyDesc.charAt(orderbyDesc.length() - 1) != '=') {
+                orderbyDesc += ",";
+            }
+            orderbyDesc += property + "%20desc";
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyDesc);
+            responseMap = HTTPMethods.doGet(urlString);
+            response = responseMap.response;
+            array = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 1; i < array.size(); i++) {
+                for (String orderProperty : orderbyPropeties) {
+                    String message = "The ordering is not correct for EntityType " + entityType + " orderby desc property " + orderProperty;
+                    int compare = compareWithPrevious(i, array, orderProperty, Compare.GE, message);
+                    if (compare != 0) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private int compareWithPrevious(int idx, JsonNode array, String property, Compare order, String message) throws JacksonException {
@@ -1328,13 +1306,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
         HttpResponse responseMap = HTTPMethods.doGet(urlString);
         String response = responseMap.response;
-        JsonNode array = null;
-        try {
-            array = Utils.MAPPER.readTree(response).get("value");
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
+        JsonNode array = Utils.MAPPER.readTree(response).get("value");
         if (array.size() == 0) {
             return;
         }
@@ -1439,8 +1411,8 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 }
             }
         } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing " + properties + ":\n" + e.getMessage());
+            LOGGER.error("An Exception occurred during testing {}", properties);
+            throw e;
         }
     }
 
@@ -1454,377 +1426,370 @@ public abstract class Capability3Tests extends AbstractTestClass {
      * Create entities as a pre-process for testing query options.
      */
     private static void createEntities() {
-        try {
-            //First Thing
-            String urlParameters = """
-                    {
-                        "name": "thing 1",
-                        "description": "thing 1",
-                        "properties": {
-                            "reference": "first"
-                        },
-                        "Locations": [
-                            {
-                                "name": "location 1",
-                                "description": "location 1",
-                                "location": {
-                                    "type": "Point",
-                                    "coordinates": [
-                                        -117.05,
-                                        51.05
-                                    ]
-                                },
-                                "encodingType": "application/vnd.geo+json"
-                            }
-                        ],
-                        "Datastreams": [
-                            {
-                                "unitOfMeasurement": {
-                                    "name": "Lumen",
-                                    "symbol": "lm",
-                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen"
-                                },
-                                "name": "datastream 1",
-                                "description": "datastream 1",
-                                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
-                                "ObservedProperty": {
-                                    "name": "Luminous Flux",
-                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux",
-                                    "description": "observedProperty 1"
-                                },
-                                "Sensor": {
-                                    "name": "sensor 1",
-                                    "description": "sensor 1",
-                                    "encodingType": "application/pdf",
-                                    "metadata": "Light flux sensor"
-                                }
+        //First Thing
+        String urlParameters = """
+                {
+                    "name": "thing 1",
+                    "description": "thing 1",
+                    "properties": {
+                        "reference": "first"
+                    },
+                    "Locations": [
+                        {
+                            "name": "location 1",
+                            "description": "location 1",
+                            "location": {
+                                "type": "Point",
+                                "coordinates": [
+                                    -117.05,
+                                    51.05
+                                ]
                             },
-                            {
-                                "unitOfMeasurement": {
-                                    "name": "Centigrade",
-                                    "symbol": "C",
-                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen"
-                                },
-                                "name": "datastream 2",
-                                "description": "datastream 2",
-                                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
-                                "ObservedProperty": {
-                                    "name": "Tempretaure",
-                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture",
-                                    "description": "observedProperty 2"
-                                },
-                                "Sensor": {
-                                    "name": "sensor 2",
-                                    "description": "sensor 2",
-                                    "encodingType": "application/pdf",
-                                    "metadata": "Tempreture sensor"
-                                }
+                            "encodingType": "application/vnd.geo+json"
+                        }
+                    ],
+                    "Datastreams": [
+                        {
+                            "unitOfMeasurement": {
+                                "name": "Lumen",
+                                "symbol": "lm",
+                                "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen"
+                            },
+                            "name": "datastream 1",
+                            "description": "datastream 1",
+                            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                            "ObservedProperty": {
+                                "name": "Luminous Flux",
+                                "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux",
+                                "description": "observedProperty 1"
+                            },
+                            "Sensor": {
+                                "name": "sensor 1",
+                                "description": "sensor 1",
+                                "encodingType": "application/pdf",
+                                "metadata": "Light flux sensor"
                             }
-                        ]
-                    }""";
-            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
-            thingId1 = postAndGetId(urlString, urlParameters);
+                        },
+                        {
+                            "unitOfMeasurement": {
+                                "name": "Centigrade",
+                                "symbol": "C",
+                                "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen"
+                            },
+                            "name": "datastream 2",
+                            "description": "datastream 2",
+                            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                            "ObservedProperty": {
+                                "name": "Tempretaure",
+                                "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Tempreture",
+                                "description": "observedProperty 2"
+                            },
+                            "Sensor": {
+                                "name": "sensor 2",
+                                "description": "sensor 2",
+                                "encodingType": "application/pdf",
+                                "metadata": "Tempreture sensor"
+                            }
+                        }
+                    ]
+                }""";
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
+        thingId1 = postAndGetId(urlString, urlParameters);
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.LOCATION, null);
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            String response = responseMap.response;
-            JsonNode array = Utils.MAPPER.readTree(response).get("value");
-            locationId1 = array.get(0).get(ControlInformation.ID);
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.LOCATION, null);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        String response = responseMap.response;
+        JsonNode array = Utils.MAPPER.readTree(response).get("value");
+        locationId1 = array.get(0).get(ControlInformation.ID);
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.DATASTREAM, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            // We can not assume the Datastreams are returned in the order we expect.
-            if ("datastream 1".equals(array.get(0).get("name").asString())) {
-                datastreamId1 = array.get(0).get(ControlInformation.ID);
-                datastreamId2 = array.get(1).get(ControlInformation.ID);
-            } else {
-                datastreamId1 = array.get(1).get(ControlInformation.ID);
-                datastreamId2 = array.get(0).get(ControlInformation.ID);
-            }
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.SENSOR, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            sensorId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVED_PROPERTY, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            observedPropertyId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.SENSOR, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            sensorId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVED_PROPERTY, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            observedPropertyId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-
-            //Second Thing
-            urlParameters = "{\n"
-                    + "    \"name\": \"thing 2\",\n"
-                    + "    \"description\": \"thing 2\",\n"
-                    + "    \"properties\": {\n"
-                    + "        \"reference\": \"second\"\n"
-                    + "    },\n"
-                    + "    \"Locations\": [\n"
-                    + "        {\n"
-                    + "            \"name\": \"location 2\",\n"
-                    + "            \"description\": \"location 2\",\n"
-                    + "            \"location\": {\n"
-                    + "                \"type\": \"Point\",\n"
-                    + "                \"coordinates\": [\n"
-                    + "                    -100.05,\n"
-                    + "                    50.05\n"
-                    + "                ]\n"
-                    + "            },\n"
-                    + "            \"encodingType\": \"application/vnd.geo+json\"\n"
-                    + "        }\n"
-                    + "    ],\n"
-                    + "    \"Datastreams\": [\n"
-                    + "        {\n"
-                    + "            \"unitOfMeasurement\": {\n"
-                    + "                \"name\": \"Lumen\",\n"
-                    + "                \"symbol\": \"lm\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
-                    + "            },\n"
-                    + "            \"name\": \"datastream 3\",\n"
-                    + "            \"description\": \"datastream 3\",\n"
-                    + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "            \"ObservedProperty\": {\n"
-                    + "                \"name\": \"Second Luminous Flux\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\n"
-                    + "                \"description\": \"observedProperty 3\"\n"
-                    + "            },\n"
-                    + "            \"Sensor\": {\n"
-                    + "                \"name\": \"sensor 3\",\n"
-                    + "                \"description\": \"sensor 3\",\n"
-                    + "                \"encodingType\": \"application/pdf\",\n"
-                    + "                \"metadata\": \"Second Light flux sensor\"\n"
-                    + "            }\n"
-                    + "        },\n"
-                    + "        {\n"
-                    + "            \"unitOfMeasurement\": {\n"
-                    + "                \"name\": \"Centigrade\",\n"
-                    + "                \"symbol\": \"C\",\n"
-                    + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
-                    + "            },\n"
-                    + "            \"name\": \"datastream 4\",\n"
-                    + "            \"description\": \"datastream 4\",\n"
-                    + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "            \"ObservedProperty\": {\n"
-                    + "                \"@iot.id\": " + quoteForJson(observedPropertyId2) + "\n"
-                    + "            },\n"
-                    + "            \"Sensor\": {\n"
-                    + "                \"name\": \"sensor 4 \",\n"
-                    + "                \"description\": \"sensor 4 \",\n"
-                    + "                \"encodingType\": \"application/pdf\",\n"
-                    + "                \"metadata\": \"Second Tempreture sensor\"\n"
-                    + "            }\n"
-                    + "        }\n"
-                    + "    ]\n"
-                    + "}";
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
-            thingId2 = postAndGetId(urlString, urlParameters);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.LOCATION, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            locationId2 = array.get(0).get(ControlInformation.ID);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.DATASTREAM, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            // We can not assume the Datastreams are returned in the order we expect.
-            if ("datastream 3".equals(array.get(0).get("name").asString())) {
-                datastreamId3 = array.get(0).get(ControlInformation.ID);
-                datastreamId4 = array.get(1).get(ControlInformation.ID);
-            } else {
-                datastreamId4 = array.get(0).get(ControlInformation.ID);
-                datastreamId3 = array.get(1).get(ControlInformation.ID);
-            }
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.SENSOR, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            sensorId3 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVED_PROPERTY, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            observedPropertyId3 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.SENSOR, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            sensorId4 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-
-            //HistoricalLocations
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, null, null);
-            urlParameters = "{\"Locations\": [\n"
-                    + "    {\n"
-                    + "      \"@iot.id\": " + quoteForJson(locationId2) + "\n"
-                    + "    }\n"
-                    + "  ]}";
-            HTTPMethods.doPatch(urlString, urlParameters);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, null, null);
-            urlParameters = "{\"Locations\": [\n"
-                    + "    {\n"
-                    + "      \"@iot.id\": " + quoteForJson(locationId1) + "\n"
-                    + "    }\n"
-                    + "  ]}";
-            HTTPMethods.doPatch(urlString, urlParameters);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            historicalLocationId1 = array.get(0).get(ControlInformation.ID);
-            historicalLocationId2 = array.get(1).get(ControlInformation.ID);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            historicalLocationId3 = array.get(0).get(ControlInformation.ID);
-            historicalLocationId4 = array.get(1).get(ControlInformation.ID);
-
-            //Observations
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, null);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-01T00:00:00Z",
-                        "result": 1
-                    }""";
-            observationId1 = postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-02T00:00:00Z",
-                        "result": 2
-                    }""";
-            postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-03T00:00:00Z",
-                        "result": 3
-                    }""";
-            postAndGetId(urlString, urlParameters);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, null);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-04T00:00:00Z",
-                        "result": 4
-                    }""";
-            postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-05T00:00:00Z",
-                        "result": 5
-                    }""";
-            postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-06T00:00:00Z",
-                        "result": 6
-                    }""";
-            postAndGetId(urlString, urlParameters);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, null);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-07T00:00:00Z",
-                        "result": 7
-                    }""";
-            observationId7 = postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-08T00:00:00Z",
-                        "result": 8
-                    }""";
-            postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-09T00:00:00Z",
-                        "result": 9
-                    }""";
-            postAndGetId(urlString, urlParameters);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, null);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-10T00:00:00Z",
-                       "result": 10
-                    }""";
-            postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-11T00:00:00Z",
-                        "result": 11
-                    }""";
-            postAndGetId(urlString, urlParameters);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-12T00:00:00Z",
-                        "result": 12
-                    }""";
-            postAndGetId(urlString, urlParameters);
-
-            //FeatureOfInterest
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId1, EntityType.FEATURE_OF_INTEREST, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            featureOfInterestId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId7, EntityType.FEATURE_OF_INTEREST, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            featureOfInterestId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-
-            ENTITYCOUNTS.setGlobalCount(EntityType.DATASTREAM, 4);
-            ENTITYCOUNTS.setGlobalCount(EntityType.FEATURE_OF_INTEREST, 2);
-            ENTITYCOUNTS.setGlobalCount(EntityType.HISTORICAL_LOCATION, 4);
-            ENTITYCOUNTS.setGlobalCount(EntityType.LOCATION, 2);
-            ENTITYCOUNTS.setGlobalCount(EntityType.OBSERVATION, 12);
-            ENTITYCOUNTS.setGlobalCount(EntityType.OBSERVED_PROPERTY, 3);
-            ENTITYCOUNTS.setGlobalCount(EntityType.SENSOR, 4);
-            ENTITYCOUNTS.setGlobalCount(EntityType.THING, 2);
-
-            ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.LOCATION, 1);
-            ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.LOCATION, 1);
-            ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, 2);
-            ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, 2);
-            ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.DATASTREAM, 2);
-            ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.DATASTREAM, 2);
-            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId1, EntityType.THING, 1);
-            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId2, EntityType.THING, 1);
-            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId1, EntityType.HISTORICAL_LOCATION, 2);
-            ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId2, EntityType.HISTORICAL_LOCATION, 2);
-            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId1, EntityType.LOCATION, 1);
-            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId2, EntityType.LOCATION, 1);
-            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId3, EntityType.LOCATION, 1);
-            ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId4, EntityType.LOCATION, 1);
-            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, 3);
-            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, 3);
-            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, 3);
-            ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, 3);
-            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId1, EntityType.DATASTREAM, 1);
-            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId2, EntityType.DATASTREAM, 1);
-            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId3, EntityType.DATASTREAM, 1);
-            ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId4, EntityType.DATASTREAM, 1);
-            ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId1, EntityType.DATASTREAM, 1);
-            ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId2, EntityType.DATASTREAM, 2);
-            ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId3, EntityType.DATASTREAM, 1);
-            ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1, EntityType.OBSERVATION, 6);
-            ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId2, EntityType.OBSERVATION, 6);
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.DATASTREAM, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        // We can not assume the Datastreams are returned in the order we expect.
+        if ("datastream 1".equals(array.get(0).get("name").asString())) {
+            datastreamId1 = array.get(0).get(ControlInformation.ID);
+            datastreamId2 = array.get(1).get(ControlInformation.ID);
+        } else {
+            datastreamId1 = array.get(1).get(ControlInformation.ID);
+            datastreamId2 = array.get(0).get(ControlInformation.ID);
         }
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.SENSOR, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        sensorId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVED_PROPERTY, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        observedPropertyId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
 
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.SENSOR, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        sensorId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVED_PROPERTY, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        observedPropertyId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+
+        //Second Thing
+        urlParameters = "{\n"
+                + "    \"name\": \"thing 2\",\n"
+                + "    \"description\": \"thing 2\",\n"
+                + "    \"properties\": {\n"
+                + "        \"reference\": \"second\"\n"
+                + "    },\n"
+                + "    \"Locations\": [\n"
+                + "        {\n"
+                + "            \"name\": \"location 2\",\n"
+                + "            \"description\": \"location 2\",\n"
+                + "            \"location\": {\n"
+                + "                \"type\": \"Point\",\n"
+                + "                \"coordinates\": [\n"
+                + "                    -100.05,\n"
+                + "                    50.05\n"
+                + "                ]\n"
+                + "            },\n"
+                + "            \"encodingType\": \"application/vnd.geo+json\"\n"
+                + "        }\n"
+                + "    ],\n"
+                + "    \"Datastreams\": [\n"
+                + "        {\n"
+                + "            \"unitOfMeasurement\": {\n"
+                + "                \"name\": \"Lumen\",\n"
+                + "                \"symbol\": \"lm\",\n"
+                + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
+                + "            },\n"
+                + "            \"name\": \"datastream 3\",\n"
+                + "            \"description\": \"datastream 3\",\n"
+                + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "            \"ObservedProperty\": {\n"
+                + "                \"name\": \"Second Luminous Flux\",\n"
+                + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux\",\n"
+                + "                \"description\": \"observedProperty 3\"\n"
+                + "            },\n"
+                + "            \"Sensor\": {\n"
+                + "                \"name\": \"sensor 3\",\n"
+                + "                \"description\": \"sensor 3\",\n"
+                + "                \"encodingType\": \"application/pdf\",\n"
+                + "                \"metadata\": \"Second Light flux sensor\"\n"
+                + "            }\n"
+                + "        },\n"
+                + "        {\n"
+                + "            \"unitOfMeasurement\": {\n"
+                + "                \"name\": \"Centigrade\",\n"
+                + "                \"symbol\": \"C\",\n"
+                + "                \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html/Lumen\"\n"
+                + "            },\n"
+                + "            \"name\": \"datastream 4\",\n"
+                + "            \"description\": \"datastream 4\",\n"
+                + "            \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "            \"ObservedProperty\": {\n"
+                + "                \"@iot.id\": " + quoteForJson(observedPropertyId2) + "\n"
+                + "            },\n"
+                + "            \"Sensor\": {\n"
+                + "                \"name\": \"sensor 4 \",\n"
+                + "                \"description\": \"sensor 4 \",\n"
+                + "                \"encodingType\": \"application/pdf\",\n"
+                + "                \"metadata\": \"Second Tempreture sensor\"\n"
+                + "            }\n"
+                + "        }\n"
+                + "    ]\n"
+                + "}";
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
+        thingId2 = postAndGetId(urlString, urlParameters);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.LOCATION, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        locationId2 = array.get(0).get(ControlInformation.ID);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.DATASTREAM, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        // We can not assume the Datastreams are returned in the order we expect.
+        if ("datastream 3".equals(array.get(0).get("name").asString())) {
+            datastreamId3 = array.get(0).get(ControlInformation.ID);
+            datastreamId4 = array.get(1).get(ControlInformation.ID);
+        } else {
+            datastreamId4 = array.get(0).get(ControlInformation.ID);
+            datastreamId3 = array.get(1).get(ControlInformation.ID);
+        }
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.SENSOR, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        sensorId3 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVED_PROPERTY, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        observedPropertyId3 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.SENSOR, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        sensorId4 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+
+        //HistoricalLocations
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, null, null);
+        urlParameters = "{\"Locations\": [\n"
+                + "    {\n"
+                + "      \"@iot.id\": " + quoteForJson(locationId2) + "\n"
+                + "    }\n"
+                + "  ]}";
+        HTTPMethods.doPatch(urlString, urlParameters);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, null, null);
+        urlParameters = "{\"Locations\": [\n"
+                + "    {\n"
+                + "      \"@iot.id\": " + quoteForJson(locationId1) + "\n"
+                + "    }\n"
+                + "  ]}";
+        HTTPMethods.doPatch(urlString, urlParameters);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        historicalLocationId1 = array.get(0).get(ControlInformation.ID);
+        historicalLocationId2 = array.get(1).get(ControlInformation.ID);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        historicalLocationId3 = array.get(0).get(ControlInformation.ID);
+        historicalLocationId4 = array.get(1).get(ControlInformation.ID);
+
+        //Observations
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, null);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-01T00:00:00Z",
+                    "result": 1
+                }""";
+        observationId1 = postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-02T00:00:00Z",
+                    "result": 2
+                }""";
+        postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-03T00:00:00Z",
+                    "result": 3
+                }""";
+        postAndGetId(urlString, urlParameters);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, null);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-04T00:00:00Z",
+                    "result": 4
+                }""";
+        postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-05T00:00:00Z",
+                    "result": 5
+                }""";
+        postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-06T00:00:00Z",
+                    "result": 6
+                }""";
+        postAndGetId(urlString, urlParameters);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, null);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-07T00:00:00Z",
+                    "result": 7
+                }""";
+        observationId7 = postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-08T00:00:00Z",
+                    "result": 8
+                }""";
+        postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-09T00:00:00Z",
+                    "result": 9
+                }""";
+        postAndGetId(urlString, urlParameters);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, null);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-10T00:00:00Z",
+                   "result": 10
+                }""";
+        postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-11T00:00:00Z",
+                    "result": 11
+                }""";
+        postAndGetId(urlString, urlParameters);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-12T00:00:00Z",
+                    "result": 12
+                }""";
+        postAndGetId(urlString, urlParameters);
+
+        //FeatureOfInterest
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId1, EntityType.FEATURE_OF_INTEREST, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        featureOfInterestId1 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, observationId7, EntityType.FEATURE_OF_INTEREST, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        featureOfInterestId2 = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
+
+        ENTITYCOUNTS.setGlobalCount(EntityType.DATASTREAM, 4);
+        ENTITYCOUNTS.setGlobalCount(EntityType.FEATURE_OF_INTEREST, 2);
+        ENTITYCOUNTS.setGlobalCount(EntityType.HISTORICAL_LOCATION, 4);
+        ENTITYCOUNTS.setGlobalCount(EntityType.LOCATION, 2);
+        ENTITYCOUNTS.setGlobalCount(EntityType.OBSERVATION, 12);
+        ENTITYCOUNTS.setGlobalCount(EntityType.OBSERVED_PROPERTY, 3);
+        ENTITYCOUNTS.setGlobalCount(EntityType.SENSOR, 4);
+        ENTITYCOUNTS.setGlobalCount(EntityType.THING, 2);
+
+        ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.LOCATION, 1);
+        ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.LOCATION, 1);
+        ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.HISTORICAL_LOCATION, 2);
+        ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.HISTORICAL_LOCATION, 2);
+        ENTITYCOUNTS.setCount(EntityType.THING, thingId1, EntityType.DATASTREAM, 2);
+        ENTITYCOUNTS.setCount(EntityType.THING, thingId2, EntityType.DATASTREAM, 2);
+        ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId1, EntityType.THING, 1);
+        ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId2, EntityType.THING, 1);
+        ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId1, EntityType.HISTORICAL_LOCATION, 2);
+        ENTITYCOUNTS.setCount(EntityType.LOCATION, locationId2, EntityType.HISTORICAL_LOCATION, 2);
+        ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId1, EntityType.LOCATION, 1);
+        ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId2, EntityType.LOCATION, 1);
+        ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId3, EntityType.LOCATION, 1);
+        ENTITYCOUNTS.setCount(EntityType.HISTORICAL_LOCATION, historicalLocationId4, EntityType.LOCATION, 1);
+        ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId1, EntityType.OBSERVATION, 3);
+        ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId2, EntityType.OBSERVATION, 3);
+        ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId3, EntityType.OBSERVATION, 3);
+        ENTITYCOUNTS.setCount(EntityType.DATASTREAM, datastreamId4, EntityType.OBSERVATION, 3);
+        ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId1, EntityType.DATASTREAM, 1);
+        ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId2, EntityType.DATASTREAM, 1);
+        ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId3, EntityType.DATASTREAM, 1);
+        ENTITYCOUNTS.setCount(EntityType.SENSOR, sensorId4, EntityType.DATASTREAM, 1);
+        ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId1, EntityType.DATASTREAM, 1);
+        ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId2, EntityType.DATASTREAM, 2);
+        ENTITYCOUNTS.setCount(EntityType.OBSERVED_PROPERTY, observedPropertyId3, EntityType.DATASTREAM, 1);
+        ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId1, EntityType.OBSERVATION, 6);
+        ENTITYCOUNTS.setCount(EntityType.FEATURE_OF_INTEREST, featureOfInterestId2, EntityType.OBSERVATION, 6);
     }
 
 }

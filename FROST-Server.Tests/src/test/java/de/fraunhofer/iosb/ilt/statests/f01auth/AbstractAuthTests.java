@@ -21,7 +21,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESC
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
@@ -322,20 +321,16 @@ public abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test18AnonRead() {
+    void test18AnonRead() throws ServiceFailureException {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
             EntityUtils.testFilterResults(ANONYMOUS, serviceAnon.dao(sMdl.etThing), "", THINGS);
         } else {
-            try {
-                serviceAnon.dao(sMdl.etThing).query().list();
-                fail(ANON_SHOULD_NOT_BE_ABLE_TO_READ);
-            } catch (StatusCodeException ex) {
-                EntityUtils.testHeadRequest(serviceAnon, ex.getUrl(), ex.getStatusCode(), "Anon", "");
-                AuthTestHelper.expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_READ, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
-            } catch (ServiceFailureException ex) {
-                fail("Failed to fetch things for user anonymous ", ex);
-            }
+            StatusCodeException ex = Assertions.assertThrows(StatusCodeException.class,
+                    () -> serviceAnon.dao(sMdl.etThing).query().list(),
+                    ANON_SHOULD_NOT_BE_ABLE_TO_READ);
+            EntityUtils.testHeadRequest(serviceAnon, ex.getUrl(), ex.getStatusCode(), "Anon", "");
+            AuthTestHelper.expectStatusCodeException(ANON_SHOULD_NOT_BE_ABLE_TO_READ, ex, HTTP_CODE_401_UNAUTHORIZED, HTTP_CODE_403_FORBIDDEN);
         }
     }
 

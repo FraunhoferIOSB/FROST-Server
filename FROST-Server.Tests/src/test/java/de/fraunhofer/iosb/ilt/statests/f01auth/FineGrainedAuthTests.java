@@ -30,7 +30,6 @@ import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.JOIN_TIMEOU
 import static de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.WAIT_AFTER_INSERT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
@@ -69,7 +68,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.geojson.Point;
@@ -727,25 +725,21 @@ public abstract class FineGrainedAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_20_TestLandingPage() {
+    void test_20_TestLandingPage() throws IOException {
         LOGGER.info("  test_11_TestLandingPage");
-        try {
-            JsonNode data = getRootUrl();
-            JsonNode settings = data.get("serverSettings");
-            JsonNode conformance = settings.get("conformance");
-            Set<String> confItems = new HashSet<>();
-            for (var item : conformance) {
-                confItems.add(item.stringValue());
-            }
-            assertTrue(confItems.contains("testModel"), "Conformance should contain 'testModel'");
-            assertTrue(confItems.contains("testModel1"), "Conformance should contain 'testModel1'");
-            assertTrue(confItems.contains("testModel2"), "Conformance should contain 'testModel2'");
-            assertEquals(4, settings.findPath("testModel").intValue());
-            assertEquals(5, settings.findPath("testModel1").intValue());
-            assertEquals(6, settings.findPath("testModel2").findPath("value").intValue());
-        } catch (NullPointerException | ParseException | IOException ex) {
-            fail("Unexpected exception during test.", ex);
+        JsonNode data = getRootUrl();
+        JsonNode settings = data.get("serverSettings");
+        JsonNode conformance = settings.get("conformance");
+        Set<String> confItems = new HashSet<>();
+        for (var item : conformance) {
+            confItems.add(item.stringValue());
         }
+        assertTrue(confItems.contains("testModel"), "Conformance should contain 'testModel'");
+        assertTrue(confItems.contains("testModel1"), "Conformance should contain 'testModel1'");
+        assertTrue(confItems.contains("testModel2"), "Conformance should contain 'testModel2'");
+        assertEquals(4, settings.findPath("testModel").intValue());
+        assertEquals(5, settings.findPath("testModel1").intValue());
+        assertEquals(6, settings.findPath("testModel2").findPath("value").intValue());
     }
 
     private JsonNode getRootUrl() throws IOException {

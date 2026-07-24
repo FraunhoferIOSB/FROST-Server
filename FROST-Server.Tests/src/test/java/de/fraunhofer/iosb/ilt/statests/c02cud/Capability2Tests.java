@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -682,197 +681,191 @@ public abstract class Capability2Tests extends AbstractTestClass {
     @Test
     void test03CreateEntitiesWithDeepInsert() {
         LOGGER.info("  test03CreateEntitiesWithDeepInsert");
-        try {
-            /* Thing */
-            String urlParameters = """
+        /* Thing */
+        String urlParameters = """
+                {
+                  "name": "Office Building",
+                  "description": "Office Building",
+                  "properties": {
+                    "reference": "Third Floor"
+                  },
+                  "Locations": [
                     {
-                      "name": "Office Building",
-                      "description": "Office Building",
-                      "properties": {
-                        "reference": "Third Floor"
+                      "name": "West Roof",
+                      "description": "West Roof",
+                      "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
+                      "encodingType": "application/vnd.geo+json"
+                    }
+                  ],
+                  "Datastreams": [
+                    {
+                      "unitOfMeasurement": {
+                        "name": "Lumen",
+                        "symbol": "lm",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
                       },
-                      "Locations": [
-                        {
-                          "name": "West Roof",
-                          "description": "West Roof",
-                          "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
-                          "encodingType": "application/vnd.geo+json"
-                        }
-                      ],
-                      "Datastreams": [
-                        {
-                          "unitOfMeasurement": {
-                            "name": "Lumen",
-                            "symbol": "lm",
-                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
-                          },
-                          "name": "Light exposure.",
-                          "description": "Light exposure.",
-                          "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
-                          "ObservedProperty": {
-                            "name": "Luminous Flux",
-                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
-                            "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
-                          },
-                          "Sensor": {
-                            "name": "Acme Fluxomatic 1000",
-                            "description": "Acme Fluxomatic 1000",
-                            "encodingType": "application/pdf",
-                            "metadata": "Light flux sensor"
-                          }
-                        }
-                      ]
-                    }""";
-            JsonNode entity = postEntity(EntityType.THING, urlParameters);
-            Object thingId = entity.get(ControlInformation.ID);
-            //Check Datastream
-            JsonNode deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                          "unitOfMeasurement": {
-                            "name": "Lumen",
-                            "symbol": "lm",
-                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
-                          },
-                          "name": "Light exposure.",
-                          "description": "Light exposure.",
-                          "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
-                        }
-                    """);
-            Object datastreamId = checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
-            DATASTREAM_IDS.add(datastreamId);
-            //Check Location
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                          "name": "West Roof",
-                          "description": "West Roof",
-                          "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
-                          "encodingType": "application/vnd.geo+json"
-                        }
-                    """);
-            LOCATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
-            //Check Sensor
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                            "name": "Acme Fluxomatic 1000",
-                            "description": "Acme Fluxomatic 1000",
-                            "encodingType": "application/pdf",
-                            "metadata": "Light flux sensor"
-                          }
-                    """);
-            SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
-            //Check ObservedProperty
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                            "name": "Luminous Flux",
-                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
-                            "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
-                          }
-                    """);
-            OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
-            THING_IDS.add(thingId);
-
-            /* Datastream */
-            urlParameters = "{\n"
-                    + "  \"unitOfMeasurement\": {\n"
-                    + "    \"name\": \"Celsius\",\n"
-                    + "    \"symbol\": \"degC\",\n"
-                    + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
-                    + "  },\n"
-                    + "  \"name\": \"test datastream.\",\n"
-                    + "  \"description\": \"test datastream.\",\n"
-                    + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
-                    + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
-                    + "   \"ObservedProperty\": {\n"
-                    + "        \"name\": \"Luminous Flux\",\n"
-                    + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
-                    + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
-                    + "   },\n"
-                    + "   \"Sensor\": {        \n"
-                    + "        \"name\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"description\": \"Acme Fluxomatic 1000\",\n"
-                    + "        \"encodingType\": \"application/pdf\",\n"
-                    + "        \"metadata\": \"Light flux sensor\"\n"
-                    + "   },\n"
-                    + "      \"Observations\": [\n"
-                    + "        {\n"
-                    + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
-                    + "          \"result\": 10\n"
-                    + "        }\n"
-                    + "      ]"
-                    + "}";
-            entity = postEntity(EntityType.DATASTREAM, urlParameters);
-            datastreamId = entity.get(ControlInformation.ID);
-            //Check Sensor
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                            "name": "Acme Fluxomatic 1000",
-                            "description": "Acme Fluxomatic 1000",
-                            "encodingType": "application/pdf",
-                            "metadata": "Light flux sensor"
-                          }
-                    """);
-            SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
-            //Check ObservedProperty
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                            "name": "Luminous Flux",
-                            "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
-                            "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
-                          }
-                    """);
-            OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
-            //Check Observation
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                              "phenomenonTime": "2015-03-01T00:10:00.000Z",
-                              "result": 10
-                            }
-                    """);
-            OBSERVATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj));
-            DATASTREAM_IDS.add(datastreamId);
-
-            /* Observation */
-            urlParameters = "{\n"
-                    + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
-                    + "  \"result\": 100,\n"
-                    + "  \"FeatureOfInterest\": {\n"
-                    + "  \t\"name\": \"A weather station.\",\n"
-                    + "  \t\"description\": \"A weather station.\",\n"
-                    + "  \t\"encodingType\": \"application/vnd.geo+json\",\n"
-                    + "    \"feature\": {\n"
-                    + "      \"type\": \"Point\",\n"
-                    + "      \"coordinates\": [\n"
-                    + "        -114.05,\n"
-                    + "        51.05\n"
-                    + "      ]\n"
-                    + "    }\n"
-                    + "  },\n"
-                    + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
-                    + "}";
-            entity = postEntity(EntityType.OBSERVATION, urlParameters);
-            Object obsId1 = entity.get(ControlInformation.ID);
-            //Check FeaturOfInterest
-            deepInsertedObj = Utils.MAPPER.readTree("""
-                    {
-                      "name": "A weather station.",
-                      "description": "A weather station.",
-                      "encodingType": "application/vnd.geo+json",
-                        "feature": {
-                          "type": "Point",
-                          "coordinates": [
-                            -114.05,
-                            51.05
-                          ]
-                        }
+                      "name": "Light exposure.",
+                      "description": "Light exposure.",
+                      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                      "ObservedProperty": {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                      },
+                      "Sensor": {
+                        "name": "Acme Fluxomatic 1000",
+                        "description": "Acme Fluxomatic 1000",
+                        "encodingType": "application/pdf",
+                        "metadata": "Light flux sensor"
                       }
-                    """);
-            FOI_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
-            OBSERVATION_IDS.add(obsId1);
+                    }
+                  ]
+                }""";
+        JsonNode entity = postEntity(EntityType.THING, urlParameters);
+        Object thingId = entity.get(ControlInformation.ID);
+        //Check Datastream
+        JsonNode deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                      "unitOfMeasurement": {
+                        "name": "Lumen",
+                        "symbol": "lm",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
+                      },
+                      "name": "Light exposure.",
+                      "description": "Light exposure.",
+                      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement"
+                    }
+                """);
+        Object datastreamId = checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.DATASTREAM, deepInsertedObj);
+        DATASTREAM_IDS.add(datastreamId);
+        //Check Location
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                      "name": "West Roof",
+                      "description": "West Roof",
+                      "location": { "type": "Point", "coordinates": [-117.05, 51.05] },
+                      "encodingType": "application/vnd.geo+json"
+                    }
+                """);
+        LOCATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.THING, thingId, EntityType.LOCATION, deepInsertedObj));
+        //Check Sensor
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                        "name": "Acme Fluxomatic 1000",
+                        "description": "Acme Fluxomatic 1000",
+                        "encodingType": "application/pdf",
+                        "metadata": "Light flux sensor"
+                      }
+                """);
+        SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
+        //Check ObservedProperty
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                      }
+                """);
+        OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
+        THING_IDS.add(thingId);
 
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-        }
+        /* Datastream */
+        urlParameters = "{\n"
+                + "  \"unitOfMeasurement\": {\n"
+                + "    \"name\": \"Celsius\",\n"
+                + "    \"symbol\": \"degC\",\n"
+                + "    \"definition\": \"http://qudt.org/vocab/unit#DegreeCelsius\"\n"
+                + "  },\n"
+                + "  \"name\": \"test datastream.\",\n"
+                + "  \"description\": \"test datastream.\",\n"
+                + "  \"observationType\": \"http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement\",\n"
+                + "  \"Thing\": { \"@iot.id\": " + quoteForJson(thingId) + " },\n"
+                + "   \"ObservedProperty\": {\n"
+                + "        \"name\": \"Luminous Flux\",\n"
+                + "        \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux\",\n"
+                + "        \"description\": \"Luminous Flux or Luminous Power is the measure of the perceived power of light.\"\n"
+                + "   },\n"
+                + "   \"Sensor\": {        \n"
+                + "        \"name\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"description\": \"Acme Fluxomatic 1000\",\n"
+                + "        \"encodingType\": \"application/pdf\",\n"
+                + "        \"metadata\": \"Light flux sensor\"\n"
+                + "   },\n"
+                + "      \"Observations\": [\n"
+                + "        {\n"
+                + "          \"phenomenonTime\": \"2015-03-01T00:10:00Z\",\n"
+                + "          \"result\": 10\n"
+                + "        }\n"
+                + "      ]"
+                + "}";
+        entity = postEntity(EntityType.DATASTREAM, urlParameters);
+        datastreamId = entity.get(ControlInformation.ID);
+        //Check Sensor
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                        "name": "Acme Fluxomatic 1000",
+                        "description": "Acme Fluxomatic 1000",
+                        "encodingType": "application/pdf",
+                        "metadata": "Light flux sensor"
+                      }
+                """);
+        SENSOR_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.SENSOR, deepInsertedObj));
+        //Check ObservedProperty
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                        "name": "Luminous Flux",
+                        "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                        "description": "Luminous Flux or Luminous Power is the measure of the perceived power of light."
+                      }
+                """);
+        OBSPROP_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVED_PROPERTY, deepInsertedObj));
+        //Check Observation
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                          "phenomenonTime": "2015-03-01T00:10:00.000Z",
+                          "result": 10
+                        }
+                """);
+        OBSERVATION_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.DATASTREAM, datastreamId, EntityType.OBSERVATION, deepInsertedObj));
+        DATASTREAM_IDS.add(datastreamId);
+
+        /* Observation */
+        urlParameters = "{\n"
+                + "  \"phenomenonTime\": \"2015-03-01T00:00:00Z\",\n"
+                + "  \"result\": 100,\n"
+                + "  \"FeatureOfInterest\": {\n"
+                + "  \t\"name\": \"A weather station.\",\n"
+                + "  \t\"description\": \"A weather station.\",\n"
+                + "  \t\"encodingType\": \"application/vnd.geo+json\",\n"
+                + "    \"feature\": {\n"
+                + "      \"type\": \"Point\",\n"
+                + "      \"coordinates\": [\n"
+                + "        -114.05,\n"
+                + "        51.05\n"
+                + "      ]\n"
+                + "    }\n"
+                + "  },\n"
+                + "  \"Datastream\":{\"@iot.id\": " + quoteForJson(datastreamId) + "}\n"
+                + "}";
+        entity = postEntity(EntityType.OBSERVATION, urlParameters);
+        Object obsId1 = entity.get(ControlInformation.ID);
+        //Check FeaturOfInterest
+        deepInsertedObj = Utils.MAPPER.readTree("""
+                {
+                  "name": "A weather station.",
+                  "description": "A weather station.",
+                  "encodingType": "application/vnd.geo+json",
+                    "feature": {
+                      "type": "Point",
+                      "coordinates": [
+                        -114.05,
+                        51.05
+                      ]
+                    }
+                  }
+                """);
+        FOI_IDS.add(checkRelatedEntity(serverSettings.getExtensions(), EntityType.OBSERVATION, obsId1, EntityType.FEATURE_OF_INTEREST, deepInsertedObj));
+        OBSERVATION_IDS.add(obsId1);
     }
 
     /**
@@ -973,95 +966,89 @@ public abstract class Capability2Tests extends AbstractTestClass {
     @Test
     void test05PatchEntities() {
         LOGGER.info("  test05PatchEntities");
-        try {
-            /* Thing */
-            Object thingId = THING_IDS.get(0);
-            JsonNode entity = getEntity(EntityType.THING, thingId);
-            String urlParameters = "{\"description\":\"This is a PATCHED Test Thing From TestNG\"}";
-            Map<String, Object> diffs = new HashMap<>();
-            diffs.put("description", "This is a PATCHED Test Thing From TestNG");
-            JsonNode updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
-            checkPatch(EntityType.THING, entity, updatedEntity, diffs);
+        /* Thing */
+        Object thingId = THING_IDS.get(0);
+        JsonNode entity = getEntity(EntityType.THING, thingId);
+        String urlParameters = "{\"description\":\"This is a PATCHED Test Thing From TestNG\"}";
+        Map<String, Object> diffs = new HashMap<>();
+        diffs.put("description", "This is a PATCHED Test Thing From TestNG");
+        JsonNode updatedEntity = patchEntity(EntityType.THING, urlParameters, thingId);
+        checkPatch(EntityType.THING, entity, updatedEntity, diffs);
 
-            /* Location */
-            Object locationId = LOCATION_IDS.get(0);
-            entity = getEntity(EntityType.LOCATION, locationId);
-            urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
-            diffs = new HashMap<>();
-            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }"));
-            updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
-            checkPatch(EntityType.LOCATION, entity, updatedEntity, diffs);
+        /* Location */
+        Object locationId = LOCATION_IDS.get(0);
+        entity = getEntity(EntityType.LOCATION, locationId);
+        urlParameters = "{\"location\": { \"type\": \"Point\", \"coordinates\": [114.05, -50] }}";
+        diffs = new HashMap<>();
+        diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -50] }"));
+        updatedEntity = patchEntity(EntityType.LOCATION, urlParameters, locationId);
+        checkPatch(EntityType.LOCATION, entity, updatedEntity, diffs);
 
-            /* HistoricalLocation */
-            Object histLocId = HISTORICAL_LOCATION_IDS.get(0);
-            entity = getEntity(EntityType.HISTORICAL_LOCATION, histLocId);
-            urlParameters = "{\"time\": \"2015-07-01T00:00:00.000Z\"}";
-            diffs = new HashMap<>();
-            diffs.put("time", "2015-07-01T00:00:00.000Z");
-            updatedEntity = patchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
-            checkPatch(EntityType.HISTORICAL_LOCATION, entity, updatedEntity, diffs);
+        /* HistoricalLocation */
+        Object histLocId = HISTORICAL_LOCATION_IDS.get(0);
+        entity = getEntity(EntityType.HISTORICAL_LOCATION, histLocId);
+        urlParameters = "{\"time\": \"2015-07-01T00:00:00.000Z\"}";
+        diffs = new HashMap<>();
+        diffs.put("time", "2015-07-01T00:00:00.000Z");
+        updatedEntity = patchEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
+        checkPatch(EntityType.HISTORICAL_LOCATION, entity, updatedEntity, diffs);
 
-            /* Sensor */
-            Object sensorId = SENSOR_IDS.get(0);
-            entity = getEntity(EntityType.SENSOR, sensorId);
-            urlParameters = "{\"metadata\": \"PATCHED\"}";
-            diffs = new HashMap<>();
-            diffs.put("metadata", "PATCHED");
-            updatedEntity = patchEntity(EntityType.SENSOR, urlParameters, sensorId);
-            checkPatch(EntityType.SENSOR, entity, updatedEntity, diffs);
+        /* Sensor */
+        Object sensorId = SENSOR_IDS.get(0);
+        entity = getEntity(EntityType.SENSOR, sensorId);
+        urlParameters = "{\"metadata\": \"PATCHED\"}";
+        diffs = new HashMap<>();
+        diffs.put("metadata", "PATCHED");
+        updatedEntity = patchEntity(EntityType.SENSOR, urlParameters, sensorId);
+        checkPatch(EntityType.SENSOR, entity, updatedEntity, diffs);
 
-            /* ObserverdProperty */
-            Object obsPropId = OBSPROP_IDS.get(0);
-            entity = getEntity(EntityType.OBSERVED_PROPERTY, obsPropId);
-            urlParameters = "{\"description\":\"PATCHED\"}";
-            diffs = new HashMap<>();
-            diffs.put("description", "PATCHED");
-            updatedEntity = patchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
-            checkPatch(EntityType.OBSERVED_PROPERTY, entity, updatedEntity, diffs);
+        /* ObserverdProperty */
+        Object obsPropId = OBSPROP_IDS.get(0);
+        entity = getEntity(EntityType.OBSERVED_PROPERTY, obsPropId);
+        urlParameters = "{\"description\":\"PATCHED\"}";
+        diffs = new HashMap<>();
+        diffs.put("description", "PATCHED");
+        updatedEntity = patchEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
+        checkPatch(EntityType.OBSERVED_PROPERTY, entity, updatedEntity, diffs);
 
-            /* FeatureOfInterest */
-            Object foiId = FOI_IDS.get(0);
-            entity = getEntity(EntityType.FEATURE_OF_INTEREST, foiId);
-            urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
-            diffs = new HashMap<>();
-            diffs.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }"));
-            updatedEntity = patchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
-            checkPatch(EntityType.FEATURE_OF_INTEREST, entity, updatedEntity, diffs);
+        /* FeatureOfInterest */
+        Object foiId = FOI_IDS.get(0);
+        entity = getEntity(EntityType.FEATURE_OF_INTEREST, foiId);
+        urlParameters = "{\"feature\":{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }}";
+        diffs = new HashMap<>();
+        diffs.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [114.05, -51.05] }"));
+        updatedEntity = patchEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
+        checkPatch(EntityType.FEATURE_OF_INTEREST, entity, updatedEntity, diffs);
 
-            /* Datastream */
-            Object datastreamId = DATASTREAM_IDS.get(0);
-            entity = getEntity(EntityType.DATASTREAM, datastreamId);
-            urlParameters = "{\"description\": \"Patched Description\"}";
-            diffs = new HashMap<>();
-            diffs.put("description", "Patched Description");
-            updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-            checkPatch(EntityType.DATASTREAM, entity, updatedEntity, diffs);
-            //Second PATCH for UOM
-            entity = updatedEntity;
-            urlParameters = """
-                    { "unitOfMeasurement": {
-                        "name": "Entropy2",
-                        "symbol": "S2",
-                        "definition": "http://qudt.org/vocab/unit#Entropy2"
-                      } }""";
-            diffs = new HashMap<>();
-            diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}"));
-            updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-            checkPatch(EntityType.DATASTREAM, entity, updatedEntity, diffs);
+        /* Datastream */
+        Object datastreamId = DATASTREAM_IDS.get(0);
+        entity = getEntity(EntityType.DATASTREAM, datastreamId);
+        urlParameters = "{\"description\": \"Patched Description\"}";
+        diffs = new HashMap<>();
+        diffs.put("description", "Patched Description");
+        updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+        checkPatch(EntityType.DATASTREAM, entity, updatedEntity, diffs);
+        //Second PATCH for UOM
+        entity = updatedEntity;
+        urlParameters = """
+                { "unitOfMeasurement": {
+                    "name": "Entropy2",
+                    "symbol": "S2",
+                    "definition": "http://qudt.org/vocab/unit#Entropy2"
+                  } }""";
+        diffs = new HashMap<>();
+        diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy2\",\"symbol\": \"S2\",\"definition\": \"http://qudt.org/vocab/unit#Entropy2\"}"));
+        updatedEntity = patchEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+        checkPatch(EntityType.DATASTREAM, entity, updatedEntity, diffs);
 
-            /* Observation */
-            Object obsId1 = OBSERVATION_IDS.get(0);
-            entity = getEntity(EntityType.OBSERVATION, obsId1);
-            urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
-            diffs = new HashMap<>();
-            diffs.put("phenomenonTime", "2015-07-01T00:40:00.000Z");
-            updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
-            checkPatch(EntityType.OBSERVATION, entity, updatedEntity, diffs);
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-        }
+        /* Observation */
+        Object obsId1 = OBSERVATION_IDS.get(0);
+        entity = getEntity(EntityType.OBSERVATION, obsId1);
+        urlParameters = "{\"phenomenonTime\": \"2015-07-01T00:40:00.000Z\"}";
+        diffs = new HashMap<>();
+        diffs.put("phenomenonTime", "2015-07-01T00:40:00.000Z");
+        updatedEntity = patchEntity(EntityType.OBSERVATION, urlParameters, obsId1);
+        checkPatch(EntityType.OBSERVATION, entity, updatedEntity, diffs);
     }
 
     /**
@@ -1072,131 +1059,125 @@ public abstract class Capability2Tests extends AbstractTestClass {
     @Test
     void test06PutEntities() {
         LOGGER.info("  test06PutEntities");
-        try {
-            /* Thing */
-            Object thingId = THING_IDS.get(0);
-            JsonNode entity = getEntity(EntityType.THING, thingId);
-            String urlParameters = """
-                    {
-                    "name":"This is a Updated Test Thing From TestNG",
-                    "description":"This is a Updated Test Thing From TestNG"
-                    }""";
-            Map<String, Object> diffs = new HashMap<>();
-            diffs.put("name", "This is a Updated Test Thing From TestNG");
-            diffs.put("description", "This is a Updated Test Thing From TestNG");
-            JsonNode updatedEntity = updateEntity(EntityType.THING, urlParameters, thingId);
-            checkPut(EntityType.THING, entity, updatedEntity, diffs);
+        /* Thing */
+        Object thingId = THING_IDS.get(0);
+        JsonNode entity = getEntity(EntityType.THING, thingId);
+        String urlParameters = """
+                {
+                "name":"This is a Updated Test Thing From TestNG",
+                "description":"This is a Updated Test Thing From TestNG"
+                }""";
+        Map<String, Object> diffs = new HashMap<>();
+        diffs.put("name", "This is a Updated Test Thing From TestNG");
+        diffs.put("description", "This is a Updated Test Thing From TestNG");
+        JsonNode updatedEntity = updateEntity(EntityType.THING, urlParameters, thingId);
+        checkPut(EntityType.THING, entity, updatedEntity, diffs);
 
-            /* Location */
-            Object locationId = LOCATION_IDS.get(0);
-            entity = getEntity(EntityType.LOCATION, locationId);
-            urlParameters = """
-                    {
-                      "encodingType":"application/vnd.geo+json",
-                      "name":"UPDATED NAME",
-                      "description":"UPDATED DESCRIPTION",
-                      "location": { "type": "Point", "coordinates": [-114.05, 50] }
-                    }""";
-            diffs = new HashMap<>();
-            diffs.put("name", "UPDATED NAME");
-            diffs.put("description", "UPDATED DESCRIPTION");
-            diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }"));
-            updatedEntity = updateEntity(EntityType.LOCATION, urlParameters, locationId);
-            checkPut(EntityType.LOCATION, entity, updatedEntity, diffs);
+        /* Location */
+        Object locationId = LOCATION_IDS.get(0);
+        entity = getEntity(EntityType.LOCATION, locationId);
+        urlParameters = """
+                {
+                  "encodingType":"application/vnd.geo+json",
+                  "name":"UPDATED NAME",
+                  "description":"UPDATED DESCRIPTION",
+                  "location": { "type": "Point", "coordinates": [-114.05, 50] }
+                }""";
+        diffs = new HashMap<>();
+        diffs.put("name", "UPDATED NAME");
+        diffs.put("description", "UPDATED DESCRIPTION");
+        diffs.put("location", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 50] }"));
+        updatedEntity = updateEntity(EntityType.LOCATION, urlParameters, locationId);
+        checkPut(EntityType.LOCATION, entity, updatedEntity, diffs);
 
-            /* HistoricalLocation */
-            Object histLocId = HISTORICAL_LOCATION_IDS.get(0);
-            entity = getEntity(EntityType.HISTORICAL_LOCATION, histLocId);
-            urlParameters = "{\"time\": \"2015-08-01T00:00:00.000Z\"}";
-            diffs = new HashMap<>();
-            diffs.put("time", "2015-08-01T00:00:00.000Z");
-            updatedEntity = updateEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
-            checkPut(EntityType.HISTORICAL_LOCATION, entity, updatedEntity, diffs);
+        /* HistoricalLocation */
+        Object histLocId = HISTORICAL_LOCATION_IDS.get(0);
+        entity = getEntity(EntityType.HISTORICAL_LOCATION, histLocId);
+        urlParameters = "{\"time\": \"2015-08-01T00:00:00.000Z\"}";
+        diffs = new HashMap<>();
+        diffs.put("time", "2015-08-01T00:00:00.000Z");
+        updatedEntity = updateEntity(EntityType.HISTORICAL_LOCATION, urlParameters, histLocId);
+        checkPut(EntityType.HISTORICAL_LOCATION, entity, updatedEntity, diffs);
 
-            /* Sensor */
-            Object sensorId = SENSOR_IDS.get(0);
-            entity = getEntity(EntityType.SENSOR, sensorId);
-            urlParameters = "{"
-                    + "\"name\": \"UPDATED\", "
-                    + "\"description\": \"UPDATED\", "
-                    + "\"encodingType\":\"application/pdf\", "
-                    + "\"metadata\": \"UPDATED\"}";
-            diffs = new HashMap<>();
-            diffs.put("name", "UPDATED");
-            diffs.put("description", "UPDATED");
-            diffs.put("metadata", "UPDATED");
-            updatedEntity = updateEntity(EntityType.SENSOR, urlParameters, sensorId);
-            checkPut(EntityType.SENSOR, entity, updatedEntity, diffs);
+        /* Sensor */
+        Object sensorId = SENSOR_IDS.get(0);
+        entity = getEntity(EntityType.SENSOR, sensorId);
+        urlParameters = "{"
+                + "\"name\": \"UPDATED\", "
+                + "\"description\": \"UPDATED\", "
+                + "\"encodingType\":\"application/pdf\", "
+                + "\"metadata\": \"UPDATED\"}";
+        diffs = new HashMap<>();
+        diffs.put("name", "UPDATED");
+        diffs.put("description", "UPDATED");
+        diffs.put("metadata", "UPDATED");
+        updatedEntity = updateEntity(EntityType.SENSOR, urlParameters, sensorId);
+        checkPut(EntityType.SENSOR, entity, updatedEntity, diffs);
 
-            /* ObserverdProperty */
-            Object obsPropId = OBSPROP_IDS.get(0);
-            urlParameters = "{"
-                    + "\"name\":\"QWERTY\", "
-                    + "\"definition\": \"ZXCVB\", "
-                    + "\"name\":\"POIUYTREW\","
-                    + "\"description\":\"POIUYTREW\""
-                    + "}";
-            diffs = new HashMap<>();
-            diffs.put("name", "QWERTY");
-            diffs.put("definition", "ZXCVB");
-            diffs.put("description", "POIUYTREW");
-            diffs.put("name", "POIUYTREW");
-            updatedEntity = updateEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
-            checkPut(EntityType.OBSERVED_PROPERTY, entity, updatedEntity, diffs);
+        /* ObserverdProperty */
+        Object obsPropId = OBSPROP_IDS.get(0);
+        urlParameters = "{"
+                + "\"name\":\"QWERTY\", "
+                + "\"definition\": \"ZXCVB\", "
+                + "\"name\":\"POIUYTREW\","
+                + "\"description\":\"POIUYTREW\""
+                + "}";
+        diffs = new HashMap<>();
+        diffs.put("name", "QWERTY");
+        diffs.put("definition", "ZXCVB");
+        diffs.put("description", "POIUYTREW");
+        diffs.put("name", "POIUYTREW");
+        updatedEntity = updateEntity(EntityType.OBSERVED_PROPERTY, urlParameters, obsPropId);
+        checkPut(EntityType.OBSERVED_PROPERTY, entity, updatedEntity, diffs);
 
-            /* FeatureOfInterest */
-            Object foiId = FOI_IDS.get(0);
-            entity = getEntity(EntityType.FEATURE_OF_INTEREST, foiId);
-            urlParameters = "{"
-                    + "\"encodingType\":\"application/vnd.geo+json\","
-                    + "\"feature\":{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }, "
-                    + "\"description\":\"POIUYTREW\","
-                    + "\"name\":\"POIUYTREW\""
-                    + "}";
-            diffs = new HashMap<>();
-            diffs.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }"));
-            diffs.put("name", "POIUYTREW");
-            diffs.put("description", "POIUYTREW");
-            updatedEntity = updateEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
-            checkPut(EntityType.FEATURE_OF_INTEREST, entity, updatedEntity, diffs);
+        /* FeatureOfInterest */
+        Object foiId = FOI_IDS.get(0);
+        entity = getEntity(EntityType.FEATURE_OF_INTEREST, foiId);
+        urlParameters = "{"
+                + "\"encodingType\":\"application/vnd.geo+json\","
+                + "\"feature\":{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }, "
+                + "\"description\":\"POIUYTREW\","
+                + "\"name\":\"POIUYTREW\""
+                + "}";
+        diffs = new HashMap<>();
+        diffs.put("feature", Utils.MAPPER.readTree("{ \"type\": \"Point\", \"coordinates\": [-114.05, 51.05] }"));
+        diffs.put("name", "POIUYTREW");
+        diffs.put("description", "POIUYTREW");
+        updatedEntity = updateEntity(EntityType.FEATURE_OF_INTEREST, urlParameters, foiId);
+        checkPut(EntityType.FEATURE_OF_INTEREST, entity, updatedEntity, diffs);
 
-            /* Datastream */
-            Object datastreamId = DATASTREAM_IDS.get(0);
-            entity = getEntity(EntityType.DATASTREAM, datastreamId);
-            urlParameters = """
-                    {
-                      "name": "Data coming from sensor on ISS.",
-                      "description": "Data coming from sensor on ISS.",
-                      "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation",
-                      "unitOfMeasurement": {
-                        "name": "Entropy",
-                        "symbol": "S",
-                        "definition": "http://qudt.org/vocab/unit#Entropy"
-                      }
-                    }
-                    """;
-            diffs = new HashMap<>();
-            diffs.put("name", "Data coming from sensor on ISS.");
-            diffs.put("description", "Data coming from sensor on ISS.");
-            diffs.put("observationType", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation");
-            diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy\",\"symbol\": \"S\",\"definition\": \"http://qudt.org/vocab/unit#Entropy\"}"));
-            updatedEntity = updateEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
-            checkPut(EntityType.DATASTREAM, entity, updatedEntity, diffs);
+        /* Datastream */
+        Object datastreamId = DATASTREAM_IDS.get(0);
+        entity = getEntity(EntityType.DATASTREAM, datastreamId);
+        urlParameters = """
+                {
+                  "name": "Data coming from sensor on ISS.",
+                  "description": "Data coming from sensor on ISS.",
+                  "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation",
+                  "unitOfMeasurement": {
+                    "name": "Entropy",
+                    "symbol": "S",
+                    "definition": "http://qudt.org/vocab/unit#Entropy"
+                  }
+                }
+                """;
+        diffs = new HashMap<>();
+        diffs.put("name", "Data coming from sensor on ISS.");
+        diffs.put("description", "Data coming from sensor on ISS.");
+        diffs.put("observationType", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation");
+        diffs.put("unitOfMeasurement", Utils.MAPPER.readTree("{\"name\": \"Entropy\",\"symbol\": \"S\",\"definition\": \"http://qudt.org/vocab/unit#Entropy\"}"));
+        updatedEntity = updateEntity(EntityType.DATASTREAM, urlParameters, datastreamId);
+        checkPut(EntityType.DATASTREAM, entity, updatedEntity, diffs);
 
-            /* Observation */
-            Object obsId1 = OBSERVATION_IDS.get(0);
-            entity = getEntity(EntityType.OBSERVATION, obsId1);
-            urlParameters = "{\"result\": \"99\", \"phenomenonTime\": \"2015-08-01T00:40:00.000Z\"}";
-            diffs = new HashMap<>();
-            diffs.put("result", "99");
-            diffs.put("phenomenonTime", "2015-08-01T00:40:00.000Z");
-            updatedEntity = updateEntity(EntityType.OBSERVATION, urlParameters, obsId1);
-            checkPut(EntityType.OBSERVATION, entity, updatedEntity, diffs);
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-        }
+        /* Observation */
+        Object obsId1 = OBSERVATION_IDS.get(0);
+        entity = getEntity(EntityType.OBSERVATION, obsId1);
+        urlParameters = "{\"result\": \"99\", \"phenomenonTime\": \"2015-08-01T00:40:00.000Z\"}";
+        diffs = new HashMap<>();
+        diffs.put("result", "99");
+        diffs.put("phenomenonTime", "2015-08-01T00:40:00.000Z");
+        updatedEntity = updateEntity(EntityType.OBSERVATION, urlParameters, obsId1);
+        checkPut(EntityType.OBSERVATION, entity, updatedEntity, diffs);
     }
 
     //TODO: Add invalid PATCH test for other entities when it is implemented in the sSrvc
@@ -1501,10 +1482,8 @@ public abstract class Capability2Tests extends AbstractTestClass {
             response = HTTPMethods.doGet(urlString);
             return Utils.MAPPER.readTree(response.response);
         } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
             LOGGER.error("Failed input: {}", response);
-            fail("An Exception occurred during testing: " + e.getMessage());
-            return null;
+            throw e;
         }
     }
 
@@ -1518,25 +1497,19 @@ public abstract class Capability2Tests extends AbstractTestClass {
      */
     private JsonNode postEntity(EntityType entityType, String urlParameters) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
-        try {
-            HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
-            String message = "Error during creation of entity " + entityType.name();
-            assertEquals(201, httpResponse.code, message);
+        HttpResponse httpResponse = HTTPMethods.doPost(urlString, urlParameters);
+        String message = "Error during creation of entity " + entityType.name();
+        assertEquals(201, httpResponse.code, message);
 
-            Object id = httpResponse.response.substring(httpResponse.response.indexOf("(") + 1, httpResponse.response.indexOf(")"));
+        Object id = httpResponse.response.substring(httpResponse.response.indexOf("(") + 1, httpResponse.response.indexOf(")"));
 
-            urlString = urlString + "(" + id + ")";
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            int responseCode = responseMap.code;
-            message = "The POSTed entity is not created.";
-            assertEquals(200, responseCode, message);
+        urlString = urlString + "(" + id + ")";
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        int responseCode = responseMap.code;
+        message = "The POSTed entity is not created.";
+        assertEquals(200, responseCode, message);
 
-            return Utils.MAPPER.readTree(responseMap.response);
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-            return null;
-        }
+        return Utils.MAPPER.readTree(responseMap.response);
     }
 
     /**
@@ -1609,20 +1582,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
      */
     private JsonNode updateEntity(EntityType entityType, String urlParameters, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
-        try {
-            HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
-            int responseCode = responseMap.code;
-            String message = "Error during updating(PUT) of entity " + entityType.name();
-            assertEquals(200, responseCode, message);
+        HttpResponse responseMap = HTTPMethods.doPut(urlString, urlParameters);
+        int responseCode = responseMap.code;
+        String message = "Error during updating(PUT) of entity " + entityType.name();
+        assertEquals(200, responseCode, message);
 
-            responseMap = HTTPMethods.doGet(urlString);
-            return Utils.MAPPER.readTree(responseMap.response);
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-            return null;
-        }
+        responseMap = HTTPMethods.doGet(urlString);
+        return Utils.MAPPER.readTree(responseMap.response);
     }
 
     /**
@@ -1636,20 +1602,12 @@ public abstract class Capability2Tests extends AbstractTestClass {
      */
     private JsonNode patchEntity(EntityType entityType, String urlParameters, Object id) {
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, null, null);
-        try {
-
-            HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
-            int responseCode = responseMap.code;
-            String message = "Error during updating(PATCH) of entity " + entityType.name();
-            assertEquals(200, responseCode, message);
-            responseMap = HTTPMethods.doGet(urlString);
-            return Utils.MAPPER.readTree(responseMap.response);
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-            return null;
-        }
+        HttpResponse responseMap = HTTPMethods.doPatch(urlString, urlParameters);
+        int responseCode = responseMap.code;
+        String message = "Error during updating(PATCH) of entity " + entityType.name();
+        assertEquals(200, responseCode, message);
+        responseMap = HTTPMethods.doGet(urlString);
+        return Utils.MAPPER.readTree(responseMap.response);
     }
 
     /**
@@ -1739,26 +1697,20 @@ public abstract class Capability2Tests extends AbstractTestClass {
      */
     private Object checkAutomaticInsertionOfFOI(Object obsId, JsonNode locationObj, Object expectedFOIId) {
         String urlString = serverSettings.getServiceUrl(version) + "/Observations(" + quoteForUrl(obsId) + ")/FeatureOfInterest";
-        try {
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            int responseCode = responseMap.code;
-            String message = "ERROR: FeatureOfInterest was not automatically created.";
-            assertEquals(200, responseCode, message);
-            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-            Object id = result.get(ControlInformation.ID);
-            if (expectedFOIId != null) {
-                message = "ERROR: the Observation should have linked to FeatureOfInterest with ID: " + expectedFOIId + ", but it is linked for FeatureOfInterest with Id: " + id + ".";
-                assertEquals(expectedFOIId, id, message);
-            }
-
-            message = "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing.";
-            assertEquals(locationObj.get("location"), result.get("feature"), message);
-            return id;
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        int responseCode = responseMap.code;
+        String message = "ERROR: FeatureOfInterest was not automatically created.";
+        assertEquals(200, responseCode, message);
+        JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+        Object id = result.get(ControlInformation.ID);
+        if (expectedFOIId != null) {
+            message = "ERROR: the Observation should have linked to FeatureOfInterest with ID: " + expectedFOIId + ", but it is linked for FeatureOfInterest with Id: " + id + ".";
+            assertEquals(expectedFOIId, id, message);
         }
-        return -1;
+
+        message = "ERROR: Automatic created FeatureOfInterest does not match last Location of that Thing.";
+        assertEquals(locationObj.get("location"), result.get("feature"), message);
+        return id;
     }
 
     /**
@@ -1777,24 +1729,18 @@ public abstract class Capability2Tests extends AbstractTestClass {
             isCollection = false;
         }
 
-        try {
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            int responseCode = responseMap.code;
-            String message = "ERROR: Deep inserted " + relationEntityType + " was not created or linked to " + parentEntityType;
-            assertEquals(200, responseCode, message);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        int responseCode = responseMap.code;
+        String message = "ERROR: Deep inserted " + relationEntityType + " was not created or linked to " + parentEntityType;
+        assertEquals(200, responseCode, message);
 
-            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-            if (isCollection == true) {
-                result = result.get("value").get(0);
-            }
-            message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
-            assertTrue(Utils.jsonEquals(relationObj, result, true, null), message);
-            return result.get(ControlInformation.ID);
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
+        JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+        if (isCollection == true) {
+            result = result.get("value").get(0);
         }
-        return -1;
+        message = "ERROR: Deep inserted " + relationEntityType + " is not created correctly.";
+        assertTrue(Utils.jsonEquals(relationObj, result, true, null), message);
+        return result.get(ControlInformation.ID);
     }
 
     /**
@@ -1822,15 +1768,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
         for (EntityType entityType : entityTypes) {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            try {
-                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-                JsonNode array = result.get("value");
-                String message = entityType + " is found although it shouldn't.";
-                assertEquals(0, array.size(), message);
-            } catch (JacksonException e) {
-                LOGGER.error("Exception: ", e);
-                fail("An Exception occurred during testing: " + e.getMessage());
-            }
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+            JsonNode array = result.get("value");
+            String message = entityType + " is found although it shouldn't.";
+            assertEquals(0, array.size(), message);
         }
     }
 
@@ -1843,15 +1784,10 @@ public abstract class Capability2Tests extends AbstractTestClass {
         for (EntityType entityType : entityTypes) {
             String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            try {
-                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-                JsonNode array = result.get("value");
-                String message = entityType + " is created although it shouldn't.";
-                assertTrue(array.size() > 0, message);
-            } catch (JacksonException e) {
-                LOGGER.error("Exception: ", e);
-                fail("An Exception occurred during testing: " + e.getMessage());
-            }
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+            JsonNode array = result.get("value");
+            String message = entityType + " is created although it shouldn't.";
+            assertTrue(array.size() > 0, message);
         }
     }
 
@@ -1894,18 +1830,13 @@ public abstract class Capability2Tests extends AbstractTestClass {
     private static void deleteEntityType(EntityType entityType) {
         JsonNode array = null;
         do {
-            try {
-                String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
-                HttpResponse responseMap = HTTPMethods.doGet(urlString);
-                JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-                array = result.get("value");
-                for (int i = 0; i < array.size(); i++) {
-                    Object id = array.get(i).get(ControlInformation.ID);
-                    deleteEntity(entityType, id);
-                }
-            } catch (JacksonException e) {
-                LOGGER.error("Exception: ", e);
-                fail("An Exception occurred during testing: " + e.getMessage());
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, null);
+            HttpResponse responseMap = HTTPMethods.doGet(urlString);
+            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
+            array = result.get("value");
+            for (int i = 0; i < array.size(); i++) {
+                Object id = array.get(i).get(ControlInformation.ID);
+                deleteEntity(entityType, id);
             }
         } while (array.size() > 0);
     }
@@ -1914,109 +1845,101 @@ public abstract class Capability2Tests extends AbstractTestClass {
      * Create entities as a pre-process for testing DELETE.
      */
     private void createEntitiesForDelete() {
-        try {
+        deleteEverything();
 
-            deleteEverything();
-
-            //First Thing
-            String urlParameters = """
-                    {
-                        "name": "thing 1",
-                        "description": "thing 1",
-                        "properties": {
-                            "reference": "first"
-                        },
-                        "Locations": [
-                            {
-                                "name": "location 1",
-                                "description": "location 1",
-                                "location": {
-                                    "type": "Point",
-                                    "coordinates": [
-                                        -117.05,
-                                        51.05
-                                    ]
-                                },
-                                "encodingType": "application/vnd.geo+json"
+        //First Thing
+        String urlParameters = """
+                {
+                    "name": "thing 1",
+                    "description": "thing 1",
+                    "properties": {
+                        "reference": "first"
+                    },
+                    "Locations": [
+                        {
+                            "name": "location 1",
+                            "description": "location 1",
+                            "location": {
+                                "type": "Point",
+                                "coordinates": [
+                                    -117.05,
+                                    51.05
+                                ]
+                            },
+                            "encodingType": "application/vnd.geo+json"
+                        }
+                    ],
+                    "Datastreams": [
+                        {
+                            "unitOfMeasurement": {
+                                "name": "Lumen",
+                                "symbol": "lm",
+                                "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
+                            },
+                            "name": "datastream 1",
+                            "description": "datastream 1",
+                            "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
+                            "ObservedProperty": {
+                                "name": "Luminous Flux",
+                                "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
+                                "description": "observedProperty 1"
+                            },
+                            "Sensor": {
+                                "name": "sensor 1",
+                                "description": "sensor 1",
+                                "encodingType": "application/pdf",
+                                "metadata": "Light flux sensor"
                             }
-                        ],
-                        "Datastreams": [
-                            {
-                                "unitOfMeasurement": {
-                                    "name": "Lumen",
-                                    "symbol": "lm",
-                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#Lumen"
-                                },
-                                "name": "datastream 1",
-                                "description": "datastream 1",
-                                "observationType": "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement",
-                                "ObservedProperty": {
-                                    "name": "Luminous Flux",
-                                    "definition": "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#LuminousFlux",
-                                    "description": "observedProperty 1"
-                                },
-                                "Sensor": {
-                                    "name": "sensor 1",
-                                    "description": "sensor 1",
-                                    "encodingType": "application/pdf",
-                                    "metadata": "Light flux sensor"
-                                }
-                            }
-                        ]
-                    }""";
-            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
-            HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
-            String response = responseMap.response;
-            THING_IDS.add(Utils.pkFromPostResult(response).get(0));
+                        }
+                    ]
+                }""";
+        String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, null, null, null);
+        HttpResponse responseMap = HTTPMethods.doPost(urlString, urlParameters);
+        String response = responseMap.response;
+        THING_IDS.add(Utils.pkFromPostResult(response).get(0));
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            JsonNode array = Utils.MAPPER.readTree(response).get("value");
-            LOCATION_IDS.add(array.get(0).get(ControlInformation.ID));
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.LOCATION, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        JsonNode array = Utils.MAPPER.readTree(response).get("value");
+        LOCATION_IDS.add(array.get(0).get(ControlInformation.ID));
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            DATASTREAM_IDS.add(array.get(0).get(ControlInformation.ID));
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.DATASTREAM, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        DATASTREAM_IDS.add(array.get(0).get(ControlInformation.ID));
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            SENSOR_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            OBSPROP_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.SENSOR, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        SENSOR_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVED_PROPERTY, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        OBSPROP_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
 
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            array = Utils.MAPPER.readTree(response).get("value");
-            HISTORICAL_LOCATION_IDS.add(array.get(0).get(ControlInformation.ID));
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, THING_IDS.get(0), EntityType.HISTORICAL_LOCATION, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        array = Utils.MAPPER.readTree(response).get("value");
+        HISTORICAL_LOCATION_IDS.add(array.get(0).get(ControlInformation.ID));
 
-            //Observations
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
-            urlParameters = """
-                    {
-                        "phenomenonTime": "2015-03-01T00:00:00Z",
-                        "result": 1
-                    }""";
-            responseMap = HTTPMethods.doPost(urlString, urlParameters);
-            response = responseMap.response;
-            OBSERVATION_IDS.add(Utils.pkFromPostResult(response).get(0));
+        //Observations
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.DATASTREAM, DATASTREAM_IDS.get(0), EntityType.OBSERVATION, null);
+        urlParameters = """
+                {
+                    "phenomenonTime": "2015-03-01T00:00:00Z",
+                    "result": 1
+                }""";
+        responseMap = HTTPMethods.doPost(urlString, urlParameters);
+        response = responseMap.response;
+        OBSERVATION_IDS.add(Utils.pkFromPostResult(response).get(0));
 
-            //FeatureOfInterest
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
-            responseMap = HTTPMethods.doGet(urlString);
-            response = responseMap.response;
-            FOI_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception: ", e);
-            fail("An Exception occurred during testing: " + e.getMessage());
-        }
-
+        //FeatureOfInterest
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.OBSERVATION, OBSERVATION_IDS.get(0), EntityType.FEATURE_OF_INTEREST, null);
+        responseMap = HTTPMethods.doGet(urlString);
+        response = responseMap.response;
+        FOI_IDS.add(Utils.MAPPER.readTree(response).get(ControlInformation.ID));
     }
 }

@@ -38,11 +38,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -141,16 +141,11 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param entityType Entity type from EntityType enum list
      */
     private void readPropertyOfEntityWithEntityType(EntityType entityType) {
-        try {
-            String response = getEntities(entityType);
-            Object id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
-            for (EntityType.EntityProperty property : entityType.getProperties()) {
-                checkGetPropertyOfEntity(entityType, id, property);
-                checkGetPropertyValueOfEntity(entityType, id, property);
-            }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception handling " + entityType, e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        String response = getEntities(entityType);
+        Object id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
+        for (EntityType.EntityProperty property : entityType.getProperties()) {
+            checkGetPropertyOfEntity(entityType, id, property);
+            checkGetPropertyValueOfEntity(entityType, id, property);
         }
     }
 
@@ -163,26 +158,21 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param property The property to get requested
      */
     private void checkGetPropertyOfEntity(EntityType entityType, Object id, EntityType.EntityProperty property) {
-        try {
-            HttpResponse responseMap = getEntity(entityType, id, property.name);
-            int responseCode = responseMap.code;
-            if (responseCode == 204) {
-                // 204 is the proper response for NULL properties.
-                return;
-            }
-            String message = "Reading property \"" + property.name + "\" of the existing " + entityType.name() + " with id " + id + " failed.";
-            assertEquals(200, responseCode, message);
-            String response = responseMap.response;
-            JsonNode entity;
-            entity = Utils.MAPPER.readTree(response);
-            message = "Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.";
-            assertNotNull(entity.get(property.name), message);
-            message = "The response for getting property " + property.name + " of a " + entityType + " returns more properties!";
-            assertEquals(1, entity.size(), message);
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        HttpResponse responseMap = getEntity(entityType, id, property.name);
+        int responseCode = responseMap.code;
+        if (responseCode == 204) {
+            // 204 is the proper response for NULL properties.
+            return;
         }
+        String message = "Reading property \"" + property.name + "\" of the existing " + entityType.name() + " with id " + id + " failed.";
+        assertEquals(200, responseCode, message);
+        String response = responseMap.response;
+        JsonNode entity;
+        entity = Utils.MAPPER.readTree(response);
+        message = "Reading property \"" + property.name + "\"of \"" + entityType + "\" fails.";
+        assertNotNull(entity.get(property.name), message);
+        message = "The response for getting property " + property.name + " of a " + entityType + " returns more properties!";
+        assertEquals(1, entity.size(), message);
     }
 
     /**
@@ -255,54 +245,48 @@ public abstract class Capability1Tests extends AbstractTestClass {
             return;
         }
         String urlString = null;
-        try {
-            String headName = entityTypes.get(entityTypes.size() - 1);
-            EntityType headEntity = EntityType.getForRelation(headName);
-            boolean isPlural = EntityType.isPlural(headName);
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, null);
-            HttpResponse responseMap = HTTPMethods.doGet(urlString);
-            int code = responseMap.code;
+        String headName = entityTypes.get(entityTypes.size() - 1);
+        EntityType headEntity = EntityType.getForRelation(headName);
+        boolean isPlural = EntityType.isPlural(headName);
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, null);
+        HttpResponse responseMap = HTTPMethods.doGet(urlString);
+        int code = responseMap.code;
 
-            String message = "Reading relation of the entity failed: " + entityTypes.toString();
-            assertEquals(200, code, message);
+        String message = "Reading relation of the entity failed: " + entityTypes.toString();
+        assertEquals(200, code, message);
 
-            String response = responseMap.response;
-            Object id;
-            if (isPlural) {
-                id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
-            } else {
-                id = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
-            }
-
-            //check $ref
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, "$ref");
-            responseMap = HTTPMethods.doGet(urlString);
-            code = responseMap.code;
-
-            message = "Reading relation of the entity failed: " + entityTypes.toString();
-            assertEquals(200, code, message);
-            response = responseMap.response;
-            checkAssociationLinks(response, entityTypes, ids);
-
-            if (entityTypes.size() == resourcePathLevel) {
-                return;
-            }
-            if (EntityType.isPlural(headName)) {
-                ids.add(id);
-            } else {
-                ids.add(null);
-            }
-            for (String relation : headEntity.getRelations(serverSettings.getExtensions())) {
-                entityTypes.add(relation);
-                readRelatedEntity(entityTypes, ids);
-                entityTypes.remove(entityTypes.size() - 1);
-            }
-            ids.remove(ids.size() - 1);
-        } catch (JacksonException e) {
-            LOGGER.error("Failed to parse response for " + urlString, e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        String response = responseMap.response;
+        Object id;
+        if (isPlural) {
+            id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
+        } else {
+            id = Utils.MAPPER.readTree(response).get(ControlInformation.ID);
         }
 
+        //check $ref
+        urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityTypes, ids, "$ref");
+        responseMap = HTTPMethods.doGet(urlString);
+        code = responseMap.code;
+
+        message = "Reading relation of the entity failed: " + entityTypes.toString();
+        assertEquals(200, code, message);
+        response = responseMap.response;
+        checkAssociationLinks(response, entityTypes, ids);
+
+        if (entityTypes.size() == resourcePathLevel) {
+            return;
+        }
+        if (EntityType.isPlural(headName)) {
+            ids.add(id);
+        } else {
+            ids.add(null);
+        }
+        for (String relation : headEntity.getRelations(serverSettings.getExtensions())) {
+            entityTypes.add(relation);
+            readRelatedEntity(entityTypes, ids);
+            entityTypes.remove(entityTypes.size() - 1);
+        }
+        ids.remove(ids.size() - 1);
     }
 
     /**
@@ -316,28 +300,23 @@ public abstract class Capability1Tests extends AbstractTestClass {
      */
     private void checkAssociationLinks(String response, List<String> entityTypes, List<Object> ids) {
 
-        try {
-            if (EntityType.isPlural(entityTypes.get(entityTypes.size() - 1))) {
-                String message = "The GET entities Association Link response does not match SensorThings API : missing \"value\" in response.: " + entityTypes.toString() + ids.toString();
-                assertTrue(response.contains("value"), message);
-                JsonNode value = Utils.MAPPER.readTree(response).get("value");
-                for (int i = 0; i < value.size() && i < 2; i++) {
-                    JsonNode obj = value.get(i);
-                    message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
-                    assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
-                    message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
-                    assertEquals(1, obj.size(), message);
-                }
-            } else {
-                JsonNode obj = Utils.MAPPER.readTree(response);
-                String message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
+        if (EntityType.isPlural(entityTypes.get(entityTypes.size() - 1))) {
+            String message = "The GET entities Association Link response does not match SensorThings API : missing \"value\" in response.: " + entityTypes.toString() + ids.toString();
+            assertTrue(response.contains("value"), message);
+            JsonNode value = Utils.MAPPER.readTree(response).get("value");
+            for (int i = 0; i < value.size() && i < 2; i++) {
+                JsonNode obj = value.get(i);
+                message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
                 assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
                 message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
                 assertEquals(1, obj.size(), message);
             }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        } else {
+            JsonNode obj = Utils.MAPPER.readTree(response);
+            String message = "The Association Link does not contain self-links.: " + entityTypes.toString() + ids.toString();
+            assertNotNull(obj.get(ControlInformation.SELF_LINK), message);
+            message = "The Association Link contains properties other than self-link.: " + entityTypes.toString() + ids.toString();
+            assertEquals(1, obj.size(), message);
         }
     }
 
@@ -348,22 +327,16 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @return The entity response as a string
      */
     private String readEntityWithEntityType(EntityType entityType) {
-        try {
-            String response = getEntities(entityType);
-            Object id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
-            HttpResponse responseMap = getEntity(entityType, id, null);
-            int responseCode = responseMap.code;
+        String response = getEntities(entityType);
+        Object id = Utils.MAPPER.readTree(response).get("value").get(0).get(ControlInformation.ID);
+        HttpResponse responseMap = getEntity(entityType, id, null);
+        int responseCode = responseMap.code;
 
-            String message = "Reading existing " + entityType.name() + " with id " + id + " failed.";
-            assertEquals(200, responseCode, message);
+        String message = "Reading existing " + entityType.name() + " with id " + id + " failed.";
+        assertEquals(200, responseCode, message);
 
-            response = responseMap.response;
-            return response;
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-            return null;
-        }
+        response = responseMap.response;
+        return response;
     }
 
     /**
@@ -386,57 +359,49 @@ public abstract class Capability1Tests extends AbstractTestClass {
     @Test
     void checkServiceRootUri() {
         LOGGER.info("  checkServiceRootUri");
-        try {
-            String response = getEntities(null);
-            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
-            JsonNode entities = jsonResponse.get("value");
-            Map<String, Boolean> addedLinks = new HashMap<>();
-            addedLinks.put("Things", false);
-            addedLinks.put("Locations", false);
-            addedLinks.put("HistoricalLocations", false);
-            addedLinks.put("Datastreams", false);
-            addedLinks.put("Sensors", false);
-            addedLinks.put("Observations", false);
-            addedLinks.put("ObservedProperties", false);
-            addedLinks.put("FeaturesOfInterest", false);
-            if (serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
-                addedLinks.put("MultiDatastreams", false);
+        String response = getEntities(null);
+        JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+        JsonNode entities = jsonResponse.get("value");
+        Map<String, Boolean> addedLinks = new HashMap<>();
+        addedLinks.put("Things", false);
+        addedLinks.put("Locations", false);
+        addedLinks.put("HistoricalLocations", false);
+        addedLinks.put("Datastreams", false);
+        addedLinks.put("Sensors", false);
+        addedLinks.put("Observations", false);
+        addedLinks.put("ObservedProperties", false);
+        addedLinks.put("FeaturesOfInterest", false);
+        if (serverSettings.implementsRequirement(version, ServerSettings.MULTIDATA_REQ)) {
+            addedLinks.put("MultiDatastreams", false);
+        }
+        if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
+            addedLinks.put("Actuators", false);
+            addedLinks.put("TaskingCapabilities", false);
+            addedLinks.put("Tasks", false);
+        }
+        for (int i = 0; i < entities.size(); i++) {
+            JsonNode entity = entities.get(i);
+            if (!entity.has("name") || !entity.has("url")) {
+                fail("Service root URI component does not have proper JSON keys: name and value.");
             }
-            if (serverSettings.implementsRequirement(version, ServerSettings.TASKING_REQ)) {
-                addedLinks.put("Actuators", false);
-                addedLinks.put("TaskingCapabilities", false);
-                addedLinks.put("Tasks", false);
+            String name = entity.get("name").stringValue();
+            String nameUrl = entity.get("url").stringValue();
+            addedLinks.put(name, true);
+            if ("MultiDatastreams".equals(name)) {
+                // TODO: MultiDatastreams are not in the entity list yet.
+                String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
+                assertEquals(serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl, message);
+            } else {
+                Assertions.assertDoesNotThrow(() -> {
+                    EntityType entityType = EntityType.getForRelation(name);
+                    String message = "The URL for " + entityType.plural + " in Service Root URI is not compliant to SensorThings API.";
+                    assertEquals(serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl, message);
+                }, "There is a component in Service Root URI response that is not in SensorThings API : " + name);
             }
-            for (int i = 0; i < entities.size(); i++) {
-                JsonNode entity = entities.get(i);
-                if (!entity.has("name") || !entity.has("url")) {
-                    fail("Service root URI component does not have proper JSON keys: name and value.");
-                }
-                String name = entity.get("name").stringValue();
-                String nameUrl = entity.get("url").stringValue();
-                addedLinks.put(name, true);
-                if ("MultiDatastreams".equals(name)) {
-                    // TODO: MultiDatastreams are not in the entity list yet.
-                    String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
-                    assertEquals(serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl, message);
-                } else {
-                    try {
-                        EntityType entityType = EntityType.getForRelation(name);
-                        String message = "The URL for " + entityType.plural + " in Service Root URI is not compliant to SensorThings API.";
-                        assertEquals(serverSettings.getServiceUrl(version) + "/" + entityType.plural, nameUrl, message);
-                    } catch (IllegalArgumentException exc) {
-                        fail("There is a component in Service Root URI response that is not in SensorThings API : " + name);
-                    }
-                }
-            }
-            for (String key : addedLinks.keySet()) {
-                String message = "The Service Root URI response does not contain " + key;
-                assertTrue(addedLinks.get(key), message);
-            }
-
-        } catch (Exception e) {
-            LOGGER.error("An Exception occurred during testing!", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        }
+        for (String key : addedLinks.keySet()) {
+            String message = "The Service Root URI response does not contain " + key;
+            assertTrue(addedLinks.get(key), message);
         }
     }
 
@@ -518,16 +483,11 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param response The response of the GET request to be checked
      */
     private void checkEntitiesControlInformation(String response) {
-        try {
-            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
-            JsonNode entities = jsonResponse.get("value");
-            for (int i = 0; i < entities.size() && i < 2; i++) {
-                JsonNode entity = entities.get(i);
-                checkEntityControlInformation(entity);
-            }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+        JsonNode entities = jsonResponse.get("value");
+        for (int i = 0; i < entities.size() && i < 2; i++) {
+            JsonNode entity = entities.get(i);
+            checkEntityControlInformation(entity);
         }
     }
 
@@ -538,16 +498,11 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param response The response of the GET request to be checked
      */
     private void checkEntityControlInformation(Object response) {
-        try {
-            JsonNode entity = Utils.MAPPER.readTree(response.toString());
-            String message = "The entity does not have mandatory control information : " + ControlInformation.ID;
-            assertNotNull(entity.get(ControlInformation.ID), message);
-            message = "The entity does not have mandatory control information : " + ControlInformation.SELF_LINK;
-            assertNotNull(entity.get(ControlInformation.SELF_LINK), message);
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
-        }
+        JsonNode entity = Utils.MAPPER.readTree(response.toString());
+        String message = "The entity does not have mandatory control information : " + ControlInformation.ID;
+        assertNotNull(entity.get(ControlInformation.ID), message);
+        message = "The entity does not have mandatory control information : " + ControlInformation.SELF_LINK;
+        assertNotNull(entity.get(ControlInformation.SELF_LINK), message);
     }
 
     /**
@@ -558,19 +513,12 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param response The response of the GET request to be checked
      */
     private void checkEntitiesProperties(EntityType entityType, String response) {
-        try {
-            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
-            JsonNode entities = jsonResponse.get("value");
-            for (int i = 0; i < entities.size() && i < 2; i++) {
-                JsonNode entity = entities.get(i);
-                checkEntityProperties(entityType, entity);
-            }
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+        JsonNode entities = jsonResponse.get("value");
+        for (int i = 0; i < entities.size() && i < 2; i++) {
+            JsonNode entity = entities.get(i);
+            checkEntityProperties(entityType, entity);
         }
-
     }
 
     /**
@@ -581,21 +529,14 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param response The response of the GET request to be checked
      */
     private void checkEntityProperties(EntityType entityType, Object response) {
-        try {
-            JsonNode entity = Utils.MAPPER.readTree(response.toString());
-            for (EntityType.EntityProperty property : entityType.getProperties()) {
-                if (property.optional) {
-                    continue;
-                }
-                String message = "Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".";
-                assertNotNull(entity.get(property.name), message);
+        JsonNode entity = Utils.MAPPER.readTree(response.toString());
+        for (EntityType.EntityProperty property : entityType.getProperties()) {
+            if (property.optional) {
+                continue;
             }
-
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+            String message = "Entity type \"" + entityType + "\" does not have mandatory property: \"" + property + "\".";
+            assertNotNull(entity.get(property.name), message);
         }
-
     }
 
     /**
@@ -606,18 +547,12 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param response The response of the GET request to be checked
      */
     private void checkEntitiesRelations(EntityType entityType, String response) {
-        try {
-            JsonNode jsonResponse = Utils.MAPPER.readTree(response);
-            JsonNode entities = jsonResponse.get("value");
-            for (int i = 0; i < entities.size() && i < 2; i++) {
-                JsonNode entity = entities.get(i);
-                checkEntityRelations(entityType, entity);
-            }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        JsonNode jsonResponse = Utils.MAPPER.readTree(response);
+        JsonNode entities = jsonResponse.get("value");
+        for (int i = 0; i < entities.size() && i < 2; i++) {
+            JsonNode entity = entities.get(i);
+            checkEntityRelations(entityType, entity);
         }
-
     }
 
     /**
@@ -628,15 +563,10 @@ public abstract class Capability1Tests extends AbstractTestClass {
      * @param response The response of the GET request to be checked
      */
     private void checkEntityRelations(EntityType entityType, Object response) {
-        try {
-            JsonNode entity = Utils.MAPPER.readTree(response.toString());
-            for (String relation : entityType.getRelations(serverSettings.getExtensions())) {
-                String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
-                assertNotNull(entity.get(relation + ControlInformation.NAVIGATION_LINK), message);
-            }
-        } catch (JacksonException e) {
-            LOGGER.error("Exception:", e);
-            fail("An Exception occurred during testing!:\n" + e.getMessage());
+        JsonNode entity = Utils.MAPPER.readTree(response.toString());
+        for (String relation : entityType.getRelations(serverSettings.getExtensions())) {
+            String message = "Entity type \"" + entityType + "\" does not have mandatory relation: \"" + relation + "\".";
+            assertNotNull(entity.get(relation + ControlInformation.NAVIGATION_LINK), message);
         }
     }
 

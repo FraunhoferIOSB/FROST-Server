@@ -21,7 +21,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.utils.StringHelper.formatKeyValuesForUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -408,7 +407,7 @@ public abstract class BatchTests extends AbstractTestClass {
     }
 
     @Test
-    void test06JsonBatchRequest() throws ServiceFailureException {
+    void test06JsonBatchRequest() throws ServiceFailureException, JsonProcessingException {
         LOGGER.info("  test06JsonBatchRequest");
         String request = """
                 {
@@ -450,32 +449,27 @@ public abstract class BatchTests extends AbstractTestClass {
         String response = postBatch(null, request);
         String thingId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etThing, "$orderby=id%20desc").get("@iot.id"));
 
-        try {
-            String expResponse = """
-                    {"responses":[
-                        {"id":"0","status":200,"body":{"name":"Patched"}},
-                        {"id":"1","status":201,"location":"$serviceUrl/Things($newThingId)"},
-                        {"id":"2","status":200},
-                        {"id":"3","status":200, "body":{"code": 200,"type": "success","message": "JSON-Patch applied."}},
-                        {"id":"4","status":404,"body":{"code":404,"type":"error","message":"Not a valid id: Path is not valid."}}
-                    ]}""";
-            expResponse = Strings.CS.replace(expResponse, "$serviceUrl", serverSettings.getServiceUrl(version));
-            expResponse = Strings.CS.replace(expResponse, "$newThingId", thingId);
-            BatchResponseJson expected = mapper.readValue(expResponse, BatchResponseJson.class);
-            BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
-            assertEquals(expected, actual, "Response not as expected.");
+        String expResponse = """
+                {"responses":[
+                    {"id":"0","status":200,"body":{"name":"Patched"}},
+                    {"id":"1","status":201,"location":"$serviceUrl/Things($newThingId)"},
+                    {"id":"2","status":200},
+                    {"id":"3","status":200, "body":{"code": 200,"type": "success","message": "JSON-Patch applied."}},
+                    {"id":"4","status":404,"body":{"code":404,"type":"error","message":"Not a valid id: Path is not valid."}}
+                ]}""";
+        expResponse = Strings.CS.replace(expResponse, "$serviceUrl", serverSettings.getServiceUrl(version));
+        expResponse = Strings.CS.replace(expResponse, "$newThingId", thingId);
+        BatchResponseJson expected = mapper.readValue(expResponse, BatchResponseJson.class);
+        BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
+        assertEquals(expected, actual, "Response not as expected.");
 
-            Entity updatedThing1 = sSrvc.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
-            assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
-            assertEquals(new StringNode("Changes"), updatedThing1.getProperty(EP_PROPERTIES).get("new"));
-        } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.", ex);
-        }
-
+        Entity updatedThing1 = sSrvc.dao(sMdl.etThing).find(THINGS.get(1).getPrimaryKeyValues());
+        assertEquals("Thing 1 Updated", updatedThing1.getProperty(EP_NAME));
+        assertEquals(new StringNode("Changes"), updatedThing1.getProperty(EP_PROPERTIES).get("new"));
     }
 
     @Test
-    void test07JsonBatchRequestWithChangeSetReferencingNewEntitiesInBody() {
+    void test07JsonBatchRequestWithChangeSetReferencingNewEntitiesInBody() throws JsonProcessingException {
         LOGGER.info("  test07JsonBatchRequestWithChangeSetReferencingNewEntitiesInBody");
         String post1 = """
                 {
@@ -522,23 +516,19 @@ public abstract class BatchTests extends AbstractTestClass {
         String sensorId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
         String datastreamId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
 
-        try {
-            BatchResponseJson expected = mapper.readValue("{\"responses\":["
-                    + "{\"id\":\"sensor1\","
-                    + "\"status\":201,"
-                    + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
-                    + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
-                    + "/Datastreams(" + datastreamId + ")\"}"
-                    + "]}", BatchResponseJson.class);
-            BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
-            assertEquals(expected, actual, "Response not as expected.");
-        } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.", ex);
-        }
+        BatchResponseJson expected = mapper.readValue("{\"responses\":["
+                + "{\"id\":\"sensor1\","
+                + "\"status\":201,"
+                + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
+                + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                + "/Datastreams(" + datastreamId + ")\"}"
+                + "]}", BatchResponseJson.class);
+        BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
+        assertEquals(expected, actual, "Response not as expected.");
     }
 
     @Test
-    void test08JsonBatchRequestWithChangeSetReferencingNewEntitiesInUrl() {
+    void test08JsonBatchRequestWithChangeSetReferencingNewEntitiesInUrl() throws JsonProcessingException {
         LOGGER.info("  test08JsonBatchRequestWithChangeSetReferencingNewEntitiesInUrl");
         String post1 = """
                 {
@@ -585,19 +575,15 @@ public abstract class BatchTests extends AbstractTestClass {
         String sensorId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etSensor, "$orderby=id%20desc").get("@iot.id"));
         String datastreamId = Utils.quoteForUrl(eh2.getEntityJson(sMdl.etDatastream, "$orderby=id%20desc").get("@iot.id"));
 
-        try {
-            BatchResponseJson expected = mapper.readValue("{\"responses\":["
-                    + "{\"id\":\"sensor1\","
-                    + "\"status\":201,"
-                    + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
-                    + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
-                    + "/Datastreams(" + datastreamId + ")\"}"
-                    + "]}", BatchResponseJson.class);
-            BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
-            assertEquals(expected, actual, "Response not as expected.");
-        } catch (JsonProcessingException ex) {
-            fail("Failed to parse response as json.", ex);
-        }
+        BatchResponseJson expected = mapper.readValue("{\"responses\":["
+                + "{\"id\":\"sensor1\","
+                + "\"status\":201,"
+                + "\"location\":\"" + serverSettings.getServiceUrl(version) + "/Sensors(" + sensorId + ")\"},"
+                + "{\"id\":\"any\",\"status\":201,\"location\":\"" + serverSettings.getServiceUrl(version)
+                + "/Datastreams(" + datastreamId + ")\"}"
+                + "]}", BatchResponseJson.class);
+        BatchResponseJson actual = mapper.readValue(response, BatchResponseJson.class);
+        assertEquals(expected, actual, "Response not as expected.");
     }
 
     private String postBatch(String boundary, String body) {

@@ -390,19 +390,14 @@ public abstract class AdditionalTests extends AbstractTestClass {
     }
 
     @Test
-    void test06DoubleConflictingNavProp() {
+    void test06DoubleConflictingNavProp() throws ServiceFailureException {
         LOGGER.info("  test06DoubleConflictingNavProp");
         Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
         Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(1));
-        try {
-            doa.create(observation);
-            Assertions.fail("Creating an Observation with conflicting Datastreams should have failed.");
-            OBSERVATIONS.add(observation);
-        } catch (StatusCodeException exc) {
-            assertEquals(400, exc.getStatusCode(), "Unexpected status code.");
-        } catch (ServiceFailureException ex) {
-            Assertions.fail("Creating an Observation with conflicting Datastreams should have given a 400 error.");
-        }
+        StatusCodeException exc = Assertions.assertThrows(StatusCodeException.class,
+                () -> doa.create(observation),
+                "Creating an Observation with conflicting Datastreams should have failed.");
+        assertEquals(400, exc.getStatusCode(), "Unexpected status code.");
     }
 
     @Test
