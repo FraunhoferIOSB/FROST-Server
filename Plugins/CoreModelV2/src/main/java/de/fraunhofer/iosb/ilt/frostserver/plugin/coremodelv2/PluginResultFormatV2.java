@@ -131,9 +131,7 @@ public class PluginResultFormatV2 implements PluginResultFormat {
         }
 
         private String createContextBase(Query query) {
-            final String contextBase = query.getContext().getPrefixGen().getUrlPrefix()
-                    + "$metadata";
-            return contextBase;
+            return query.getContext().getPrefixGen().getUrlPrefix() + "$metadata";
         }
 
         @Override

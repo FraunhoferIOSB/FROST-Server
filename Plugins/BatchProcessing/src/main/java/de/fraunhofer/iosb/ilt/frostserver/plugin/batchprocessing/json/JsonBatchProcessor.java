@@ -101,8 +101,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
                     String value = UrlHelper.quoteForJson(pair.value.get(0));
                     return '(' + StringEscapeUtils.escapeJson(value) + ')';
                 } else {
-                    String value = UrlHelper.quoteForJson(pair.value.get(0));
-                    return value;
+                    return UrlHelper.quoteForJson(pair.value.get(0));
                 }
             };
         } else {

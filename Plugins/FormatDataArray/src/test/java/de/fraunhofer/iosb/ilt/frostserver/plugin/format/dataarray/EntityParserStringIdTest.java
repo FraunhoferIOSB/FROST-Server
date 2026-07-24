@@ -128,7 +128,7 @@ class EntityParserStringIdTest {
     }
 
     private String createDataJson() {
-        String json = """
+        return """
                 [
                   {
                     "Datastream": {
@@ -200,7 +200,6 @@ class EntityParserStringIdTest {
                     ]
                   }
                 ]""";
-        return json;
     }
 
 }

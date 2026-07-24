@@ -235,9 +235,8 @@ public class EntityHelper11 extends EntityHelperAbstract {
 
     @Override
     public Entity newLocation(Entity thing) {
-        final Entity newLocation = newLocation()
+        return newLocation()
                 .addNavigationEntity(sMdl.npLocationThings, thing);
-        return newLocation;
     }
 
     @Override
@@ -304,9 +303,8 @@ public class EntityHelper11 extends EntityHelperAbstract {
 
     @Override
     public Entity newDatastream(Entity thing, Entity observedProperty, Entity sensor) {
-        final Entity newDatastream = newDatastream(observedProperty, sensor)
+        return newDatastream(observedProperty, sensor)
                 .setProperty(sMdl.npDatastreamThing, thing);
-        return newDatastream;
     }
 
     @Override

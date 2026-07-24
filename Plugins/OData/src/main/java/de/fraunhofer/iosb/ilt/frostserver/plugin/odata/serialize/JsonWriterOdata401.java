@@ -84,7 +84,7 @@ public class JsonWriterOdata401 {
                 .addSerializer(Property.class, new EntityPropertySerialiser())
                 .addSerializer(Date.class, new DateSerialiser());
 
-        ObjectMapper mapper = JsonMapper.builder()
+        return JsonMapper.builder()
                 .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
                 .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
                 .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
@@ -93,8 +93,6 @@ public class JsonWriterOdata401 {
                 .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
                 .addModule(module)
                 .build();
-
-        return mapper;
     }
 
     public static void writeEntity(Writer writer, EntityWrapper entity) throws JacksonException {

@@ -401,8 +401,7 @@ public abstract class EntityHelperAbstract {
             String message = "Error during updating(PUT) of entity " + entityType.getName() + ": " + responseMap.response;
             assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
-            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-            return result;
+            return Utils.MAPPER.readTree(responseMap.response);
 
         } catch (JacksonException e) {
             LOGGER.error("Exception:", e);

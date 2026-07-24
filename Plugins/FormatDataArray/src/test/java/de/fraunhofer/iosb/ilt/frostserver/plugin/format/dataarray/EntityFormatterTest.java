@@ -106,7 +106,7 @@ class EntityFormatterTest {
     }
 
     private String createDataJson() {
-        String expResult = """
+        return """
                 {
                     "@iot.count": 108,
                     "@iot.nextLink": "nextLinkHere",
@@ -175,7 +175,6 @@ class EntityFormatterTest {
                     ]
                 }
                 """;
-        return expResult;
     }
 
     private boolean jsonEqual(String string1, String string2) {

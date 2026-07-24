@@ -74,7 +74,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttCoreTests20.class);
 
-    private final StringModifier urlsHttpToMqtt = (s) -> Strings.CS.replace(s, serverSettings.getServiceRootUrl() + '/', "");
+    private final StringModifier urlsHttpToMqtt =  s -> Strings.CS.replace(s, serverSettings.getServiceRootUrl() + '/', "");
 
     private static List<EntityCreateInfo> entityTypesForCreate;
 

@@ -719,8 +719,7 @@ public abstract class Capability3Tests extends AbstractTestClass {
     private int compareWithPrevious(int idx, JsonNode array, String property, Compare order, String message) throws JacksonException {
         JsonNode jObj1 = array.get(idx - 1);
         JsonNode jObj2 = array.get(idx);
-        int result = compareObjects(property, jObj1, jObj2, order, message);
-        return result;
+        return compareObjects(property, jObj1, jObj2, order, message);
     }
 
     private int compareObjects(String property, JsonNode jObj1, JsonNode jObj2, Compare order, String message) throws JacksonException {

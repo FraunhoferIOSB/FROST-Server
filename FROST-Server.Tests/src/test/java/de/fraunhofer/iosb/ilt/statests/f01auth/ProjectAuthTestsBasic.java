@@ -74,8 +74,7 @@ public class ProjectAuthTestsBasic extends ProjectAuthTests {
 
     @Override
     public String getBatchPostData() throws IOException {
-        String batchPostData = IOUtils.resourceToString("projects/dataBatchPost.json", StandardCharsets.UTF_8, getClass().getClassLoader());
-        return batchPostData;
+        return IOUtils.resourceToString("projects/dataBatchPost.json", StandardCharsets.UTF_8, getClass().getClassLoader());
     }
 
     @Override

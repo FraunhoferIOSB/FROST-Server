@@ -248,8 +248,7 @@ public abstract class MetadataTests extends AbstractTestClass {
                 THINGS.get(1).getPrimaryKeyValues().get(0),
                 null,
                 "?$resultMetadata=" + metadata);
-        HttpResponse result = HTTPMethods.doGet(urlString);
-        return result;
+        return HTTPMethods.doGet(urlString);
     }
 
     @Test

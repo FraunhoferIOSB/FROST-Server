@@ -108,7 +108,7 @@ class EntityParserTest {
     }
 
     private String createDataJson() {
-        String json = """
+        return """
                 [
                   {
                     "Datastream": {
@@ -180,7 +180,6 @@ class EntityParserTest {
                     ]
                   }
                 ]""";
-        return json;
     }
 
 }

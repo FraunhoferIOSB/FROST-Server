@@ -166,8 +166,7 @@ public class HTTPMethods {
         countGet++;
         HttpHead request = new HttpHead(urlString);
         try (CloseableHttpResponse response = service.execute(request)) {
-            HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());
-            return result;
+            return new HttpResponse(response.getStatusLine().getStatusCode());
         }
     }
 

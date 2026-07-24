@@ -1531,8 +1531,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             message = "The POSTed entity is not created.";
             assertEquals(200, responseCode, message);
 
-            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-            return result;
+            return Utils.MAPPER.readTree(responseMap.response);
         } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
             fail("An Exception occurred during testing: " + e.getMessage());
@@ -1617,8 +1616,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             assertEquals(200, responseCode, message);
 
             responseMap = HTTPMethods.doGet(urlString);
-            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-            return result;
+            return Utils.MAPPER.readTree(responseMap.response);
 
         } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);
@@ -1645,8 +1643,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
             String message = "Error during updating(PATCH) of entity " + entityType.name();
             assertEquals(200, responseCode, message);
             responseMap = HTTPMethods.doGet(urlString);
-            JsonNode result = Utils.MAPPER.readTree(responseMap.response);
-            return result;
+            return Utils.MAPPER.readTree(responseMap.response);
 
         } catch (JacksonException e) {
             LOGGER.error("Exception: ", e);

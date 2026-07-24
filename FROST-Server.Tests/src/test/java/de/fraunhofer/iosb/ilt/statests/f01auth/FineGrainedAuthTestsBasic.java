@@ -80,8 +80,7 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
 
     @Override
     public String getBatchPostData() throws IOException {
-        String batchPostData = IOUtils.resourceToString("finegrainedsecurity/dataBatchPost.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());
-        return batchPostData;
+        return IOUtils.resourceToString("finegrainedsecurity/dataBatchPost.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());
     }
 
     @Override
@@ -115,9 +114,9 @@ public class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
     @Test
     void test_99_ChangePassword() {
         LOGGER.info("  test_04c_ChangePassword");
-        EntityCreator changed = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changed = user -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .setProperty(EP_USERPASS, user + "2");
-        EntityCreator changedCopy = (user) -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
+        EntityCreator changedCopy = user -> USERS.stream().filter(t -> t.getProperty(EP_USERNAME).equals(user)).findFirst().get()
                 .withOnlyPk()
                 .setProperty(EP_USERPASS, user + "2");
 

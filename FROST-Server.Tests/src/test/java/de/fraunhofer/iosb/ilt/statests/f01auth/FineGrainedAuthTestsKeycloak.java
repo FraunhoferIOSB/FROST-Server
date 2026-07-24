@@ -107,8 +107,7 @@ public class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
 
     @Override
     public String getBatchPostData() throws IOException {
-        String batchPostData = IOUtils.resourceToString("finegrainedsecurity/dataBatchPostKeyCloak.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());
-        return batchPostData;
+        return IOUtils.resourceToString("finegrainedsecurity/dataBatchPostKeyCloak.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());
     }
 
     @Override
