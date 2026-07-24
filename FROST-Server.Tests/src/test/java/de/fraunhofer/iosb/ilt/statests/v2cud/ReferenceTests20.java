@@ -252,7 +252,7 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     private void putEntityRefAndTest(Entity source, NavigationPropertyEntity np, Entity target, boolean abs) throws ServiceFailureException {
         String selfLinkSrc = source.getSelfLink();
-        String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
+        String refLink = selfLinkSrc + "/" + np.getName() + "/$ref";
         String selfLinkTrgt = target.getSelfLink(abs);
         String body = SimpleJsonMapper.getSimpleObjectMapper()
                 .writeValueAsString(
@@ -322,7 +322,7 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     private void putEntitySetRefsAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) {
         String selfLinkSrc = source.getSelfLink();
-        String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
+        String refLink = selfLinkSrc + "/" + np.getName() + "/$ref";
 
         List<Map<String, Object>> selfLinkList = new ArrayList<>();
         for (var target : targets) {
@@ -345,7 +345,7 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     private void postEntitySetRefAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, Entity target, List<Entity> expected) {
         String selfLinkSrc = source.getSelfLink();
-        String refLink = selfLinkSrc += "/" + np.getName() + "/$ref";
+        String refLink = selfLinkSrc + "/" + np.getName() + "/$ref";
 
         Map<String, Object> data = CollectionsHelper.propertiesBuilder()
                 .addItem("@id", target.getSelfLink(abs))

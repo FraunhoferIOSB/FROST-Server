@@ -24,7 +24,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.loader.DefNavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperId;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany;
-import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToManyOrdered;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import java.time.ZoneId;
@@ -153,47 +152,50 @@ public class LiquibaseTemplates {
         final String tableName = et.getTable();
         String otherEntityType = np.getEntityType();
         for (var handler : np.getHandlers()) {
-            if (handler instanceof FieldMapperOneToMany fm) {
-                String ourColumn = fm.getField();
-                String otherColumn = fm.getOtherField();
-                String otherTable = fm.getOtherTable();
-                if (ourColumn.equals(idField)) {
-                    clEntityType.addChangesetColumnsBuilder(
-                            ChangesetColumnsBuilder.start()
-                                    .setTableName(otherTable)
-                                    .setTestColumnName(otherColumn)
-                                    .prependColumn(otherColumn, idColumnType(etName), !np.getInverse().isRequired()));
-                    clg.clForeignKeys.addChangsetForeignKey(otherTable, otherColumn, tableName, ourColumn);
-                    clEntityType.addChangsetIndex(otherTable, otherColumn);
-                } else {
-                    csColumns.prependColumn(ourColumn, idColumnType(otherEntityType), !np.isRequired());
-                    if (!csColumns.isTestColumnNameSet()) {
-                        csColumns.setTestColumnName(ourColumn);
+            switch (handler) {
+                case FieldMapperOneToMany fm -> {
+                    String ourColumn = fm.getField();
+                    String otherColumn = fm.getOtherField();
+                    String otherTable = fm.getOtherTable();
+                    if (ourColumn.equals(idField)) {
+                        clEntityType.addChangesetColumnsBuilder(
+                                ChangesetColumnsBuilder.start()
+                                        .setTableName(otherTable)
+                                        .setTestColumnName(otherColumn)
+                                        .prependColumn(otherColumn, idColumnType(etName), !np.getInverse().isRequired()));
+                        clg.clForeignKeys.addChangsetForeignKey(otherTable, otherColumn, tableName, ourColumn);
+                        clEntityType.addChangsetIndex(otherTable, otherColumn);
+                    } else {
+                        csColumns.prependColumn(ourColumn, idColumnType(otherEntityType), !np.isRequired());
+                        if (!csColumns.isTestColumnNameSet()) {
+                            csColumns.setTestColumnName(ourColumn);
+                        }
+                        clg.clForeignKeys.addChangsetForeignKey(tableName, ourColumn, otherTable, otherColumn);
+                        clEntityType.addChangsetIndex(ourColumn);
                     }
-                    clg.clForeignKeys.addChangsetForeignKey(tableName, ourColumn, otherTable, otherColumn);
-                    clEntityType.addChangsetIndex(ourColumn);
                 }
-            } else if (handler instanceof FieldMapperManyToMany fm) {
-                String ourField = fm.getField();
-                String ourType = idColumnType(etName);
-                String otherType = idColumnType(otherEntityType);
-                String linkTableOurField = fm.getLinkOurField();
-                String linkTable = fm.getLinkTable();
-                String linkTableOtherField = fm.getLinkOtherField();
-                String otherField = fm.getOtherField();
-                String otherTable = fm.getOtherTable();
-                final EntityTableColumn etc1 = new EntityTableColumn(etName, tableName, linkTableOurField, ourType);
-                final EntityTableColumn etc2 = new EntityTableColumn(otherEntityType, otherTable, linkTableOtherField, otherType);
-                TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(clg.clMain.getDate())
-                        .setAuthor(clg.clMain.getAuthor())
-                        .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
-                        .addChangsetLinkTable(linkTable, etc1, etc2);
-                clg.clBuilders.add(clLinkTable);
-                clg.clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
-                clg.clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
-                clg.clMain.addFileLinkTable(clLinkTable.getFileName());
-            } else if (handler instanceof FieldMapperManyToManyOrdered fm) {
-                LOGGER.warn("Unknown Handler Type: {}", handler);
+                case FieldMapperManyToMany fm -> {
+                    String ourField = fm.getField();
+                    String ourType = idColumnType(etName);
+                    String otherType = idColumnType(otherEntityType);
+                    String linkTableOurField = fm.getLinkOurField();
+                    String linkTable = fm.getLinkTable();
+                    String linkTableOtherField = fm.getLinkOtherField();
+                    String otherField = fm.getOtherField();
+                    String otherTable = fm.getOtherTable();
+                    final EntityTableColumn etc1 = new EntityTableColumn(etName, tableName, linkTableOurField, ourType);
+                    final EntityTableColumn etc2 = new EntityTableColumn(otherEntityType, otherTable, linkTableOtherField, otherType);
+                    TableChangelogBuilder clLinkTable = TableChangelogBuilder.start(clg.clMain.getDate())
+                            .setAuthor(clg.clMain.getAuthor())
+                            .setFileName("table" + CaseUtils.toCamelCase(linkTable, true, '_') + ".xml")
+                            .addChangsetLinkTable(linkTable, etc1, etc2);
+                    clg.clBuilders.add(clLinkTable);
+                    clg.clForeignKeys.addChangsetForeignKey(linkTable, linkTableOurField, tableName, ourField);
+                    clg.clForeignKeys.addChangsetForeignKey(linkTable, linkTableOtherField, otherTable, otherField);
+                    clg.clMain.addFileLinkTable(clLinkTable.getFileName());
+                }
+                default ->
+                    LOGGER.warn("Unknown Handler Type: {}", handler);
             }
         }
     }

@@ -616,9 +616,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
         waitMillis(WAIT_AFTER_CLEANUP);
 
         int totalPaths = 0;
-        int count = 0;
         for (var eci : entityTypesForCreate) {
-            count++;
             EntityType entityType = eci.et;
             LOGGER.info("    {}", entityType);
 
