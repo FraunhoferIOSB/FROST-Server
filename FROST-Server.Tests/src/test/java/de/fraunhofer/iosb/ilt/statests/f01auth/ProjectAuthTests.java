@@ -87,10 +87,10 @@ import tools.jackson.databind.JsonNode;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 abstract class ProjectAuthTests extends AbstractTestClass {
 
-    private final int H200 = HTTP_CODE_200_OK;
-    private final int H401 = HTTP_CODE_401_UNAUTHORIZED;
-    private final int H403 = HTTP_CODE_403_FORBIDDEN;
-    private final int H404 = HTTP_CODE_404_NOT_FOUND;
+    private static final int H200 = HTTP_CODE_200_OK;
+    private static final int H401 = HTTP_CODE_401_UNAUTHORIZED;
+    private static final int H403 = HTTP_CODE_403_FORBIDDEN;
+    private static final int H404 = HTTP_CODE_404_NOT_FOUND;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectAuthTests.class);
 
