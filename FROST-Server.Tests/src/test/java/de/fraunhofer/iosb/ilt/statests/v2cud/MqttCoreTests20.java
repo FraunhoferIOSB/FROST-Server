@@ -74,7 +74,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MqttCoreTests20.class);
 
-    private final StringModifier urlsHttpToMqtt =  s -> Strings.CS.replace(s, serverSettings.getServiceRootUrl() + '/', "");
+    private final StringModifier urlsHttpToMqtt = s -> Strings.CS.replace(s, serverSettings.getServiceRootUrl() + '/', "");
 
     private static List<EntityCreateInfo> entityTypesForCreate;
 
@@ -362,12 +362,12 @@ public class MqttCoreTests20 extends AbstractTestClass {
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                String topic = version.urlPart;
+                StringBuilder topic = new StringBuilder(version.urlPart);
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
-                    topic += '/' + path.get(idx);
+                    topic.append('/').append(path.get(idx));
                 }
                 final TestSubscription testSub = new TestSubscription(mqttHelper)
-                        .setTopic(topic)
+                        .setTopic(topic.toString())
                         .addExpectedJson(future.getFuture())
                         .createReceivedListener(entityType);
                 subs.add(testSub);
@@ -631,12 +631,12 @@ public class MqttCoreTests20 extends AbstractTestClass {
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                String topic = version.urlPart;
+                StringBuilder topic = new StringBuilder(version.urlPart);
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
-                    topic += '/' + path.get(idx);
+                    topic.append('/').append(path.get(idx));
                 }
                 final TestSubscription testSub = new TestSubscription(mqttHelper)
-                        .setTopic(topic)
+                        .setTopic(topic.toString())
                         .addExpectedJson(future.getFuture())
                         .createReceivedListener(entityType);
                 subs.add(testSub);

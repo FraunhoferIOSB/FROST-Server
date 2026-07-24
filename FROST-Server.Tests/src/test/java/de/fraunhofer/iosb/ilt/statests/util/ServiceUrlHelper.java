@@ -80,34 +80,34 @@ public class ServiceUrlHelper {
      * @return The URL String created based on the input parameters
      */
     public static String buildURLString(String rootURI, List<String> entityTypes, List<Object> ids, String property) {
-        String urlString = rootURI;
         if (entityTypes.size() != ids.size() && entityTypes.size() != ids.size() + 1) {
             fail("There is problem with the path of entities!!!");
         }
-        if (urlString.charAt(urlString.length() - 1) != '/') {
-            urlString += '/';
+        StringBuilder urlString = new StringBuilder(rootURI);
+        if (!rootURI.endsWith("/")) {
+            urlString.append('/');
         }
         for (int i = 0; i < entityTypes.size(); i++) {
-            urlString += entityTypes.get(i);
+            urlString.append(entityTypes.get(i));
             if (i < ids.size()) {
                 Object id = ids.get(i);
                 if (id == null) {
-                    urlString += "/";
+                    urlString.append('/');
                 } else {
-                    urlString += "(" + Utils.quoteForUrl(id) + ")/";
+                    urlString.append('(').append(Utils.quoteForUrl(id)).append(")/");
                 }
             }
         }
         if (urlString.charAt(urlString.length() - 1) == '/') {
-            urlString = urlString.substring(0, urlString.length() - 1);
+            urlString.deleteCharAt(urlString.length() - 1);
         }
         if (property != null) {
             if (property.indexOf('?') >= 0) {
-                urlString += property;
+                urlString.append(property);
             } else {
-                urlString += "/" + property;
+                urlString.append("/").append(property);
             }
         }
-        return urlString;
+        return urlString.toString();
     }
 }

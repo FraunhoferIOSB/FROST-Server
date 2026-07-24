@@ -344,12 +344,12 @@ public class MqttCoreTests11 extends AbstractTestClass {
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                String topic = version.urlPart;
+                StringBuilder topic = new StringBuilder(version.urlPart);
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
-                    topic = topic + '/' + path.get(idx);
+                    topic.append('/').append(path.get(idx));
                 }
                 final TestSubscription testSub = new TestSubscription(mqttHelper)
-                        .setTopic(topic)
+                        .setTopic(topic.toString())
                         .addExpectedJson(future.getFuture())
                         .createReceivedListener(entityType);
                 subs.add(testSub);
@@ -607,12 +607,12 @@ public class MqttCoreTests11 extends AbstractTestClass {
             LOGGER.debug("      {} paths", paths.size());
             for (var path : paths) {
                 totalPaths++;
-                String topic = version.urlPart;
+                StringBuilder topic = new StringBuilder(version.urlPart);
                 for (int idx = path.size() - 1; idx >= 0; idx--) {
-                    topic = topic + '/' + path.get(idx);
+                    topic.append('/').append(path.get(idx));
                 }
                 final TestSubscription testSub = new TestSubscription(mqttHelper)
-                        .setTopic(topic)
+                        .setTopic(topic.toString())
                         .addExpectedJson(future.getFuture())
                         .createReceivedListener(entityType);
                 subs.add(testSub);

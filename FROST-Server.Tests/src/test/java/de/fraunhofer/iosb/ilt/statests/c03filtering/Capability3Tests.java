@@ -540,19 +540,20 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
                 //multiple orderby
                 List<String> orderbyPropeties = new ArrayList<>();
-                String orderby = "?$orderby=";
-                String orderbyAsc = "?$orderby=";
-                String orderbyDesc = "?$orderby=";
+                StringBuilder orderby = new StringBuilder("?$orderby=");
+                StringBuilder orderbyAsc = new StringBuilder("?$orderby=");
+                StringBuilder orderbyDesc = new StringBuilder("?$orderby=");
+                boolean first = true;
                 for (EntityType.EntityProperty property : properties) {
                     if (!property.canSort) {
                         continue;
                     }
-                    if (orderby.charAt(orderby.length() - 1) != '=') {
-                        orderby += ",";
+                    if (!first) {
+                        orderby.append(",");
                     }
-                    orderby += property.name;
+                    orderby.append(property.name);
                     orderbyPropeties.add(property.name);
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderby);
+                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderby.toString());
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = Utils.MAPPER.readTree(response).get("value");
@@ -565,11 +566,11 @@ public abstract class Capability3Tests extends AbstractTestClass {
                             }
                         }
                     }
-                    if (orderbyAsc.charAt(orderbyAsc.length() - 1) != '=') {
-                        orderbyAsc += ",";
+                    if (!first) {
+                        orderbyAsc.append(",");
                     }
-                    orderbyAsc += property + "%20asc";
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyAsc);
+                    orderbyAsc.append(property).append("%20asc");
+                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyAsc.toString());
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = Utils.MAPPER.readTree(response).get("value");
@@ -582,11 +583,13 @@ public abstract class Capability3Tests extends AbstractTestClass {
                             }
                         }
                     }
-                    if (orderbyDesc.charAt(orderbyDesc.length() - 1) != '=') {
-                        orderbyDesc += ",";
+                    if (first) {
+                        first = false;
+                    } else {
+                        orderbyDesc.append(",");
                     }
-                    orderbyDesc += property + "%20desc";
-                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyDesc);
+                    orderbyDesc.append(property).append("%20desc");
+                    urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, id, relationEntityType, orderbyDesc.toString());
                     responseMap = HTTPMethods.doGet(urlString);
                     response = responseMap.response;
                     array = Utils.MAPPER.readTree(response).get("value");

@@ -182,16 +182,16 @@ public abstract class EntityHelperAbstract {
 
     public final String createSelect(List<String> select) {
         boolean first = true;
-        String result = "$select=";
+        StringBuilder result = new StringBuilder("$select=");
         for (var item : select) {
             if (first) {
-                result += item;
+                result.append(item);
                 first = false;
             } else {
-                result += ',' + item;
+                result.append(',').append(item);
             }
         }
-        return result;
+        return result.toString();
     }
 
     public final String createUrl(EntityType target) {

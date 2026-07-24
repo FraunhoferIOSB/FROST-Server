@@ -202,14 +202,14 @@ public class MqttHelper11 {
                     () -> "Errors encountered for " + tl.getName() + " on " + tl.getTopic() + "; Latest: " + tl.getErrors().get(0));
         }
         boolean failed = false;
-        String messages = "";
+        StringBuilder messages = new StringBuilder();
         for (var listener : listeners) {
             if (!listener.isDone()) {
                 failed = true;
-                messages += "\n" + listener.getName() + " not done on " + listener.getTopic();
+                messages.append("\n").append(listener.getName()).append(" not done on ").append(listener.getTopic());
             }
         }
-        Assertions.assertFalse(failed, messages);
+        Assertions.assertFalse(failed, messages.toString());
         ma.setAllOk();
     }
 
