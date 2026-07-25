@@ -36,10 +36,10 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETUR
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.URI_PATH_SEP;
 
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.MetaDataGenerator;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument.ODataVersion;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
 import de.fraunhofer.iosb.ilt.frostserver.property.StandardProperties;
@@ -227,7 +227,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         response.addHeader("OData-Version", "4.01");
         final ModelRegistry mr = request.getContext().getModelRegistry();
         final PrincipalExtended userPrincipal = request.getUserPrincipal();
-        request.getContext().setJsonReader(new JsonReaderOData(mr, VERSION_STA_2_0, userPrincipal));
+        request.getContext().setJsonReader(new JsonReaderDefault(mr, VERSION_STA_2_0, userPrincipal));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA:
                 return new MetaDataGenerator(coreSettings)

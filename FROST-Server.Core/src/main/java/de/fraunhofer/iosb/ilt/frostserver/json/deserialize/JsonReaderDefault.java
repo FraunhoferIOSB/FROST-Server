@@ -135,8 +135,8 @@ public class JsonReaderDefault implements JsonReader {
     /**
      * Create a non-admin JsonReader.
      *
-     * @param modelRegistry the model registry to create the json reader for.
-     * @param version the API version to create the json reader for.
+     * @param modelRegistry the model registry to create the JSON reader for.
+     * @param version The API version to create the JSON reader for.
      */
     public JsonReaderDefault(ModelRegistry modelRegistry, Version version) {
         this(modelRegistry, version, false);
@@ -146,7 +146,7 @@ public class JsonReaderDefault implements JsonReader {
      * Create a JsonReader.
      *
      * @param modelRegistry the model registry to create the json reader for.
-     * @param version the API version to create the json reader for.
+     * @param version The API version to create the JSON reader for.
      * @param user the user to create the reader for.
      */
     public JsonReaderDefault(ModelRegistry modelRegistry, Version version, PrincipalExtended user) {
@@ -156,8 +156,8 @@ public class JsonReaderDefault implements JsonReader {
     /**
      * Create a JsonReader.
      *
-     * @param modelRegistry the model registry to create the json reader for.
-     * @param version The API version to create the reader for.
+     * @param modelRegistry the model registry to create the JSON reader for.
+     * @param version The API version to create the JSON reader for.
      * @param isAdmin flag indicating if the user is an admin.
      */
     public JsonReaderDefault(ModelRegistry modelRegistry, Version version, boolean isAdmin) {

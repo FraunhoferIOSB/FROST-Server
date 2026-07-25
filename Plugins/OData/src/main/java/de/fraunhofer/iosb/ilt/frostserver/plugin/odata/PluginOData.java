@@ -28,9 +28,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.CONTENT_TYPE_APP
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.REQUEST_PARAM_FORMAT;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.TAG_PREFER_RETURN;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.JsonReaderDefault;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.deserialize.JsonReaderOData;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.metadata.CsdlDocument.ODataVersion;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata40;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.serialize.JsonWriterOdata401;
@@ -203,7 +203,7 @@ public class PluginOData implements PluginService, ConfigDefaults {
         }
         response.addHeader("OData-Version", version.identifier);
         request.getContext()
-                .setJsonReader(new JsonReaderOData(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
+                .setJsonReader(new JsonReaderDefault(request.getModelRegistry(), request.getVersion(), request.getUserPrincipal()));
         switch (request.getRequestType()) {
             case REQUEST_TYPE_METADATA -> {
                 return new MetaDataGenerator(settings)
