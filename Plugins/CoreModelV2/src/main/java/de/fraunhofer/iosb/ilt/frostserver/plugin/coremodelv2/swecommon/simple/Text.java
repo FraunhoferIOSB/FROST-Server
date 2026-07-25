@@ -31,13 +31,6 @@ public class Text extends AbstractSimpleComponent<Text, String> implements Quali
     private static final Logger LOGGER = LoggerFactory.getLogger(Text.class.getName());
 
     /**
-     * Value
-     *
-     * The value of this field.
-     */
-    private String value;
-
-    /**
      * Constraint
      *
      * The constraints put on the value of this component.
@@ -47,7 +40,6 @@ public class Text extends AbstractSimpleComponent<Text, String> implements Quali
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.value);
         hash = 59 * hash + Objects.hashCode(this.constraint);
         hash = 59 * hash + super.hashCode();
         return hash;
@@ -58,20 +50,11 @@ public class Text extends AbstractSimpleComponent<Text, String> implements Quali
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final Text other = (Text) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        if (!Objects.equals(this.constraint, other.constraint)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.constraint, other.constraint);
     }
 
     public AllowedTokens getConstraint() {
@@ -81,22 +64,6 @@ public class Text extends AbstractSimpleComponent<Text, String> implements Quali
     public Text setConstraint(AllowedTokens constraint) {
         this.constraint = constraint;
         return this;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public Text setValue(String value) {
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
     }
 
     @Override
@@ -119,7 +86,7 @@ public class Text extends AbstractSimpleComponent<Text, String> implements Quali
         if (input == null) {
             return isOptional() || isSecret();
         }
-        if (!input.isTextual()) {
+        if (!input.isString()) {
             LOGGER.debug("Non-Text value {} for Text.", input);
             return false;
         }

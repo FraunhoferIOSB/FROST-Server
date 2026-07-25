@@ -43,13 +43,6 @@ public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> impl
     private String uom;
 
     /**
-     * Value
-     *
-     * The starting and ending values of this CategoryRange.
-     */
-    private List<BigDecimal> value;
-
-    /**
      * Constraint
      *
      * A limited list of possible values.
@@ -60,7 +53,6 @@ public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> impl
     public int hashCode() {
         int hash = 5;
         hash = 67 * hash + Objects.hashCode(this.uom);
-        hash = 67 * hash + Objects.hashCode(this.value);
         hash = 67 * hash + Objects.hashCode(this.constraint);
         hash = 67 * hash + super.hashCode();
         return hash;
@@ -71,17 +63,11 @@ public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> impl
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final QuantityRange other = (QuantityRange) obj;
         if (!Objects.equals(this.uom, other.uom)) {
-            return false;
-        }
-        if (!Objects.equals(this.value, other.value)) {
             return false;
         }
         if (!Objects.equals(this.constraint, other.constraint)) {
@@ -99,17 +85,6 @@ public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> impl
         return this;
     }
 
-    @Override
-    public List<BigDecimal> getValue() {
-        return value;
-    }
-
-    @Override
-    public QuantityRange setValue(List<BigDecimal> value) {
-        this.value = value;
-        return this;
-    }
-
     public AllowedValues getConstraint() {
         return constraint;
     }
@@ -117,11 +92,6 @@ public class QuantityRange extends AbstractRange<QuantityRange, BigDecimal> impl
     public QuantityRange setConstraint(AllowedValues constraint) {
         this.constraint = constraint;
         return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
     }
 
     @Override

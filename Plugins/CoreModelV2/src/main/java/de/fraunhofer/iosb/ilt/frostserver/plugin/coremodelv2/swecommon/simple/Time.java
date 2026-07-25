@@ -26,6 +26,9 @@ import tools.jackson.databind.JsonNode;
 
 /**
  * SWE Time class.
+ *
+ * The “value” attribute (or the corresponding value in out-of-band data) is of
+ * type “TimePosition” and must match the constraint.
  */
 public class Time extends AbstractSimpleComponent<Time, String> {
 
@@ -72,14 +75,6 @@ public class Time extends AbstractSimpleComponent<Time, String> {
      */
     private AllowedTimes constraint;
 
-    /**
-     * Value
-     *
-     * The “value” attribute (or the corresponding value in out-of-band data) is
-     * of type “TimePosition” and must match the constraint.
-     */
-    private String value;
-
     public String getReferenceTime() {
         return referenceTime;
     }
@@ -114,22 +109,6 @@ public class Time extends AbstractSimpleComponent<Time, String> {
     public Time setConstraint(AllowedTimes constraint) {
         this.constraint = constraint;
         return this;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public Time setValue(String value) {
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
     }
 
     @Override
@@ -176,7 +155,6 @@ public class Time extends AbstractSimpleComponent<Time, String> {
         hash = 19 * hash + Objects.hashCode(this.localFrame);
         hash = 19 * hash + Objects.hashCode(this.uom);
         hash = 19 * hash + Objects.hashCode(this.constraint);
-        hash = 19 * hash + Objects.hashCode(this.value);
         hash = 19 * hash + super.hashCode();
         return hash;
     }
@@ -186,10 +164,7 @@ public class Time extends AbstractSimpleComponent<Time, String> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final Time other = (Time) obj;
@@ -202,13 +177,7 @@ public class Time extends AbstractSimpleComponent<Time, String> {
         if (!Objects.equals(this.uom, other.uom)) {
             return false;
         }
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        if (!Objects.equals(this.constraint, other.constraint)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.constraint, other.constraint);
     }
 
     @Override

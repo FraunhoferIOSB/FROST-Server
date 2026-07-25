@@ -27,18 +27,13 @@ import tools.jackson.databind.JsonNode;
 
 /**
  * SWE Count class.
+ *
+ * an integer that must be within one of the constraint intervals or exactly one
+ * of the enumerated values.
  */
 public class Count extends AbstractSimpleComponent<Count, Number> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Count.class.getName());
-
-    /**
-     * Value
-     *
-     * an integer that must be within one of the constraint intervals or exactly
-     * one of the enumerated values.
-     */
-    private Number value;
 
     /**
      * Constraint
@@ -53,22 +48,6 @@ public class Count extends AbstractSimpleComponent<Count, Number> {
 
     public void setConstraint(AllowedValues constraint) {
         this.constraint = constraint;
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
-    }
-
-    @Override
-    public Count setValue(Number value) {
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
     }
 
     @Override
@@ -126,7 +105,6 @@ public class Count extends AbstractSimpleComponent<Count, Number> {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 79 * hash + Objects.hashCode(this.value);
         hash = 79 * hash + Objects.hashCode(this.constraint);
         return 79 * hash + super.hashCode();
     }
@@ -136,20 +114,11 @@ public class Count extends AbstractSimpleComponent<Count, Number> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final Count other = (Count) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        if (!Objects.equals(this.constraint, other.constraint)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.constraint, other.constraint);
     }
 
     @Override

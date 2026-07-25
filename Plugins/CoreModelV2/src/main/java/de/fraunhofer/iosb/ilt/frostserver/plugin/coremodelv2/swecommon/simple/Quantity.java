@@ -27,19 +27,14 @@ import tools.jackson.databind.JsonNode;
 
 /**
  * SWE Quantity class.
+ *
+ * A real value that is within one of the constraint intervals or exactly one of
+ * the enumerated values, and most importantly is expressed in the unit
+ * specified.
  */
 public class Quantity extends AbstractSimpleComponent<Quantity, Number> implements Quality<Quantity, Number> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Quantity.class.getName());
-
-    /**
-     * Value
-     *
-     * A real value that is within one of the constraint intervals or exactly
-     * one of the enumerated values, and most importantly is expressed in the
-     * unit specified.
-     */
-    private Number value;
 
     /**
      * Constraint
@@ -63,22 +58,6 @@ public class Quantity extends AbstractSimpleComponent<Quantity, Number> implemen
     public Quantity setUom(UnitOfMeasurement uom) {
         this.uom = uom;
         return this;
-    }
-
-    @Override
-    public Number getValue() {
-        return value;
-    }
-
-    @Override
-    public Quantity setValue(Number value) {
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
     }
 
     @Override
@@ -133,7 +112,6 @@ public class Quantity extends AbstractSimpleComponent<Quantity, Number> implemen
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 53 * hash + Objects.hashCode(this.value);
         hash = 53 * hash + Objects.hashCode(this.constraint);
         hash = 53 * hash + Objects.hashCode(this.uom);
         hash = 53 * hash + super.hashCode();
@@ -145,23 +123,14 @@ public class Quantity extends AbstractSimpleComponent<Quantity, Number> implemen
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final Quantity other = (Quantity) obj;
         if (!Objects.equals(this.uom, other.uom)) {
             return false;
         }
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        if (!Objects.equals(this.constraint, other.constraint)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.constraint, other.constraint);
     }
 
     @Override

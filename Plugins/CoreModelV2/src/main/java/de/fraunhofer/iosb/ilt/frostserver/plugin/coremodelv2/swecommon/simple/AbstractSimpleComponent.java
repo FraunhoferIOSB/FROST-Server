@@ -104,10 +104,7 @@ public abstract class AbstractSimpleComponent<T extends AbstractSimpleComponent<
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final AbstractSimpleComponent other = (AbstractSimpleComponent) obj;
@@ -120,10 +117,7 @@ public abstract class AbstractSimpleComponent<T extends AbstractSimpleComponent<
         if (!Objects.equals(this.nilValues, other.nilValues)) {
             return false;
         }
-        if (!Objects.equals(this.quality, other.quality)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.quality, other.quality);
     }
 
 }

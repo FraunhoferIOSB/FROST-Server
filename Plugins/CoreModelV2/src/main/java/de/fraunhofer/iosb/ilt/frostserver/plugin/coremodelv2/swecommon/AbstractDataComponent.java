@@ -58,6 +58,8 @@ public abstract class AbstractDataComponent<T extends AbstractDataComponent<T, V
      */
     private boolean updatable;
 
+    private V value;
+
     public String getDefinition() {
         return definition;
     }
@@ -65,6 +67,7 @@ public abstract class AbstractDataComponent<T extends AbstractDataComponent<T, V
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.value);
         hash = 29 * hash + Objects.hashCode(this.definition);
         hash = 29 * hash + (this.optional ? 1 : 0);
         hash = 29 * hash + (this.updatable ? 1 : 0);
@@ -77,23 +80,20 @@ public abstract class AbstractDataComponent<T extends AbstractDataComponent<T, V
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final AbstractDataComponent other = (AbstractDataComponent) obj;
+        if (!Objects.equals(this.value, other.value)) {
+            return false;
+        }
         if (this.optional != other.optional) {
             return false;
         }
         if (this.updatable != other.updatable) {
             return false;
         }
-        if (!Objects.equals(this.definition, other.definition)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.definition, other.definition);
     }
 
     public String getName() {
@@ -120,16 +120,23 @@ public abstract class AbstractDataComponent<T extends AbstractDataComponent<T, V
      *
      * @return true if the values are valid.
      */
-    public abstract boolean valueIsValid();
+    public boolean valueIsValid() {
+        return validate(getValue());
+    }
 
     /**
      * Get the value of this DataComponent.
      *
      * @return The value of this DataComponent.
      */
-    public abstract V getValue();
+    public V getValue() {
+        return value;
+    }
 
-    public abstract T setValue(V value);
+    public T setValue(V value) {
+        this.value = value;
+        return self();
+    }
 
     /**
      * Validate the given value against this component.

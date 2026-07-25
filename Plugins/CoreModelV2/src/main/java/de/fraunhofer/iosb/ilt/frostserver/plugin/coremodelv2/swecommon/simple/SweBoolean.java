@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.simple;
 
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.JsonNode;
@@ -30,22 +29,6 @@ public class SweBoolean extends AbstractSimpleComponent<SweBoolean, Boolean> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SweBoolean.class.getName());
 
     public static final String SWE_NAME = "Boolean";
-
-    /**
-     * The value of this Boolean Component.
-     */
-    private Boolean value;
-
-    @Override
-    public Boolean getValue() {
-        return value;
-    }
-
-    @Override
-    public SweBoolean setValue(Boolean value) {
-        this.value = value;
-        return this;
-    }
 
     @Override
     public boolean valueIsValid() {
@@ -77,32 +60,6 @@ public class SweBoolean extends AbstractSimpleComponent<SweBoolean, Boolean> {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 71 * hash + Objects.hashCode(this.value);
-        hash = 71 * hash + super.hashCode();
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SweBoolean other = (SweBoolean) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return super.equals(obj);
     }
 
     @Override

@@ -32,13 +32,6 @@ public class Category extends AbstractSimpleComponent<Category, String> implemen
     private static final Logger LOGGER = LoggerFactory.getLogger(Category.class.getName());
 
     /**
-     * Value
-     *
-     * The value of this Category.
-     */
-    private String value = "";
-
-    /**
      * Constraint
      *
      * A limited list of possible values.
@@ -58,22 +51,6 @@ public class Category extends AbstractSimpleComponent<Category, String> implemen
     }
 
     @Override
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public Category setValue(String value) {
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
-    }
-
-    @Override
     public boolean validate(Object input) {
         if (input == null) {
             return isOptional() || isSecret();
@@ -81,7 +58,7 @@ public class Category extends AbstractSimpleComponent<Category, String> implemen
         if (input instanceof String s) {
             return validate(s);
         }
-        LOGGER.debug("Value is not a String: {}", value);
+        LOGGER.debug("Value is not a String: {}", input);
         return false;
     }
 
@@ -90,7 +67,7 @@ public class Category extends AbstractSimpleComponent<Category, String> implemen
         if (input == null) {
             return isOptional() || isSecret();
         }
-        if (!input.isTextual()) {
+        if (!input.isString()) {
             LOGGER.debug("Given value is not textual: {}", input);
             return false;
         }
@@ -110,7 +87,6 @@ public class Category extends AbstractSimpleComponent<Category, String> implemen
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 17 * hash + Objects.hashCode(this.value);
         hash = 17 * hash + Objects.hashCode(this.constraint);
         hash = 17 * hash + Objects.hashCode(this.codeSpace);
         hash = 17 * hash + super.hashCode();
@@ -122,23 +98,14 @@ public class Category extends AbstractSimpleComponent<Category, String> implemen
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final Category other = (Category) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
         if (!Objects.equals(this.constraint, other.constraint)) {
             return false;
         }
-        if (!Objects.equals(this.codeSpace, other.codeSpace)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.codeSpace, other.codeSpace);
     }
 
     @Override

@@ -17,27 +17,54 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.constraint;
 
+import java.util.List;
+import java.util.Objects;
+
 /**
  * The abstract class for constraints.
  *
  * @param <T> The type of the extending class.
+ * @param <V> The value type of the constraint.
  */
-public abstract class AbstractConstraint<T extends AbstractConstraint<T>> {
+public abstract class AbstractConstraint<T extends AbstractConstraint<T, V>, V> {
 
     /**
-     * the type of the constraint.
+     * Values
+     *
+     * The values that the user can choose from.
      */
-    private String type;
+    private List<V> values;
 
-    public String getType() {
-        return type;
+    public final List<V> getValues() {
+        return values;
     }
 
-    public T setType(String type) {
-        this.type = type;
+    public final T setValues(List<V> values) {
+        this.values = values;
         return self();
     }
 
-    protected abstract T self();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AbstractConstraint<?, ?> other = (AbstractConstraint<?, ?>) obj;
+        return Objects.equals(this.values, other.values);
+    }
 
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 73 * hash + Objects.hashCode(this.values);
+        return hash;
+    }
+
+    protected abstract T self();
 }

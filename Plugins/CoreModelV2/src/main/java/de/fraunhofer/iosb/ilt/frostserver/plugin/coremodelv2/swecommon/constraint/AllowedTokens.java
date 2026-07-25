@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.constraint;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -25,14 +24,7 @@ import java.util.regex.Pattern;
 /**
  * SWE Class AllowedTokens constraint implementation.
  */
-public class AllowedTokens extends AbstractConstraint<AllowedTokens> {
-
-    /**
-     * Value
-     *
-     * The values that the user can choose from.
-     */
-    private List<String> values;
+public class AllowedTokens extends AbstractConstraint<AllowedTokens, String> {
 
     /**
      * Pattern
@@ -44,19 +36,11 @@ public class AllowedTokens extends AbstractConstraint<AllowedTokens> {
     public AllowedTokens() {
     }
 
-    public AllowedTokens(String... tokens) {
-        this.values = Arrays.asList(tokens);
-    }
-
-    public AllowedTokens(String pattern) {
-        this.pattern = pattern;
-    }
-
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 37 * hash + Objects.hashCode(this.values);
         hash = 37 * hash + Objects.hashCode(this.pattern);
+        hash = 37 * hash + super.hashCode();
         return hash;
     }
 
@@ -65,20 +49,11 @@ public class AllowedTokens extends AbstractConstraint<AllowedTokens> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final AllowedTokens other = (AllowedTokens) obj;
-        if (!Objects.equals(this.pattern, other.pattern)) {
-            return false;
-        }
-        if (!Objects.equals(this.values, other.values)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.pattern, other.pattern);
     }
 
     public String getPattern() {
@@ -90,16 +65,8 @@ public class AllowedTokens extends AbstractConstraint<AllowedTokens> {
         return this;
     }
 
-    public List<String> getValues() {
-        return values;
-    }
-
-    public AllowedTokens setValues(List<String> values) {
-        this.values = values;
-        return this;
-    }
-
     public boolean isValid(String input) {
+        List<String> values = getValues();
         if (values != null) {
             for (String item : values) {
                 if (item.equals(input)) {

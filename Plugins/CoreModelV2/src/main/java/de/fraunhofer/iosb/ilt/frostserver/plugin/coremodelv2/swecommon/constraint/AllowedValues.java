@@ -26,14 +26,7 @@ import java.util.Objects;
 /**
  * SWE Class AllowedValues constraint implementation.
  */
-public class AllowedValues extends AbstractConstraint<AllowedValues> {
-
-    /**
-     * Values
-     *
-     * The values that the user can choose from.
-     */
-    private List<BigDecimal> values;
+public class AllowedValues extends AbstractConstraint<AllowedValues, BigDecimal> {
 
     /**
      * Intervals
@@ -48,15 +41,6 @@ public class AllowedValues extends AbstractConstraint<AllowedValues> {
      * The number of significant figures.
      */
     private Integer significantFigures;
-
-    public List<BigDecimal> getValues() {
-        return values;
-    }
-
-    public AllowedValues setValues(List<BigDecimal> values) {
-        this.values = values;
-        return this;
-    }
 
     public List<List<BigDecimal>> getIntervals() {
         return intervals;
@@ -77,6 +61,7 @@ public class AllowedValues extends AbstractConstraint<AllowedValues> {
     }
 
     public boolean isValid(BigDecimal input) {
+        List<BigDecimal> values = getValues();
         if (isNullOrEmpty(values) && isNullOrEmpty(intervals) && significantFigures == 0) {
             // This constraint is empty
             return true;
@@ -102,9 +87,9 @@ public class AllowedValues extends AbstractConstraint<AllowedValues> {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 17 * hash + Objects.hashCode(this.values);
         hash = 17 * hash + Objects.hashCode(this.intervals);
         hash = 17 * hash + Objects.hashCode(this.significantFigures);
+        hash = 17 * hash + super.hashCode();
         return hash;
     }
 
@@ -113,16 +98,10 @@ public class AllowedValues extends AbstractConstraint<AllowedValues> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final AllowedValues other = (AllowedValues) obj;
-        if (!Objects.equals(this.values, other.values)) {
-            return false;
-        }
         if (!Objects.equals(this.intervals, other.intervals)) {
             return false;
         }

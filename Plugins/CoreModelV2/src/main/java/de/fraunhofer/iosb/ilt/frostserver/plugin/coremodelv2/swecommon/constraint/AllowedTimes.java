@@ -26,15 +26,9 @@ import org.slf4j.LoggerFactory;
 /**
  * SWE Class AllowedTimes constraint implementation.
  */
-public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
+public class AllowedTimes extends AbstractConstraint<AllowedTimes, String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllowedTimes.class.getName());
-    /**
-     * Value
-     *
-     * The values that the user can choose from.
-     */
-    private List<String> values;
 
     /**
      * Intervals
@@ -46,9 +40,9 @@ public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 11 * hash + Objects.hashCode(this.values);
         hash = 11 * hash + Objects.hashCode(this.intervals);
         hash = 11 * hash + Objects.hashCode(this.significantFigures);
+        hash = 11 * hash + super.hashCode();
         return hash;
     }
 
@@ -57,16 +51,10 @@ public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final AllowedTimes other = (AllowedTimes) obj;
-        if (!Objects.equals(this.values, other.values)) {
-            return false;
-        }
         if (!Objects.equals(this.intervals, other.intervals)) {
             return false;
         }
@@ -79,15 +67,6 @@ public class AllowedTimes extends AbstractConstraint<AllowedTimes> {
      * The number of significant figures.
      */
     private Integer significantFigures;
-
-    public List<String> getValues() {
-        return values;
-    }
-
-    public AllowedTimes setValues(List<String> values) {
-        this.values = values;
-        return this;
-    }
 
     public List<List<String>> getIntervals() {
         return intervals;

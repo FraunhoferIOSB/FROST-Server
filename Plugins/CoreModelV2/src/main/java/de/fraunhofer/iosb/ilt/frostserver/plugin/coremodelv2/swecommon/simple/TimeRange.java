@@ -75,13 +75,6 @@ public class TimeRange extends AbstractRange<TimeRange, String> {
      */
     private AllowedTimes constraint;
 
-    /**
-     * Value
-     *
-     * The starting end ending values of this TimeRange.
-     */
-    private List<String> value;
-
     public String getReferenceTime() {
         return referenceTime;
     }
@@ -119,28 +112,12 @@ public class TimeRange extends AbstractRange<TimeRange, String> {
     }
 
     @Override
-    public List<String> getValue() {
-        return value;
-    }
-
-    @Override
-    public TimeRange setValue(List<String> value) {
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
-    }
-
-    @Override
     protected boolean validateArray(JsonNode input) {
         if (constraint == null) {
             return true;
         }
         for (JsonNode item : input) {
-            if (!item.isTextual()) {
+            if (!item.isString()) {
                 LOGGER.debug("Non-text value {} for TimeRange.", input);
                 return false;
             }
@@ -183,7 +160,6 @@ public class TimeRange extends AbstractRange<TimeRange, String> {
         hash = 97 * hash + Objects.hashCode(this.localFrame);
         hash = 97 * hash + Objects.hashCode(this.uom);
         hash = 97 * hash + Objects.hashCode(this.constraint);
-        hash = 97 * hash + Objects.hashCode(this.value);
         hash = 97 * hash + super.hashCode();
         return hash;
     }
@@ -193,10 +169,7 @@ public class TimeRange extends AbstractRange<TimeRange, String> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final TimeRange other = (TimeRange) obj;
@@ -209,13 +182,7 @@ public class TimeRange extends AbstractRange<TimeRange, String> {
         if (!Objects.equals(this.uom, other.uom)) {
             return false;
         }
-        if (!Objects.equals(this.constraint, other.constraint)) {
-            return false;
-        }
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.constraint, other.constraint);
     }
 
     @Override

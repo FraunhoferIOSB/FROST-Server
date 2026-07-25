@@ -36,32 +36,11 @@ public class CountRange extends AbstractRange<CountRange, Long> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CountRange.class);
 
     /**
-     * Value
-     *
-     * The starting end ending values of this CountRange.
-     */
-    private List<Long> value;
-
-    /**
      * Constraint
      *
      * A limited list of possible values.
      */
     private AllowedValues constraint;
-
-    @Override
-    public List<Long> getValue() {
-        return value;
-    }
-
-    @Override
-    public CountRange setValue(List<Long> value) {
-        if (value.size() != 2) {
-            throw new IllegalArgumentException("CountRange must have a value with exactly 2 values.");
-        }
-        this.value = value;
-        return this;
-    }
 
     public AllowedValues getConstraint() {
         return constraint;
@@ -70,11 +49,6 @@ public class CountRange extends AbstractRange<CountRange, Long> {
     public CountRange setConstraint(AllowedValues constraint) {
         this.constraint = constraint;
         return this;
-    }
-
-    @Override
-    public boolean valueIsValid() {
-        return validate(value);
     }
 
     @Override
@@ -121,7 +95,6 @@ public class CountRange extends AbstractRange<CountRange, Long> {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.value);
         hash = 79 * hash + Objects.hashCode(this.constraint);
         hash = 79 * hash + super.hashCode();
         return hash;
@@ -132,20 +105,11 @@ public class CountRange extends AbstractRange<CountRange, Long> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (!super.equals(obj)) {
             return false;
         }
         final CountRange other = (CountRange) obj;
-        if (!Objects.equals(this.value, other.value)) {
-            return false;
-        }
-        if (!Objects.equals(this.constraint, other.constraint)) {
-            return false;
-        }
-        return super.equals(obj);
+        return Objects.equals(this.constraint, other.constraint);
     }
 
     @Override
