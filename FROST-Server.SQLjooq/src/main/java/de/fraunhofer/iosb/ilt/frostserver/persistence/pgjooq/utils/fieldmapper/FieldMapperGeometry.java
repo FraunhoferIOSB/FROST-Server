@@ -56,6 +56,13 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
     @JsonIgnore
     private int fieldGeomIdx;
 
+    @JsonIgnore
+    private boolean flatten = true;
+
+    public void setFlatten(boolean flatten) {
+        this.flatten = flatten;
+    }
+
     @Override
     public void registerField(JooqPersistenceManager ppm, StaMainTable staTable) {
         final Name tableName = staTable.getQualifiedName();
@@ -74,9 +81,9 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
         final int idxGeom = fieldGeomIdx;
         final PropertyFieldRegistry.NFP<T> sourcePfr;
         if (idxLocation >= 0) {
-            sourcePfr = new PropertyFieldRegistry.NFP<>("j", t -> t.field(idxLocation));
+            sourcePfr = new NFP<>("j", t -> t.field(idxLocation));
         } else {
-            sourcePfr = new PropertyFieldRegistry.NFP<>(
+            sourcePfr = new NFP<>(
                     "j",
                     t -> DSL.field("ST_AsGeoJSON(?)", String.class, t.field(idxGeom, SQLDataType.CLOB)).as(fieldGeom));
         }
@@ -98,11 +105,11 @@ public class FieldMapperGeometry extends FieldMapperAbstractEp {
                         },
                         (t, entity, insertFields) -> {
                             Object feature = entity.getProperty(property);
-                            EntityFactories.insertGeometry(insertFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature);
+                            EntityFactories.insertGeometry(insertFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature, flatten);
                         },
                         (t, entity, updateFields, message) -> {
                             Object feature = entity.getProperty(property);
-                            EntityFactories.insertGeometry(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature);
+                            EntityFactories.insertGeometry(updateFields, t.field(idxLocation, SQLDataType.CLOB), t.field(idxGeom), null, feature, flatten);
                             message.addField(property);
                         }),
                 sourcePfr,

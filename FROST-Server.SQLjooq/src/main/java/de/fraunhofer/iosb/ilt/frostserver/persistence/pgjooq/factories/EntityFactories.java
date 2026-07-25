@@ -242,14 +242,7 @@ public class EntityFactories {
      * @param location The location.
      */
     public static void insertGeometry(Map<Field, Object> clause, Field<String> locationPath, Field<? extends Object> geomPath, String encodingType, Object location) {
-        if (location == null) {
-            return;
-        }
-        if (location instanceof JsonNode jn) {
-            insertGeometry(clause, locationPath, geomPath, encodingType, jn, true);
-        } else {
-            throw new IllegalArgumentException("Unknown location object type: " + location.getClass());
-        }
+        insertGeometry(clause, locationPath, geomPath, encodingType, location, true);
     }
 
     /**
