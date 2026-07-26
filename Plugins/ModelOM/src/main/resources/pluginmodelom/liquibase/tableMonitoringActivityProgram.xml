@@ -21,30 +21,30 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
     -->
 
-    <changeSet author="iosb" id="2025-05-05-sensor_observing_procedure" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+    <changeSet author="iosb" id="2025-05-05-monitoring_activity_program" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="CONTINUE">
-            <tableExists tableName="observing_procedures" />
-            <tableExists tableName="sensors" />
+            <tableExists tableName="monitoring_activities" />
+            <tableExists tableName="monitoring_programs" />
             <not>
-                <tableExists tableName="sensor_observing_procedure" />
+                <tableExists tableName="monitoring_activity_program" />
             </not>
-            <changeLogPropertyDefined property="idType-ObservingProcedure" />
-            <changeLogPropertyDefined property="idType-Sensor" />
+            <changeLogPropertyDefined property="idType-MonitoringActivity" />
+            <changeLogPropertyDefined property="idType-MonitoringProgram" />
         </preConditions>
-        <createTable tableName="sensor_observing_procedure">
-            <column name="procedure_id" type="${idType-ObservingProcedure}">
+        <createTable tableName="monitoring_activity_program">
+            <column name="activity_id" type="${idType-MonitoringActivity}">
                 <constraints nullable="false"/>
             </column>
-            <column name="sensor_id" type="${idType-Sensor}">
+            <column name="program_id" type="${idType-MonitoringProgram}">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="procedure_id, sensor_id" constraintName="pk_sensor_observing_procedure" tableName="sensor_observing_procedure"/>
-        <createIndex tableName="sensor_observing_procedure" indexName="sensor_observing_procedure_procedure_id">
-            <column name="procedure_id" />
+        <addPrimaryKey columnNames="activity_id, program_id" constraintName="pk_monitoring_activity_program" tableName="monitoring_activity_program"/>
+        <createIndex tableName="monitoring_activity_program" indexName="monitoring_activity_program_activity_id">
+            <column name="activity_id" />
         </createIndex>
-        <createIndex tableName="sensor_observing_procedure" indexName="sensor_observing_procedure_sensor_id">
-            <column name="sensor_id" />
+        <createIndex tableName="monitoring_activity_program" indexName="monitoring_activity_program_program_id">
+            <column name="program_id" />
         </createIndex>
     </changeSet>
 

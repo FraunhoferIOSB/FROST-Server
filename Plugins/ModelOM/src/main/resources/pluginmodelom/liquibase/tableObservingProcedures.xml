@@ -53,7 +53,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-observing_procedures-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="observing_procedures" />
             <not>
                 <columnExists columnName="name" tableName="observing_procedures" />
             </not>
@@ -67,7 +68,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-datastreams-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="datastreams" />
             <not>
                 <columnExists columnName="observing_procedure_id" tableName="datastreams" />
             </not>
@@ -78,7 +80,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-datastreams-idx-observing_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="datastreams" />
             <not>
                 <indexExists tableName="datastreams" indexName="datastreams_observing_procedure_id" />
             </not>

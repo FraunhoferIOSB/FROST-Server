@@ -4,10 +4,10 @@
   "simplePropertyTypes": [],
   "entityTypes": [
     {
-      "name": "ObservingProcedure",
-      "plural": "ObservingProcedures",
+      "name": "MonitoringNetwork",
+      "plural": "MonitoringNetworks",
       "adminOnly": false,
-      "table": "observing_procedures",
+      "table": "monitoring_networks",
       "key": [
         "id"
       ],
@@ -72,18 +72,30 @@
             }
           ],
           "annotations": []
+        },
+        {
+          "name": "time",
+          "type": "TM_Object",
+          "handlers": [
+            {
+              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperTimeValue",
+              "fieldStart": "time_start",
+              "fieldEnd": "time_end"
+            }
+          ],
+          "annotations": []
         }
       ],
       "navigationProperties": [
         {
-          "name": "Sensors",
+          "name": "Things",
           "entitySet": true,
-          "entityType": "Sensor",
+          "entityType": "org.OGC.STA.Thing",
           "required": false,
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "ObservingProcedures",
+            "name": "MonitoringNetworks",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -93,24 +105,24 @@
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
               "field": "id",
-              "linkTable": "sensor_observing_procedure",
-              "linkOurField": "procedure_id",
-              "linkOtherField": "sensor_id",
-              "otherTable": "sensors",
+              "linkTable": "monitoring_network_thing",
+              "linkOurField": "network_id",
+              "linkOtherField": "thing_id",
+              "otherTable": "things",
               "otherField": "id"
             }
           ],
           "annotations": []
         },
         {
-          "name": "ObservedProperties",
+          "name": "MonitoringActivities",
           "entitySet": true,
-          "entityType": "ObservedProperty",
-          "required": true,
+          "entityType": "org.OGC.STA.MonitoringActivity",
+          "required": false,
           "symmetrical": false,
           "priority": 0,
           "inverse": {
-            "name": "ObservingProcedures",
+            "name": "MonitoringNetworks",
             "entitySet": true,
             "required": false,
             "priority": 0,
@@ -120,35 +132,11 @@
             {
               "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperManyToMany",
               "field": "id",
-              "linkTable": "observed_property_observing_procedure",
-              "linkOurField": "procedure_id",
-              "linkOtherField": "observed_property_id",
-              "otherTable": "observed_properties",
+              "linkTable": "monitoring_network_activity",
+              "linkOurField": "network_id",
+              "linkOtherField": "activity_id",
+              "otherTable": "monitoring_activities",
               "otherField": "id"
-            }
-          ],
-          "annotations": []
-        },
-        {
-          "name": "Datastreams",
-          "entitySet": true,
-          "entityType": "Datastream",
-          "required": false,
-          "symmetrical": false,
-          "priority": 0,
-          "inverse": {
-            "name": "ObservingProcedure",
-            "entitySet": false,
-            "required": false,
-            "priority": 0,
-            "annotations": []
-          },
-          "handlers": [
-            {
-              "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.fieldmapper.FieldMapperOneToMany",
-              "field": "id",
-              "otherTable": "datastreams",
-              "otherField": "observing_procedure_id"
             }
           ],
           "annotations": []

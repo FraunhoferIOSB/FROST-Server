@@ -23,12 +23,24 @@
 
     <property name="id-Deployment" value="LONG" />
     <property name="idType-Deployment" value="BIGINT" />
+    <property name="id-MonitoringActivity" value="LONG" />
+    <property name="idType-MonitoringActivity" value="BIGINT" />
+    <property name="id-MonitoringNetwork" value="LONG" />
+    <property name="idType-MonitoringNetwork" value="BIGINT" />
+    <property name="id-MonitoringProgram" value="LONG" />
+    <property name="idType-MonitoringProgram" value="BIGINT" />
     <property name="id-ObservingProcedure" value="LONG" />
     <property name="idType-ObservingProcedure" value="BIGINT" />
 
     <include relativeToChangelogFile="true" file="tableDeployments.xml" />
-    <include relativeToChangelogFile="true" file="tableDeploymentDatastream.xml" />
+    <include relativeToChangelogFile="true" file="tableMonitoringActivities.xml" />
+    <include relativeToChangelogFile="true" file="tableMonitoringNetworks.xml" />
+    <include relativeToChangelogFile="true" file="tableMonitoringPrograms.xml" />
     <include relativeToChangelogFile="true" file="tableObservingProcedures.xml" />
+    <include relativeToChangelogFile="true" file="tableDeploymentDatastream.xml" />
+    <include relativeToChangelogFile="true" file="tableMonitoringActivityProgram.xml" />
+    <include relativeToChangelogFile="true" file="tableMonitoringNetworkThing.xml" />
+    <include relativeToChangelogFile="true" file="tableMonitoringNetworkActivity.xml" />
     <include relativeToChangelogFile="true" file="tableSensorObservingProcedure.xml" />
     <include relativeToChangelogFile="true" file="tableObservedPropertyObservingProcedure.xml" />
     <include relativeToChangelogFile="true" file="foreignKeys.xml" />

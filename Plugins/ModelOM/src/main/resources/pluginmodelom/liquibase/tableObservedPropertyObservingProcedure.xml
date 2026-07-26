@@ -22,10 +22,14 @@
     -->
 
     <changeSet author="iosb" id="2025-05-05-observed_property_observing_procedure" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="observing_procedures" />
+            <tableExists tableName="observed_properties" />
             <not>
                 <tableExists tableName="observed_property_observing_procedure" />
             </not>
+            <changeLogPropertyDefined property="idType-ObservingProcedure" />
+            <changeLogPropertyDefined property="idType-ObservedProperty" />
         </preConditions>
         <createTable tableName="observed_property_observing_procedure">
             <column name="procedure_id" type="${idType-ObservingProcedure}">

@@ -22,10 +22,12 @@
     -->
 
     <changeSet author="iosb" id="2025-05-05-fk_deployments_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_deployments_sensor_id" foreignKeyTableName="deployments" />
             </not>
+            <tableExists tableName="deployments" />
+            <tableExists tableName="sensors" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_deployments_sensor_id"
@@ -36,10 +38,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_deployments_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_deployments_thing_id" foreignKeyTableName="deployments" />
             </not>
+            <tableExists tableName="deployments" />
+            <tableExists tableName="things" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_deployments_thing_id"
@@ -50,10 +54,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_deployment_datastream_deployment_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_deployment_datastream_deployment_id" foreignKeyTableName="deployment_datastream" />
             </not>
+            <tableExists tableName="deployment_datastream" />
+            <tableExists tableName="deployments" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_deployment_datastream_deployment_id"
@@ -64,10 +70,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_deployment_datastream_datastream_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_deployment_datastream_datastream_id" foreignKeyTableName="deployment_datastream" />
             </not>
+            <tableExists tableName="deployment_datastream" />
+            <tableExists tableName="datastreams" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_deployment_datastream_datastream_id"
@@ -77,11 +85,109 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
+    <changeSet author="iosb" id="2025-05-05-fk_monitoring_activity_program_activity_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_monitoring_activity_program_activity_id" foreignKeyTableName="monitoring_activity_program" />
+            </not>
+            <tableExists tableName="monitoring_activity_program" />
+            <tableExists tableName="monitoring_activities" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_monitoring_activity_program_activity_id"
+            baseTableName="monitoring_activity_program" baseColumnNames="activity_id"
+            referencedTableName="monitoring_activities" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_monitoring_activity_program_program_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_monitoring_activity_program_program_id" foreignKeyTableName="monitoring_activity_program" />
+            </not>
+            <tableExists tableName="monitoring_activity_program" />
+            <tableExists tableName="monitoring_programs" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_monitoring_activity_program_program_id"
+            baseTableName="monitoring_activity_program" baseColumnNames="program_id"
+            referencedTableName="monitoring_programs" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_monitoring_network_thing_network_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_monitoring_network_thing_network_id" foreignKeyTableName="monitoring_network_thing" />
+            </not>
+            <tableExists tableName="monitoring_network_thing" />
+            <tableExists tableName="monitoring_networks" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_monitoring_network_thing_network_id"
+            baseTableName="monitoring_network_thing" baseColumnNames="network_id"
+            referencedTableName="monitoring_networks" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_monitoring_network_thing_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_monitoring_network_thing_thing_id" foreignKeyTableName="monitoring_network_thing" />
+            </not>
+            <tableExists tableName="monitoring_network_thing" />
+            <tableExists tableName="things" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_monitoring_network_thing_thing_id"
+            baseTableName="monitoring_network_thing" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_monitoring_network_activity_network_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_monitoring_network_activity_network_id" foreignKeyTableName="monitoring_network_activity" />
+            </not>
+            <tableExists tableName="monitoring_network_activity" />
+            <tableExists tableName="monitoring_networks" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_monitoring_network_activity_network_id"
+            baseTableName="monitoring_network_activity" baseColumnNames="network_id"
+            referencedTableName="monitoring_networks" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_monitoring_network_activity_activity_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_monitoring_network_activity_activity_id" foreignKeyTableName="monitoring_network_activity" />
+            </not>
+            <tableExists tableName="monitoring_network_activity" />
+            <tableExists tableName="monitoring_activities" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_monitoring_network_activity_activity_id"
+            baseTableName="monitoring_network_activity" baseColumnNames="activity_id"
+            referencedTableName="monitoring_activities" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
     <changeSet author="iosb" id="2025-05-05-fk_sensor_observing_procedure_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_sensor_observing_procedure_procedure_id" foreignKeyTableName="sensor_observing_procedure" />
             </not>
+            <tableExists tableName="sensor_observing_procedure" />
+            <tableExists tableName="observing_procedures" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_sensor_observing_procedure_procedure_id"
@@ -92,10 +198,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_sensor_observing_procedure_sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_sensor_observing_procedure_sensor_id" foreignKeyTableName="sensor_observing_procedure" />
             </not>
+            <tableExists tableName="sensor_observing_procedure" />
+            <tableExists tableName="sensors" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_sensor_observing_procedure_sensor_id"
@@ -106,10 +214,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_observed_property_observing_procedure_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_observed_property_observing_procedure_procedure_id" foreignKeyTableName="observed_property_observing_procedure" />
             </not>
+            <tableExists tableName="observed_property_observing_procedure" />
+            <tableExists tableName="observing_procedures" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_observed_property_observing_procedure_procedure_id"
@@ -120,10 +230,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_observed_property_observing_procedure_observed_property_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_observed_property_observing_procedure_observed_property_id" foreignKeyTableName="observed_property_observing_procedure" />
             </not>
+            <tableExists tableName="observed_property_observing_procedure" />
+            <tableExists tableName="observed_properties" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_observed_property_observing_procedure_observed_property_id"
@@ -134,10 +246,12 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-fk_datastreams_observing_procedure_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
             <not>
                 <foreignKeyConstraintExists foreignKeyName="fk_datastreams_observing_procedure_id" foreignKeyTableName="datastreams" />
             </not>
+            <tableExists tableName="datastreams" />
+            <tableExists tableName="observing_procedures" />
         </preConditions>
         <addForeignKeyConstraint
             constraintName="fk_datastreams_observing_procedure_id"

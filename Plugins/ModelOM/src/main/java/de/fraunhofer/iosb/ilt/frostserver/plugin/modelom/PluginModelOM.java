@@ -56,6 +56,9 @@ public class PluginModelOM implements Plugin, ConfigDefaults {
             pml.addLiquibaseFile("pluginmodelom/liquibase/tables.xml");
             pml.addModelFile("pluginmodelom/model/Deployment.json");
             pml.addModelFile("pluginmodelom/model/ObservingProcedure.json");
+            pml.addModelFile("pluginmodelom/model/MonitoringActivity.json");
+            pml.addModelFile("pluginmodelom/model/MonitoringNetwork.json");
+            pml.addModelFile("pluginmodelom/model/MonitoringProgram.json");
             pluginManager.registerPlugin(this);
         }
         return InitResult.INIT_OK;

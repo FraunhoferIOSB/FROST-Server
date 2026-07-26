@@ -53,7 +53,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-deployments-3" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="deployments" />
             <not>
                 <columnExists columnName="name" tableName="deployments" />
             </not>
@@ -79,7 +80,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-deployments-idx-sensor_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="deployments" />
             <not>
                 <indexExists tableName="deployments" indexName="deployments_sensor_id" />
             </not>
@@ -90,7 +92,8 @@
     </changeSet>
 
     <changeSet author="iosb" id="2025-05-05-deployments-idx-thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="deployments" />
             <not>
                 <indexExists tableName="deployments" indexName="deployments_thing_id" />
             </not>

@@ -22,10 +22,14 @@
     -->
 
     <changeSet author="iosb" id="2025-05-05-deployment_datastream" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
-        <preConditions onFail="MARK_RAN">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="deployments" />
+            <tableExists tableName="datastreams" />
             <not>
                 <tableExists tableName="deployment_datastream" />
             </not>
+            <changeLogPropertyDefined property="idType-Deployment" />
+            <changeLogPropertyDefined property="idType-Datastream" />
         </preConditions>
         <createTable tableName="deployment_datastream">
             <column name="deployment_id" type="${idType-Deployment}">

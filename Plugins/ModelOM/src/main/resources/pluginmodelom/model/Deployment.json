@@ -10,6 +10,9 @@
       "plural": "Deployments",
       "adminOnly": false,
       "table": "deployments",
+      "key": [
+        "id"
+      ],
       "orderByDflt": [],
       "entityProperties": [
         {
