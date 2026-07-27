@@ -6,7 +6,7 @@
 A Server implementation of the [OGC SensorThings API](https://github.com/opengeospatial/sensorthings).
 The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server is the first complete, open-source official reference implementation of the OGC SensorThings API.
 It implements:
-- 
+
 - [Part 1: Sensing 1.0](https://docs.ogc.org/is/15-078r6/15-078r6.html)
 - [Part 1: Sensing 1.1](https://docs.ogc.org/is/18-088/18-088.html)
 - [Part 2: Tasking Core](https://docs.ogc.org/is/17-079r1/17-079r1.html)
