@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.8.0-SNAPSHOT
+## Version 2.8.0
 
 **New Features**
 * Implemented fine-grained authorisation on MQTT topics, meaning a user subscribing 
