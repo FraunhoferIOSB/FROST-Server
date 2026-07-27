@@ -3,18 +3,15 @@
 ![FROST-Server Logo](https://raw.githubusercontent.com/FraunhoferIOSB/FROST-Server/v2.x/docs/images/FROST-Server-darkgrey.png)
 <a href="https://www.ogc.org/resource/products/details/?pid=1751"><img align="right" src="https://portal.ogc.org/public_ogc/compliance/OGC_Certified_Badge.png" alt="Certified OGC Compliant Logo" width="206" height="130"/></a>
 
-A Server implementation of the [OGC SensorThings API](https://github.com/opengeospatial/sensorthings). The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server
-is the first complete, open-source official reference implementation of the [OGC SensorThings API Part 1: Sensing 1.0](https://docs.ogc.org/is/15-078r6/15-078r6.html). It also implements [OGC SensorThings API Part 1: Sensing 1.1](https://docs.ogc.org/is/18-088/18-088.html) and [OGC SensorThings API Part 2: Tasking Core 1.1](https://docs.ogc.org/is/17-079r1/17-079r1.html).
-
-
-## Downloading
-
-Instead of compiling the server yourself, you can also download pre-built war and jar files from Maven Central:
-* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/) FROST-Server.MQTTP-x.y.z.war
-* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/) FROST-Server.HTTP-x.y.z.war
-* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/) FROST-Server.MQTT-x.y.z-jar-with-dependencies.jar
-
-Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
+A Server implementation of the [OGC SensorThings API](https://github.com/opengeospatial/sensorthings).
+The **FR**aunhofer **O**pensource **S**ensor**T**hings-Server is the first complete, open-source official reference implementation of the OGC SensorThings API.
+It implements:
+- 
+- [Part 1: Sensing 1.0](https://docs.ogc.org/is/15-078r6/15-078r6.html)
+- [Part 1: Sensing 1.1](https://docs.ogc.org/is/18-088/18-088.html)
+- [Part 2: Tasking Core](https://docs.ogc.org/is/17-079r1/17-079r1.html)
+- The draft [OGC SensorThings API 2.0](https://hylkevds.github.io/23-019/23-019.html)
+- The draft [OGC SensorThings API 2.0 Extensions](https://hylkevds.github.io/24-046/24-046.html)
 
 
 ## Extendable Data Model and pluggable APIs
@@ -39,6 +36,16 @@ Documentation can be found on the [documentation site](https://fraunhoferiosb.gi
 ## Changes and Updates
 
 See the [Change Log](CHANGELOG.md).
+
+
+## Downloading
+
+Instead of compiling the server yourself, you can also download pre-built war and jar files from Maven Central:
+* [FROST-Server.MQTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTTP/) FROST-Server.MQTTP-x.y.z.war
+* [FROST-Server.HTTP](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.HTTP/) FROST-Server.HTTP-x.y.z.war
+* [FROST-Server.MQTT](https://repo1.maven.org/maven2/de/fraunhofer/iosb/ilt/FROST-Server/FROST-Server.MQTT/) FROST-Server.MQTT-x.y.z-jar-with-dependencies.jar
+
+Or you can [use Docker](https://fraunhoferiosb.github.io/FROST-Server/deployment/docker.html).
 
 
 ## Kubernetes (Helm) support

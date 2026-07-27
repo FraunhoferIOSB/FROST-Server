@@ -7,14 +7,13 @@
   on v1.1/Observations will only receive notifications for Observations they are
   allowed to see.
 * Implemented #2318: Added support for GZip and deflate compression on HTTP Uploads.
-* Implemented V2 API with HTTP and MQTT bindings, including request/response over MQTT5.
+* Implemented V2 API with HTTP and MQTT bindings, including request/response over MQTT 5.
 * Implemented handling of nested complex properties.
 
 **Internal changes & Bugfixes**
 * Fixed non-validated query in some MQTT subscriptions.
 * Declared bouncycastle as direct dependency.
 * Fixed prefer-header not working in batch requests.
-* Updated V2 model to latest spec version.
 * Improved model editor:
   * Ensure main tables are generated before link tables.
   * Check key types are known when generating link tables.
