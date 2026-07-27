@@ -148,9 +148,9 @@ public class LiquibaseTemplates {
             final ChangeLogGroup clg,
             final TableChangelogBuilder clEntityType,
             final ChangesetColumnsBuilder csColumns) {
-        final String etName = et.getName();
+        final String etName = stripNamespace(et.getName());
         final String tableName = et.getTable();
-        String otherEntityType = np.getEntityType();
+        String otherEntityType = stripNamespace(np.getEntityType());
         for (var handler : np.getHandlers()) {
             switch (handler) {
                 case FieldMapperOneToMany fm -> {
@@ -231,14 +231,14 @@ public class LiquibaseTemplates {
         public String build();
     }
 
-    public static interface ChangeSetBuilder {
+    private static interface ChangeSetBuilder {
 
         public boolean isEmpty();
 
         public String build();
     }
 
-    public static class WrappedSetBuilder implements ChangeSetBuilder {
+    private static class WrappedSetBuilder implements ChangeSetBuilder {
 
         private final String data;
 
@@ -258,7 +258,7 @@ public class LiquibaseTemplates {
 
     }
 
-    public static class MainChangeLogBuilder implements ChangeLogBuilder {
+    private static class MainChangeLogBuilder implements ChangeLogBuilder {
 
         private static final String TAG_INCLUDE_START = "    <include relativeToChangelogFile=\"true\" file=\"";
         private static final String TAG_INCLUDE_END = "\" />\n";
@@ -362,7 +362,7 @@ public class LiquibaseTemplates {
 
     }
 
-    public static class TableChangelogBuilder implements ChangeLogBuilder {
+    private static class TableChangelogBuilder implements ChangeLogBuilder {
 
         private final List<ChangeSetBuilder> changesets = new ArrayList<>();
         private final String base;
@@ -485,7 +485,7 @@ public class LiquibaseTemplates {
         }
     }
 
-    public static String createChangsetLongId(String author, String date, String tableName, String columnName, String entityName) {
+    private static String createChangsetLongId(String author, String date, String tableName, String columnName, String entityName) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
@@ -503,7 +503,7 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_IDLONG, searchList, replacementList);
     }
 
-    public static String createChangsetStringId(String author, String date, String tableName, String columnName, String entityName) {
+    private static String createChangsetStringId(String author, String date, String tableName, String columnName, String entityName) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
@@ -521,7 +521,7 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_IDSTRING, searchList, replacementList);
     }
 
-    public static class ChangesetColumnsBuilder implements ChangeSetBuilder {
+    private static class ChangesetColumnsBuilder implements ChangeSetBuilder {
 
         private final StringBuilder preColumns = new StringBuilder();
         private final StringBuilder columns = new StringBuilder();
@@ -582,6 +582,7 @@ public class LiquibaseTemplates {
             return this;
         }
 
+        @Override
         public boolean isEmpty() {
             return preColumns.isEmpty() && columns.isEmpty();
         }
@@ -613,7 +614,7 @@ public class LiquibaseTemplates {
         }
     }
 
-    public static String createBlockColumn(String columnName, String columnType, boolean nullable) {
+    private static String createBlockColumn(String columnName, String columnType, boolean nullable) {
         if (nullable) {
             return createBlockColumn(columnName, columnType);
         } else {
@@ -621,7 +622,7 @@ public class LiquibaseTemplates {
         }
     }
 
-    public static String createBlockColumn(String columnName, String columnType) {
+    private static String createBlockColumn(String columnName, String columnType) {
         String[] searchList = new String[]{
             S_NAME_COLUMN_NAME,
             S_NAME_COLUMN_TYPE
@@ -633,7 +634,7 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_COLUMN, searchList, replacementList);
     }
 
-    public static String createBlockColumnNonNull(String columnName, String columnType) {
+    private static String createBlockColumnNonNull(String columnName, String columnType) {
         String[] searchList = new String[]{
             S_NAME_COLUMN_NAME,
             S_NAME_COLUMN_TYPE
@@ -645,7 +646,7 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_COLUMN_NONNULL, searchList, replacementList);
     }
 
-    public static String createChangsetIndex(String author, String date, String tableName, String columnName) {
+    private static String createChangsetIndex(String author, String date, String tableName, String columnName) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
@@ -661,7 +662,7 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_INDEX, searchList, replacementList);
     }
 
-    public static String createChangsetLinkTable(String author, String date, String tableName,
+    private static String createChangsetLinkTable(String author, String date, String tableName,
             EntityTableColumn etc1,
             EntityTableColumn etc2) {
         String[] searchList = new String[]{
@@ -693,7 +694,7 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_LINKTABLE, searchList, replacementList);
     }
 
-    public static String createChangsetForeignKey(String author, String date, String tableName, String columnName, String otherTableName, String otherColumnName) {
+    private static String createChangsetForeignKey(String author, String date, String tableName, String columnName, String otherTableName, String otherColumnName) {
         String[] searchList = new String[]{
             S_NAME_CHANGELOG_AUTHOR,
             S_NAME_CHANGELOG_DATE,
@@ -713,13 +714,21 @@ public class LiquibaseTemplates {
         return StringUtils.replaceEach(BLOCK_CHANGESET_FKEY, searchList, replacementList);
     }
 
-    public static String idColumnType(String entityType) {
-        return "${idType-" + entityType + "}";
+    private static String idColumnType(String entityType) {
+        return "${idType-" + stripNamespace(entityType) + "}";
     }
 
     private record EntityTableColumn(String entityName, String tableName, String columnName, String columnType) {
 
         // No content
+    }
+
+    private static String stripNamespace(String entityTypeName) {
+        int lastNamespaceSep = entityTypeName.lastIndexOf('.');
+        if (lastNamespaceSep >= 0) {
+            return entityTypeName.substring(lastNamespaceSep + 1);
+        }
+        return entityTypeName;
     }
 
     public static final String BLOCK_COPYRIGHT = """
