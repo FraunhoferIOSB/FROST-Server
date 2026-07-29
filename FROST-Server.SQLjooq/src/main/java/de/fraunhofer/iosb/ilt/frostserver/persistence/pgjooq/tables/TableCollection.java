@@ -195,10 +195,14 @@ public class TableCollection {
         final List<HookValidator> hvList = securityValidators.get(table.getName());
         if (hvList == null) {
             LOGGER.info("    Adding default security hooks for {}", table.getName());
+            final String typeName = table.getEntityType().entityName.toLowerCase();
+            final String typeCreate = typeName + ROLE_CREATE;
+            final String typeUpdate = typeName + ROLE_UPDATE;
+            final String typeDelete = typeName + ROLE_DELETE;
             HookValidator hv = new ValidatorCUD()
-                    .setCheckInsertPreRel(new CheckUserHasRoles().setCheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_CREATE))
-                    .setCheckUpdate(new CheckUserHasRoles().setCheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_UPDATE))
-                    .setCheckDelete(new CheckUserHasRoles().setCheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_DELETE));
+                    .setCheckInsertPreRel(new CheckUserHasRoles().setCheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_CREATE, typeCreate))
+                    .setCheckUpdate(new CheckUserHasRoles().setCheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_UPDATE, typeUpdate))
+                    .setCheckDelete(new CheckUserHasRoles().setCheckType(CheckUserHasRoles.Type.ANY).setRoles(ROLE_ADMIN, ROLE_DELETE, typeDelete));
             hv.registerHooks(table, ppm);
             return;
         }

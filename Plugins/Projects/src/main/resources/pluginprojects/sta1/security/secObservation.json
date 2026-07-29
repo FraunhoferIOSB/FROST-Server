@@ -15,6 +15,7 @@
                 "roles": [
                   "admin",
                   "create",
+                  "observationcreate",
                   "obscreate"
                 ]
               },
@@ -36,6 +37,7 @@
                 "roles": [
                   "admin",
                   "update",
+                  "observationupdate",
                   "obsupdate"
                 ]
               },
@@ -72,6 +74,7 @@
                 "roles": [
                   "admin",
                   "delete",
+                  "observationdelete",
                   "obsdelete"
                 ]
               },
@@ -90,7 +93,8 @@
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
                 "checkType": "ANY",
                 "roles": [
-                  "read"
+                  "read",
+                  "observationread"
                 ]
               },
               "wrapper": {
