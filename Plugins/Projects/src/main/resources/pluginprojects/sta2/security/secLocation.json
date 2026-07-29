@@ -14,7 +14,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "create"
+                  "create",
+                  "locationcreate"
                 ]
               },
               {
@@ -50,7 +51,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "update"
+                  "update",
+                  "locationupdate"
                 ]
               },
               {
@@ -90,7 +92,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "delete"
+                  "delete",
+                  "locationdelete"
                 ]
               },
               {
@@ -108,7 +111,8 @@
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
                 "checkType": "ANY",
                 "roles": [
-                  "read"
+                  "read",
+                  "locationread"
                 ]
               },
               "wrapper": {

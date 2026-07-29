@@ -14,7 +14,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "create"
+                  "create",
+                  "taskcreate"
                 ]
               },
               {
@@ -34,7 +35,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "update"
+                  "update",
+                  "taskupdate"
                 ]
               },
               {
@@ -64,7 +66,8 @@
                 "checkType": "ANY",
                 "roles": [
                   "admin",
-                  "delete"
+                  "delete",
+                  "taskdelete"
                 ]
               },
               {
@@ -82,7 +85,8 @@
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.CheckUserHasRoles",
                 "checkType": "ANY",
                 "roles": [
-                  "read"
+                  "read",
+                  "taskread"
                 ]
               },
               "wrapper": {

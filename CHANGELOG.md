@@ -4,6 +4,7 @@
 
 **Internal changes & Bugfixes**
 * Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
+* Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 * [BUS] Fixed bus message decoding failing on unknown properties.
 
 
