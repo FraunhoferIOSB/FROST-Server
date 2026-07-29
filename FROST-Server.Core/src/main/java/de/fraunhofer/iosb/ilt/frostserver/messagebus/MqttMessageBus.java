@@ -65,6 +65,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -130,7 +131,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
     private boolean listening = false;
 
     private ObjectMapper formatter;
-    private JsonReaderDefault parser;
+    private ObjectMapper parser;
 
     @Override
     public void init(CoreSettings settings) {
@@ -179,7 +180,10 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
 
         formatter = JsonWriter.getObjectMapper();
         final ModelRegistry modelRegistry = settings.getModelRegistry();
-        parser = new JsonReaderDefault(modelRegistry, Version.INTERNAL, true);
+        parser = JsonReaderDefault.getObjectMapper(modelRegistry, Version.INTERNAL, true)
+                .rebuild()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
 
         long queueLoggingInterval = settings.getSettings().getInt(CoreSettings.TAG_QUEUE_LOGGING_INTERVAL, CoreSettings.class);
         if (queueLoggingInterval > 0) {
@@ -381,7 +385,7 @@ public class MqttMessageBus implements MessageBus, ConfigDefaults {
         LOGGER.trace("Received: {}", serialisedEcMessage);
         EntityChangedMessage ecMessage;
         try {
-            ecMessage = parser.parseObject(EntityChangedMessage.class, serialisedEcMessage);
+            ecMessage = parser.readValue(serialisedEcMessage, EntityChangedMessage.class);
         } catch (UnknownEntityTypeException ex) {
             LOGGER.debug("Failed to decode due to unknown entity type", ex);
             return;

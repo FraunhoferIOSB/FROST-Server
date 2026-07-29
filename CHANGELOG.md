@@ -3,6 +3,7 @@
 ## Version 2.8.1-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* [BUS] Fixed bus message decoding failing on unknown properties.
 
 
 ## Version 2.8.0

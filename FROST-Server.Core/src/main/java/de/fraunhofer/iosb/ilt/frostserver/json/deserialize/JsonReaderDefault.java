@@ -71,7 +71,7 @@ public class JsonReaderDefault implements JsonReader {
      * mapper for.
      * @return The cached or created object mapper.
      */
-    private static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
+    public static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         ObjectMapper mapper;
         if (isAdmin) {
             mapper = mappersAdmin.get(modelRegistry);
