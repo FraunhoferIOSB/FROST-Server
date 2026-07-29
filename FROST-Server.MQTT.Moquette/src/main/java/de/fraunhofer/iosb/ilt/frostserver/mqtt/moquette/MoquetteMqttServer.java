@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import de.fraunhofer.iosb.ilt.settings.annotation.SensitiveValue;
+import io.moquette.BrokerConstants;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.subscriptions.Subscription;
@@ -119,7 +120,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
     /**
      * TODO: Make this configurable in Moquette, and fix it there!
      */
-    public String responseTopicBase = "/reqresp/response/";
+    public String responseTopicBase = BrokerConstants.RESPONSE_TOPIC_BASE;
 
     private Server mqttBroker;
     protected List<SubscriptionListener> subscriptionListeners = new CopyOnWriteArrayList<>();
