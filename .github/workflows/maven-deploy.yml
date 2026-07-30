@@ -44,7 +44,12 @@ jobs:
         distribution: 'temurin'
         java-version: 21
 
-    - name: Build and Deploy with Maven
+    - name: Build with Maven
+      run: |
+        mvn -B -Dmaven.javadoc.skip=true install
+
+
+    - name: Deploy with Maven
       env:
         OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
         OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
@@ -53,7 +58,7 @@ jobs:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       run: |
-        mvn -B deploy -P release --settings maven-ci-settings.xml
+        mvn -B deploy -P release -DskipTests=true --settings maven-ci-settings.xml
         echo "Exporting Variables"
         export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
