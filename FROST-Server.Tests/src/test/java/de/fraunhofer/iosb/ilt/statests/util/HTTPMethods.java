@@ -296,6 +296,10 @@ public class HTTPMethods {
         }
     }
 
+    public static HttpResponse doPost(SensorThingsService service, String urlString, String postBody) {
+        return doPost(service, urlString, postBody, CONTENT_TYPE_APPLICATION_JSON);
+    }
+
     public static HttpResponse doPost(SensorThingsService service, String urlString, String postBody, String contentType) {
         try {
             LOGGER.debug("Posting: {}", urlString);

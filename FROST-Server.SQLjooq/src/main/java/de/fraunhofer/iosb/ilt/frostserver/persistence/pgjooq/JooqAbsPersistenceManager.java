@@ -532,7 +532,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
         }
         for (var target : targets) {
             if (!entityFactories.entityExists(this, target, userIsAdmin)) {
-                throw new NoSuchEntityException("Source entity not found: " + target.getType() + "(" + target.getPrimaryKeyValues() + ")");
+                throw new NoSuchEntityException("Target entity not found: " + target.getType() + "(" + target.getPrimaryKeyValues() + ")");
             }
         }
         StaMainTable<?> table = getTableCollection().getTableForType(sourceEntity.getType());

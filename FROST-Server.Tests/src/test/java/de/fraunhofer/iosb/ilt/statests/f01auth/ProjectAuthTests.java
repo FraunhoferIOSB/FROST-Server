@@ -1032,7 +1032,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_18a_ObservationCreate() {
-        LOGGER.info("  test_08e_ObservationCreate");
+        LOGGER.info("  test_18a_ObservationCreate");
         EntityCreator creator = user -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
@@ -1043,7 +1043,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_18b_ObservationCreateNewFoi() throws ServiceFailureException {
-        LOGGER.info("  test_08f_ObservationCreateNewFoi");
+        LOGGER.info("  test_18b_ObservationCreateNewFoi");
         // Create a new Location for Thing 1, so a new FoI must be generated.
         Entity newLocation = mdlSensing.newLocation("testFoiGeneration", "Testing if FoI generation works", new Point(10.0, 49.0))
                 .addNavigationEntity(mdlSensing.npLocationThings, THINGS.get(0));
@@ -1057,7 +1057,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
     @Test
     void test_18c_ObservedPropertyCreate() {
-        LOGGER.info("  test_09_ObservedPropertyCreate");
+        LOGGER.info("  test_18c_ObservedPropertyCreate");
         EntityCreator creator = user -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
@@ -1072,8 +1072,24 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test_19a_ThingDelete() {
-        LOGGER.info("  test_10a_ThingDelete");
+    void test_19a_LinkThingLocation() {
+        LOGGER.info("  test_19a_LinkThingLocation");
+        final Entity sourceThing = THINGS.get(0);
+        final Entity targetLocation = LOCATIONS.get(0);
+
+        ath.linkForFail11(ANONYMOUS, serviceAnon, sourceThing, mdlSensing.npThingLocations, targetLocation, anonymousReadAllowed ? H404 : H401);
+        ath.linkForFail11(READ, serviceRead, sourceThing, mdlSensing.npThingLocations, targetLocation, H403);
+        ath.linkForOk11(WRITE, serviceWrite, sourceThing, mdlSensing.npThingLocations, targetLocation);
+        ath.linkForOk11(ADMIN, serviceAdmin, sourceThing, mdlSensing.npThingLocations, targetLocation);
+        ath.linkForOk11(ADMIN_P1, serviceAdminProject1, sourceThing, mdlSensing.npThingLocations, targetLocation);
+        ath.linkForFail11(ADMIN_P2, serviceAdminProject2, sourceThing, mdlSensing.npThingLocations, targetLocation, H404);
+        ath.linkForFail11(OBS_CREATE_P1, serviceObsCreaterProject1, sourceThing, mdlSensing.npThingLocations, targetLocation, H403);
+        ath.linkForFail11(OBS_CREATE_P2, serviceObsCreaterProject2, sourceThing, mdlSensing.npThingLocations, targetLocation, H404);
+    }
+
+    @Test
+    void test_20a_ThingDelete() {
+        LOGGER.info("  test_20a_ThingDelete");
         EntityCreator creator = user -> THINGS.get(0);
 
         deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);

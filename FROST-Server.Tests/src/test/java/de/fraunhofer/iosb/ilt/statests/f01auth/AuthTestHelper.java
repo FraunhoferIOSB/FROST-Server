@@ -19,15 +19,20 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.dao.Dao;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
+import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.EntityPropertyMain;
 import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntity;
+import de.fraunhofer.iosb.ilt.frostclient.model.property.NavigationPropertyEntitySet;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -153,29 +158,97 @@ public class AuthTestHelper {
 
     public void deleteForFail(String user, SensorThingsService service, Entity entity, Dao validateDoa, List<Entity> expected, int... expectedCodes) {
         String failMessage = "User " + user + " should NOT be able to delete " + entity.getType();
-        try {
-            service.delete(entity);
-            fail(failMessage);
-        } catch (ServiceFailureException ex) {
-            expectStatusCodeException(failMessage, ex, expectedCodes);
-        }
+        ServiceFailureException ex = Assertions.assertThrows(
+                ServiceFailureException.class,
+                () -> service.delete(entity),
+                failMessage);
+        expectStatusCodeException(failMessage, ex, expectedCodes);
         EntityUtils.testFilterResults(validateDoa, "", expected);
+    }
+
+    public void linkForOk(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target) {
+        try {
+            source.dao(property)
+                    .linkEntity(target.asReference());
+        } catch (ServiceFailureException ex) {
+            String failMessage = "User " + user + " should be able to link " + source + "/" + property + " to " + target;
+            LOGGER.error(failMessage, ex);
+            fail(failMessage);
+        }
+    }
+
+    private static class EntityReference {
+
+        @JsonProperty("@id")
+        public final String selfLink;
+
+        public EntityReference(String selfLink) {
+            this.selfLink = selfLink;
+        }
+
+        public static EntityReference of(String selfLink) {
+            return new EntityReference(selfLink);
+        }
+    }
+
+    public void linkForFail(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target, int... expectedCodes) {
+        String failMsg = Exceptions.replacePlaceholders("User {} should not be able to link {}/{} to {}", user, source, property, target);
+        StatusCodeException ex = Assertions.assertThrows(StatusCodeException.class,
+                () -> source.dao(property).linkEntity(target.asReference()),
+                failMsg);
+        expectStatusCodeException(failMsg, ex, expectedCodes);
+    }
+
+    public void linkForOk11(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target) {
+        String urlString = service.getFullPathString(source, property) + "/$ref";
+        EntityReference reference = EntityReference.of(target.getSelfLink(false));
+        String json = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(reference);
+        HTTPMethods.HttpResponse response = HTTPMethods.doPost(service, urlString, json);
+        if (response.code >= 200 && response.code < 300) {
+            return;
+        }
+        String failMessage = Exceptions.replacePlaceholders("User {} should not be able to link {}/{} to {}. Got {}", user, source, property, target, response);
+        LOGGER.error(failMessage);
+        fail(failMessage);
+
+    }
+
+    public void linkForFail11(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target, int... expectedCodes) {
+        String urlString = service.getFullPathString(source, property) + "/$ref";
+        EntityReference reference = EntityReference.of(target.getSelfLink(false));
+        String json = SimpleJsonMapper.getSimpleObjectMapper().writeValueAsString(reference);
+        HTTPMethods.HttpResponse response = HTTPMethods.doPost(service, urlString, json);
+        if (isIn(response.code, expectedCodes)) {
+            return;
+        }
+        String failMessage = Exceptions.replacePlaceholders("User {} should not be able to link {}/{} to {}. Expected {}, got {}",
+                user, source, property, target, Arrays.toString(expectedCodes), response);
+        LOGGER.error(failMessage);
+        fail(failMessage);
     }
 
     public static void expectStatusCodeException(String failMessage, Exception ex, int... expected) {
         int got = -1;
-        if (ex instanceof StatusCodeException) {
-            StatusCodeException scex = (StatusCodeException) ex;
+        String returnedContent = "";
+        if (ex instanceof StatusCodeException scex) {
+            returnedContent = scex.getReturnedContent();
             got = scex.getStatusCode();
-            for (int want : expected) {
-                if (got == want) {
-                    return;
-                }
+            if (isIn(got, expected)) {
+                return;
             }
         }
-        failMessage += " expected one of: " + Arrays.toString(expected) + " got " + got;
+        failMessage += " expected one of: " + Arrays.toString(expected) + " got " + got + "\n" + returnedContent;
         LOGGER.error(failMessage, ex);
         fail(failMessage);
+    }
+
+    public static boolean isIn(int find, int... codes) {
+        for (int code : codes) {
+            if (code == find) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static SensorThingsService setAuthBasic(SensorThingsService service, String username, String password) {

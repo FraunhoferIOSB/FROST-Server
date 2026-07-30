@@ -196,7 +196,7 @@ class TestSuite {
             Assertions.assertEquals(190, countDelete, "Unexpected number of DELETE calls.");
             Assertions.assertEquals(6761, countGet, "Unexpected number of GET calls.");
             Assertions.assertEquals(46, countPatch, "Unexpected number of PATCH calls.");
-            Assertions.assertEquals(188, countPost, "Unexpected number of POST calls.");
+            Assertions.assertEquals(204, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(64, countPut, "Unexpected number of PUT calls.");
         }
     }
