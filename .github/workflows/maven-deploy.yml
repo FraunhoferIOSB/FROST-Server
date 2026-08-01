@@ -47,6 +47,54 @@ jobs:
     - name: Build with Maven
       run: |
         mvn -B -Dmaven.javadoc.skip=true install
+        echo "Exporting Variables"
+        export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MODEL_EDITOR_NAME=$(mvn -pl Tools/ModelEditor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MODEL_EXTRACTOR_NAME=$(mvn -pl Tools/ModelExtractor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        
+        echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
+        echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
+        echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
+        echo "MODEL_EDITOR_ARTIFACT=${MODEL_EDITOR_NAME}-shaded.jar" >> $GITHUB_ENV
+        echo "MODEL_EXTRACTOR_ARTIFACT=${MODEL_EXTRACTOR_NAME}-shaded.jar" >> $GITHUB_ENV
+
+        export version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
+        echo "DOCKER_TAG_FULL=${version}"     >> $GITHUB_ENV
+        echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV
+        if [[ "$version" == *SNAPSHOT ]]; then echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV; fi
+
+
+    - name: Upload MQTTP war
+      uses: actions/upload-artifact@v7
+      with:
+        path: FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }}
+        archive: false
+
+    - name: Upload HTTP war
+      uses: actions/upload-artifact@v7
+      with:
+        path: FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }}
+        archive: false
+
+    - name: Upload MQTT jar
+      uses: actions/upload-artifact@v7
+      with:
+        path: FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }}
+        archive: false
+
+    - name: Upload ModelEditor jar
+      uses: actions/upload-artifact@v7
+      with:
+        path: Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }}
+        archive: false
+
+    - name: Upload ModelExtractor jar
+      uses: actions/upload-artifact@v7
+      with:
+        path: Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }}
+        archive: false
 
 
     - name: Deploy with Maven
@@ -59,17 +107,6 @@ jobs:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       run: |
         mvn -B deploy -P release -DskipTests=true --settings maven-ci-settings.xml
-        echo "Exporting Variables"
-        export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
-        echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
-        echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
-        export version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
-        echo "DOCKER_TAG_FULL=${version}"     >> $GITHUB_ENV
-        echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV
-        if [[ "$version" == *SNAPSHOT ]]; then echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV; fi
 
 
     - name: Set up QEMU
