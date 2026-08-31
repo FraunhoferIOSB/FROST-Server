@@ -15,6 +15,9 @@
   allowed to see.
 * Implemented #2318: Added support for GZip and deflate compression on HTTP Uploads.
 * Implemented V2 API with HTTP and MQTT bindings, including request/response over MQTT 5.
+  This feature was funded by BRGM (http://www.brgm.eu/), French PEPR OneWater - Eau Bien Commun
+  (https://www.onewater.fr/en, ANR-22-PEXO-0009, under the Future Program France 2030) and test
+  from Water4All Partnership members (https://www.water4all-partnership.eu/)
 * Implemented handling of nested complex properties.
 
 **Internal changes & Bugfixes**
