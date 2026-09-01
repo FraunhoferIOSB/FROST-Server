@@ -94,7 +94,12 @@ public class PersistenceManagerFactory {
 
     public void maybeUpdateDatabase() {
         if (maybeUpdateDatabase) {
-            PersistenceManager pm = create();
+            updateDatabase();
+        }
+    }
+
+    private void updateDatabase() {
+        try (PersistenceManager pm = create()) {
             final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
             Map<String, Object> liquibaseParams = new LinkedHashMap<>();
             for (LiquibaseUser lbu : liquibaseUsers) {
