@@ -137,7 +137,9 @@ public class PluginManager implements ConfigDefaults {
         LOGGER.info("Loading plugins...");
         loadPlugins(provided);
         loadPlugins(extra);
-        initPlugins(PersistenceManagerFactory.getInstance(settings).create());
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(settings).create()) {
+            initPlugins(pm);
+        }
     }
 
     public void initPlugins(PersistenceManager pm) {

@@ -3,6 +3,7 @@
 ## Version 2.6.5
 
 **Internal changes & Bugfixes**
+* Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 * Updated dependencies.
 
 
