@@ -1,8 +1,9 @@
 # Changelog
 
-## Version 2.7.4-SNAPSHOT
+## Version 2.7.4
 
 **Internal changes & Bugfixes**
+* Bumped dependencies.
 * Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 
 
