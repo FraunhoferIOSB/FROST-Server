@@ -56,7 +56,7 @@ Type | encoding | example
 --- | --- | ---
 numbers | direct in URL | `result gt 5`
 strings | quoted with `'`, quotes doubled | `name eq 'Hylke''s Thing'`
-times | direct in URL | `phenomenonTime ge phenomenonTime ge 2022-12-23T13:21:31%2B01:00` (URL Encoded from `2022-12-23T13:21:31+01:00`)
+times | direct in URL | `phenomenonTime ge 2022-12-23T13:21:31%2B01:00` (URL Encoded from `2022-12-23T13:21:31+01:00`)
 durations | `duration'<ISO 8601 code>'` | `phenomenonTime gt now() sub duration'P1D'`
 geometries | `geography'<WKT geometry>'` | `st_within(location, geography'POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))')`
 
