@@ -99,28 +99,29 @@ public class PersistenceManagerFactory {
     }
 
     private void updateDatabase() {
-        PersistenceManager pm = create();
-        final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
-        Map<String, Object> liquibaseParams = new LinkedHashMap<>();
-        for (LiquibaseUser lbu : liquibaseUsers) {
-            liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
-        }
-        if (LOGGER.isDebugEnabled()) {
-            for (var entry : liquibaseParams.entrySet()) {
-                LOGGER.debug("  param: {}={}", entry.getKey(), entry.getValue());
+        try (PersistenceManager pm = create()) {
+            final Set<LiquibaseUser> liquibaseUsers = settings.getLiquibaseUsers();
+            Map<String, Object> liquibaseParams = new LinkedHashMap<>();
+            for (LiquibaseUser lbu : liquibaseUsers) {
+                liquibaseParams = lbu.createLiqibaseParams(pm, liquibaseParams);
             }
-        }
+            if (LOGGER.isDebugEnabled()) {
+                for (var entry : liquibaseParams.entrySet()) {
+                    LOGGER.debug("  param: {}={}", entry.getKey(), entry.getValue());
+                }
+            }
 
-        // Ensure the PM gets to go first.
-        if (pm instanceof LiquibaseUser liquibaseUser) {
-            LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser, liquibaseParams);
-        }
+            // Ensure the PM gets to go first.
+            if (pm instanceof LiquibaseUser liquibaseUser) {
+                LiquibaseUtils.maybeUpdateDatabase(LOGGER, liquibaseUser, liquibaseParams);
+            }
 
-        if (liquibaseUsers.isEmpty()) {
-            LOGGER.warn("No Liquibase users found!");
-            return;
+            if (liquibaseUsers.isEmpty()) {
+                LOGGER.warn("No Liquibase users found!");
+                return;
+            }
+            maybeUpdateDatabase = updateUsers(liquibaseUsers, liquibaseParams);
         }
-        maybeUpdateDatabase = updateUsers(liquibaseUsers, liquibaseParams);
     }
 
     private boolean updateUsers(final Set<LiquibaseUser> liquibaseUsers, Map<String, Object> liquibaseParams) {
