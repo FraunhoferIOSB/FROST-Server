@@ -3,6 +3,7 @@
 ## Version 2.8.1-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 * [BUS] Fixed bus message decoding failing on unknown properties.
 
 
