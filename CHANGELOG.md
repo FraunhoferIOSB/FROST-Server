@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.6.6-SNAPSHOT
+
+**Internal changes & Bugfixes**
+
+
 ## Version 2.6.5
 
 **Internal changes & Bugfixes**
