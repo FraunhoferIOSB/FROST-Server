@@ -118,7 +118,6 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     private final String roleRead;
     private final String frostClientId;
     private final Pattern topicAllowPattern;
-    private PersistenceManager persistenceManager;
 
     public AuthWrapper(CoreSettings coreSettings, String authProviderClassName, String frostClientId) {
         LOGGER.info("Initialising authentication.");
@@ -230,7 +229,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
 
     private boolean validatePath(Version version, String topic, PrincipalExtended userPrincipal) {
         PrincipalExtended lp = PrincipalExtended.getLocalPrincipal();
-        try {
+        try (PersistenceManager pm = getPm()) {
             String internalTopic = URLDecoder.decode(topic, StringHelper.UTF8.name());
             ResourcePath path = PathParser.parsePath(
                     context,
@@ -238,7 +237,8 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
                     internalTopic,
                     userPrincipal);
             PrincipalExtended.setLocalPrincipal(userPrincipal);
-            boolean validPath = getPm().validatePath(path);
+
+            boolean validPath = pm.validatePath(path);
             if (validPath) {
                 LOGGER.debug("  Allowing access for user {} to {}.", userPrincipal, topic);
             } else {
@@ -254,10 +254,7 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     }
 
     public PersistenceManager getPm() {
-        if (persistenceManager == null) {
-            persistenceManager = PersistenceManagerFactory.getInstance(coreSettings).create();
-        }
-        return persistenceManager;
+        return PersistenceManagerFactory.getInstance(coreSettings).create();
     }
 
     public UserCaches getUserCaches() {
