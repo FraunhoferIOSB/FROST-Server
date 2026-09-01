@@ -3,6 +3,7 @@
 ## Version 2.6.5
 
 **Internal changes & Bugfixes**
+* Updated dependencies.
 
 
 ## Version 2.6.4
