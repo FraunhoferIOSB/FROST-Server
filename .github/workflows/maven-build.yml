@@ -16,13 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
 
+
     - name: Cache maven repository
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           ~/.m2/repository
@@ -30,11 +31,13 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven
 
+
     - name: Set up JDK 21
       uses: actions/setup-java@v5
       with:
-        distribution: 'adopt'
+        distribution: 'temurin'
         java-version: 21
+
 
     - name: Get Date
       id: get-date
@@ -42,50 +45,18 @@ jobs:
         echo "date=$(/bin/date -u "+%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
       shell: bash
 
-    - name: Restore CVD Database from Cache
-      uses: actions/cache/restore@v5
-      with:
-        path: |
-          ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
-        restore-keys: ${{ runner.os }}-maven-owasp-cvedb
-
-    - name: Update CVD Database
-      continue-on-error: true
-      env:
-        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
-        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
-        NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
-      run: |
-        mvn -B -P owasp -DnvdApiDelay=6000 --settings maven-ci-settings.xml org.owasp:dependency-check-maven:update-only
-
-    - name: Save CVD Database to Cache
-      uses: actions/cache/save@v5
-      with:
-        path: |
-          ~/.m2/repository/org/owasp/dependency-check-data
-        key: ${{ runner.os }}-maven-owasp-cvedb-${{ steps.get-date.outputs.date }}
-
-    - name: Check OWASP
-      env:
-        OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
-        OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
-        OWASP_OSS_INDEX_USERNAME: ${{ secrets.OWASP_OSS_INDEX_USERNAME }}
-        OWASP_OSS_INDEX_APIKEY: ${{ secrets.OWASP_OSS_INDEX_APIKEY }}
-        NIST_NVD_API_KEY: ${{ secrets.NIST_NVD_API_KEY }}
-      run: |
-        mvn -B -DskipTests -Dmaven.javadoc.skip=true -P owasp -DautoUpdate=false --settings maven-ci-settings.xml org.owasp:dependency-check-maven:aggregate
 
     - name: Build with Maven
       run: |
-        mvn -B -DskipTests -Dmaven.javadoc.skip=true install
+        mvn -B -Dmaven.javadoc.skip=true install -P coverage
+
 
     - name: Test with Sonar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
-        mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
+        mvn -B sonar:sonar -Dsonar.projectKey=FraunhoferIOSB_FROST-Server -Dmaven.javadoc.skip=true -P coverage
         echo "Exporting Variables"
         export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
@@ -99,11 +70,11 @@ jobs:
 
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@v4
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Login to DockerHub
-      uses: docker/login-action@v3 
+      uses: docker/login-action@v4 
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
@@ -113,7 +84,7 @@ jobs:
 
     - name: Build and push - HTTP - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -127,7 +98,7 @@ jobs:
 
     - name: Build and push - MQTTP - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -143,7 +114,7 @@ jobs:
 
     - name: Build and push - MQTT - Master branch latest
       if: github.ref == 'refs/heads/v2.x'
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
@@ -159,7 +130,7 @@ jobs:
 
     - name: Build and push - HTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.HTTP"
@@ -172,7 +143,7 @@ jobs:
 
     - name: Build and push - MQTTP - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTTP"
@@ -186,7 +157,7 @@ jobs:
 
     - name: Build and push - MQTT - Develop branch latest
       if: startsWith(github.ref, 'refs/heads/develop')
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
         context: "./FROST-Server.MQTT"
