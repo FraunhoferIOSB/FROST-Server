@@ -18,13 +18,6 @@ jobs:
         fetch-depth: 0
 
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v5
-      with:
-        distribution: 'adopt'
-        java-version: 21
-
-
     - name: Set up Helm
       env:
         HELM_VERSION: "v3.16.1"
