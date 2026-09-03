@@ -8,26 +8,20 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      target_tag:
+        description: 'The tag you want to build/deploy'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up GnuPG
-      env:
-        GPG_EXECUTABLE: gpg
-        GPG_SECRET_KEYS: ${{ secrets.GPG_SECRET_KEYS }}
-        GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
-      run: |
-        mkdir -m 700 ~/.gnupg/
-        echo 'use-agent' > ~/.gnupg/gpg.conf
-        echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf
-        echo 'allow-loopback-pinentry' > ~/.gnupg/gpg-agent.conf
-        echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE  --yes --batch --import
-        echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE  --yes --batch --import-ownertrust
-
     - name: Checkout Source
       uses: actions/checkout@v7
+      with:
+        ref: ${{ github.event.inputs.target_tag }}
 
     - name: Cache maven repository
       uses: actions/cache@v6
@@ -98,16 +92,15 @@ jobs:
 
 
     - name: Create Release
-      if: github.ref_type == 'tag'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create ${{ github.ref_name }} -F CHANGELOG.md -d
-        gh release upload ${{ github.ref_name }} FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }} --clobber
+        gh release create ${{ github.event.inputs.target_tag }} -F CHANGELOG.md -d
+        gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }} --clobber
 
 
     - name: Set up QEMU
