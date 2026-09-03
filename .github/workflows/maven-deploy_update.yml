@@ -1,4 +1,4 @@
-name: Deploy to Maven Central
+name: Update Release
 
 on:
   push:
@@ -103,23 +103,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh release create ${{ github.ref_name }} -F CHANGELOG.md -d
-        gh release upload ${{ github.ref_name }} FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }}
-        gh release upload ${{ github.ref_name }} FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }}
-        gh release upload ${{ github.ref_name }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }}
-        gh release upload ${{ github.ref_name }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }}
-        gh release upload ${{ github.ref_name }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }}
-
-
-    - name: Deploy with Maven
-      env:
-        OSSINDEX_TOKEN: ${{ secrets.OSSINDEX_TOKEN }}
-        OSSINDEX_USERNAME: ${{ secrets.OSSINDEX_USERNAME }}
-        GPG_EXECUTABLE: gpg
-        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-      run: |
-        mvn -B deploy -P release -DskipTests=true --settings maven-ci-settings.xml
+        gh release upload ${{ github.ref_name }} FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }} --clobber
+        gh release upload ${{ github.ref_name }} FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }} --clobber
+        gh release upload ${{ github.ref_name }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }} --clobber
+        gh release upload ${{ github.ref_name }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }} --clobber
+        gh release upload ${{ github.ref_name }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }} --clobber
 
 
     - name: Set up QEMU
