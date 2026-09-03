@@ -10,6 +10,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      uuid-ossp:
+        condition: service_completed_successfully
       mosquitto:
         condition: service_started
     environment:
@@ -30,6 +32,8 @@ services:
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
       - persistence_autoUpdateDatabase=true
+      # STRING/UUID entity ids need uuid-ossp (installed by the uuid-ossp service):
+      # - plugins_coreModel_idType=STRING
       - auth_provider=de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider
       - auth_db_driver=org.postgresql.Driver
       - auth_db_url=jdbc:postgresql://database:5432/sensorthings
@@ -46,6 +50,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      uuid-ossp:
+        condition: service_completed_successfully
       mosquitto:
         condition: service_started
     environment:
@@ -94,6 +100,19 @@ services:
       interval: 10s
       timeout: 2s
       retries: 5
+
+  uuid-ossp:
+    image: postgis/postgis:18-3.6-alpine
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - PGPASSWORD=ChangeMe
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      psql -h database -U sensorthings -d sensorthings
+      -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
 
 
   pgadmin:

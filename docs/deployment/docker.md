@@ -63,6 +63,18 @@ For more information see the `docker-compose.yaml` file and the https://hub.dock
 
 You can override all [configuration settings](../settings/settings.html) by using environment variables in the docker-compose files.
 
+## STRING or UUID entity ids
+
+`plugins.coreModel.idType=STRING` and `UUID` generate ids with `uuid_generate_v1mc()`, which needs the `uuid-ossp` PostgreSQL extension.
+
+The example compose files create that extension through a one-shot `uuid-ossp` service, so it also works on an already-initialised volume. Uncomment this on the FROST service (and keep the default long ids if you do not need it):
+
+```
+- plugins_coreModel_idType=STRING
+```
+
+On a non-compose database, run `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";` as documented in [PostgreSQL Setup](postgresql.html).
+
 
 ## Logging
 
