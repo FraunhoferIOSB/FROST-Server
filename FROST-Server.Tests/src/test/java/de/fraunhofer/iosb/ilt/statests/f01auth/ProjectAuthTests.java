@@ -798,12 +798,15 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     void test_09a_MQTT() {
         LOGGER.info("  test_09a_MQTT");
         final CompletableFuture<Entity> obsFuture0 = new CompletableFuture<>();
-        final CompletableFuture<JsonNode> obsFuture0Json1 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture0Json1Short = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture0Json1Long = new CompletableFuture<>();
         final CompletableFuture<JsonNode> obsFuture0Json2 = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture1 = new CompletableFuture<>();
-        final CompletableFuture<JsonNode> obsFuture1Json1 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture1Json1Short = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture1Json1Long = new CompletableFuture<>();
         final CompletableFuture<Entity> obsFuture2 = new CompletableFuture<>();
-        final CompletableFuture<JsonNode> obsFuture2Json1 = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture2Json1Short = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture2Json1Long = new CompletableFuture<>();
         final CompletableFuture<Entity> thingFuture0 = new CompletableFuture<>();
         final CompletableFuture<Entity> thingFuture1 = new CompletableFuture<>();
         final CompletableFuture<Entity> thingFuture2 = new CompletableFuture<>();
@@ -817,9 +820,13 @@ abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs0);
             obsFuture0.complete(obs0);
-            JsonNode entityJson0a = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture0Json1.complete(entityJson0a);
-            JsonNode entityJson0b = ehAdminProject2.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            JsonNode entityJson0a1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture0Json1Short.complete(entityJson0a1);
+
+            JsonNode entityJson0a2 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest,FeatureOfInterest/GeneratedForLocations");
+            obsFuture0Json1Long.complete(entityJson0a2);
+
+            JsonNode entityJson0b = ehAdminProject2.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest");
             obsFuture0Json2.complete(entityJson0b);
 
             Entity obs1 = EntityUtils.createObservation(
@@ -830,8 +837,12 @@ abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs1);
             obsFuture1.complete(obs1);
-            JsonNode entityJson1a = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture1Json1.complete(entityJson1a);
+
+            JsonNode entityJson1a1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture1Json1Short.complete(entityJson1a1);
+
+            JsonNode entityJson1a2 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest,FeatureOfInterest/GeneratedForLocations");
+            obsFuture1Json1Long.complete(entityJson1a2);
 
             Entity obs2 = EntityUtils.createObservation(
                     serviceAdmin,
@@ -841,8 +852,11 @@ abstract class ProjectAuthTests extends AbstractTestClass {
                     ehAdmin.getCache(mdlSensing.etObservation));
             LOGGER.debug("Created {}", obs2);
             obsFuture2.complete(obs2);
-            JsonNode entityJson2a = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
-            obsFuture2Json1.complete(entityJson2a);
+            JsonNode entityJson2a1 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest($select=id)");
+            obsFuture2Json1Short.complete(entityJson2a1);
+
+            JsonNode entityJson2a2 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest,FeatureOfInterest/GeneratedForLocations");
+            obsFuture2Json1Long.complete(entityJson2a2);
 
             Entity origThing0 = ehAdmin.getCache(mdlSensing.etThing, 0);
             Entity updateThing0 = origThing0.withOnlyPk()
@@ -872,7 +886,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
         Entity ds0 = ehAdmin.getCache(mdlSensing.etDatastream, 0);
         String relationPathDs0 = ParserUtils.relationPath(ds0, mdlSensing.npDatastreamObservations);
-        String dsTopic0 = "v1.1/" + relationPathDs0 + "?$expand=FeatureOfInterest($select=id)";
+        String dsTopic0 = "v1.1/" + relationPathDs0 + "?$expand=FeatureOfInterest,FeatureOfInterest/GeneratedForLocations";
 
         Entity ds1 = ehAdmin.getCache(mdlSensing.etDatastream, 1);
         String relationPathDs1 = ParserUtils.relationPath(ds1, mdlSensing.npDatastreamObservations);
@@ -882,27 +896,27 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         String relationPathDs2 = ParserUtils.relationPath(ds2, mdlSensing.npDatastreamObservations);
         String dsTopic2 = "v1.1/" + relationPathDs2 + "?$expand=FeatureOfInterest($select=id)";
 
-        final TestSubscription test1SubAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Observations?$expand=FeatureOfInterest($select=id)")
+        final TestSubscription test1SubAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Observations?$expand=FeatureOfInterest,FeatureOfInterest/GeneratedForLocations")
                 .setName(ADMIN + "-1")
-                .addExpectedJson(obsFuture0Json1)
-                .addExpectedJson(obsFuture1Json1)
-                .addExpectedJson(obsFuture2Json1)
+                .addExpectedJson(obsFuture0Json1Long)
+                .addExpectedJson(obsFuture1Json1Long)
+                .addExpectedJson(obsFuture2Json1Long)
                 .setExpectedMessageCount(3)
                 .createReceivedListener(mdlSensing.etObservation);
 
         final TestSubscription test0SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic0)
                 .setName(ADMIN + "-2")
-                .addExpectedJson(obsFuture0Json1)
+                .addExpectedJson(obsFuture0Json1Long)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic1)
                 .setName(ADMIN + "-3")
-                .addExpectedJson(obsFuture1Json1)
+                .addExpectedJson(obsFuture1Json1Short)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdmin = new TestSubscription(mqttHelperAdmin, dsTopic2)
                 .setName(ADMIN + "-4")
-                .addExpectedJson(obsFuture2Json1)
+                .addExpectedJson(obsFuture2Json1Short)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test3SubThingsAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Things")
@@ -920,12 +934,12 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
         final TestSubscription test0SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic0)
                 .setName(ADMIN_P1 + "-2")
-                .addExpectedJson(obsFuture0Json1)
+                .addExpectedJson(obsFuture0Json1Long)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test1SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic1)
                 .setName(ADMIN_P1 + "-3")
-                .addExpectedJson(obsFuture1Json1)
+                .addExpectedJson(obsFuture1Json1Short)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdminP1 = new TestSubscription(mqttHelperAdminProject1, dsTopic2)
@@ -954,7 +968,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test2SubDsAdminP2 = new TestSubscription(mqttHelperAdminProject2, dsTopic2)
                 .setName(ADMIN_P2 + "-4")
-                .addExpectedJson(obsFuture2Json1)
+                .addExpectedJson(obsFuture2Json1Short)
                 .setExpectedMessageCount(1)
                 .createReceivedListener(mdlSensing.etObservation);
         final TestSubscription test3SubThingsAdminP2 = new TestSubscription(mqttHelperAdminProject2, "v1.1/Things")

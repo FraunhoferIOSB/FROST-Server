@@ -25,10 +25,12 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.SubscriptionListener
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.ThreadUtils;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -162,8 +164,8 @@ public class MqttListener implements Callable<JsonNode> {
 
                         @Override
                         public void messageArrived(String topic, MqttMessage mm) {
+                            final String payload = new String(mm.getPayload(), StandardCharsets.UTF_8);
                             if (barrier.getCount() > 0) {
-                                final String payload = new String(mm.getPayload(), StandardCharsets.UTF_8);
                                 try {
                                     result = Utils.MAPPER.readTree(payload);
                                 } catch (JacksonException ex) {
@@ -172,7 +174,7 @@ public class MqttListener implements Callable<JsonNode> {
                                 notifyMessage(payload);
                                 LOGGER.debug("  c: {} Received on {}. To go: {}", clientId, topic, barrier.getCount());
                             } else {
-                                LOGGER.error("  c: {} Received on {}. Barrier already empty!", clientId, topic);
+                                LOGGER.error("  c: {} Received on {}. Barrier already empty! Data: {}", clientId, topic, payload);
                             }
                         }
 
@@ -242,6 +244,9 @@ public class MqttListener implements Callable<JsonNode> {
     public JsonNode call() throws InterruptedException, MqttException {
         try {
             barrier.await();
+            LOGGER.debug("{} barrier empty, waiting a bit longer...", name);
+            ThreadUtils.sleep(Duration.ofMillis(500));
+            LOGGER.debug("{} Really done.", name);
         } catch (InterruptedException ex) {
             LOGGER.error("{} waiting for {} MQTT events on {} timed out.", name, barrier.getCount(), topic);
             LOGGER.debug("Exception:", ex);
