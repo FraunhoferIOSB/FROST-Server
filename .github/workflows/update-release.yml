@@ -92,16 +92,15 @@ jobs:
 
 
     - name: Create Release
-      if: github.ref_type == 'tag'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create ${{ github.ref_name }} -F CHANGELOG.md -d
-        gh release upload ${{ github.ref_name }} FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }} --clobber
-        gh release upload ${{ github.ref_name }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }} --clobber
+        gh release create ${{ github.event.inputs.target_tag }} -F CHANGELOG.md -d
+        gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.MQTTP/target/${{ env.MQTTP_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.HTTP/target/${{ env.HTTP_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }} --clobber
+        gh release upload ${{ github.event.inputs.target_tag }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }} --clobber
 
 
     - name: Set up QEMU
