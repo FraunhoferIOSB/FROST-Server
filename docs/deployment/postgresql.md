@@ -40,5 +40,7 @@ After setting up FROST-Server in Docker, Tomcat or Wildfly:
 
 This should initialise/update the database to the latest version and the service is ready for use.
 
+`/DatabaseStatus` is an admin tool. Do not leave it reachable on a public server without authentication or a reverse proxy. See [Authentication](../settings/auth.md#databasestatus).
+
 Now you may want to have a look at  [Performance tips for PostgreSQL and PostGIS](db_performance.md).
 

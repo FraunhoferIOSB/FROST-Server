@@ -33,6 +33,8 @@ If you have docker and docker-compose
 7. Browse to http://localhost:8080/FROST-Server/v1.1
 8. Enjoy!
 
+`/DatabaseStatus` is an admin tool. Do not leave it reachable on a public server without authentication or a reverse proxy. See [Authentication](../settings/auth.md#databasestatus).
+
 
 ## Details
 
