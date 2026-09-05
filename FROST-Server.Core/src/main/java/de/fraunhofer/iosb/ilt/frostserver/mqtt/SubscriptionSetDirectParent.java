@@ -90,7 +90,7 @@ class SubscriptionSetDirectParent {
             SubscriptionSet subsForParent = subscriptions.computeIfAbsent(parentPk, t -> new SubscriptionSet(topicCount));
             subsForParent.addSubscription(subscription);
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("  Added subscription {} for {}", subscriptions.size(), subscription);
+                LOGGER.trace("  Added subscription {} on {} / {} for {}", subscriptions.size(), parentRelation, parentPk, subscription);
             }
             return true;
         }
@@ -106,8 +106,10 @@ class SubscriptionSetDirectParent {
             }
             SubscriptionSet subsForParent = subscriptions.get(parentPk);
             if (subsForParent == null) {
+                LOGGER.debug("No subs for parent {} / {}", parentRelation, parentPk);
                 return;
             }
+            LOGGER.debug("Removing sub for parent {} / {}", parentRelation, parentPk);
             subsForParent.removeSubscription(subscription);
         }
     }

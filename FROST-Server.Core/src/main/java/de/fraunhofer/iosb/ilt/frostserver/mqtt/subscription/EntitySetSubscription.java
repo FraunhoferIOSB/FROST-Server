@@ -38,7 +38,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.net.URLDecoder;
 import java.util.List;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,20 +137,6 @@ public class EntitySetSubscription extends AbstractSubscription {
             }
         }
         return super.fetchExpand(persistenceManager, newEntity);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), query);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!super.equals(obj)) {
-            return false;
-        }
-        final EntitySetSubscription other = (EntitySetSubscription) obj;
-        return Objects.equals(this.query, other.query);
     }
 
 }

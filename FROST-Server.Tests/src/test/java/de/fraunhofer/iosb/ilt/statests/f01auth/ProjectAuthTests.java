@@ -1045,6 +1045,60 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     @Test
+    void test_09b_MQTT() {
+        LOGGER.info("  test_09b_MQTT");
+        final CompletableFuture<JsonNode> obsFuture0Json1Long = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture1Json1Long = new CompletableFuture<>();
+        final CompletableFuture<JsonNode> obsFuture2Json1Long = new CompletableFuture<>();
+        final Callable<Object> insertAction = () -> {
+            Entity obs0 = EntityUtils.createObservation(
+                    serviceAdmin,
+                    ehAdmin.getCache(mdlSensing.etDatastream, 0),
+                    0,
+                    ZonedDateTime.parse("2024-01-01T00:00:00.000Z"),
+                    ehAdmin.getCache(mdlSensing.etObservation));
+            LOGGER.debug("Created {}", obs0);
+            JsonNode entityJson0a2 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs0.getPrimaryKeyValues(), "FeatureOfInterest,FeatureOfInterest/GeneratedForLocations");
+            obsFuture0Json1Long.complete(entityJson0a2);
+
+            Entity obs1 = EntityUtils.createObservation(
+                    serviceAdmin,
+                    ehAdmin.getCache(mdlSensing.etDatastream, 1),
+                    0,
+                    ZonedDateTime.parse("2024-01-01T01:00:00.000Z"),
+                    ehAdmin.getCache(mdlSensing.etObservation));
+            LOGGER.debug("Created {}", obs1);
+            JsonNode entityJson1a2 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs1.getPrimaryKeyValues(), "FeatureOfInterest,FeatureOfInterest/GeneratedForLocations");
+            obsFuture1Json1Long.complete(entityJson1a2);
+
+            Entity obs2 = EntityUtils.createObservation(
+                    serviceAdmin,
+                    ehAdmin.getCache(mdlSensing.etDatastream, 2),
+                    0,
+                    ZonedDateTime.parse("2024-02-02T02:00:00.000Z"),
+                    ehAdmin.getCache(mdlSensing.etObservation));
+            LOGGER.debug("Created {}", obs2);
+            JsonNode entityJson2a2 = ehAdmin.getEntityJson(mdlSensing.etObservation, obs2.getPrimaryKeyValues(), "FeatureOfInterest,FeatureOfInterest/GeneratedForLocations");
+            obsFuture2Json1Long.complete(entityJson2a2);
+
+            return null;
+        };
+
+        final TestSubscription test1SubAdmin = new TestSubscription(mqttHelperAdmin, "v1.1/Observations?$expand=FeatureOfInterest,FeatureOfInterest/GeneratedForLocations")
+                .setName(ADMIN + "-1")
+                .addExpectedJson(obsFuture0Json1Long)
+                .addExpectedJson(obsFuture1Json1Long)
+                .addExpectedJson(obsFuture2Json1Long)
+                .setExpectedMessageCount(3)
+                .createReceivedListener(mdlSensing.etObservation);
+
+        MqttHelper11.MqttAction mqttAction = new MqttHelper11.MqttAction(insertAction)
+                .add(test1SubAdmin);
+        mqttHelperAdmin.executeRequest(mqttAction);
+        Assertions.assertTrue(mqttAction.isAllOk());
+    }
+
+    @Test
     void test_18a_ObservationCreate() {
         LOGGER.info("  test_18a_ObservationCreate");
         EntityCreator creator = user -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));

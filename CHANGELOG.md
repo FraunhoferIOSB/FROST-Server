@@ -5,6 +5,7 @@
 **New Features**
 
 **Internal changes & Bugfixes**
+* Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
 * Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 
 
