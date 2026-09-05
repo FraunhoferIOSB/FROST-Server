@@ -3,6 +3,7 @@
 ## Version 2.8.1-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
 * Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 * [BUS] Fixed bus message decoding failing on unknown properties.

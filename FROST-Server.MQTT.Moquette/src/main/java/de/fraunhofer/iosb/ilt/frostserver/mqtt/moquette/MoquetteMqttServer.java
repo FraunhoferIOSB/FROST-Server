@@ -467,13 +467,13 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
                 LOGGER.debug("      Ignoring subscription of {} to response topic {}", clientId, topicFilterIntrnl);
                 return;
             }
-            LOGGER.debug("      Client {} subscribed to {}", clientId, topicFilterIntrnl);
+            LOGGER.debug("      Client subscribed {} to {}", clientId, topicFilterIntrnl);
             if (clientSubscriptions
                     .computeIfAbsent(clientId, t -> ConcurrentHashMap.newKeySet())
                     .add(topicFilterIntrnl)) {
                 fireSubscribe(new SubscriptionEvent(clientId, topicFilterIntrnl, topicFilterClient));
             } else {
-                LOGGER.warn("Client {} subscribed to {} twice!", clientId, topicFilterIntrnl);
+                LOGGER.warn("Client subscribed {} to {} twice!", clientId, topicFilterIntrnl);
             }
         }
 
@@ -485,7 +485,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults, TopicRewr
             }
             final String topicFilterIntrnl = msg.getTopicFilterInternal();
             final String topicFilterClient = msg.getTopicFilterClient();
-            LOGGER.debug("      Client {} unsubscribed from {}", clientId, topicFilterIntrnl);
+            LOGGER.debug("      Client unsubscribed {} from {}", clientId, topicFilterIntrnl);
             boolean removed = clientSubscriptions.getOrDefault(clientId, Collections.emptySet())
                     .remove(topicFilterIntrnl);
             if (removed) {
