@@ -3,6 +3,7 @@
 ## Version 2.7.5-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Updated Moquette to 0.18.6.
 
 
 ## Version 2.7.4

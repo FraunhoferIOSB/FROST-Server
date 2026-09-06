@@ -305,7 +305,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             if (clientId.equalsIgnoreCase(frostClientId)) {
                 return;
             }
-            final String topicFilter = msg.getTopicFilter();
+            final String topicFilter = msg.getTopicFilterInternal();
             LOGGER.trace("      Client {} subscribed to {}", clientId, topicFilter);
             clientSubscriptions
                     .computeIfAbsent(clientId, t -> new ArrayList<>())
@@ -319,7 +319,7 @@ public class MoquetteMqttServer implements MqttServer, ConfigDefaults {
             if (frostClientId.equals(clientId)) {
                 return;
             }
-            final String topicFilter = msg.getTopicFilter();
+            final String topicFilter = msg.getTopicFilterInternal();
             LOGGER.trace("      Client {} unsubscribed from {}", clientId, topicFilter);
             boolean removed = clientSubscriptions.getOrDefault(clientId, new ArrayList<>())
                     .remove(topicFilter);
