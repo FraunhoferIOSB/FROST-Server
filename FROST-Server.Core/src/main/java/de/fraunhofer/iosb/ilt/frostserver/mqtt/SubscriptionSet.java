@@ -44,17 +44,26 @@ class SubscriptionSet {
         return subscriptions;
     }
 
+    public boolean isEmpty() {
+        return subscriptions.isEmpty();
+    }
+
     public void addSubscription(Subscription subscription) {
         AtomicInteger clientCount = subscriptions.get(subscription);
         if (clientCount == null) {
-            clientCount = new AtomicInteger(1);
-            subscriptions.put(subscription, clientCount);
-            topicCount.incrementAndGet();
-            LOGGER.debug("Created new subscription for {}.", subscription);
-        } else {
-            int newCount = clientCount.incrementAndGet();
-            LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
+            final AtomicInteger tempAtInt = new AtomicInteger(0);
+            clientCount = subscriptions.putIfAbsent(subscription, tempAtInt);
+            if (null == clientCount) {
+                clientCount = tempAtInt;
+                topicCount.incrementAndGet();
+                LOGGER.debug("Created new subscription for {}.", subscription);
+            }
         }
+        int newCount;
+        synchronized (clientCount) {
+            newCount = clientCount.incrementAndGet();
+        }
+        LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
     }
 
     public void removeSubscription(Subscription subscription) {
@@ -66,9 +75,13 @@ class SubscriptionSet {
         int newCount = clientCount.decrementAndGet();
         LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
         if (newCount <= 0) {
-            subscriptions.remove(subscription);
-            topicCount.decrementAndGet();
-            LOGGER.debug("Removed last subscription for {}.", subscription);
+            synchronized (clientCount) {
+                if (clientCount.get() == 0) {
+                    subscriptions.remove(subscription);
+                    topicCount.decrementAndGet();
+                    LOGGER.debug("Removed last subscription for {}.", subscription);
+                }
+            }
         }
     }
 

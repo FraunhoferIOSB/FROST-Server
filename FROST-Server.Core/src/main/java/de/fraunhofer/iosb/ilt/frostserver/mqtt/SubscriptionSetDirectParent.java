@@ -96,21 +96,28 @@ class SubscriptionSetDirectParent {
         }
     }
 
-    public void removeSubscription(Subscription subscription) {
+    public boolean removeSubscription(Subscription subscription) {
         synchronized (this) {
             NavigationPropertyMain parentRelation = subscription.getParentRelation();
             PkValue parentPk = subscription.getParentId();
             if (parentRelation == null || parentPk == null) {
                 LOGGER.error("Parent Relation or ParentId is null! {} / {}", parentRelation, parentPk);
-                return;
+                return false;
             }
             SubscriptionSet subsForParent = subscriptions.get(parentPk);
             if (subsForParent == null) {
                 LOGGER.debug("No subs for parent {} / {}", parentRelation, parentPk);
-                return;
+                return false;
             }
-            LOGGER.debug("Removing sub for parent {} / {}", parentRelation, parentPk);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Removing from parent {} / {} sub {}", parentRelation, parentPk, subscription);
+            }
             subsForParent.removeSubscription(subscription);
+            if (subsForParent.isEmpty()) {
+                LOGGER.debug("Removed last sub for parent {} / {}", parentRelation, parentPk);
+                subscriptions.remove(parentPk);
+            }
+            return true;
         }
     }
 
