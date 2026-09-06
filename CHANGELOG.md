@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.8.2-SNAPSHOT
+
+**Internal changes & Bugfixes**
+
+
 ## Version 2.8.1
 
 **Internal changes & Bugfixes**
