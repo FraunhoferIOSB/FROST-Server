@@ -3,6 +3,7 @@
 ## Version 2.9.0-SNAPSHOT
 
 **New Features**
+* Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
 * Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
