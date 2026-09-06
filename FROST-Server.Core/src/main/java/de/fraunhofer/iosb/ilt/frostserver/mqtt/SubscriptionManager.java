@@ -99,11 +99,14 @@ class SubscriptionManager {
 
     public synchronized void removeSubscription(Subscription subscription) {
         NavigationPropertyMain parentRelation = subscription.getParentRelation();
+        boolean removed = false;
         if (parentRelation != null) {
             SubscriptionSetDirectParent parentSet = parentedSubscriptions.get(parentRelation);
-            parentSet.removeSubscription(subscription);
+            removed = parentSet.removeSubscription(subscription);
         }
-        complexSubscriptions.removeSubscription(subscription);
+        if (!removed) {
+            complexSubscriptions.removeSubscription(subscription);
+        }
     }
 
 }
