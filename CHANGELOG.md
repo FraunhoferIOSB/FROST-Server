@@ -1,8 +1,9 @@
 # Changelog
 
-## Version 2.8.1-SNAPSHOT
+## Version 2.8.1
 
 **Internal changes & Bugfixes**
+* Bumped dependencies.
 * Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
 * Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
