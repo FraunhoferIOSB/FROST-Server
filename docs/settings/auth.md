@@ -45,6 +45,12 @@ FROST-Server asks the AuthProvider if the user has the following roles:
 
 Currently there are two auth packages included: `FROST-Server.Auth.Basic` and `FROST-Server.Auth.Keycloak`.
 
+## DatabaseStatus
+
+`/DatabaseStatus` can initialise or upgrade the database. The start page links to it for convenience after install.
+
+If you enable an auth provider, only users with the **admin** role can open it. If you do not enable auth, FROST does not restrict the page — put it behind a reverse proxy (or equivalent) before exposing the server. Without that, anyone who can reach the HTTP port can trigger a database update. They can also create, update, or delete entities, which is a larger risk than DatabaseStatus itself.
+
 
 ## Auth settings
 

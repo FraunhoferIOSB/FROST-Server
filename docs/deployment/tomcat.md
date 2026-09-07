@@ -102,5 +102,7 @@ For Wildfly, configuration options like the `persistence.persistenceManagerImple
 
 This should initialise/update the database to the latest version and the service is ready for use.
 
+`/DatabaseStatus` is an admin tool. Do not leave it reachable on a public server without authentication or a reverse proxy. See [Authentication](../settings/auth.md#databasestatus).
+
 Now you may want to have a look at [PostgreSQL Setup](postgresql.md) or [Performance tips for PostgreSQL and PostGIS](db_performance.md).
 
