@@ -43,8 +43,6 @@ updates:
         patterns:
           - "*"
     ignore:
-      - dependency-name: "de.fraunhofer.iosb.io.moquette:*"
-        versions: ["[0.18.3,)"]
       - dependency-name: "org.openjfx:*"
         versions: ["[24,)"]
       - dependency-name: "org.liquibase:*"
