@@ -35,6 +35,9 @@ spec:
         - name: {{ $fullName }}
           image: "{{ .Values.frost.bus.image.registry }}/{{ .Values.frost.bus.image.repository }}:{{ .Values.frost.bus.image.tag }}"
           imagePullPolicy: {{ .Values.frost.bus.image.pullPolicy | quote }}
+          volumeMounts:
+          - mountPath: /mosquitto/config/
+            name: mosquitto-conf
           ports:
             - name: mqtt
               containerPort: 1883
@@ -54,4 +57,11 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
             successThreshold: 1
+      volumes:
+      - name: mosquitto-conf
+        configMap:
+          defaultMode: 420
+          name: mosquitto.conf
+
+
 {{- end -}}

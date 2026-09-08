@@ -405,7 +405,7 @@ frost:
     image:
         registry: docker.io
         repository: eclipse-mosquitto
-        tag: 1.4.12
+        tag: 2.1.2-alpine
         pullPolicy: IfNotPresent
         imagePullSecret:
     # FROST-Server Messages Bus deployment settings
