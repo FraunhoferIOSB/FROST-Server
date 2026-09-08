@@ -1,0 +1,19 @@
+{{- if .Values.frost.mqtt.enabled -}}
+{{- $tier := "bus" -}}
+{{- $fullName := include "frost-server.fullName" (merge (dict "tier" $tier) .) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: {{ include "frost-server.chart" . }}
+    app: {{ include "frost-server.name" . }}
+    component: {{ $tier }}
+data:
+  mosquitto.conf: |
+    listener 1883
+    allow_anonymous true
+
+{{- end -}}
