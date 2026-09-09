@@ -145,6 +145,10 @@ public class BasicAuthFilter implements Filter {
             return USER_DATA_NO_USER;
         }
         String[] split = StringUtils.split(userPassDecoded, ":", 2);
+        if (split.length != 2) {
+            LOGGER.debug("Empty username or password in basic auth header.");
+            return USER_DATA_NO_USER;
+        }
         final UserData userData = new UserData(split[0], maxNameLength, split[1], maxPassLength);
         if (databaseHandler.isValidUser(userData)) {
             LOGGER.debug("User {}", userData.userName);
