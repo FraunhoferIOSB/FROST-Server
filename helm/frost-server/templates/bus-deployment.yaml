@@ -61,7 +61,7 @@ spec:
       - name: mosquitto-conf
         configMap:
           defaultMode: 420
-          name: mosquitto.conf
+          name: {{ $fullName }}
 
 
 {{- end -}}
