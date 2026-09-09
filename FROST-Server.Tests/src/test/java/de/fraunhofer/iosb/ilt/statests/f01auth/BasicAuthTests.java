@@ -20,10 +20,13 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
+import de.fraunhofer.iosb.ilt.frostclient.exception.StatusCodeException;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestCore;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +60,26 @@ abstract class BasicAuthTests extends AbstractAuthTests {
     protected void setUpVersion() {
         LOGGER.info("Setting up for version {}.", version.urlPart);
         super.setUpVersion();
+    }
+
+    @Test
+    void testEmptyUsername() {
+        LOGGER.info("  testEmptyUsername");
+        SensorThingsService testService = AuthTestHelper.setAuthBasic(createService(), "", "read");
+        StatusCodeException exc = Assertions.assertThrows(StatusCodeException.class, () -> {
+            testService.query(sMdl.etThing).list();
+        });
+        Assertions.assertEquals(401, exc.getStatusCode(), "Incorrect status code for missing username.");
+    }
+
+    @Test
+    void testEmptyPassword() {
+        LOGGER.info("  testEmptyPassword");
+        SensorThingsService testService = AuthTestHelper.setAuthBasic(createService(), "read", "");
+        StatusCodeException exc = Assertions.assertThrows(StatusCodeException.class, () -> {
+            testService.query(sMdl.etThing).list();
+        });
+        Assertions.assertEquals(401, exc.getStatusCode(), "Incorrect status code for missing username.");
     }
 
     @Override
