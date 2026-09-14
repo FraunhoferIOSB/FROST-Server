@@ -3,6 +3,7 @@
 ## Version 2.9.0-SNAPSHOT
 
 **New Features**
+* [ModelOM] Added time attribute to MonitoringProgram and MonitoringActivity.
 * [ModelOM] Added LinkingTime EntityType between Thing and Network.
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 

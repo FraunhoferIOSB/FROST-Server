@@ -67,5 +67,18 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="iosb" id="2025-05-05-monitoring_activities-4" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="monitoring_activities" />
+            <not>
+                <columnExists columnName="time_start" tableName="monitoring_activities" />
+            </not>
+        </preConditions>
+        <addColumn tableName="monitoring_activities">
+            <column name="time_start" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="time_end" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
 
