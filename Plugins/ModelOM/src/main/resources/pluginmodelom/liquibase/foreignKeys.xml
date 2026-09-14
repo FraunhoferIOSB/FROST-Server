@@ -85,6 +85,38 @@
             onDelete="CASCADE" onUpdate="CASCADE"/>
     </changeSet>
 
+    <changeSet author="iosb" id="2025-05-05-fk_tn_linking_time_thing_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tn_linking_time_thing_id" foreignKeyTableName="tn_linking_time" />
+            </not>
+            <tableExists tableName="tn_linking_time" />
+            <tableExists tableName="things" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tn_linking_time_thing_id"
+            baseTableName="tn_linking_time" baseColumnNames="thing_id"
+            referencedTableName="things" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet author="iosb" id="2025-05-05-fk_tn_linking_time_network_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <preConditions onFail="CONTINUE">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_tn_linking_time_network_id" foreignKeyTableName="tn_linking_time" />
+            </not>
+            <tableExists tableName="tn_linking_time" />
+            <tableExists tableName="monitoring_networks" />
+        </preConditions>
+        <addForeignKeyConstraint
+            constraintName="fk_tn_linking_time_network_id"
+            baseTableName="tn_linking_time" baseColumnNames="network_id"
+            referencedTableName="monitoring_networks" referencedColumnNames="id"
+            deferrable="false" initiallyDeferred="false"
+            onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
     <changeSet author="iosb" id="2025-05-05-fk_monitoring_activity_program_activity_id" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
         <preConditions onFail="CONTINUE">
             <not>

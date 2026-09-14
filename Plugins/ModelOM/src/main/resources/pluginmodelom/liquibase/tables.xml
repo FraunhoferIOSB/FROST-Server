@@ -23,6 +23,8 @@
 
     <property name="id-Deployment" value="LONG" />
     <property name="idType-Deployment" value="BIGINT" />
+    <property name="id-LinkingTime" value="LONG" />
+    <property name="idType-LinkingTime" value="BIGINT" />
     <property name="id-MonitoringActivity" value="LONG" />
     <property name="idType-MonitoringActivity" value="BIGINT" />
     <property name="id-MonitoringNetwork" value="LONG" />
@@ -33,6 +35,7 @@
     <property name="idType-ObservingProcedure" value="BIGINT" />
 
     <include relativeToChangelogFile="true" file="tableDeployments.xml" />
+    <include relativeToChangelogFile="true" file="tableLinkingTimes.xml" />
     <include relativeToChangelogFile="true" file="tableMonitoringActivities.xml" />
     <include relativeToChangelogFile="true" file="tableMonitoringNetworks.xml" />
     <include relativeToChangelogFile="true" file="tableMonitoringPrograms.xml" />
