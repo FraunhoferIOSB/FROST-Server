@@ -3,6 +3,7 @@
 ## Version 2.8.2-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed "is null" not working on phenomenonTime/end.
 * Added option to enable/disable MQTT Request/Reponse functionality.
 
 

@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTim
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.WrapperHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.TableCollection;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry.PropertyFields;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.Utils;
@@ -163,7 +164,10 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
 
     @Override
     public void walkPath(PathState state, int startIdx, Path path) throws IllegalArgumentException {
+        PropertyFields<?> prevPropFields = null;
+        Property lastProp = null;
         for (state.curIndex = startIdx; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
+            prevPropFields = state.parentPropFields;
             Property element = state.elements.get(state.curIndex);
             if (element instanceof EntityPropertyCustom) {
                 handleCustomProperty(state, path);
@@ -177,6 +181,7 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
             } else if (element instanceof NavigationPropertyMain navigationPropertyMain) {
                 handleNavigationProperty(state, path, navigationPropertyMain);
             }
+            lastProp = element;
         }
         if (state.finalExpression == null) {
             throw new IllegalArgumentException("Path does not end in an EntityProperty: " + path);
@@ -184,6 +189,15 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         if (state.finalExpression instanceof Field field && Moment.class.isAssignableFrom(field.getType())) {
             Field<Moment> dateTimePath = (Field<Moment>) state.finalExpression;
             state.finalExpression = new StaDateTimeWrapper(dateTimePath);
+        }
+        if (state.finalExpression instanceof StaDateTimeWrapper sdtw && prevPropFields != null && prevPropFields.fieldsAll.size() == 2) {
+            String myName = lastProp.getName();
+            for (var entry : prevPropFields.fieldsAll.entrySet()) {
+                if (!entry.getKey().equals(myName)) {
+                    sdtw.setPartnerField(entry.getValue().get(state.pathTableRef.getTable()));
+                    return;
+                }
+            }
         }
     }
 
@@ -254,7 +268,7 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
                     .resolveAllFieldsForProperty(element, new LinkedHashMap<>());
         }
         if (pathExpressions.size() == 1) {
-            final Field field = pathExpressions.values().stream().iterator().next();
+            final Field field = pathExpressions.values().iterator().next();
             Field optimisedField = state.pathTableRef.getJoinEqual(field);
             state.finalExpression = WrapperHelper.wrapField(optimisedField);
         } else {

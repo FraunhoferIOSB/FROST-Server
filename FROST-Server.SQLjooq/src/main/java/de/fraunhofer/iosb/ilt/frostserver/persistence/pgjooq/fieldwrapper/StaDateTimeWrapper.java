@@ -42,6 +42,12 @@ public class StaDateTimeWrapper implements TimeFieldWrapper {
     private final Field<Moment> field;
 
     /**
+     * Hack to be able to do "is null" on TimeObject/end. For a TimeObject
+     * without end, the end Field is set to be the same as the start Field.
+     */
+    private Field<Moment> partnerField;
+
+    /**
      *
      * @param ts The constant timestamp.
      * @param utc Flag indicating that the original time given was in utc.
@@ -225,6 +231,14 @@ public class StaDateTimeWrapper implements TimeFieldWrapper {
                     specificOpBool(op, staTimeIntervalWrapper));
         }
         throw new UnsupportedOperationException("Can not compare between Duration and " + other.getClass().getName());
+    }
+
+    public Field<Moment> getPartnerField() {
+        return partnerField;
+    }
+
+    public void setPartnerField(Field<Moment> partnerField) {
+        this.partnerField = partnerField;
     }
 
 }
