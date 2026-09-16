@@ -80,6 +80,7 @@ import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests11;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests10;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import de.fraunhofer.iosb.ilt.statests.v2cud.DateTimeTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.GeoTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.MqttCoreTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.MqttRequestResponse20;
@@ -155,6 +156,7 @@ import org.slf4j.LoggerFactory;
     ProjectAuthTestsBasic11.class,
     ProjectAuthTestsBasicAnon11.class,
     SuiteFinaliser1.class,
+    DateTimeTests20.class,
     ReferenceTests20.class,
     GeoTests20.class,
     MqttCoreTests20.class,
@@ -217,7 +219,7 @@ class TestSuite {
             final int countPut = HTTPMethods.getCountPut();
             HTTPMethods.resetStats();
             Assertions.assertEquals(6, countDelete, "Unexpected number of DELETE calls.");
-            Assertions.assertEquals(208, countGet, "Unexpected number of GET calls.");
+            Assertions.assertEquals(219, countGet, "Unexpected number of GET calls.");
             Assertions.assertEquals(0, countPatch, "Unexpected number of PATCH calls.");
             Assertions.assertEquals(3, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(48, countPut, "Unexpected number of PUT calls.");

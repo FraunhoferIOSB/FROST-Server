@@ -8,6 +8,7 @@
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
+* Fixed "is null" not working on phenomenonTime/end.
 * Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
 * Fixed "connection closed" database errors in MQTT service due to overly long living persistence manager.
 

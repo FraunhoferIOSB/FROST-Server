@@ -373,9 +373,15 @@ public class ExpressionHandlers {
             FieldWrapper p1 = h.handle(params.get(0));
             FieldWrapper p2 = h.handle(params.get(1));
             if (p1 instanceof NullWrapper) {
+                if (p2 instanceof StaDateTimeWrapper sdtw) {
+                    return new SimpleFieldWrapper(p2.getDefaultField().eq(sdtw.getPartnerField()));
+                }
                 return new SimpleFieldWrapper(p2.getDefaultField().isNull());
             }
             if (p2 instanceof NullWrapper) {
+                if (p1 instanceof StaDateTimeWrapper sdtw) {
+                    return new SimpleFieldWrapper(p1.getDefaultField().eq(sdtw.getPartnerField()));
+                }
                 return new SimpleFieldWrapper(p1.getDefaultField().isNull());
             }
             if (p1 instanceof TimeFieldWrapper ti1) {
@@ -480,9 +486,15 @@ public class ExpressionHandlers {
             FieldWrapper p1 = h.handle(params.get(0));
             FieldWrapper p2 = h.handle(params.get(1));
             if (p1 instanceof NullWrapper) {
+                if (p2 instanceof StaDateTimeWrapper sdtw) {
+                    return new SimpleFieldWrapper(p2.getDefaultField().ne(sdtw.getPartnerField()));
+                }
                 return new SimpleFieldWrapper(p2.getDefaultField().isNotNull());
             }
             if (p2 instanceof NullWrapper) {
+                if (p1 instanceof StaDateTimeWrapper sdtw) {
+                    return new SimpleFieldWrapper(p1.getDefaultField().ne(sdtw.getPartnerField()));
+                }
                 return new SimpleFieldWrapper(p1.getDefaultField().isNotNull());
             }
             if (p1 instanceof TimeFieldWrapper ti1) {
