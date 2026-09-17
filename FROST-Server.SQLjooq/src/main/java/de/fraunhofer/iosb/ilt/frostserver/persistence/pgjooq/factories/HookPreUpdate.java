@@ -27,8 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 /**
  * A hook that can be registered on a table and will get executed before an
  * update happens.
- *
- * @author hylke
  */
 public interface HookPreUpdate extends JooqPmHook {
 

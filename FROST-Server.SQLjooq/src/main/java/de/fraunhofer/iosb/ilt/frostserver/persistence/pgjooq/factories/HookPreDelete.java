@@ -23,9 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 
 /**
  * A hook that can be registered on a table and will get executed before a
- * preDelete has happened.
- *
- * @author hylke
+ * delete has happened.
  */
 public interface HookPreDelete extends JooqPmHook {
 

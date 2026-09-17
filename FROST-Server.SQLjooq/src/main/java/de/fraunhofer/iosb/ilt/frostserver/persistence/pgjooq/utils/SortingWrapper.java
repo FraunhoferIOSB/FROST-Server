@@ -78,4 +78,8 @@ public class SortingWrapper<O extends Comparable<O>, T> implements Comparable<So
         return order.compareTo(other.order);
     }
 
+    public static <O extends Comparable<O>, T> SortingWrapper<O, T> of(O order, T object) {
+        return new SortingWrapper<>(order, object);
+    }
+
 }

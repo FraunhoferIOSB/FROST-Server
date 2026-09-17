@@ -40,6 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDe
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert.Phase;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookRelation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations.Relation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.DataSize;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.PropertyFieldRegistry;
@@ -363,9 +364,16 @@ public abstract class StaTableAbstract<T extends StaMainTable<T>> extends TableI
         final T thisTable = getThis();
         final EntityType entityType = entity.getType();
         for (NavigationPropertyMain<Entity> np : entityType.getNavigationEntities()) {
+            Relation<T> relation = findRelation(np.getName());
+            SortedSet<SortingWrapper<Double, HookRelation>> hooks = relation.getHooks();
+
             if (entity.isSetProperty(np)) {
                 Entity ne = entity.getProperty(np);
                 entityFactories.entityExistsOrCreate(pm, ne, updateMode);
+                for (SortingWrapper<Double, HookRelation> hook : hooks) {
+                    hook.getObject().preCreate(pm, np, entity, ne);
+                }
+
                 PropertyFields<T> registry = pfReg.getPropertyFieldsForProperty(np);
                 registry.convert(thisTable, entity, insertFields);
             }

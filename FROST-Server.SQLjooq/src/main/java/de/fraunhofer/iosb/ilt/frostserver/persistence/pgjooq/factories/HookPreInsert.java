@@ -27,8 +27,6 @@ import org.jooq.Field;
 /**
  * A hook that can be registered on a table and will get executed before an
  * insert happens.
- *
- * @author hylke
  */
 public interface HookPreInsert extends JooqPmHook {
 

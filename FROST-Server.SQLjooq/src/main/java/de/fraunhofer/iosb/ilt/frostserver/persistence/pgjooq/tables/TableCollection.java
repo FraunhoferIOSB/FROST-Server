@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author scf
+ * The registry for database tables.
  */
 public class TableCollection {
 
@@ -62,6 +62,7 @@ public class TableCollection {
     private List<DefModel> modelDefinitions;
     private Map<String, SecurityTableWrapper> securityWrappers;
     private Map<String, List<HookValidator>> securityValidators;
+    private Map<String, List<HookValidator>> validators;
 
     private final Map<EntityType, StaMainTable<?>> tablesByType = new LinkedHashMap<>();
     private final Map<Class<?>, StaTable<?>> tablesByClass = new LinkedHashMap<>();
@@ -129,6 +130,7 @@ public class TableCollection {
 
     public void initSecurity(JooqPersistenceManager ppm) {
         for (StaMainTable<?> table : getAllTables()) {
+            initValidators(table, ppm);
             initSecurityWrapper(table);
             initSecurityValidators(table, ppm);
         }
@@ -221,4 +223,26 @@ public class TableCollection {
         securityValidators.computeIfAbsent(tableName, tn -> new ArrayList<>())
                 .add(hv);
     }
+
+    public void initValidators(StaMainTable table, JooqPersistenceManager ppm) {
+        if (validators == null) {
+            return;
+        }
+        final List<HookValidator> hvList = validators.getOrDefault(table.getName(), Collections.emptyList());
+        for (HookValidator hv : hvList) {
+            hv.registerHooks(table, ppm);
+        }
+    }
+
+    public void addValidator(String tableName, HookValidator hv) {
+        if (validators == null) {
+            validators = new HashMap<>();
+        }
+        if (hv == null) {
+            return;
+        }
+        validators.computeIfAbsent(tableName, tn -> new ArrayList<>())
+                .add(hv);
+    }
+
 }

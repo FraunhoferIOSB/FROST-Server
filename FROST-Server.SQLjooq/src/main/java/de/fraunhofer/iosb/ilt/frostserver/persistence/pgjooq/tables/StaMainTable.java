@@ -48,8 +48,8 @@ import org.jooq.Name;
 import org.jooq.Record;
 
 /**
+ * The main table interface.
  *
- * @author Hylke van der Schaaf
  * @param <T> The exact type of the implementing class.
  */
 public interface StaMainTable<T extends StaMainTable<T>> extends StaTable<T> {

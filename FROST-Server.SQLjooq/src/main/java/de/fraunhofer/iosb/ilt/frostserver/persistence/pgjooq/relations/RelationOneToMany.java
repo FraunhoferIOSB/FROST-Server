@@ -21,25 +21,31 @@ import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersiste
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.NOT_IMPLEMENTED_MULTI_VALUE_PK;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
+import de.fraunhofer.iosb.ilt.frostserver.model.core.PkValue;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookRelation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jooq.Field;
+import org.jooq.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A relation from a source table to a target table.
  *
- * @author hylke
  * @param <S> The source table
  * @param <T> The target table
  */
@@ -84,6 +90,8 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
      * DISTINCT.
      */
     private final boolean distinctRequired;
+
+    private final transient SortedSet<SortingWrapper<Double, HookRelation>> hooks = new TreeSet<>();
 
     public RelationOneToMany(NavigationPropertyMain navProp, S source, T target) {
         this(navProp, source, target, navProp.isEntitySet());
@@ -136,25 +144,36 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     }
 
     @Override
-    public void link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets) {
+    public List<Entity> link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets) {
         if (distinctRequired) {
             Object sourceId = source.getPrimaryKeyValues().get(0);
             List<Object> targetIds = new ArrayList<>();
             targets.forEach(t -> targetIds.add(t.getPrimaryKeyValues().get(0)));
-            pm.timeExecute(
-                    pm.getDslContext().update(target)
-                            .setNull(targetFieldAccessor.getField(target))
-                            .where(
-                                    targetFieldAccessor.getField(target).eq(sourceId)
-                                            .and(target.getPkFields().get(0).notIn(targets))),
+
+            final Field targetPkField = target.getPkFields().get(0);
+
+            // Remove entities that should no longer be linked.
+            Result removedIds = pm.timeFetch(pm.getDslContext().update(target)
+                    .setNull(targetFieldAccessor.getField(target))
+                    .where(targetFieldAccessor.getField(target).eq(sourceId)
+                            .and(targetPkField.notIn(targetIds)))
+                    .returningResult(targetPkField),
                     LINK_TABLE);
-            for (var targetId : targetIds) {
-                pm.timeExecute(
-                        pm.getDslContext().update(target)
-                                .set(targetFieldAccessor.getField(target), sourceId)
-                                .where(target.getPkFields().get(0).eq(targetId)),
-                        LINK_TABLE);
+            final List<Entity> unlinkedEntities = new ArrayList<>();
+            for (Object id : removedIds) {
+                targetIds.remove(id);
+                Entity eUnlinked = EntityFactories.entityFromId(navProp.getEntityType(), PkValue.of(id));
+                for (var hook : hooks) {
+                    hook.getObject().postDelete(pm, navProp, source, eUnlinked);
+                }
+                unlinkedEntities.add(eUnlinked);
             }
+            // Link entities that now should be linked.
+            for (var targetId : targetIds) {
+                Entity eTarget = EntityFactories.entityFromId(navProp.getEntityType(), PkValue.of(targetId));
+                link(pm, source, eTarget);
+            }
+            return unlinkedEntities;
         } else {
             throw new IllegalArgumentException("Can not set multiple targets on relation with cardinality of one.");
         }
@@ -162,6 +181,9 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
 
     @Override
     public void link(JooqPersistenceManager pm, Entity source, Entity target) {
+        for (var hook : hooks) {
+            hook.getObject().preCreate(pm, navProp, source, target);
+        }
         link(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
     }
 
@@ -198,6 +220,9 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
     @Override
     public void unLink(JooqPersistenceManager pm, Entity source, Entity target) {
         unLink(pm, source.getPrimaryKeyValues().get(0), target.getPrimaryKeyValues().get(0));
+        for (var hook : hooks) {
+            hook.getObject().postDelete(pm, navProp, source, target);
+        }
     }
 
     protected void unLink(JooqPersistenceManager pm, Object sourceId, Object targetId) {
@@ -218,6 +243,16 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
         if (count != 1) {
             LOGGER.error("Executing query did not result in an update!");
         }
+    }
+
+    @Override
+    public SortedSet<SortingWrapper<Double, HookRelation>> getHooks() {
+        return hooks;
+    }
+
+    @Override
+    public void registerHook(Double priority, HookRelation hook) {
+        hooks.add(SortingWrapper.of(priority, hook));
     }
 
     /**

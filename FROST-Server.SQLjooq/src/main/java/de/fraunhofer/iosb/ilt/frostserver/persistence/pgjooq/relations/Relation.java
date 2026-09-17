@@ -19,9 +19,13 @@ package de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.relations;
 
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookRelation;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.QueryState;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.SortingWrapper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.TableRef;
+import java.util.List;
+import java.util.SortedSet;
 
 /**
  * The interface for table-to-table relations.
@@ -37,6 +41,23 @@ public interface Relation<S extends StaMainTable<S>> {
      * @return the name
      */
     public String getName();
+
+    /**
+     * Add a hook that runs pre create or delete.
+     *
+     * @param priority The priority. Lower priority hooks run first. This is a
+     * double to make sure it is always possible to squeeze in between two other
+     * hooks.
+     * @param hook The hook
+     */
+    public void registerHook(Double priority, HookRelation hook);
+
+    /**
+     * Get the hooks registered on this relation.
+     *
+     * @return The hooks registered on this relation.
+     */
+    public SortedSet<SortingWrapper<Double, HookRelation>> getHooks();
 
     /**
      * Create a table join across this relation.
@@ -81,8 +102,9 @@ public interface Relation<S extends StaMainTable<S>> {
      * @param pm The persistence manager to use for accessing the database.
      * @param source The source entity of the link.
      * @param targets The target entity of the link.
+     * @return The list of entities that are no longer linked.
      */
-    public void link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets);
+    public List<Entity> link(JooqPersistenceManager pm, Entity source, Iterable<Entity> targets);
 
     public void unLink(JooqPersistenceManager pm, Entity source, Entity target);
 }

@@ -27,8 +27,6 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.NoSuchEntityException;
 /**
  * A hook that can be registered on a table and will get executed after an
  * update has happened.
- *
- * @author hylke
  */
 public interface HookPostUpdate extends JooqPmHook {
 

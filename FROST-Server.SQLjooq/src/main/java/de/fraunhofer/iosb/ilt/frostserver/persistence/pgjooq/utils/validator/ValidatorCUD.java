@@ -22,7 +22,9 @@ import de.fraunhofer.iosb.ilt.configurable.editor.EditorSubclass;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreDelete;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreInsert;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.HookPreUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.tables.StaMainTable;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.ForbiddenException;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.UnauthorizedException;
@@ -64,9 +66,9 @@ public class ValidatorCUD implements HookValidator {
     public void registerHooks(StaMainTable mainTable, JooqPersistenceManager ppm) {
         LOGGER.info("    Registering hooks for {}", mainTable.getName());
         final EntityType entityType = mainTable.getEntityType();
-        if (getCheckInsertPreRel() != null) {
-            LOGGER.info("    - insert pre relations: {}", getCheckInsertPreRel());
-            mainTable.registerHookPreInsert(-10, (phase, pm, entity, insertFields) -> {
+        if (checkInsertPreRel != null) {
+            LOGGER.info("    - insert pre relations: {}", checkInsertPreRel);
+            final HookPreInsert hook = (phase, pm, entity, insertFields) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return true;
                 }
@@ -74,11 +76,12 @@ public class ValidatorCUD implements HookValidator {
                     throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
                 return true;
-            });
+            };
+            mainTable.registerHookPreInsert(-10, hook);
         }
-        if (getCheckInsert() != null) {
-            LOGGER.info("    - insert: {}", getCheckInsert());
-            mainTable.registerHookPreInsert(-10, (phase, pm, entity, insertFields) -> {
+        if (checkInsert != null) {
+            LOGGER.info("    - insert: {}", checkInsert);
+            final HookPreInsert hook = (phase, pm, entity, insertFields) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return true;
                 }
@@ -86,22 +89,24 @@ public class ValidatorCUD implements HookValidator {
                     throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
                 return true;
-            });
+            };
+            mainTable.registerHookPreInsert(-10, hook);
         }
-        if (getCheckUpdate() != null) {
-            LOGGER.info("    - update: {}", getCheckUpdate());
-            mainTable.registerHookPreUpdate(-10, (pm, entity, id, updateMode) -> {
+        if (checkUpdate != null) {
+            LOGGER.info("    - update: {}", checkUpdate);
+            final HookPreUpdate hook = (pm, entity, id, updateMode) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return;
                 }
                 if (!checkUpdate.check(pm, entity)) {
                     throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
-            });
+            };
+            mainTable.registerHookPreUpdate(-10, hook);
         }
-        if (getCheckDelete() != null) {
-            LOGGER.info("    - delete: {}", getCheckDelete());
-            mainTable.registerHookPreDelete(-10, (pm, id) -> {
+        if (checkDelete != null) {
+            LOGGER.info("    - delete: {}", checkDelete);
+            final HookPreDelete hook = (pm, id) -> {
                 if (PrincipalExtended.getLocalPrincipal().isAdmin()) {
                     return;
                 }
@@ -109,7 +114,8 @@ public class ValidatorCUD implements HookValidator {
                 if (!checkDelete.check(pm, entity)) {
                     throwUnautorizedOrForbidden(OPERATION_NOT_ALLOWED);
                 }
-            });
+            };
+            mainTable.registerHookPreDelete(-10, hook);
         }
     }
 

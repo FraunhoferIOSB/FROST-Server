@@ -550,7 +550,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
     }
 
     @Override
-    public void deleteRelation(PathElementEntity source, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException, NoSuchEntityException {
+    public void deleteRelation(PathElementEntity sourcePath, NavigationPropertyMain np, PathElementEntity target) throws IncompleteEntityException, NoSuchEntityException {
         if (!np.isEntitySet() && np.isRequired()) {
             throw new IncompleteEntityException("Deleting a required relation is not allowed. Delete the entity instead.");
         }
@@ -559,14 +559,14 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
             throw new IncompleteEntityException("Deleting a required relation is not allowed. Delete the entity instead.");
         }
         final boolean userIsAdmin = PrincipalExtended.getLocalPrincipal().isAdmin();
-        final StaMainTable<?> sourceTable = getTableCollection().getTableForType(source.getEntityType());
+        final EntityType sourceType = sourcePath.getEntityType();
+        final StaMainTable<?> sourceTable = getTableCollection().getTableForType(sourceType);
         final Relation<?> relation = sourceTable.findRelation(np.getName());
-        final Entity sourceEntity = EntityFactories.entityFromId(source.getEntityType(), source.getPkValues());
+        final Entity sourceEntity = EntityFactories.entityFromId(sourceType, sourcePath.getPkValues());
         if (!entityFactories.entityExists(this, sourceEntity, userIsAdmin)) {
-            throw new NoSuchEntityException("Source entity not found: " + source.getEntityType() + "(" + source.getPkValues() + ")");
+            throw new NoSuchEntityException("Source entity not found: " + sourceType + "(" + sourcePath.getPkValues() + ")");
         }
-        StaMainTable<?> tableSource = getTableCollection().getTableForType(sourceEntity.getType());
-        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : tableSource.getHooksPreUpdate()) {
+        for (SortingWrapper<Double, HookPreUpdate> hookWrapper : sourceTable.getHooksPreUpdate()) {
             try {
                 hookWrapper.getObject().preUpdateInDatabase(this, sourceEntity, sourceEntity.getPrimaryKeyValues(), EditFeatures.NONE);
             } catch (IncompleteEntityException ex) {
@@ -576,7 +576,7 @@ public abstract class JooqAbsPersistenceManager extends AbstractPersistenceManag
 
         final Entity targetEntity = EntityFactories.entityFromId(target.getEntityType(), target.getPkValues());
         if (!entityFactories.entityExists(this, targetEntity, userIsAdmin)) {
-            throw new NoSuchEntityException("Source entity not found: " + target.getEntityType() + "(" + target.getPkValues() + ")");
+            throw new NoSuchEntityException("Target entity not found: " + target.getEntityType() + "(" + target.getPkValues() + ")");
         }
         StaMainTable<?> tableTarget = getTableCollection().getTableForType(targetEntity.getType());
         for (SortingWrapper<Double, HookPreUpdate> hookWrapper : tableTarget.getHooksPreUpdate()) {

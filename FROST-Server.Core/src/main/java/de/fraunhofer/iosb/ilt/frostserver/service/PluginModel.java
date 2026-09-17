@@ -21,8 +21,6 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 
 /**
  * The interface that plugins must implement that want to change the data model.
- *
- * @author hylke
  */
 public interface PluginModel extends Plugin {
 
