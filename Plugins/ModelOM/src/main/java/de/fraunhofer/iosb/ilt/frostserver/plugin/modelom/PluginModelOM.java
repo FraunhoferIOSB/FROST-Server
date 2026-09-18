@@ -19,10 +19,15 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.modelom;
 
 import static de.fraunhofer.iosb.ilt.frostserver.service.InitResult.INIT_DELAY;
 
+import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
+import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.modelloader.PluginModelLoader;
 import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
-import de.fraunhofer.iosb.ilt.frostserver.service.Plugin;
 import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginModel;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;
@@ -33,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Plugin loader for the Observations and Measurements Model plugin.
  */
-public class PluginModelOM implements Plugin, ConfigDefaults {
+public class PluginModelOM implements PluginModel, ConfigDefaults {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginModelOM.class.getName());
 
@@ -41,6 +46,7 @@ public class PluginModelOM implements Plugin, ConfigDefaults {
     public static final String TAG_ENABLE_PDQ = "modelOM.enable";
 
     private boolean enabled;
+    private boolean initialised;
 
     @Override
     public InitResult init(CoreSettings settings) {
@@ -68,6 +74,37 @@ public class PluginModelOM implements Plugin, ConfigDefaults {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public boolean isFullyInitialised() {
+        return initialised;
+    }
+
+    @Override
+    public void registerEntityTypes() {
+        // Nothing to do.
+    }
+
+    @Override
+    public boolean linkEntityTypes(PersistenceManager pm) {
+        final CoreSettings coreSettings = pm.getCoreSettings();
+        final PluginCoreModelV2 pluginCoreModel = coreSettings.getPluginManager().getPlugin(PluginCoreModelV2.class);
+        if (pluginCoreModel == null || !pluginCoreModel.isEnabled()) {
+            LOGGER.info("CoreModelV2 not enabled, delaying...");
+            return false;
+        }
+        ModelRegistry mr = coreSettings.getModelRegistry();
+        EntityType etmn = mr.getEntityTypeForName("MonitoringNetwork");
+        if (etmn == null) {
+            LOGGER.info("MonitoringNetwork entity type not registered, delaying...");
+            return false;
+        }
+        if (pm instanceof JooqPersistenceManager jpm) {
+            jpm.getTableCollection().addValidator("monitoring_networks", new LinkingTimeValidator());
+        }
+        initialised = true;
+        return true;
     }
 
 }

@@ -219,7 +219,7 @@ class TestSuite {
             final int countPut = HTTPMethods.getCountPut();
             HTTPMethods.resetStats();
             Assertions.assertEquals(6, countDelete, "Unexpected number of DELETE calls.");
-            Assertions.assertEquals(219, countGet, "Unexpected number of GET calls.");
+            Assertions.assertEquals(225, countGet, "Unexpected number of GET calls.");
             Assertions.assertEquals(0, countPatch, "Unexpected number of PATCH calls.");
             Assertions.assertEquals(3, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(48, countPut, "Unexpected number of PUT calls.");

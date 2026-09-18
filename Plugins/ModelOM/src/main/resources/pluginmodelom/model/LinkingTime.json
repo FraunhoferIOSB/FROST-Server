@@ -90,6 +90,14 @@
           "annotations": []
         }
       ],
+      "hooks": [
+        {
+          "hook": {
+            "@class": "de.fraunhofer.iosb.ilt.frostserver.plugin.modelom.HookPostInsertUpdateLinkingTime",
+            "tltName": "tn_linking_time"
+          }
+        }
+      ],
       "annotations": []
     }
   ]

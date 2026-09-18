@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.property.type.TypeComplex;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.swecommon.util.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -44,6 +45,7 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
+import de.fraunhofer.iosb.ilt.statests.util.model.SensorThingsV20Om;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -55,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import net.time4j.Moment;
 import org.geojson.Point;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -80,7 +83,10 @@ public class ReferenceTests20 extends AbstractTestClass {
     private static final List<Entity> OBSERVATIONS = new ArrayList<>();
     private static final List<Entity> SENSORS = new ArrayList<>();
     private static final List<Entity> THINGS = new ArrayList<>();
-    private static SensorThingsV20Core sMdl;
+    private static final List<Entity> NETWORKS = new ArrayList<>();
+
+    private static SensorThingsV20Core mdlCore;
+    private static SensorThingsV20Om mdlOm;
 
     private static final Map<String, String> SERVER_PROPERTIES = new LinkedHashMap<>();
 
@@ -90,6 +96,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.coreModel.idType", "LONG");
         SERVER_PROPERTIES.put("plugins.coreService.enable", "true");
         SERVER_PROPERTIES.put("plugins.coreModelV2.enable", "true");
+        SERVER_PROPERTIES.put("plugins.modelOM.enable", "true");
     }
 
     public ReferenceTests20() {
@@ -99,7 +106,8 @@ public class ReferenceTests20 extends AbstractTestClass {
     @Override
     protected void setUpVersion() throws ServiceFailureException {
         LOGGER.info("Setting up for version {}.", version.urlPart);
-        sMdl = sSrvc.getModel(SensorThingsV20Core.class);
+        mdlCore = sSrvc.getModel(SensorThingsV20Core.class);
+        mdlOm = sSrvc.getModel(SensorThingsV20Om.class);
         try {
             EntityUtils.deleteAll(sSrvc);
             createEntities();
@@ -111,7 +119,7 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     @Override
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
-        return new SensorThingsService(new SensorThingsV20Core())
+        return new SensorThingsService(new SensorThingsV20Core(), new SensorThingsV20Om())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
                 .init();
     }
@@ -140,68 +148,68 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException {
         {
-            Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+            Entity thing = mdlCore.newThing("Thing 1", "The first thing.");
             sSrvc.create(thing);
             THINGS.add(thing);
         }
         {
-            Entity location = sMdl.newLocation("Location Des Dings von ILT", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 49));
-            location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+            Entity location = mdlCore.newLocation("Location Des Dings von ILT", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 49));
+            location.addNavigationEntity(mdlCore.npLocationThings, THINGS.get(0));
             sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Entity sensor1 = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+            Entity sensor1 = mdlCore.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
             sSrvc.create(sensor1);
             SENSORS.add(sensor1);
         }
         {
-            Entity sensor2 = sMdl.newSensor("Sensor 2", "The second sensor", "text", "Some metadata.");
+            Entity sensor2 = mdlCore.newSensor("Sensor 2", "The second sensor", "text", "Some metadata.");
             sSrvc.create(sensor2);
             SENSORS.add(sensor2);
         }
-        Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp1 = mdlCore.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
         sSrvc.create(obsProp1);
         OPROPS.add(obsProp1);
 
-        Entity obsProp2 = sMdl.newObservedProperty("Humidity", "http://ucom.org/humidity", "The humidity of the thing.");
+        Entity obsProp2 = mdlCore.newObservedProperty("Humidity", "http://ucom.org/humidity", "The humidity of the thing.");
         sSrvc.create(obsProp2);
         OPROPS.add(obsProp2);
 
         {
-            Entity datastream1 = sMdl.newDatastream(
+            Entity datastream1 = mdlCore.newDatastream(
                     "Datastream Temp",
                     "The temperature of thing 1, sensor 1.",
                     obsProp1.getSelfLink(false),
                     new UnitOfMeasurement().setLabel("degree celcius").setSymbol("°C").setCode("ucum:T"));
-            datastream1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-            datastream1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+            datastream1.setProperty(mdlCore.npDatastreamThing, THINGS.get(0).withOnlyPk());
+            datastream1.setProperty(mdlCore.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
             sSrvc.create(datastream1);
             DATASTREAMS.add(datastream1);
         }
         {
-            Entity datastream2 = sMdl.newDatastream(
+            Entity datastream2 = mdlCore.newDatastream(
                     "Datastream LF",
                     "The humidity of thing 1, sensor 2.",
                     obsProp2.getSelfLink(false),
                     new UnitOfMeasurement().setLabel("relative humidity").setSymbol("%").setCode("ucum:Humidity"))
-                    .setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk())
-                    .setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
+                    .setProperty(mdlCore.npDatastreamThing, THINGS.get(0).withOnlyPk())
+                    .setProperty(mdlCore.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
             sSrvc.create(datastream2);
             DATASTREAMS.add(datastream2);
         }
         {
-            Entity feature = sMdl.newFeature("Feature 1", "The first Features", new Point(8.0, 50.0));
+            Entity feature = mdlCore.newFeature("Feature 1", "The first Features", new Point(8.0, 50.0));
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
         {
-            Entity feature = sMdl.newFeature("Feature 2", "The second Features", new Point(9.0, 50.0));
+            Entity feature = mdlCore.newFeature("Feature 2", "The second Features", new Point(9.0, 50.0));
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
         {
-            Entity feature = sMdl.newFeature("Feature 3", "The third Features", new Point(9.0, 51.0));
+            Entity feature = mdlCore.newFeature("Feature 3", "The third Features", new Point(9.0, 51.0));
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
@@ -231,16 +239,16 @@ public class ReferenceTests20 extends AbstractTestClass {
     void test01_editRefEntity() throws ServiceFailureException {
         LOGGER.info("  test01_editRefEntity");
         final Entity ds0 = DATASTREAMS.get(0);
-        putEntityRefAndTest(ds0, sMdl.npDatastreamProximateFoi, FEATURES.get(0), true);
-        putEntityRefAndTest(ds0, sMdl.npDatastreamProximateFoi, FEATURES.get(1), false);
+        putEntityRefAndTest(ds0, mdlCore.npDatastreamProximateFoi, FEATURES.get(0), true);
+        putEntityRefAndTest(ds0, mdlCore.npDatastreamProximateFoi, FEATURES.get(1), false);
 
         String selfLinkSrc = ds0.getSelfLink();
-        String refLink = selfLinkSrc + "/" + sMdl.npDatastreamProximateFoi.getName() + "/$ref";
+        String refLink = selfLinkSrc + "/" + mdlCore.npDatastreamProximateFoi.getName() + "/$ref";
         {
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
             Entity target = ds0.withOnlyPk()
-                    .getProperty(sMdl.npDatastreamProximateFoi);
+                    .getProperty(mdlCore.npDatastreamProximateFoi);
             Assertions.assertNull(target);
         }
         {
@@ -275,16 +283,16 @@ public class ReferenceTests20 extends AbstractTestClass {
     void test02_editRefEntitySet() {
         LOGGER.info("  test02_editRefEntitySet");
         final Entity f0 = FEATURES.get(0);
-        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 0));
-        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 1, 2));
-        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 1));
+        putEntitySetRefsAndTest(f0, mdlCore.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 0));
+        putEntitySetRefsAndTest(f0, mdlCore.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 1, 2));
+        putEntitySetRefsAndTest(f0, mdlCore.npFeatureFeatureTypes, true, getFromList(FEATURE_TYPES, 1));
 
         String selfLinkSrc = f0.getSelfLink();
-        String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "(" + Utils.quoteForUrl(FEATURE_TYPES.get(1).getPrimaryKeyValues().get(0)) + ")" + "/$ref";
+        String refLink = selfLinkSrc + "/" + mdlCore.npFeatureFeatureTypes.getName() + "(" + Utils.quoteForUrl(FEATURE_TYPES.get(1).getPrimaryKeyValues().get(0)) + ")" + "/$ref";
         {
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
-            EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", Collections.emptyList());
+            EntityUtils.testFilterResults(f0.dao(mdlCore.npFeatureFeatureTypes), "", Collections.emptyList());
         }
         {
             // Doing it again should give a reference-not-found
@@ -297,27 +305,107 @@ public class ReferenceTests20 extends AbstractTestClass {
     void test03_editRefEntitySet() {
         LOGGER.info("  test03_editRefEntitySet");
         final Entity f0 = FEATURES.get(0);
-        putEntitySetRefsAndTest(f0, sMdl.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 0, 1, 2));
+        putEntitySetRefsAndTest(f0, mdlCore.npFeatureFeatureTypes, false, getFromList(FEATURE_TYPES, 0, 1, 2));
 
         String selfLinkSrc = f0.getSelfLink();
         {
-            String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "/$ref?$id=../../" + FEATURE_TYPES.get(1).getSelfLink(false);
+            String refLink = selfLinkSrc + "/" + mdlCore.npFeatureFeatureTypes.getName() + "/$ref?$id=../../" + FEATURE_TYPES.get(1).getSelfLink(false);
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
-            EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 0, 2));
+            EntityUtils.testFilterResults(f0.dao(mdlCore.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 0, 2));
         }
         {
-            String refLink = selfLinkSrc + "/" + sMdl.npFeatureFeatureTypes.getName() + "/$ref?$id=" + FEATURE_TYPES.get(0).getSelfLink(true);
+            String refLink = selfLinkSrc + "/" + mdlCore.npFeatureFeatureTypes.getName() + "/$ref?$id=" + FEATURE_TYPES.get(0).getSelfLink(true);
             HttpResponse response = HTTPMethods.doDelete(refLink);
             Assertions.assertEquals(204, response.code);
-            EntityUtils.testFilterResults(f0.dao(sMdl.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 2));
+            EntityUtils.testFilterResults(f0.dao(mdlCore.npFeatureFeatureTypes), "", getFromList(FEATURE_TYPES, 2));
         }
         // Adding the ony that is already there is a no-op (204 no content)
-        postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, false, FEATURE_TYPES.get(2), getFromList(FEATURE_TYPES, 2));
+        postEntitySetRefAndTest(f0, mdlCore.npFeatureFeatureTypes, false, FEATURE_TYPES.get(2), getFromList(FEATURE_TYPES, 2));
         // Adding a new one.
-        postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, false, FEATURE_TYPES.get(1), getFromList(FEATURE_TYPES, 1, 2));
+        postEntitySetRefAndTest(f0, mdlCore.npFeatureFeatureTypes, false, FEATURE_TYPES.get(1), getFromList(FEATURE_TYPES, 1, 2));
         // Adding a new one.
-        postEntitySetRefAndTest(f0, sMdl.npFeatureFeatureTypes, true, FEATURE_TYPES.get(0), getFromList(FEATURE_TYPES, 0, 1, 2));
+        postEntitySetRefAndTest(f0, mdlCore.npFeatureFeatureTypes, true, FEATURE_TYPES.get(0), getFromList(FEATURE_TYPES, 0, 1, 2));
+    }
+
+    @Test
+    void test10_omLinkingTimeAutomation() throws ServiceFailureException {
+        Entity thing = mdlCore.newThing("NetworkThing 1", "The first thing to network.");
+        sSrvc.create(thing);
+        THINGS.add(thing);
+
+        Entity nw1 = mdlOm.buildMonitoringNetwork()
+                .setName("TestNetwork 1")
+                .build();
+        sSrvc.create(nw1);
+        NETWORKS.add(nw1);
+
+        PkValue linkPk1;
+        {
+            // Create a link, test if a LinkingTime is created automatically.
+            EntityUtils.testFilterResults(sSrvc.dao(mdlOm.etLinkingTime), "", Collections.emptyList());
+            nw1.addLink(mdlOm.npMonitoringnetworkThings, thing);
+            List<Entity> links = sSrvc.query(mdlOm.etLinkingTime).list().toList();
+            Assertions.assertEquals(1, links.size(), "Incorrect number of links found.");
+            Entity link1 = links.get(0);
+            linkPk1 = link1.getPrimaryKeyValues();
+            final TimeValue link1Time = link1.getProperty(SensorThingsV20Om.EP_TIME);
+            Assertions.assertTrue(link1Time.isInstant(), "Expected only a start time, also got an end time.");
+        }
+        {
+            // Create the same link again. This is a no-op, so no LinkingTime should be created automatically.
+            nw1.addLink(mdlOm.npMonitoringnetworkThings, thing);
+            List<Entity> links = sSrvc.query(mdlOm.etLinkingTime).list().toList();
+            Assertions.assertEquals(1, links.size(), "Incorrect number of links found.");
+            Entity link1 = links.get(0);
+            Assertions.assertEquals(linkPk1, link1.getPrimaryKeyValues(), "ID of the link should not change");
+            final TimeValue link1Time = link1.getProperty(SensorThingsV20Om.EP_TIME);
+            Assertions.assertTrue(link1Time.isInstant(), "Expected only a start time, also got an end time.");
+        }
+        {
+            // Delete the link, test if a LinkingTime is closed automatically.
+            nw1.unLink(mdlOm.npMonitoringnetworkThings, thing);
+            List<Entity> links = sSrvc.query(mdlOm.etLinkingTime).list().toList();
+            Assertions.assertEquals(1, links.size(), "Incorrect number of links found.");
+            Entity link1 = links.get(0);
+            Assertions.assertEquals(linkPk1, link1.getPrimaryKeyValues(), "ID of the link should not change");
+            final TimeValue link1Time = link1.getProperty(SensorThingsV20Om.EP_TIME);
+            Assertions.assertTrue(link1Time.isInterval(), "Expected a start and end time, only got a start time.");
+        }
+    }
+
+    @Test
+    void test11_omLinkingTimeAutomation() throws ServiceFailureException {
+        Entity thing = THINGS.getLast();
+        Entity nw2 = mdlOm.buildMonitoringNetwork()
+                .setName("TestNetwork 2")
+                .build();
+        sSrvc.create(nw2);
+        NETWORKS.add(nw2);
+
+        {
+            // Create an open LinkingTime, this should also create a direct link.
+            EntityUtils.testFilterResults(thing.dao(mdlOm.npThingMonitoringnetworks), "", Collections.emptyList());
+            EntityUtils.testFilterResults(nw2.dao(mdlOm.npMonitoringnetworkThings), "", Collections.emptyList());
+            final Moment timeNow = Moment.nowInSystemTime();
+            Entity lt1 = mdlOm.buildLinkingTime()
+                    .addThing(thing)
+                    .addMonitoringNetwork(nw2)
+                    .setTimeStart(timeNow.minus(1, TimeUnit.DAYS))
+                    .build();
+            sSrvc.create(lt1);
+            EntityUtils.testFilterResults(thing.dao(mdlOm.npThingMonitoringnetworks), "", getFromList(NETWORKS, 1));
+            EntityUtils.testFilterResults(nw2.dao(mdlOm.npMonitoringnetworkThings), "", getFromList(THINGS, 1));
+            // Close the linking time, this should remove the direct links.
+            sSrvc.update(
+                    mdlOm.buildLinkingTime()
+                            .setId(lt1.getPrimaryKeyValues())
+                            .setTime(lt1.getProperty(SensorThingsV20Om.EP_TIME))
+                            .setTimeEnd(timeNow)
+                            .build());
+            EntityUtils.testFilterResults(thing.dao(mdlOm.npThingMonitoringnetworks), "", Collections.emptyList());
+            EntityUtils.testFilterResults(nw2.dao(mdlOm.npMonitoringnetworkThings), "", Collections.emptyList());
+        }
     }
 
     private void putEntitySetRefsAndTest(Entity source, NavigationPropertyEntitySet np, boolean abs, List<Entity> targets) {
@@ -360,11 +448,11 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     //To remove once added to FROST-Client-Dynamic
     public static Entity newFeatureType() {
-        return new Entity(sMdl.etFeatureType);
+        return new Entity(mdlCore.etFeatureType);
     }
 
     public static Entity newFeatureType(Object id) {
-        return new Entity(sMdl.etFeatureType)
+        return new Entity(mdlCore.etFeatureType)
                 .setPrimaryKeyValues(PkValue.of(id));
     }
 
@@ -397,7 +485,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         int idx = registry.size();
         MapValue properties = new MapValue(TypeComplex.STA_MAP);
         properties.put("idx", idx);
-        Entity obs = sMdl.newObservation(result, phenomenonTime, datastream)
+        Entity obs = mdlCore.newObservation(result, phenomenonTime, datastream)
                 .setProperty(EP_VALIDTIME, validTime)
                 .setProperty(EP_PROPERTIES, properties);
         srvc.create(obs);
