@@ -36,16 +36,12 @@ import jakarta.json.JsonValue;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.node.LongNode;
 import tools.jackson.databind.node.StringNode;
 
-/**
- * @author Hylke van der Schaaf
- */
 public abstract class JsonPatchTests extends AbstractTestClass {
 
     /**
@@ -73,25 +69,14 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         createEntities();
     }
 
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
         OPROPS.clear();
         DATASTREAMS.clear();
-    }
-
-    /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
-     *
-     * @throws ServiceFailureException
-     */
-    @AfterAll
-    public static void deleteEverything() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

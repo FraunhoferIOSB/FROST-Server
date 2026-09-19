@@ -38,6 +38,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.swecommon.util.UnitOfMeasuremen
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -160,20 +161,22 @@ public class DateTimeTests20 extends AbstractTestClass {
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
         return new SensorThingsService(new SensorThingsV20Core())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 
     @AfterAll
-    static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    static void stats() {
         cleanup();
+        HTTPMethods.expectStats("DateTimeTests20", 56, 483, 0, 55, 0);
     }
 
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

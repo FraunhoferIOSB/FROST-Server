@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 /**
  * Runs the FineGrained Auth Tests using Keycloak Auth on the v1.1 API.
@@ -28,4 +30,9 @@ public class FineGrainedAuthTestsKeycloakAnon11 extends FineGrainedAuthTestsKeyc
         super(ServerVersion.V_1_1, true);
     }
 
+    @AfterAll
+    static void stats() {
+        FineGrainedAuthTestsKeycloak.cleanup();
+        HTTPMethods.expectStats("FineGrainedAuthTestsKeycloakAnon11", 0, 15, 0, 2, 0);
+    }
 }

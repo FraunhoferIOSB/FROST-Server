@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class BasicAuthTests11 extends BasicAuthTests {
 
@@ -25,4 +27,9 @@ public class BasicAuthTests11 extends BasicAuthTests {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        BasicAuthTests.cleanup();
+        HTTPMethods.expectStats("BasicAuthTests11", 7, 38, 4, 6, 0);
+    }
 }

@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
@@ -44,7 +45,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -122,6 +122,7 @@ abstract class AbstractAuthTests extends AbstractTestClass {
             return new SensorThingsService(sSrvc.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .setVersion(sSrvc.getVersion())
+                    .addHook(HTTPMethods.getCountHook())
                     .init();
         } catch (MalformedURLException | URISyntaxException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
@@ -158,14 +159,7 @@ abstract class AbstractAuthTests extends AbstractTestClass {
      */
     public abstract SensorThingsService getServiceAnonymous();
 
-    @AfterAll
-    static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
-        sMdl = null;
-    }
-
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(serviceAdmin);
         THINGS.clear();
         LOCATIONS.clear();
@@ -173,6 +167,8 @@ abstract class AbstractAuthTests extends AbstractTestClass {
         O_PROPS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
+        sMdl = null;
+        AbstractTestClass.cleanup();
     }
 
     @Test

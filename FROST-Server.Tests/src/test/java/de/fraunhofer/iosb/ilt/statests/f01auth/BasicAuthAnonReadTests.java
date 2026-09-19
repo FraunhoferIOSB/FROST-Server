@@ -60,6 +60,10 @@ abstract class BasicAuthAnonReadTests extends AbstractAuthTests {
         super.setUpVersion();
     }
 
+    public static void cleanup() {
+        AbstractAuthTests.cleanup();
+    }
+
     @Override
     public SensorThingsService getServiceAdmin() {
         return AuthTestHelper.setAuthBasic(createService(), "admin", "admin");

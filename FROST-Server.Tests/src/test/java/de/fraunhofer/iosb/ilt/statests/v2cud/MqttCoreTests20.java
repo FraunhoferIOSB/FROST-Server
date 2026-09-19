@@ -43,6 +43,7 @@ import de.fraunhofer.iosb.ilt.statests.util.EntityHelper20;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelperAbstract.EntityCreateInfo;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelperAbstract.StringModifier;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
@@ -117,27 +118,22 @@ public class MqttCoreTests20 extends AbstractTestClass {
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
         return new SensorThingsService(new SensorThingsV20Core())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 
-    /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
-     *
-     * @throws ServiceFailureException if cleaning up fails,
-     */
     @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    static void stats() {
         cleanup();
+        HTTPMethods.expectStats("MqttCoreTests20", 99, 686, 33, 139, 42);
     }
 
-    public static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         eh.clearCaches();
         eh = null;
         mqttHelper = null;
-
+        AbstractTestClass.cleanup();
     }
 
     private void deleteCreatedEntities() throws ServiceFailureException {

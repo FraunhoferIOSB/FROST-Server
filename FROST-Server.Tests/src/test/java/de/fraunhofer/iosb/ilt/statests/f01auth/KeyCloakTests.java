@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestCore;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -115,6 +116,10 @@ abstract class KeyCloakTests extends AbstractAuthTests {
         USERS.add(mdlUsers.newUser("write", null));
     }
 
+    public static void cleanup() {
+        AbstractAuthTests.cleanup();
+    }
+
     @Test
     void test_100_ReadUser() {
         LOGGER.info("  test_100_ReadUser");
@@ -132,6 +137,7 @@ abstract class KeyCloakTests extends AbstractAuthTests {
             return new SensorThingsService(baseService.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .setVersion(baseService.getVersion())
+                    .addHook(HTTPMethods.getCountHook())
                     .init();
         } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);

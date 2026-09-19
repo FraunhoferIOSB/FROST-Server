@@ -36,6 +36,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -108,16 +109,17 @@ public class MqttRequestResponse20 extends AbstractTestClass {
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
         return new SensorThingsService(new SensorThingsV20Core())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 
     @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    static void stats() {
         cleanup();
+        HTTPMethods.expectStats("MqttRequestResponse20", 8, 12, 0, 13, 0);
     }
 
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         FEATURES.clear();
@@ -126,6 +128,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         O_PROPS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {
@@ -414,28 +417,28 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         public void accept(Mqtt5Publish p) {
             final Optional<ByteBuffer> correlationData = p.getCorrelationData();
             if (correlationData.isEmpty()) {
-                LOGGER.error("Received a publish without correlation data: {}", p);
+                LOGGER.error("    Received a publish without correlation data: {}", p);
                 unexpectedCount.incrementAndGet();
                 return;
             }
             final byte[] corrData = asByteArray(correlationData.get());
             DataAnalyser analyser = analysers.get(new BigInteger(corrData));
             if (analyser == null) {
-                LOGGER.error("Received a publish with unknown correlation data: {}", p);
+                LOGGER.error("    Received a publish with unknown correlation data: {}", p);
                 unexpectedCount.incrementAndGet();
                 return;
             }
             try {
                 if (analyser.analyse(p)) {
-                    LOGGER.info("Received a publish expected data: {}", p);
+                    LOGGER.debug("    Received a publish expected data: {}", p);
                     goodCount.incrementAndGet();
                 } else {
-                    LOGGER.error("Received a publish unexpected data: {}", p);
+                    LOGGER.error("    Received a publish unexpected data: {}", p);
                     failCount.incrementAndGet();
                 }
             } catch (AssertionFailedError e) {
                 // The test used assertions, and failed.
-                LOGGER.info("Analyser failed: {}", e.toString(), e);
+                LOGGER.debug("    Analyser failed: {}", e.toString(), e);
                 failCount.incrementAndGet();
             }
             if (activeCount.decrementAndGet() == 0) {

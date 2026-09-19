@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class FilterTests11 extends FilterTests {
 
@@ -25,4 +27,9 @@ public class FilterTests11 extends FilterTests {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        FilterTests.cleanup();
+        HTTPMethods.expectStats("FilterTests10", 22, 42, 0, 63, 0);
+    }
 }

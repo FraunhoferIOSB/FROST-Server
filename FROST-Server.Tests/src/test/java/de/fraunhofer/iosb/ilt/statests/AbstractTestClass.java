@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Tasking;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.ActuationModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.MdsModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,7 +37,6 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-import org.junit.jupiter.api.AfterAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,9 @@ public abstract class AbstractTestClass {
             LOGGER.trace("Init for version {} on {}.", serverVersion.urlPart, getClass());
             if (!serverVersion.equals(version)) {
                 if (version != null) {
-                    LOGGER.warn("Previous implementation did not clean up!");
+                    LOGGER.error("-----------------------------------------");
+                    LOGGER.error("Previous implementation did not clean up!");
+                    LOGGER.error("-----------------------------------------");
                 }
                 version = serverVersion;
                 LOGGER.info("Setting up for version {}.\n\n", version.urlPart);
@@ -105,16 +107,17 @@ public abstract class AbstractTestClass {
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
         return new SensorThingsService(new SensorThingsV11Sensing(), new SensorThingsV11MultiDatastream(), new SensorThingsV11Tasking())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 
     protected abstract void setUpVersion() throws ServiceFailureException, URISyntaxException;
 
-    @AfterAll
-    public static final void cleanupAbstractClass() {
+    public static void cleanup() {
         version = null;
         serverSettings = null;
         sSrvc = null;
+        HTTPMethods.logStats();
     }
 
     /**

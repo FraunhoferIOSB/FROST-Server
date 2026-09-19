@@ -194,12 +194,15 @@ class TestSuite {
             final int countPatch = HTTPMethods.getCountPatch();
             final int countPost = HTTPMethods.getCountPost();
             final int countPut = HTTPMethods.getCountPut();
+            final int countSets = HTTPMethods.getSetCount();
+
             HTTPMethods.resetStats();
-            Assertions.assertEquals(190, countDelete, "Unexpected number of DELETE calls.");
-            Assertions.assertEquals(6773, countGet, "Unexpected number of GET calls.");
-            Assertions.assertEquals(46, countPatch, "Unexpected number of PATCH calls.");
-            Assertions.assertEquals(204, countPost, "Unexpected number of POST calls.");
+            Assertions.assertEquals(965, countDelete, "Unexpected number of DELETE calls.");
+            Assertions.assertEquals(10601, countGet, "Unexpected number of GET calls.");
+            Assertions.assertEquals(141, countPatch, "Unexpected number of PATCH calls.");
+            Assertions.assertEquals(1242, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(64, countPut, "Unexpected number of PUT calls.");
+            Assertions.assertEquals(57, countSets, "Unexpected number of call sets.");
         }
     }
 
@@ -218,10 +221,10 @@ class TestSuite {
             final int countPost = HTTPMethods.getCountPost();
             final int countPut = HTTPMethods.getCountPut();
             HTTPMethods.resetStats();
-            Assertions.assertEquals(6, countDelete, "Unexpected number of DELETE calls.");
-            Assertions.assertEquals(225, countGet, "Unexpected number of GET calls.");
-            Assertions.assertEquals(0, countPatch, "Unexpected number of PATCH calls.");
-            Assertions.assertEquals(3, countPost, "Unexpected number of POST calls.");
+            Assertions.assertEquals(207, countDelete, "Unexpected number of DELETE calls.");
+            Assertions.assertEquals(1298, countGet, "Unexpected number of GET calls.");
+            Assertions.assertEquals(34, countPatch, "Unexpected number of PATCH calls.");
+            Assertions.assertEquals(271, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(48, countPut, "Unexpected number of PUT calls.");
         }
     }

@@ -105,6 +105,10 @@ abstract class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
 
     }
 
+    public static void cleanup() {
+        FineGrainedAuthTests.cleanup();
+    }
+
     @Override
     public String getBatchPostData() throws IOException {
         return IOUtils.resourceToString("finegrainedsecurity/dataBatchPostKeyCloak.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());

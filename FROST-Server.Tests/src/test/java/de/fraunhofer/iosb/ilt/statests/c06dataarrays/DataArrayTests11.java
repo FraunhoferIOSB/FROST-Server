@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c06dataarrays;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class DataArrayTests11 extends DataArrayTests {
 
@@ -25,4 +27,9 @@ public class DataArrayTests11 extends DataArrayTests {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        DataArrayTests.cleanup();
+        HTTPMethods.expectStats("DataArrayTests11", 10, 20, 0, 22, 0);
+    }
 }

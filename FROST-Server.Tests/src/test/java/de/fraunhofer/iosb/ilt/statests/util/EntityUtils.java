@@ -216,26 +216,34 @@ public class EntityUtils {
         return null;
     }
 
-    public static void deleteAll(StaService sts) throws ServiceFailureException {
+    public static void deleteAll(StaService sts) {
         deleteAll(sts.service);
     }
 
-    public static void deleteAll(SensorThingsService service) throws ServiceFailureException {
+    public static void deleteAll(SensorThingsService service) {
         ModelRegistry mr = service.getModelRegistry();
         if (mr.getEntityTypeForName("Thing") != null) {
             // First delete Things, for efficiency
-            deleteAll(service.dao(mr.getEntityTypeForName("Thing")));
+            catchDeleteAll(service.dao(mr.getEntityTypeForName("Thing")));
         }
         for (de.fraunhofer.iosb.ilt.frostclient.model.EntityType et : mr.getEntityTypes()) {
             if ("user".equalsIgnoreCase(et.getName())) {
                 // Can't usually delete users.
                 continue;
             }
-            try {
-                deleteAll(service.dao(et));
-            } catch (NotFoundException exc) {
-                // the model has entity types that dont exist on the server.
-            }
+            catchDeleteAll(service.dao(et));
+        }
+    }
+
+    private static void catchDeleteAll(Dao doa) {
+        try {
+            deleteAll(doa);
+        } catch (NotFoundException exc) {
+            // the model has entity types that dont exist on the server.
+        } catch (StatusCodeException ex) {
+            LOGGER.error("Failed to delete all: {}\n{}", ex.getStatusCode(), ex.getReturnedContent(), ex);
+        } catch (ServiceFailureException ex) {
+            LOGGER.error("Failed to delete all", ex);
         }
     }
 

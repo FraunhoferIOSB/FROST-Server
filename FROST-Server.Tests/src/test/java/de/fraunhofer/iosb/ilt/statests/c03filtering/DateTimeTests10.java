@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class DateTimeTests10 extends DateTimeTests {
 
@@ -25,4 +27,9 @@ public class DateTimeTests10 extends DateTimeTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        DateTimeTests.cleanup();
+        HTTPMethods.expectStats("DateTimeTests10", 59, 484, 0, 54, 0);
+    }
 }
