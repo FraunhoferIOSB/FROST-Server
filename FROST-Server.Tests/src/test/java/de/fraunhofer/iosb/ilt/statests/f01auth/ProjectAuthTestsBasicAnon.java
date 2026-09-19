@@ -59,6 +59,10 @@ abstract class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
         super(version, SERVER_PROPERTIES, true);
     }
 
+    public static void cleanup() {
+        ProjectAuthTests.cleanup();
+    }
+
     @Override
     public String getBatchPostData() throws IOException {
         return IOUtils.resourceToString("projects/dataBatchPost.json", StandardCharsets.UTF_8, getClass().getClassLoader());

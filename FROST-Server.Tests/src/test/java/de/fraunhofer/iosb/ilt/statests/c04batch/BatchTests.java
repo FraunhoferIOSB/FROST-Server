@@ -43,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.Strings;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -84,16 +83,13 @@ public abstract class BatchTests extends AbstractTestClass {
         }
     }
 
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
-    }
-
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         OBSERVED_PROPS.clear();
+        eh2 = null;
+        sMdl = null;
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class JsonPatchTests11 extends JsonPatchTests {
 
@@ -25,4 +27,9 @@ public class JsonPatchTests11 extends JsonPatchTests {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        JsonPatchTests.cleanup();
+        HTTPMethods.expectStats("JsonPatchTests11", 6, 33, 6, 8, 0);
+    }
 }

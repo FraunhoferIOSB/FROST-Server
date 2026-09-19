@@ -121,10 +121,17 @@ public class ReferenceTests20 extends AbstractTestClass {
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
         return new SensorThingsService(new SensorThingsV20Core(), new SensorThingsV20Om())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 
-    private static void cleanup() throws ServiceFailureException {
+    @AfterAll
+    static void stats() {
+        cleanup();
+        HTTPMethods.expectStats("ReferenceTests20", 22, 57, 1, 33, 6);
+    }
+
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         DATASTREAMS.clear();
         FEATURES.clear();
@@ -132,18 +139,7 @@ public class ReferenceTests20 extends AbstractTestClass {
         OPROPS.clear();
         SENSORS.clear();
         THINGS.clear();
-    }
-
-    /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
-     *
-     * @throws ServiceFailureException
-     */
-    @AfterAll
-    public static void deleteEverything() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

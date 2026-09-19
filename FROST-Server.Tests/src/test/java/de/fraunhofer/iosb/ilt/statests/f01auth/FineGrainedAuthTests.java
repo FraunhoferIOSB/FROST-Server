@@ -202,6 +202,31 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
         createEntities();
     }
 
+    public static void cleanup() {
+        EntityUtils.deleteAll(serviceAdmin);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
+        PROJECTS.clear();
+        USERS.clear();
+        ROLES.clear();
+        USER_PROJECT_ROLES.clear();
+        ehAdmin = null;
+        ehAdminProject1 = null;
+        ehAdminProject2 = null;
+        mqttHelperAdmin = null;
+        mqttHelperAdminProject1 = null;
+        mqttHelperAdminProject2 = null;
+        mqttHelperObsCreaterProject1 = null;
+        mqttHelperObsCreaterProject2 = null;
+        mqttHelperRead = null;
+        mqttHelperWrite = null;
+        AbstractTestClass.cleanup();
+    }
+
     protected EntityHelperAbstract setCaches(EntityHelper11 eh) {
         return eh.setCache(mdlSensing.etThing, THINGS)
                 .setCache(mdlSensing.etDatastream, DATASTREAMS)

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class JsonPropertiesTests10 extends JsonPropertiesTests {
 
@@ -25,4 +27,9 @@ public class JsonPropertiesTests10 extends JsonPropertiesTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        JsonPropertiesTests.cleanup();
+        HTTPMethods.expectStats("JsonPropertiesTests10", 11, 99, 0, 28, 0);
+    }
 }

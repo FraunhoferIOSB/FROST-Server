@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class Capability2Tests10 extends Capability2Tests {
 
@@ -25,4 +27,9 @@ public class Capability2Tests10 extends Capability2Tests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        Capability2Tests.cleanup();
+        HTTPMethods.expectStats("Capability2Tests10", 89, 448, 19, 52, 8);
+    }
 }

@@ -44,7 +44,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Point;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -92,13 +91,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         createEntities();
     }
 
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Cleaning up after version {}.", version.urlPart);
-        cleanup();
-    }
-
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         FEATURESOFINTEREST.clear();
@@ -107,6 +100,7 @@ public abstract class CustomLinksTests extends AbstractTestClass {
         O_PROPS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.geojson.Point;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,21 +64,12 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         createEntities();
     }
 
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         DATASTREAMS.clear();
         DATASTREAMS.clear();
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        LOGGER.info("Tearing down.");
-        try {
-            cleanup();
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

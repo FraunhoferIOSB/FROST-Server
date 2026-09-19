@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c03filtering;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class GeoTests10 extends GeoTests {
 
@@ -25,4 +27,9 @@ public class GeoTests10 extends GeoTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        GeoTests.cleanup();
+        HTTPMethods.expectStats("GeoTests10", 22, 62, 0, 31, 0);
+    }
 }

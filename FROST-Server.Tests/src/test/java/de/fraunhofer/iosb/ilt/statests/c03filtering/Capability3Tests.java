@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
@@ -45,7 +44,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -101,18 +99,10 @@ public abstract class Capability3Tests extends AbstractTestClass {
         createEntities();
     }
 
-    /**
-     * This method is run after all the tests of this class is run and clean the
-     * database.
-     *
-     * @throws
-     * de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException
-     */
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         ENTITYCOUNTS.clear();
+        AbstractTestClass.cleanup();
     }
 
     /**

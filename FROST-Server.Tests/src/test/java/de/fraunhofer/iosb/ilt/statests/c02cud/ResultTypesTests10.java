@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class ResultTypesTests10 extends ResultTypesTests {
 
@@ -25,4 +27,9 @@ public class ResultTypesTests10 extends ResultTypesTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        ResultTypesTests.cleanup();
+        HTTPMethods.expectStats("ResultTypesTests10", 5, 25, 1, 13, 0);
+    }
 }

@@ -62,6 +62,10 @@ abstract class KeyCloakAnonReadTests extends AbstractAuthTests {
         super.setUpVersion();
     }
 
+    public static void cleanup() {
+        AbstractAuthTests.cleanup();
+    }
+
     @Override
     public SensorThingsService getServiceAdmin() {
         return setAuth(createService(), "admin", "admin");

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class MdDateTimeTests11 extends MdDateTimeTests {
 
@@ -25,4 +27,9 @@ public class MdDateTimeTests11 extends MdDateTimeTests {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        MdDateTimeTests.cleanup();
+        HTTPMethods.expectStats("MdDateTimeTests11", 32, 466, 0, 28, 0);
+    }
 }

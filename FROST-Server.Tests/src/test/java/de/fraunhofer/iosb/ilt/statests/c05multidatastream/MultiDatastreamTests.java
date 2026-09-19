@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.geojson.Point;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -95,13 +94,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         createEntities();
     }
 
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
-    }
-
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
@@ -110,6 +103,7 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         DATASTREAMS.clear();
         MULTIDATASTREAMS.clear();
         OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     /**

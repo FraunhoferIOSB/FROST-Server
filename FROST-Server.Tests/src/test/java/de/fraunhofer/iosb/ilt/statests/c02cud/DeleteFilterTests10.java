@@ -18,15 +18,18 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
-/**
- *
- * @author hylke
- */
 public class DeleteFilterTests10 extends DeleteFilterTests {
 
     public DeleteFilterTests10() {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        DeleteFilterTests.cleanup();
+        HTTPMethods.expectStats("DeleteFilterTests10", 10, 18, 0, 53, 0);
+    }
 }

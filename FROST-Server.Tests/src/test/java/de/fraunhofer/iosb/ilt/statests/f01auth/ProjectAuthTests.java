@@ -190,6 +190,42 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         createEntities();
     }
 
+    public static void cleanup() {
+        EntityUtils.deleteAll(sSrvc);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
+        PROJECTS.clear();
+        USERS.clear();
+        ROLES.clear();
+        USER_PROJECT_ROLES.clear();
+        ehAdmin = null;
+        ehAdminProject1 = null;
+        ehAdminProject2 = null;
+        serviceAdmin = null;
+        serviceAdminProject1 = null;
+        serviceAdminProject2 = null;
+        serviceAnon = null;
+        serviceGlObsCr = null;
+        serviceGlObsPropCr = null;
+        serviceObsCreaterProject1 = null;
+        serviceObsCreaterProject2 = null;
+        serviceRead = null;
+        serviceWrite = null;
+        mqttHelperAdmin = null;
+        mqttHelperAdminProject1 = null;
+        mqttHelperAdminProject2 = null;
+        mqttHelperAnon = null;
+        mqttHelperObsCreaterProject1 = null;
+        mqttHelperObsCreaterProject2 = null;
+        mqttHelperRead = null;
+        mqttHelperWrite = null;
+        AbstractTestClass.cleanup();
+    }
+
     protected EntityHelperAbstract setCaches(EntityHelper11 eh) {
         return eh.setCache(mdlSensing.etThing, THINGS)
                 .setCache(mdlSensing.etDatastream, DATASTREAMS)

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c07mqttcreate;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class Capability7Tests10 extends Capability7Tests {
 
@@ -25,4 +27,9 @@ public class Capability7Tests10 extends Capability7Tests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        Capability7Tests.cleanup();
+        HTTPMethods.expectStats("Capability7Tests10", 19, 26, 0, 15, 0);
+    }
 }

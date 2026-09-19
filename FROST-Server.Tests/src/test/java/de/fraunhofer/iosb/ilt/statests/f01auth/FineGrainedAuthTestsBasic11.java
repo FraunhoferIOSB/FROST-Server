@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 /**
  * Runs the FineGrained Auth Tests using BasicAuth on the v1.1 API.
@@ -28,4 +30,9 @@ public class FineGrainedAuthTestsBasic11 extends FineGrainedAuthTestsBasic {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        FineGrainedAuthTestsBasic.cleanup();
+        HTTPMethods.expectStats("FineGrainedAuthTestsBasic11", 0, 19, 0, 2, 0);
+    }
 }

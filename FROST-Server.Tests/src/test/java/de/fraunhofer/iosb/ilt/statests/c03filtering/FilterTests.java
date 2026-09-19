@@ -46,7 +46,6 @@ import org.geojson.LineString;
 import org.geojson.LngLatAlt;
 import org.geojson.Point;
 import org.geojson.Polygon;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,13 +76,7 @@ public abstract class FilterTests extends AbstractTestClass {
         createEntities();
     }
 
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
-    }
-
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         LOCATIONS.clear();
@@ -91,6 +84,7 @@ public abstract class FilterTests extends AbstractTestClass {
         O_PROPS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

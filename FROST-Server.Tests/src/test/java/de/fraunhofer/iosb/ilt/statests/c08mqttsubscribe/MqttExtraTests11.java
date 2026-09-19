@@ -32,6 +32,7 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.MqttAction;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.TestSubscription;
@@ -84,12 +85,17 @@ public class MqttExtraTests11 extends AbstractTestClass {
     }
 
     @AfterAll
-    static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    static void stats() {
+        cleanup();
+        HTTPMethods.expectStats("MqttExtraTests11", 23, 22, 0, 35, 0);
+    }
+
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         eh.clearCaches();
         eh = null;
         mqttHelper = null;
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

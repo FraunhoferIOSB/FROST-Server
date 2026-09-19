@@ -18,11 +18,19 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class KeyCloakTests11 extends KeyCloakTests {
 
     public KeyCloakTests11() {
         super(ServerVersion.V_1_1);
+    }
+
+    @AfterAll
+    static void stats() {
+        KeyCloakTests.cleanup();
+        HTTPMethods.expectStats("KeyCloakTests11", 7, 37, 4, 6, 0);
     }
 
 }
