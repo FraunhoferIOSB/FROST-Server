@@ -50,10 +50,6 @@
             <artifactId>moquette-metrics-prometheus</artifactId>
             <version>${version.moquette}</version>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.paho</groupId>
-            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
