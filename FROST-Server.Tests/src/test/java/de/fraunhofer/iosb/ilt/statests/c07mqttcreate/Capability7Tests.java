@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -67,12 +66,11 @@ public abstract class Capability7Tests extends AbstractTestClass {
         mqttHelper = new MqttHelper11(sSrvc, serverSettings.getMqttUrl(), mqttTimeout);
     }
 
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         entityHelper = null;
         mqttHelper = null;
+        AbstractTestClass.cleanup();
     }
 
     @Test

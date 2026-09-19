@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c01sensingcore;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class Capability1Tests10 extends Capability1Tests {
 
@@ -25,4 +27,9 @@ public class Capability1Tests10 extends Capability1Tests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        Capability1Tests.cleanup();
+        HTTPMethods.expectStats("Capability1Tests10", 8, 626, 0, 2, 0);
+    }
 }

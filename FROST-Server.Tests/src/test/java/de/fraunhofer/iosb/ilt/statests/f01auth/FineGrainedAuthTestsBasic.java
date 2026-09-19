@@ -72,6 +72,10 @@ abstract class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
         super(version, SERVER_PROPERTIES, false);
     }
 
+    public static void cleanup() {
+        FineGrainedAuthTests.cleanup();
+    }
+
     @Override
     public String getBatchPostData() throws IOException {
         return IOUtils.resourceToString("finegrainedsecurity/dataBatchPost.json", StandardCharsets.UTF_8, FineGrainedAuthTests.class.getClassLoader());

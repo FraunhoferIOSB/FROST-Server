@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class MultiDatastreamObsPropTests11 extends MultiDatastreamObsPropTests {
 
@@ -25,4 +27,9 @@ public class MultiDatastreamObsPropTests11 extends MultiDatastreamObsPropTests {
         super(ServerVersion.V_1_1);
     }
 
+    @AfterAll
+    static void stats() {
+        MultiDatastreamObsPropTests.cleanup();
+        HTTPMethods.expectStats("MultiDatastreamObsPropTests11", 13, 28, 0, 15, 0);
+    }
 }

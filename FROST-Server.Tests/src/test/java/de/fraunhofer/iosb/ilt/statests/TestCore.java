@@ -387,6 +387,8 @@ public class TestCore {
         for (ServerVersion version : ServerVersion.values()) {
             String rootUri = serverSettings.getServiceUrl(version);
             HTTPMethods.HttpResponse response = HTTPMethods.doGet(rootUri);
+            // Don't count this request.
+            HTTPMethods.decrementCountGet();
             String implemented;
             if (response.code == 200) {
                 serverSettings.addImplementedVersion(version);
@@ -414,6 +416,8 @@ public class TestCore {
     public void checkServiceRootUri(ServerSettings serverSettings, ServerVersion version) {
         String rootUri = serverSettings.getServiceUrl(version);
         HttpResponse response = HTTPMethods.doGet(rootUri);
+        // Don't count this request.
+        HTTPMethods.decrementCountGet();
 
         if (response == null || response.code != 200) {
             fail("Cannot fetch service root url from " + rootUri + ".");

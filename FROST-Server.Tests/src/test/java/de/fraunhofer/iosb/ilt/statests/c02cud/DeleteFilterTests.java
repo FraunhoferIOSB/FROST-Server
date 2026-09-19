@@ -42,7 +42,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,14 +96,12 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
         createEntities();
     }
 
-    @AfterAll
-    public static void tearDown() {
-        LOGGER.info("Tearing down.");
-        try {
-            cleanup();
-        } catch (ServiceFailureException ex) {
-            LOGGER.error("Failed to clean database.", ex);
-        }
+    public static void cleanup() {
+        EntityUtils.deleteAll(sSrvc);
+        THINGS.clear();
+        DATASTREAMS.clear();
+        OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {
@@ -224,10 +221,4 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
         deleteAndCheck(doaDs1, String.format("%s lt phenomenonTime", T800), Utils.removeFromList(OBSERVATIONS, remaining, 6, 7, 15, 22, 24));
     }
 
-    private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(sSrvc);
-        THINGS.clear();
-        DATASTREAMS.clear();
-        OBSERVATIONS.clear();
-    }
 }

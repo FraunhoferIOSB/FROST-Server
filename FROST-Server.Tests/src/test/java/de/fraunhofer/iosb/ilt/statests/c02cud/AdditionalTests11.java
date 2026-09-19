@@ -18,11 +18,19 @@
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class AdditionalTests11 extends AdditionalTests {
 
     public AdditionalTests11() {
         super(ServerVersion.V_1_1);
+    }
+
+    @AfterAll
+    static void stats() {
+        AdditionalTests.cleanup();
+        HTTPMethods.expectStats("AdditionalTests11", 26, 82, 4, 30, 3);
     }
 
 }

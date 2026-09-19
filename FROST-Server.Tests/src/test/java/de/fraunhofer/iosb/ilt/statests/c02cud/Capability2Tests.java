@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.ControlInformation;
+import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Extension;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -129,11 +129,11 @@ public abstract class Capability2Tests extends AbstractTestClass {
         ID_TYPES.clear();
     }
 
-    @AfterAll
-    public static void tearDown() {
-        LOGGER.info("Tearing down.");
+    public static void cleanup() {
         deleteEverything();
         ID_TYPES.clear();
+        EntityUtils.deleteAll(sSrvc);
+        AbstractTestClass.cleanup();
     }
 
     /**

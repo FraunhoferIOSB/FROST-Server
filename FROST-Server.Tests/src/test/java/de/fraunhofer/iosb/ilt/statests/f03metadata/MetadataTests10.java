@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.f03metadata;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class MetadataTests10 extends MetadataTests {
 
@@ -25,4 +27,9 @@ public class MetadataTests10 extends MetadataTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        MetadataTests.cleanup();
+        HTTPMethods.expectStats("MetadataTests10", 15, 33, 0, 24, 0);
+    }
 }

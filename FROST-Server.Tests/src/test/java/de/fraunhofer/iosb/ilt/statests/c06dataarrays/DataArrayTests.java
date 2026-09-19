@@ -42,7 +42,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.geojson.Point;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -93,10 +92,17 @@ public abstract class DataArrayTests extends AbstractTestClass {
         createEntities();
     }
 
-    @AfterAll
-    public static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
-        cleanup();
+    public static void cleanup() {
+        EntityUtils.deleteAll(sSrvc);
+        THINGS.clear();
+        LOCATIONS.clear();
+        SENSORS.clear();
+        O_PROPS.clear();
+        DATASTREAMS.clear();
+        MULTIDATASTREAMS.clear();
+        OBSERVATIONS.clear();
+        FEATURES.clear();
+        AbstractTestClass.cleanup();
     }
 
     @Test
@@ -403,18 +409,6 @@ public abstract class DataArrayTests extends AbstractTestClass {
                 }
             }
         }
-    }
-
-    private static void cleanup() throws ServiceFailureException {
-        EntityUtils.deleteAll(sSrvc);
-        THINGS.clear();
-        LOCATIONS.clear();
-        SENSORS.clear();
-        O_PROPS.clear();
-        DATASTREAMS.clear();
-        MULTIDATASTREAMS.clear();
-        OBSERVATIONS.clear();
-        FEATURES.clear();
     }
 
     private static void createEntities() throws ServiceFailureException {
