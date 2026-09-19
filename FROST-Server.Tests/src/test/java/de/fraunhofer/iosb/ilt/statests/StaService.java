@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Tasking;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -44,6 +45,7 @@ public class StaService {
         this.modelTasking = new SensorThingsV11Tasking();
         this.service = new SensorThingsService(modelSensing, modelMultiDatastream, modelTasking)
                 .setBaseUrl(url)
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 

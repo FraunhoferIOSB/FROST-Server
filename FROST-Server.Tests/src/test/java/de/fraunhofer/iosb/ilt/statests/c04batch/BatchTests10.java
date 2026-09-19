@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.c04batch;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class BatchTests10 extends BatchTests {
 
@@ -25,4 +27,9 @@ public class BatchTests10 extends BatchTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        BatchTests.cleanup();
+        HTTPMethods.expectStats("BatchTests10", 12, 31, 0, 15, 0);
+    }
 }

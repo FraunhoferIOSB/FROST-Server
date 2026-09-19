@@ -99,16 +99,17 @@ public class GeoTests20 extends AbstractTestClass {
     protected SensorThingsService createService() throws MalformedURLException, URISyntaxException {
         return new SensorThingsService(new SensorThingsV20Core())
                 .setBaseUrl(new URI(serverSettings.getServiceUrl(version)).toURL())
+                .addHook(HTTPMethods.getCountHook())
                 .init();
     }
 
     @AfterAll
-    static void tearDown() throws ServiceFailureException {
-        LOGGER.info("Tearing down.");
+    static void stats() {
         cleanup();
+        HTTPMethods.expectStats("GeoTests20", 22, 60, 0, 31, 0);
     }
 
-    private static void cleanup() throws ServiceFailureException {
+    public static void cleanup() {
         EntityUtils.deleteAll(sSrvc);
         THINGS.clear();
         FEATURES.clear();
@@ -117,6 +118,7 @@ public class GeoTests20 extends AbstractTestClass {
         O_PROPS.clear();
         DATASTREAMS.clear();
         OBSERVATIONS.clear();
+        AbstractTestClass.cleanup();
     }
 
     private static void createEntities() throws ServiceFailureException {

@@ -18,6 +18,8 @@
 package de.fraunhofer.iosb.ilt.statests.f02customlinks;
 
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
+import org.junit.jupiter.api.AfterAll;
 
 public class CustomLinksTests10 extends CustomLinksTests {
 
@@ -25,4 +27,9 @@ public class CustomLinksTests10 extends CustomLinksTests {
         super(ServerVersion.V_1_0);
     }
 
+    @AfterAll
+    static void stats() {
+        CustomLinksTests.cleanup();
+        HTTPMethods.expectStats("CustomLinksTests10", 8, 19, 0, 8, 0);
+    }
 }

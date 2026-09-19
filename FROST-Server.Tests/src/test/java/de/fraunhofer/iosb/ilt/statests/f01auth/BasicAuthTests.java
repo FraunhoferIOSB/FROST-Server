@@ -62,6 +62,10 @@ abstract class BasicAuthTests extends AbstractAuthTests {
         super.setUpVersion();
     }
 
+    public static void cleanup() {
+        AbstractAuthTests.cleanup();
+    }
+
     @Test
     void testEmptyUsername() {
         LOGGER.info("  testEmptyUsername");
