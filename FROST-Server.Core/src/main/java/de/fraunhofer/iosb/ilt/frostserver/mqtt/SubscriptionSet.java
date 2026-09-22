@@ -54,16 +54,27 @@ class SubscriptionSet {
             final AtomicInteger tempAtInt = new AtomicInteger(0);
             clientCount = subscriptions.putIfAbsent(subscription, tempAtInt);
             if (null == clientCount) {
+                // Ours was the new one
                 clientCount = tempAtInt;
                 topicCount.incrementAndGet();
                 LOGGER.debug("Created new subscription for {}.", subscription);
+                int newCount = clientCount.incrementAndGet();
+                LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
+                return;
             }
+            // Someone else added one before us, use that one.
         }
         int newCount;
-        synchronized (clientCount) {
-            newCount = clientCount.incrementAndGet();
-        }
+        newCount = clientCount.incrementAndGet();
         LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
+        if (newCount == 1) {
+            LOGGER.error("Race condition subscribing to {}.", subscription);
+            AtomicInteger checkCount = subscriptions.get(subscription);
+            if (checkCount != clientCount) {
+                LOGGER.error("Failed to subscribe to {}, retrying...", subscription);
+                addSubscription(subscription);
+            }
+        }
     }
 
     public void removeSubscription(Subscription subscription) {
@@ -75,11 +86,12 @@ class SubscriptionSet {
         int newCount = clientCount.decrementAndGet();
         LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
         if (newCount <= 0) {
-            synchronized (clientCount) {
-                if (clientCount.get() == 0) {
-                    subscriptions.remove(subscription);
-                    topicCount.decrementAndGet();
-                    LOGGER.debug("Removed last subscription for {}.", subscription);
+            if (clientCount.get() == 0) {
+                subscriptions.remove(subscription);
+                topicCount.decrementAndGet();
+                LOGGER.debug("Removed last subscription for {}.", subscription);
+                if (clientCount.get() != 0) {
+                    LOGGER.error("Possible race condition removing last subscription for {}.", subscription);
                 }
             }
         }
