@@ -191,7 +191,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     }
 
     public static void cleanup() {
-        EntityUtils.deleteAll(sSrvc);
+        EntityUtils.deleteAll(serviceAdmin);
         THINGS.clear();
         LOCATIONS.clear();
         SENSORS.clear();
