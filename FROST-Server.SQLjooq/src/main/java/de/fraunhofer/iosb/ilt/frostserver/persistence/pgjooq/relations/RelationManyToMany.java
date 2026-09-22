@@ -96,7 +96,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
      */
     private boolean symmetrical;
 
-    private final transient SortedSet<SortingWrapper<Double, HookRelation>> hooks = new TreeSet<>();
+    private final SortedSet<SortingWrapper<Double, HookRelation>> hooks = new TreeSet<>();
 
     public RelationManyToMany(NavigationPropertyMain navProp, S source, L linkTable, T target) {
         this(navProp, source, linkTable, target, false);

@@ -169,18 +169,7 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
         for (state.curIndex = startIdx; state.curIndex < state.elements.size() && !state.finished; state.curIndex++) {
             prevPropFields = state.parentPropFields;
             Property element = state.elements.get(state.curIndex);
-            if (element instanceof EntityPropertyCustom) {
-                handleCustomProperty(state, path);
-
-            } else if (element instanceof EntityPropertyCustomLink) {
-                handleCustomProperty(state, path);
-
-            } else if (element instanceof EntityPropertyMain entityPropertyMain) {
-                handleEntityProperty(state, path, entityPropertyMain);
-
-            } else if (element instanceof NavigationPropertyMain navigationPropertyMain) {
-                handleNavigationProperty(state, path, navigationPropertyMain);
-            }
+            handleElement(element, state, path);
             lastProp = element;
         }
         if (state.finalExpression == null) {
@@ -198,6 +187,21 @@ public class ExpressionHelper implements ExpressionHandlers.JooqExpHlpr {
                     return;
                 }
             }
+        }
+    }
+
+    private void handleElement(Property element, PathState state, Path path) {
+        if (element instanceof EntityPropertyCustom) {
+            handleCustomProperty(state, path);
+
+        } else if (element instanceof EntityPropertyCustomLink) {
+            handleCustomProperty(state, path);
+
+        } else if (element instanceof EntityPropertyMain entityPropertyMain) {
+            handleEntityProperty(state, path, entityPropertyMain);
+
+        } else if (element instanceof NavigationPropertyMain navigationPropertyMain) {
+            handleNavigationProperty(state, path, navigationPropertyMain);
         }
     }
 

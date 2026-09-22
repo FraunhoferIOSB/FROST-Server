@@ -71,22 +71,25 @@ public class LinkingTimeValidator implements HookValidator {
 
     public void registerHooksMonitoringNetwork(StaMainTable networksTable, JooqPersistenceManager ppm) {
         final Relation relThings = networksTable.findRelation(NAME_MONITORINGNETWORK_THINGS);
+        final EntityType etNetworks = networksTable.getEntityType();
         if (relThings == null) {
-            LOGGER.error("Count not find relation {} on table of entity type {}", NAME_MONITORINGNETWORK_THINGS, networksTable.getEntityType());
+            LOGGER.error("Count not find relation {} on table of entity type {}", NAME_MONITORINGNETWORK_THINGS, etNetworks);
             return;
         }
+        // Here we swap target and source!
         relThings.registerHook(0.0, HookRelation.of(
                 (pm, np, source, target) -> directLinkPreCreate(pm, np, target, source),
                 (pm, np, source, target) -> directLinkPostDelete(pm, np, target, source)));
 
-        final var npThings = networksTable.getEntityType().getNavigationPropertyEntitySet(NAME_MONITORINGNETWORK_THINGS);
+        final var npThings = etNetworks.getNavigationPropertyEntitySet(NAME_MONITORINGNETWORK_THINGS);
+        Exceptions.unknownPropertyIf(npThings == null, "NavigationProperty {}/{} not found", NAME_MONITORINGNETWORK_THINGS);
         final EntityType thingType = npThings.getEntityType();
         final StaMainTable<?> thingsTable = ppm.getTableCollection().getTableForType(thingType);
         Relation<?> relNetworks = thingsTable.findRelation(npThings.getInverse().getName());
+        // Here we do not swap target and source!
         relNetworks.registerHook(0.0, HookRelation.of(
-                (pm, np, source, target) -> directLinkPreCreate(pm, np, source, target),
-                (pm, np, source, target) -> directLinkPostDelete(pm, np, source, target)));
-
+                LinkingTimeValidator::directLinkPreCreate,
+                LinkingTimeValidator::directLinkPostDelete));
     }
 
     private static void directLinkPreCreate(JooqPersistenceManager pm, NavigationProperty np, Entity thing, Entity network) {
@@ -142,7 +145,7 @@ public class LinkingTimeValidator implements HookValidator {
                 .from(tlt)
                 .where(tltThingId.eq(thingPk.get(0)))
                 .and(tltNetworkId.eq(networkPk.get(0)))
-                .and(tltTimeEnd.isNull())
+                .and(tltTimeEnd.eq(tltTimeStart).or(tltTimeEnd.isNull()))
                 .fetchAny();
         if (rcrd == null) {
             LOGGER.info("No open LinkingTime exists between {} and {}", thing, network);

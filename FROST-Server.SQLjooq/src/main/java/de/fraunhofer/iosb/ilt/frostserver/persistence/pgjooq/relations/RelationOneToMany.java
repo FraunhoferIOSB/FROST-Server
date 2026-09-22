@@ -91,7 +91,7 @@ public class RelationOneToMany<S extends StaMainTable<S>, T extends StaMainTable
      */
     private final boolean distinctRequired;
 
-    private final transient SortedSet<SortingWrapper<Double, HookRelation>> hooks = new TreeSet<>();
+    private final SortedSet<SortingWrapper<Double, HookRelation>> hooks = new TreeSet<>();
 
     public RelationOneToMany(NavigationPropertyMain navProp, S source, T target) {
         this(navProp, source, target, navProp.isEntitySet());

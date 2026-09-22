@@ -137,9 +137,6 @@ public class SensorThingsV20Om implements DataModel {
 
     private ModelRegistry mr;
 
-    public SensorThingsV20Om() {
-    }
-
     @Override
     public final void init(SensorThingsService service, ModelRegistry modelRegistry) {
         if (this.mr != null) {
