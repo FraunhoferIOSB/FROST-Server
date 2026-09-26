@@ -73,18 +73,40 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         THINGS.add(thing);
-        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
         thing.getProperty(sMdl.npThingLocations).add(location);
         sSrvc.create(thing);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, thing);
-        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .setThing(thing)
+                .setSensor(sensor)
+                .setObservedProperty(obsProp)
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
     }
@@ -97,11 +119,17 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testBooleanResult() throws ServiceFailureException {
         LOGGER.info("  testBooleanResult");
-        Entity b1 = sMdl.newObservation(Boolean.TRUE, DATASTREAMS.get(0));
+        Entity b1 = sMdl.buildObservation()
+                .setResult(Boolean.TRUE)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
-        Entity b2 = sMdl.newObservation(Boolean.FALSE, DATASTREAMS.get(0));
+        Entity b2 = sMdl.buildObservation()
+                .setResult(Boolean.FALSE)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         sSrvc.create(b2);
         OBSERVATIONS.add(b2);
 
@@ -123,7 +151,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testStringResult() throws ServiceFailureException {
         LOGGER.info("  testStringResult");
-        Entity b1 = sMdl.newObservation("fourty two", DATASTREAMS.get(0));
+        Entity b1 = sMdl.buildObservation()
+                .setResult("fourty two")
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
@@ -142,7 +173,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     @Test
     void testNumericResult() throws ServiceFailureException {
         LOGGER.info("  testNumericResult");
-        Entity b1 = sMdl.newObservation(1L, DATASTREAMS.get(0));
+        Entity b1 = sMdl.buildObservation()
+                .setResult(1L)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         sSrvc.create(b1);
         OBSERVATIONS.add(b1);
 
@@ -151,7 +185,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         String message = "Expected result to be a Number.";
         assertEquals(b1.getProperty(EP_RESULT), found1.getProperty(EP_RESULT), message);
 
-        Entity b2 = sMdl.newObservation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
+        Entity b2 = sMdl.buildObservation()
+                .setResult(BigDecimal.valueOf(1.23))
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(b2);
         OBSERVATIONS.add(b2);
 
@@ -173,7 +210,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         result.put("number", BigDecimal.valueOf(1.23));
         result.put("string", "One comma twentythree");
         result.put("boolean", Boolean.TRUE);
-        Entity o1 = sMdl.newObservation(result, DATASTREAMS.get(0));
+        Entity o1 = sMdl.buildObservation()
+                .setResult(result)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
@@ -195,7 +235,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         result.add(BigDecimal.valueOf(1.23));
         result.add("One comma twentythree");
         result.add(Boolean.TRUE);
-        Entity o1 = sMdl.newObservation(result, DATASTREAMS.get(0));
+        Entity o1 = sMdl.buildObservation()
+                .setResult(result)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
@@ -213,7 +256,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     void testNullResult() throws ServiceFailureException {
         LOGGER.info("  testNullResult");
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        Entity o1 = sMdl.newObservation(null, DATASTREAMS.get(0));
+        Entity o1 = sMdl.buildObservation()
+                .setResult(null)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
@@ -222,7 +268,10 @@ public abstract class ResultTypesTests extends AbstractTestClass {
         String message = "Expected result to be Null.";
         assertEquals(o1.getProperty(EP_RESULT), found.getProperty(EP_RESULT), message);
 
-        Entity o2 = sMdl.newObservation(BigDecimal.valueOf(1.23), DATASTREAMS.get(0));
+        Entity o2 = sMdl.buildObservation()
+                .setResult(BigDecimal.valueOf(1.23))
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(o2);
         OBSERVATIONS.add(o2);
 
@@ -244,7 +293,6 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     void testResultQualityObject() throws ServiceFailureException {
         LOGGER.info("  testResultQualityObject");
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
         ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
         String resultQualityString = """
                 {"DQ_Status":{
@@ -252,7 +300,11 @@ public abstract class ResultTypesTests extends AbstractTestClass {
                   "label": "Niveau 1",
                   "comment": "Donn\u00e9e contr\u00f4l\u00e9e niveau 1 (donn\u00e9es contr\u00f4l\u00e9es)"
                 }}""";
-        o1.setProperty(EP_RESULTQUALITY, mapper.readTree(resultQualityString));
+        Entity o1 = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(DATASTREAMS.get(0))
+                .setResultQuality(mapper.readTree(resultQualityString))
+                .build();
         doa.create(o1);
         OBSERVATIONS.add(o1);
 
@@ -271,7 +323,6 @@ public abstract class ResultTypesTests extends AbstractTestClass {
     void testResultQualityArray() throws ServiceFailureException {
         LOGGER.info("  testResultQualityArray");
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        Entity o1 = sMdl.newObservation(1.0, DATASTREAMS.get(0));
         ObjectMapper mapper = SimpleJsonMapper.getSimpleObjectMapper();
         String resultQualityString = """
                 [
@@ -292,7 +343,11 @@ public abstract class ResultTypesTests extends AbstractTestClass {
                         }
                     }
                 ]""";
-        o1.setProperty(EP_RESULTQUALITY, mapper.readTree(resultQualityString));
+        Entity o1 = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(DATASTREAMS.get(0))
+                .setResultQuality(mapper.readTree(resultQualityString))
+                .build();
         doa.create(o1);
         OBSERVATIONS.add(o1);
 

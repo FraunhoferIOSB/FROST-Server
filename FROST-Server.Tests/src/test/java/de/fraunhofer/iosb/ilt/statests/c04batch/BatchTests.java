@@ -97,13 +97,19 @@ public abstract class BatchTests extends AbstractTestClass {
             MapValue properties = CollectionsHelper.propertiesBuilder()
                     .addItem("int", i + 8)
                     .build();
-            Entity thing = sMdl.newThing("Thing " + i, "It's a thing.");
+            Entity thing = sMdl.buildThing()
+                    .setName("Thing " + i)
+                    .setDescription("It's a thing.")
+                    .build();
             thing.setProperty(EP_PROPERTIES, properties);
             sSrvc.create(thing);
             THINGS.add(thing);
         }
-        Entity obsProp = sMdl.newObservedProperty("ObservedProperty 1", "http://ucom.org/temperature",
-                "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("ObservedProperty 1")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 

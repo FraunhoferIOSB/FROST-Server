@@ -180,20 +180,41 @@ public class DateTimeTests20 extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         THINGS.add(thing);
-        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
         thing.getProperty(sMdl.npThingLocations).add(location);
         sSrvc.create(thing);
 
         final UnitOfMeasurement unitCelcius = new UnitOfMeasurement().setLabel("degree celcius").setSymbol("°C").setCode("ucum:T");
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", obsProp.getSelfLink(false), unitCelcius);
-        datastream.setProperty(sMdl.npDatastreamThing, thing);
-        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .withQuantity(obsProp.getSelfLink(false), unitCelcius)
+                .setThing(thing)
+                .setSensor(sensor)
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
@@ -229,16 +250,24 @@ public class DateTimeTests20 extends AbstractTestClass {
         Assertions.assertEquals(25, r);
 
         // A second Datastream, with no observations.
-        Entity datastream2 = sMdl.newDatastream("Datastream 2", "The second temperature of thing 1, sensor 1.", obsProp.getSelfLink(false), unitCelcius);
-        datastream2.setProperty(sMdl.npDatastreamThing, thing);
-        datastream2.setProperty(sMdl.npDatastreamSensor, sensor);
+        Entity datastream2 = sMdl.buildDatastream()
+                .setName("Datastream 2")
+                .setDescription("The second temperature of thing 1, sensor 1.")
+                .withQuantity(obsProp.getSelfLink(false), unitCelcius)
+                .setThing(thing)
+                .setSensor(sensor)
+                .build();
         sSrvc.create(datastream2);
         DATASTREAMS.add(datastream2);
 
         // A third Datastream, with a days worth of observations.
-        Entity datastream3 = sMdl.newDatastream("Datastream 3", "The third temperature of thing 1, sensor 1.", obsProp.getSelfLink(false), unitCelcius);
-        datastream3.setProperty(sMdl.npDatastreamThing, thing);
-        datastream3.setProperty(sMdl.npDatastreamSensor, sensor);
+        Entity datastream3 = sMdl.buildDatastream()
+                .setName("Datastream 3")
+                .setDescription("The third temperature of thing 1, sensor 1.")
+                .withQuantity(obsProp.getSelfLink(false), unitCelcius)
+                .setThing(thing)
+                .setSensor(sensor)
+                .build();
         sSrvc.create(datastream3);
         DATASTREAMS.add(datastream3);
 
@@ -279,7 +308,11 @@ public class DateTimeTests20 extends AbstractTestClass {
     }
 
     private static void createObservation(double result, Entity ds, TimeValue pt, TimeInstant rt, TimeInterval vt) throws ServiceFailureException {
-        Entity o = sMdl.newObservation(result, pt, ds)
+        Entity o = sMdl.buildObservation()
+                .setResult(result)
+                .setPhenomenonTime(pt)
+                .setDatastream(ds)
+                .build()
                 .setProperty(EP_RESULTTIME, rt)
                 .setProperty(EP_VALIDTIME, vt);
         sSrvc.create(o);

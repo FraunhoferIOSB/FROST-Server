@@ -26,6 +26,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.swecommon.util.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
@@ -40,7 +41,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -137,78 +137,114 @@ public class GeoTests20 extends AbstractTestClass {
     }
 
     private static void createThings() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 2", "The second thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 2")
+                .setDescription("The second thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 3", "The third thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 3")
+                .setDescription("The third thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 4", "The fourt thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 4")
+                .setDescription("The fourt thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
     }
 
     private static void createSensor() throws ServiceFailureException {
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
         sSrvc.create(sensor);
         SENSORS.add(sensor);
     }
 
     private static void createObsProp() throws ServiceFailureException {
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
     }
 
     private static void createDatastreams() throws ServiceFailureException {
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(0).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 2, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 2")
+                .setDescription("The temperature of thing 2, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(1).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 3", "The temperature of thing 3, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(2).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 3")
+                .setDescription("The temperature of thing 3, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(2).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 4", "The temperature of thing 4, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(3).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
-        datastream.addNavigationEntity(sMdl.npDatastreamObservedproperties, O_PROPS.get(0).asReference());
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 4")
+                .setDescription("The temperature of thing 4, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(3).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
     }
@@ -216,18 +252,32 @@ public class GeoTests20 extends AbstractTestClass {
     private static void createLocation0() throws ServiceFailureException {
         // Locations 0
         Point gjo = new Point(8, 51);
-        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", gjo);
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).asReference());
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("First Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .addThing(THINGS.get(0).asReference())
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 0", "This should be FoI #0.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 0")
+                .setDescription("This should be FoI #0.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
 
-        Entity o = sMdl.newObservation(1, ZonedDateTime.parse("2016-01-01T01:01:01.000Z"), DATASTREAMS.get(0).asReference())
-                .setProperty(sMdl.npObservationProximateFoi, featureOfInterest)
-                .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-01T01:01:01.000Z"), Instant.parse("2016-01-01T23:59:59.999Z")));
+        Entity o = sMdl.buildObservation()
+                .setResult(1)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-01T01:01:01.000Z"))
+                .setValidTime(TimeInterval.create(Instant.parse("2016-01-01T01:01:01.000Z"), Instant.parse("2016-01-01T23:59:59.999Z")))
+                .setDatastream(DATASTREAMS.get(0).asReference())
+                .setProximateFoi(featureOfInterest)
+                .build();
         sSrvc.create(o);
         OBSERVATIONS.add(o);
     }
@@ -235,16 +285,30 @@ public class GeoTests20 extends AbstractTestClass {
     private static void createLocation1() throws ServiceFailureException {
         // Locations 1
         Point gjo = new Point(8, 52);
-        Entity location = sMdl.newLocation("Location 1.1", "Second Entity of Thing 1.", "application/vnd.geo+json", gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.1")
+                .setDescription("Second Entity of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .build();
         location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).asReference());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 1", "This should be FoI #1.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 1")
+                .setDescription("This should be FoI #1.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
 
-        Entity o = sMdl.newObservation(2, ZonedDateTime.parse("2016-01-02T01:01:01.000Z"), DATASTREAMS.get(0).asReference())
+        Entity o = sMdl.buildObservation()
+                .setResult(2)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-02T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(0).asReference())
+                .build()
                 .setProperty(sMdl.npObservationProximateFoi, featureOfInterest)
                 .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-02T01:01:01.000Z"), Instant.parse("2016-01-02T23:59:59.999Z")));
         sSrvc.create(o);
@@ -254,16 +318,30 @@ public class GeoTests20 extends AbstractTestClass {
     private static void createLocation2() throws ServiceFailureException {
         // Locations 2
         Point gjo = new Point(8, 53);
-        Entity location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/vnd.geo+json", gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 2")
+                .setDescription("Location of Thing 2.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .build();
         location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(1).asReference());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 2", "This should be FoI #2.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 2")
+                .setDescription("This should be FoI #2.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
 
-        Entity o = sMdl.newObservation(3, ZonedDateTime.parse("2016-01-03T01:01:01.000Z"), DATASTREAMS.get(1).asReference())
+        Entity o = sMdl.buildObservation()
+                .setResult(3)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-03T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(1).asReference())
+                .build()
                 .setProperty(sMdl.npObservationProximateFoi, featureOfInterest)
                 .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-03T01:01:01.000Z"), Instant.parse("2016-01-03T23:59:59.999Z")));
         sSrvc.create(o);
@@ -275,16 +353,30 @@ public class GeoTests20 extends AbstractTestClass {
         Point point = new Point(8, 54);
         Feature gjo = new Feature();
         gjo.setGeometry(point);
-        Entity location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/geo+json", gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 3")
+                .setDescription("Location of Thing 3.")
+                .setEncodingType("application/geo+json")
+                .setLocation(gjo)
+                .build();
         location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(2).asReference());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 3", "This should be FoI #3.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 3")
+                .setDescription("This should be FoI #3.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
 
-        Entity o = sMdl.newObservation(4, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), DATASTREAMS.get(2).asReference())
+        Entity o = sMdl.buildObservation()
+                .setResult(4)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-04T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(2).asReference())
+                .build()
                 .setProperty(sMdl.npObservationProximateFoi, featureOfInterest)
                 .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-04T01:01:01.000Z"), Instant.parse("2016-01-04T23:59:59.999Z")));
         sSrvc.create(o);
@@ -298,16 +390,30 @@ public class GeoTests20 extends AbstractTestClass {
                 new LngLatAlt(7, 52),
                 new LngLatAlt(7, 53),
                 new LngLatAlt(8, 53));
-        Entity location = sMdl.newLocation("Location 4", "Location of Thing 4.", "application/vnd.geo+json", gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 4")
+                .setDescription("Location of Thing 4.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .build();
         location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(3).asReference());
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 4", "This should be FoI #4.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 4")
+                .setDescription("This should be FoI #4.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
 
-        Entity o = sMdl.newObservation(4, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), DATASTREAMS.get(3).asReference())
+        Entity o = sMdl.buildObservation()
+                .setResult(4)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-04T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(3).asReference())
+                .build()
                 .setProperty(sMdl.npObservationProximateFoi, featureOfInterest)
                 .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-04T01:01:01.000Z"), Instant.parse("2016-01-04T23:59:59.999Z")));
         sSrvc.create(o);
@@ -319,11 +425,21 @@ public class GeoTests20 extends AbstractTestClass {
         LineString gjo = new LineString(
                 new LngLatAlt(5, 52),
                 new LngLatAlt(5, 53));
-        Entity location = sMdl.newLocation("Location 5", "A line.", "application/vnd.geo+json", gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 5")
+                .setDescription("A line.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 5", "This should be FoI #5.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 5")
+                .setDescription("This should be FoI #5.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
     }
@@ -333,11 +449,21 @@ public class GeoTests20 extends AbstractTestClass {
         LineString gjo = new LineString(
                 new LngLatAlt(5, 52),
                 new LngLatAlt(6, 53));
-        Entity location = sMdl.newLocation("Location 6", "A longer line.", "application/vnd.geo+json", gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 6")
+                .setDescription("A longer line.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 6", "This should be FoI #6.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 6")
+                .setDescription("This should be FoI #6.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
     }
@@ -347,12 +473,21 @@ public class GeoTests20 extends AbstractTestClass {
         LineString gjo = new LineString(
                 new LngLatAlt(4, 52),
                 new LngLatAlt(8, 52));
-        Entity location = sMdl.newLocation("Location 7", "The longest line.", "application/vnd.geo+json",
-                gjo);
+        Entity location = sMdl.buildLocation()
+                .setName("Location 7")
+                .setDescription("The longest line.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 7", "This should be FoI #7.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 7")
+                .setDescription("This should be FoI #7.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
     }

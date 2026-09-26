@@ -81,50 +81,86 @@ public abstract class JsonPatchTests extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException {
         {
-            Entity thing = sMdl.newThing("Thing 1", "The first thing.")
-                    .setProperty(EP_PROPERTIES, CollectionsHelper.propertiesBuilder().addItem("key0", "zero").build());
+            Entity thing = sMdl.buildThing()
+                    .setName("Thing 1")
+                    .setDescription("The first thing.")
+                    .setProperties(CollectionsHelper.propertiesBuilder().addItem("key0", "zero").build())
+                    .build();
             sSrvc.create(thing);
             THINGS.add(thing);
         }
         {
-            Entity location = sMdl.newLocation("Location Des Dings von ILT", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 49));
-            location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
+            Entity location = sMdl.buildLocation()
+                    .setName("Location Des Dings von ILT")
+                    .setDescription("First Location of Thing 1.")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setLocation(new Point(8, 49))
+                    .addThing(THINGS.get(0))
+                    .build();
             sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Entity sensor1 = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+            Entity sensor1 = sMdl.buildSensor()
+                    .setName("Sensor 1")
+                    .setDescription("The first sensor.")
+                    .setEncodingType("text")
+                    .setMetadata("Some metadata.")
+                    .build();
             sSrvc.create(sensor1);
             SENSORS.add(sensor1);
         }
         {
-            Entity sensor2 = sMdl.newSensor("Sensor 2", "The second sensor", "text", "Some metadata.");
+            Entity sensor2 = sMdl.buildSensor()
+                    .setName("Sensor 2")
+                    .setDescription("The second sensor")
+                    .setEncodingType("text")
+                    .setMetadata("Some metadata.")
+                    .build();
             sSrvc.create(sensor2);
             SENSORS.add(sensor2);
         }
         {
-            Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+            Entity obsProp1 = sMdl.buildObservedProperty()
+                    .setName("Temperature")
+                    .setDefinition("http://ucom.org/temperature")
+                    .setDescription("The temperature of the thing.")
+                    .build();
             sSrvc.create(obsProp1);
             OPROPS.add(obsProp1);
         }
         {
-            Entity obsProp2 = sMdl.newObservedProperty("Humidity", "http://ucom.org/humidity", "The humidity of the thing.");
+            Entity obsProp2 = sMdl.buildObservedProperty()
+                    .setName("Humidity")
+                    .setDefinition("http://ucom.org/humidity")
+                    .setDescription("The humidity of the thing.")
+                    .build();
             sSrvc.create(obsProp2);
             OPROPS.add(obsProp2);
         }
         {
-            Entity datastream1 = sMdl.newDatastream("Datastream Temp", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-            datastream1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
-            datastream1.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(0).withOnlyPk());
+            Entity datastream1 = sMdl.buildDatastream()
+                    .setName("Datastream Temp")
+                    .setDescription("The temperature of thing 1, sensor 1.")
+                    .setObservationType("someType")
+                    .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                    .setThing(THINGS.get(0).withOnlyPk())
+                    .setSensor(SENSORS.get(0).withOnlyPk())
+                    .setObservedProperty(OPROPS.get(0).withOnlyPk())
+                    .build();
             sSrvc.create(datastream1);
             DATASTREAMS.add(datastream1);
         }
         {
-            Entity datastream2 = sMdl.newDatastream("Datastream LF", "The humidity of thing 1, sensor 2.", "someType", new UnitOfMeasurement("relative humidity", "%", "ucum:Humidity"));
-            datastream2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-            datastream2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
-            datastream2.setProperty(sMdl.npDatastreamObservedproperty, OPROPS.get(1).withOnlyPk());
+            Entity datastream2 = sMdl.buildDatastream()
+                    .setName("Datastream LF")
+                    .setDescription("The humidity of thing 1, sensor 2.")
+                    .setObservationType("someType")
+                    .setUnitOfMeasurement(new UnitOfMeasurement("relative humidity", "%", "ucum:Humidity"))
+                    .setThing(THINGS.get(0).withOnlyPk())
+                    .setSensor(SENSORS.get(1).withOnlyPk())
+                    .setObservedProperty(OPROPS.get(1).withOnlyPk())
+                    .build();
             sSrvc.create(datastream2);
             DATASTREAMS.add(datastream2);
         }

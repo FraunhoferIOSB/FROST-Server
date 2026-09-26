@@ -199,7 +199,10 @@ abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test05AdminCreate() {
         LOGGER.info("  test05AdminCreate");
-        Entity thing = sMdl.newThing("AdminThing", "The Thing made by admin.");
+        Entity thing = sMdl.buildThing()
+                .setName("AdminThing")
+                .setDescription("The Thing made by admin.")
+                .build();
         THINGS.add(thing);
         ath.createForOk(ADMIN, serviceAdmin, thing, serviceAdmin.dao(sMdl.etThing), THINGS);
     }
@@ -231,7 +234,10 @@ abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test09WriteCreate() {
         LOGGER.info("  test09WriteCreate");
-        Entity thing = sMdl.newThing("WriteThing", "The Thing made by write.");
+        Entity thing = sMdl.buildThing()
+                .setName("WriteThing")
+                .setDescription("The Thing made by write.")
+                .build();
         THINGS.add(thing);
         ath.createForOk(WRITE, serviceWrite, thing, serviceWrite.dao(sMdl.etThing), THINGS);
     }
@@ -264,7 +270,10 @@ abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test13ReadCreate() {
         LOGGER.info("  test13ReadCreate");
-        Entity thing = sMdl.newThing("ReadThing", "The Thing made by read.");
+        Entity thing = sMdl.buildThing()
+                .setName("ReadThing")
+                .setDescription("The Thing made by read.")
+                .build();
         ath.createForFail(
                 READ, serviceRead, thing,
                 serviceRead.dao(sMdl.etThing), THINGS,
@@ -275,7 +284,10 @@ abstract class AbstractAuthTests extends AbstractTestClass {
     void test14ReadRead() {
         LOGGER.info("  test14ReadRead");
         // Make sure there is something to read.
-        Entity thing = sMdl.newThing("WriteThing", "The Thing made by write.");
+        Entity thing = sMdl.buildThing()
+                .setName("WriteThing")
+                .setDescription("The Thing made by write.")
+                .build();
         THINGS.add(thing);
         try {
             serviceWrite.create(thing);
@@ -309,7 +321,10 @@ abstract class AbstractAuthTests extends AbstractTestClass {
     @Test
     void test17AnonCreate() {
         LOGGER.info("  test17AnonCreate");
-        Entity thing = sMdl.newThing("AnonThing", "The Thing made by anonymous.");
+        Entity thing = sMdl.buildThing()
+                .setName("AnonThing")
+                .setDescription("The Thing made by anonymous.")
+                .build();
         ath.createForFail(
                 ANONYMOUS, serviceAnon, thing,
                 serviceRead.dao(sMdl.etThing), THINGS,

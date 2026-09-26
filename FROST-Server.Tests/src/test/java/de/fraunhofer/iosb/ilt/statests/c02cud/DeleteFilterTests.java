@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c02cud;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTTIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -105,27 +103,54 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .addLocation(location)
+                .build();
         THINGS.add(thing);
-        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        thing.getProperty(sMdl.npThingLocations).add(location);
         sSrvc.create(thing);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         {
-            Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setProperty(sMdl.npDatastreamThing, thing);
-            datastream.setProperty(sMdl.npDatastreamSensor, sensor);
-            datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+            Entity datastream = sMdl.buildDatastream()
+                    .setName("Datastream 1")
+                    .setDescription("The temperature of thing 1, sensor 1.")
+                    .setObservationType("someType")
+                    .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                    .setThing(thing)
+                    .setSensor(sensor)
+                    .setObservedProperty(obsProp)
+                    .build();
             sSrvc.create(datastream);
             DATASTREAMS.add(datastream);
         }
         {
-            Entity datastream = sMdl.newDatastream("Datastream 2", "The alternate temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-            datastream.setProperty(sMdl.npDatastreamThing, thing);
-            datastream.setProperty(sMdl.npDatastreamSensor, sensor);
-            datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+            Entity datastream = sMdl.buildDatastream()
+                    .setName("Datastream 2")
+                    .setDescription("The alternate temperature of thing 1, sensor 1.")
+                    .setObservationType("someType")
+                    .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                    .setThing(thing)
+                    .setSensor(sensor)
+                    .setObservedProperty(obsProp)
+                    .build();
             sSrvc.create(datastream);
             DATASTREAMS.add(datastream);
         }
@@ -178,9 +203,13 @@ public abstract class DeleteFilterTests extends AbstractTestClass {
     }
 
     private void createObservation(double result, Entity ds, TimeValue pt, TimeInstant rt, TimeInterval vt) throws ServiceFailureException {
-        Entity o = sMdl.newObservation(result, pt, ds)
-                .setProperty(EP_RESULTTIME, rt)
-                .setProperty(EP_VALIDTIME, vt);
+        Entity o = sMdl.buildObservation()
+                .setResult(result)
+                .setPhenomenonTime(pt)
+                .setDatastream(ds)
+                .setResultTime(rt)
+                .setValidTime(vt)
+                .build();
         sSrvc.create(o);
         OBSERVATIONS.add(o);
     }

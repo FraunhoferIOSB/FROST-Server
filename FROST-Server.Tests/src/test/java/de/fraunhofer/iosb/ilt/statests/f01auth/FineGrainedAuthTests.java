@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.Constants.CONTENT_TYPE_APPLICATION_GEOJSON;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
@@ -329,10 +330,12 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_00_TriggerInit() {
         LOGGER.info("  test_00_TriggerInit");
-        EntityCreator creator = user -> mdlSensing.newSensor(
-                user + " MQTT-Sensor",
-                "A Sensor made by " + user + " using MQTT",
-                "encodingType", "metadata");
+        EntityCreator creator = user -> mdlSensing.buildSensor()
+                .setName(user + " MQTT-Sensor")
+                .setDescription("A Sensor made by " + user + " using MQTT")
+                .setEncodingType("encodingType")
+                .setMetadata("metadata")
+                .build();
         StringCreator filterCreator = user -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Sensor");
         String topic = version.urlPart + '/' + mdlSensing.etSensor.mainSet;
 
@@ -481,7 +484,10 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_06a_PlainThingCreate() {
         LOGGER.info("  test_06a_PlainThingCreate");
-        EntityCreator creator = user -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user);
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + "Thing")
+                .setDescription("A Thing made by " + user)
+                .build();
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -495,7 +501,10 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_06b_ThingCreateForProject1() {
         LOGGER.info("  test_06b_ThingCreateForProject1");
-        EntityCreator creator = user -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + "Thing")
+                .setDescription("A Thing made by " + user)
+                .build()
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
@@ -510,13 +519,20 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_06c_ThingCreateForProject1WithDatastream() {
         LOGGER.info("  test_06c_ThingCreateForProject1WithDatastream");
-        EntityCreator creator = user -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + "Thing")
+                .setDescription("A Thing made by " + user)
+                .build()
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk())
                 .addNavigationEntity(
                         mdlSensing.npThingDatastreams,
-                        mdlSensing.newDatastream("DeepInsertDs", "Ds created by deep insert", new UnitOfMeasurement("%", "%", "%"))
-                                .setProperty(mdlSensing.npDatastreamSensor, SENSORS.get(0).withOnlyPk())
-                                .setProperty(mdlSensing.npDatastreamObservedproperty, O_PROPS.get(0).withOnlyPk()));
+                        mdlSensing.buildDatastream()
+                                .setName("DeepInsertDs")
+                                .setDescription("Ds created by deep insert")
+                                .setUnitOfMeasurement(new UnitOfMeasurement("%", "%", "%"))
+                                .setSensor(SENSORS.get(0).withOnlyPk())
+                                .setObservedProperty(O_PROPS.get(0).withOnlyPk())
+                                .build());
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -530,7 +546,10 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_06d_ThingCreateForProject1Mqtt() {
         LOGGER.info("  test_06d_ThingCreateForProject1Mqtt");
-        EntityCreator creator = user -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + " MQTT-Thing")
+                .setDescription("A Thing made by " + user + " using MQTT")
+                .build()
                 .addNavigationEntity(mdlUsers.npThingProjects, PROJECTS.get(0).withOnlyPk());
         StringCreator filterCreator = user -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Thing");
         String topic = version.urlPart + '/' + mdlSensing.etThing.mainSet;
@@ -701,7 +720,10 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_18a_ObservationCreate() {
         LOGGER.info("  test_08e_ObservationCreate");
-        EntityCreator creator = user -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
+        EntityCreator creator = user -> mdlSensing.buildObservation()
+                .setResult(user + " Observation")
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
         createForOk(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
@@ -711,11 +733,19 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     void test_18b_ObservationCreateNewFoi() throws ServiceFailureException {
         LOGGER.info("  test_08f_ObservationCreateNewFoi");
         // Create a new Location for Thing 1, so a new FoI must be generated.
-        Entity newLocation = mdlSensing.newLocation("testFoiGeneration", "Testing if FoI generation works", new Point(10.0, 49.0))
-                .addNavigationEntity(mdlSensing.npLocationThings, THINGS.get(0));
+        Entity newLocation = mdlSensing.buildLocation()
+                .setName("testFoiGeneration")
+                .setDescription("Testing if FoI generation works")
+                .setEncodingType(CONTENT_TYPE_APPLICATION_GEOJSON)
+                .setLocation(new Point(10.0, 49.0))
+                .addThing(THINGS.get(0))
+                .build();
         serviceAdmin.create(newLocation);
 
-        EntityCreator creator = user -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
+        EntityCreator creator = user -> mdlSensing.buildObservation()
+                .setResult(user + " Observation")
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
         createForOk(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
@@ -724,7 +754,11 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
     @Test
     void test_18c_ObservedPropertyCreate() {
         LOGGER.info("  test_09_ObservedPropertyCreate");
-        EntityCreator creator = user -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
+        EntityCreator creator = user -> mdlSensing.buildObservedProperty()
+                .setName(user + " ObservedProperty")
+                .setDefinition("http://example.org")
+                .setDescription("An ObservedProperty made by " + user)
+                .build();
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
