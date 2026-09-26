@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
-import de.fraunhofer.iosb.ilt.frostclient.models.ext.MapValue;
 import de.fraunhofer.iosb.ilt.frostclient.utils.CollectionsHelper;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -109,63 +108,91 @@ public abstract class CustomLinksTests extends AbstractTestClass {
     }
 
     private static void createThings() throws ServiceFailureException {
-        Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
-        MapValue properties = CollectionsHelper.propertiesBuilder()
-                .addItem("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues().get(0))
+        Entity thing1 = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .setProperties(CollectionsHelper.propertiesBuilder()
+                        .addItem("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues().get(0))
+                        .build())
+                .addLocation(LOCATIONS.get(0))
                 .build();
-        thing1.setProperty(EP_PROPERTIES, properties);
-        thing1.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(0));
         sSrvc.create(thing1);
         THINGS.add(thing1);
 
-        Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
-        properties = CollectionsHelper.propertiesBuilder()
-                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
-                .addItem("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues().get(0))
+        Entity thing2 = sMdl.buildThing()
+                .setName("Thing 2")
+                .setDescription("The second thing.")
+                .setProperties(CollectionsHelper.propertiesBuilder()
+                        .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
+                        .addItem("alternate.Location@iot.id", LOCATIONS.get(0).getPrimaryKeyValues().get(0))
+                        .build())
+                .addLocation(LOCATIONS.get(1))
                 .build();
-        thing2.setProperty(EP_PROPERTIES, properties);
-        thing2.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(1));
         sSrvc.create(thing2);
         THINGS.add(thing2);
 
-        Entity thing3 = sMdl.newThing("Thing 3", "The third thing.");
-        properties = CollectionsHelper.propertiesBuilder()
-                .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
-                .addItem("alternate.Location@iot.id", "000000000")
+        Entity thing3 = sMdl.buildThing()
+                .setName("Thing 3")
+                .setDescription("The third thing.")
+                .setProperties(CollectionsHelper.propertiesBuilder()
+                        .addItem("parent.Thing@iot.id", thing1.getPrimaryKeyValues().get(0))
+                        .addItem("alternate.Location@iot.id", "000000000")
+                        .build())
+                .addLocation(LOCATIONS.get(2))
                 .build();
-        thing3.setProperty(EP_PROPERTIES, properties);
-        thing3.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(2));
         sSrvc.create(thing3);
         THINGS.add(thing3);
 
-        Entity thing4 = sMdl.newThing("Thing 4", "The fourt thing.");
-        properties = CollectionsHelper.propertiesBuilder()
-                .addItem("parent.Thing@iot.id", thing2.getPrimaryKeyValues().get(0))
+        Entity thing4 = sMdl.buildThing()
+                .setName("Thing 4")
+                .setDescription("The fourt thing.")
+                .setProperties(CollectionsHelper.propertiesBuilder()
+                        .addItem("parent.Thing@iot.id", thing2.getPrimaryKeyValues().get(0))
+                        .build())
+                .addLocation(LOCATIONS.get(3))
                 .build();
-        thing4.setProperty(EP_PROPERTIES, properties);
-        thing4.addNavigationEntity(sMdl.npThingLocations, LOCATIONS.get(3));
         sSrvc.create(thing4);
         THINGS.add(thing4);
     }
 
     private static void createLocations() throws ServiceFailureException {
         {
-            Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+            Entity location = sMdl.buildLocation()
+                    .setName("Location 1.0")
+                    .setDescription("First Location of Thing 1.")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setLocation(new Point(8, 51))
+                    .build();
             sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Entity location = sMdl.newLocation("Location 2.0", "First Location of Thing 2.", "application/vnd.geo+json", new Point(9, 51));
+            Entity location = sMdl.buildLocation()
+                    .setName("Location 2.0")
+                    .setDescription("First Location of Thing 2.")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setLocation(new Point(9, 51))
+                    .build();
             sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Entity location = sMdl.newLocation("Location 3.0", "First Location of Thing 3.", "application/vnd.geo+json", new Point(8, 50));
+            Entity location = sMdl.buildLocation()
+                    .setName("Location 3.0")
+                    .setDescription("First Location of Thing 3.")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setLocation(new Point(8, 50))
+                    .build();
             sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Entity location = sMdl.newLocation("Location 4.0", "First Location of Thing 4.", "application/vnd.geo+json", new Point(9, 50));
+            Entity location = sMdl.buildLocation()
+                    .setName("Location 4.0")
+                    .setDescription("First Location of Thing 4.")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setLocation(new Point(9, 50))
+                    .build();
             sSrvc.create(location);
             LOCATIONS.add(location);
         }

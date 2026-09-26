@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.statests.f01auth;
 
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostclient.utils.Constants.CONTENT_TYPE_APPLICATION_GEOJSON;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_200_OK;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_401_UNAUTHORIZED;
 import static de.fraunhofer.iosb.ilt.statests.f01auth.AuthTestHelper.HTTP_CODE_403_FORBIDDEN;
@@ -250,17 +251,17 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         USERS.add(mdlProjects.newUser("read", "read"));
         USERS.add(mdlProjects.newUser("write", "write"));
         USERS.add(mdlProjects.newUser("admin", "admin"));
-        ROLES.add(mdlProjects.newRole("read", ""));
-        ROLES.add(mdlProjects.newRole("create", ""));
-        ROLES.add(mdlProjects.newRole("update", ""));
-        ROLES.add(mdlProjects.newRole("delete", ""));
-        ROLES.add(mdlProjects.newRole("admin", ""));
-        ROLES.add(mdlProjects.newRole("obscreate", ""));
-        ROLES.add(mdlProjects.newRole("obsupdate", ""));
-        ROLES.add(mdlProjects.newRole("obsdelete", ""));
-        ROLES.add(mdlProjects.newRole("obspropcreate", ""));
-        ROLES.add(mdlProjects.newRole("obspropupdate", ""));
-        ROLES.add(mdlProjects.newRole("obspropdelete", ""));
+        ROLES.add(mdlProjects.buildRole().setRolename("read").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("create").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("update").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("delete").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("admin").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("obscreate").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("obsupdate").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("obsdelete").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("obspropcreate").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("obspropupdate").build());
+        ROLES.add(mdlProjects.buildRole().setRolename("obspropdelete").build());
         try {
             HTTPMethods.doPost(serviceAdmin, serverSettings.getServiceRootUrl() + "/DatabaseStatus", "", "");
 
@@ -334,10 +335,12 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_00_TriggerInit() {
         LOGGER.info("  test_00_TriggerInit");
-        EntityCreator creator = user -> mdlSensing.newSensor(
-                user + " MQTT-Sensor",
-                "A Sensor made by " + user + " using MQTT",
-                "encodingType", "metadata");
+        EntityCreator creator = user -> mdlSensing.buildSensor()
+                .setName(user + " MQTT-Sensor")
+                .setDescription("A Sensor made by " + user + " using MQTT")
+                .setEncodingType("encodingType")
+                .setMetadata("metadata")
+                .build();
         StringCreator filterCreator = user -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Sensor");
         String topic = version.urlPart + '/' + mdlSensing.etSensor.mainSet;
 
@@ -484,7 +487,10 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_03a_CreateProject() {
         LOGGER.info("  test_03a_CreateProject");
-        EntityCreator creator = user -> mdlProjects.newProject(user + "-Project", "A Project made by " + user);
+        EntityCreator creator = user -> mdlProjects.buildProject()
+                .setName(user + "-Project")
+                .setDescription("A Project made by " + user)
+                .build();
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
@@ -532,7 +538,10 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_04a_PlainThingCreate() {
         LOGGER.info("  test_04a_PlainThingCreate");
-        EntityCreator creator = user -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user);
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + "Thing")
+                .setDescription("A Thing made by " + user)
+                .build();
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -546,8 +555,12 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_04b_ThingCreateForProject1() {
         LOGGER.info("  test_04b_ThingCreateForProject1");
-        EntityCreator creator = user -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
-                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk());
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + "Thing")
+                .setDescription("A Thing made by " + user)
+                .extend(mdlProjects.thingExtender())
+                .addProject(PROJECTS.get(0).withOnlyPk())
+                .build();
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -561,14 +574,19 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_04c_ThingCreateForProject1WithDatastream() {
         LOGGER.info("  test_04c_ThingCreateForProject1WithDatastream");
-        EntityCreator creator = user -> mdlSensing.newThing(user + "Thing", "A Thing made by " + user)
-                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk())
-                .addNavigationEntity(
-                        mdlSensing.npThingDatastreams,
-                        mdlSensing.newDatastream("DeepInsertDs", "Ds created by deep insert", new UnitOfMeasurement("%", "%", "%"))
-                                .setProperty(mdlSensing.npDatastreamSensor, SENSORS.get(0).withOnlyPk())
-                                .setProperty(mdlSensing.npDatastreamObservedproperty, O_PROPS.get(0).withOnlyPk()));
-
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + "Thing")
+                .setDescription("A Thing made by " + user)
+                .addDatastream(mdlSensing.buildDatastream()
+                        .setName("DeepInsertDs")
+                        .setDescription("Ds created by deep insert")
+                        .setUnitOfMeasurement(new UnitOfMeasurement("%", "%", "%"))
+                        .setSensor(SENSORS.get(0).withOnlyPk())
+                        .setObservedProperty(O_PROPS.get(0).withOnlyPk())
+                        .build())
+                .extend(mdlProjects.thingExtender())
+                .addProject(PROJECTS.get(0).withOnlyPk())
+                .build();
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
@@ -581,8 +599,12 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_04d_ThingCreateForProject1Mqtt() {
         LOGGER.info("  test_04d_ThingCreateForProject1Mqtt");
-        EntityCreator creator = user -> mdlSensing.newThing(user + " MQTT-Thing", "A Thing made by " + user + " using MQTT")
-                .addNavigationEntity(mdlProjects.npThingProjects, PROJECTS.get(0).withOnlyPk());
+        EntityCreator creator = user -> mdlSensing.buildThing()
+                .setName(user + " MQTT-Thing")
+                .setDescription("A Thing made by " + user + " using MQTT")
+                .extend(mdlProjects.thingExtender())
+                .addProject(PROJECTS.get(0).withOnlyPk())
+                .build();
         StringCreator filterCreator = user -> "name eq " + StringHelper.quoteForUrl(user + " MQTT-Thing");
         String topic = version.urlPart + '/' + mdlSensing.etThing.mainSet;
 
@@ -1137,7 +1159,10 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_18a_ObservationCreate() {
         LOGGER.info("  test_18a_ObservationCreate");
-        EntityCreator creator = user -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
+        EntityCreator creator = user -> mdlSensing.buildObservation()
+                .setResult(user + " Observation")
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
         createForFail(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
@@ -1149,11 +1174,19 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     void test_18b_ObservationCreateNewFoi() throws ServiceFailureException {
         LOGGER.info("  test_18b_ObservationCreateNewFoi");
         // Create a new Location for Thing 1, so a new FoI must be generated.
-        Entity newLocation = mdlSensing.newLocation("testFoiGeneration", "Testing if FoI generation works", new Point(10.0, 49.0))
-                .addNavigationEntity(mdlSensing.npLocationThings, THINGS.get(0));
+        Entity newLocation = mdlSensing.buildLocation()
+                .setName("testFoiGeneration")
+                .setDescription("Testing if FoI generation works")
+                .setEncodingType(CONTENT_TYPE_APPLICATION_GEOJSON)
+                .setLocation(new Point(10.0, 49.0))
+                .addThing(THINGS.get(0))
+                .build();
         serviceAdmin.create(newLocation);
 
-        EntityCreator creator = user -> mdlSensing.newObservation(user + " Observation", DATASTREAMS.get(0));
+        EntityCreator creator = user -> mdlSensing.buildObservation()
+                .setResult(user + " Observation")
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
 
         createForFail(OBS_CREATE_P2, serviceObsCreaterProject2, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS, H403);
         createForOk(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservation), OBSERVATIONS);
@@ -1162,7 +1195,11 @@ abstract class ProjectAuthTests extends AbstractTestClass {
     @Test
     void test_18c_ObservedPropertyCreate() {
         LOGGER.info("  test_18c_ObservedPropertyCreate");
-        EntityCreator creator = user -> mdlSensing.newObservedProperty(user + " ObservedProperty", "http://example.org", "An ObservedProperty made by " + user);
+        EntityCreator creator = user -> mdlSensing.buildObservedProperty()
+                .setName(user + " ObservedProperty")
+                .setDefinition("http://example.org")
+                .setDescription("An ObservedProperty made by " + user)
+                .build();
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);

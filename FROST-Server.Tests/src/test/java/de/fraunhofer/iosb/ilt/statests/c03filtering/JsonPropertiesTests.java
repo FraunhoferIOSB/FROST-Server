@@ -115,27 +115,48 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
                     .addItem("intIntArray", generateIntIntArray(i + 8, 3))
                     .addItem("objArray", generateObjectList(i + 8, 3))
                     .build();
-            Entity thing = sMdl.newThing("Thing " + i, "It's a thing.")
-                    .setProperty(EP_PROPERTIES, properties);
+            Entity thing = sMdl.buildThing()
+                    .setName("Thing " + i)
+                    .setDescription("It's a thing.")
+                    .setProperties(properties)
+                    .build();
             sSrvc.create(thing);
             THINGS.add(thing);
 
-            Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "application/geo+json", "")
-                    .setProperty(EP_METADATA, properties);
+            Entity sensor = sMdl.buildSensor()
+                    .setName("Sensor 1")
+                    .setDescription("The first sensor.")
+                    .setEncodingType("application/geo+json")
+                    .setMetadata(properties)
+                    .build();
             sSrvc.create(sensor);
             SENSORS.add(sensor);
         }
 
-        Entity location = sMdl.newLocation("Location 1", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 52));
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).withOnlyPk());
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 52))
+                .addThing(THINGS.get(0).withOnlyPk())
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
 
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "Cel"));
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "Cel"))
+                .build();
         datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
         datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
         datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
@@ -173,7 +194,10 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
 
         for (int i = 0; i <= 12; i++) {
             MapValue parameters = new MapValue(TypeComplex.STA_MAP);
-            Entity o = sMdl.newObservation(i, datastream);
+            Entity o = sMdl.buildObservation()
+                    .setResult(i)
+                    .setDatastream(datastream)
+                    .build();
             parameters.put("string", generateString(i, 10));
             parameters.put("boolean", i % 2 == 0);
             parameters.put("int", i);
@@ -188,7 +212,10 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         {
             // 13
             MapValue parameters = new MapValue(TypeComplex.STA_MAP);
-            Entity o = sMdl.newObservation("badVales1", datastream);
+            Entity o = sMdl.buildObservation()
+                    .setResult("badVales1")
+                    .setDatastream(datastream)
+                    .build();
             parameters.put("int", generateString(13, 10));
             parameters.put("string", 13 % 2 == 0);
             parameters.put("boolean", 13);
@@ -202,7 +229,10 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         {
             // 14
             MapValue parameters = new MapValue(TypeComplex.STA_MAP);
-            Entity o = sMdl.newObservation("badVales2", datastream);
+            Entity o = sMdl.buildObservation()
+                    .setResult("badVales2")
+                    .setDatastream(datastream)
+                    .build();
             parameters.put("boolean", generateString(14, 10));
             parameters.put("int", 14 % 2 == 0);
             parameters.put("string", 14);
@@ -216,7 +246,10 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
         {
             // 15
             MapValue parameters = new MapValue(TypeComplex.STA_MAP);
-            Entity o = sMdl.newObservation("badVales3", datastream);
+            Entity o = sMdl.buildObservation()
+                    .setResult("badVales3")
+                    .setDatastream(datastream)
+                    .build();
             parameters.put("boolean", "true");
             parameters.put("int", "5");
             o.setProperty(EP_PARAMETERS, parameters);
@@ -224,7 +257,12 @@ public abstract class JsonPropertiesTests extends AbstractTestClass {
             OBSERVATIONS.add(o);
         }
 
-        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree Fahrenheit", "°F", "[degF]"));
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 2")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree Fahrenheit", "°F", "[degF]"))
+                .build();
         datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
         datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
         datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);

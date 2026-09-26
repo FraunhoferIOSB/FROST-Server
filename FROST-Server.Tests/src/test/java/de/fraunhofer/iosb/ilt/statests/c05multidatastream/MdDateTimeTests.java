@@ -17,10 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.statests.c05multidatastream;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PHENOMENONTIME;
 import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_PHENOMENONTIMEDS;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_RESULTTIME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.filterForException;
 import static de.fraunhofer.iosb.ilt.statests.util.EntityUtils.testFilterResults;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
@@ -118,21 +115,40 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .addLocation(location)
+                .build();
         THINGS.add(thing);
-        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
-        thing.getProperty(sMdl.npThingLocations).add(location);
         sSrvc.create(thing);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
-        Entity mds = mMdl.newMultiDatastream(
-                "Datastream 1",
-                "The temperature of thing 1, sensor 1.",
-                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        mds.setProperty(sMdl.npDatastreamThing, thing);
-        mds.setProperty(sMdl.npDatastreamSensor, sensor);
-        mds.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, obsProp);
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
+        Entity mds = mMdl.buildMultiDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setUnitOfMeasurements(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .createMultiObservationDataType()
+                .setThing(thing)
+                .setSensor(sensor)
+                .addObservedProperty(obsProp)
+                .build();
         sSrvc.create(mds);
         MULTI_DATASTREAMS.add(mds);
 
@@ -166,13 +182,15 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
         createObservation(24, mds, I2017, T2017.plus(1, ChronoUnit.HOURS), I2017); // 24
 
         // A second Datastream, with no observations.
-        Entity datastream2 = mMdl.newMultiDatastream(
-                "Datastream 2",
-                "The second temperature of thing 1, sensor 1.",
-                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream2.setProperty(sMdl.npDatastreamThing, thing);
-        datastream2.setProperty(sMdl.npDatastreamSensor, sensor);
-        datastream2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, obsProp);
+        Entity datastream2 = mMdl.buildMultiDatastream()
+                .setName("Datastream 2")
+                .setDescription("The second temperature of thing 1, sensor 1.")
+                .setUnitOfMeasurements(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .createMultiObservationDataType()
+                .setThing(thing)
+                .setSensor(sensor)
+                .addObservedProperty(obsProp)
+                .build();
         sSrvc.create(datastream2);
         MULTI_DATASTREAMS.add(datastream2);
     }
@@ -186,10 +204,14 @@ public abstract class MdDateTimeTests extends AbstractTestClass {
     }
 
     private static void createObservation(double result, Entity mds, TimeValue pt, TimeInstant rt, TimeInterval vt) throws ServiceFailureException {
-        Entity o = mMdl.newObservation(new double[]{result}, mds);
-        o.setProperty(EP_PHENOMENONTIME, pt);
-        o.setProperty(EP_RESULTTIME, rt);
-        o.setProperty(EP_VALIDTIME, vt);
+        Entity o = sMdl.buildObservation()
+                .setResult(new double[]{result})
+                .setPhenomenonTime(pt)
+                .setResultTime(rt)
+                .setValidTime(vt)
+                .extend(mMdl.observationExtender())
+                .setMultiDatastream(mds)
+                .build();
         sSrvc.create(o);
         OBSERVATIONS.add(o);
     }

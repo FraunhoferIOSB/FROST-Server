@@ -90,30 +90,63 @@ public abstract class AdditionalTests extends AbstractTestClass {
         LOGGER.info("  test01MultipleLocations");
         EntityUtils.deleteAll(sSrvc);
 
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
-
-        Entity location1 = sMdl.newLocation("Location 1.0, Address", "The address of Thing 1.", "text/plain", "Street Lane 1, City of Townsville");
-        thing.getProperty(sMdl.npThingLocations).add(location1);
-        Entity location2 = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/geo+json", new Point(8, 51));
-        thing.getProperty(sMdl.npThingLocations).add(location2);
-        Entity location3 = sMdl.newLocation("Location 1.0, Directions", "How to find Thing 1 in human language.", "text/plain", "Third rock from the Sun");
-        thing.getProperty(sMdl.npThingLocations).add(location3);
+        Entity location1 = sMdl.buildLocation()
+                .setName("Location 1.0, Address")
+                .setDescription("The address of Thing 1.")
+                .setEncodingType("text/plain")
+                .setLocation("Street Lane 1, City of Townsville")
+                .build();
+        Entity location2 = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
+        Entity location3 = sMdl.buildLocation()
+                .setName("Location 1.0, Directions")
+                .setDescription("How to find Thing 1 in human language.")
+                .setEncodingType("text/plain")
+                .setLocation("Third rock from the Sun")
+                .build();
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .addLocation(location1)
+                .addLocation(location2)
+                .addLocation(location3)
+                .build();
 
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamSensor, sensor);
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
-        datastream.setProperty(sMdl.npDatastreamThing, thing);
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .setSensor(sensor)
+                .setObservedProperty(obsProp)
+                .setThing(thing.withOnlyPk())
+                .build();
 
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(0));
+        Entity observation = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(observation);
         OBSERVATIONS.add(observation);
 
@@ -128,7 +161,10 @@ public abstract class AdditionalTests extends AbstractTestClass {
     void test02GeneratePhenomenonTime() throws ServiceFailureException {
         LOGGER.info("  test02GeneratePhenomenonTime");
         Dao doa = sSrvc.dao(sMdl.etObservation);
-        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(0));
+        Entity observation = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(observation);
         OBSERVATIONS.add(observation);
 
@@ -154,13 +190,28 @@ public abstract class AdditionalTests extends AbstractTestClass {
         EntityUtils.deleteAll(sSrvc);
 
         // Create a thing
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing().setName("Thing 1").setDescription("The first thing.").build();
         sSrvc.create(thing);
 
         // Create three locations.
-        Entity location1 = sMdl.newLocation("Location 1.0", "Location Number 1.", "application/vnd.geo+json", new Point(8, 50));
-        Entity location2 = sMdl.newLocation("Location 2.0", "Location Number 2.", "application/vnd.geo+json", new Point(8, 51));
-        Entity location3 = sMdl.newLocation("Location 3.0", "Location Number 3.", "application/vnd.geo+json", new Point(8, 52));
+        Entity location1 = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location Number 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 50))
+                .build();
+        Entity location2 = sMdl.buildLocation()
+                .setName("Location 2.0")
+                .setDescription("Location Number 2.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
+        Entity location3 = sMdl.buildLocation()
+                .setName("Location 3.0")
+                .setDescription("Location Number 3.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 52))
+                .build();
         sSrvc.create(location1);
         sSrvc.create(location2);
         sSrvc.create(location3);
@@ -179,7 +230,11 @@ public abstract class AdditionalTests extends AbstractTestClass {
         sSrvc.update(histLocation);
 
         // Now create a new HistoricalLocation for the Thing, with a later time.
-        Entity histLocation2 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T07:00:00.000Z"), thing.withOnlyPk(), location2);
+        Entity histLocation2 = sMdl.buildHistoricalLocation()
+                .setTime(TimeInstant.parse("2016-01-01T07:00:00.000Z"))
+                .setThing(thing.withOnlyPk())
+                .addLocation(location2)
+                .build();
         sSrvc.create(histLocation2);
 
         // Check if the Location of the Thing is now Location 2.
@@ -190,7 +245,11 @@ public abstract class AdditionalTests extends AbstractTestClass {
         assertEquals(location2, thingLocations.get(0));
 
         // Now create a new HistoricalLocation for the Thing, with an earlier time.
-        Entity histLocation3 = sMdl.newHistoricalLocation(ZonedDateTime.parse("2016-01-01T05:00:00.000Z"), thing.withOnlyPk(), location3.withOnlyPk());
+        Entity histLocation3 = sMdl.buildHistoricalLocation()
+                .setTime(TimeInstant.parse("2016-01-01T05:00:00.000Z"))
+                .setThing(thing.withOnlyPk())
+                .addLocation(location3.withOnlyPk())
+                .build();
         sSrvc.create(histLocation3);
 
         // Check if the Location of the Thing is still Location 2.
@@ -213,30 +272,58 @@ public abstract class AdditionalTests extends AbstractTestClass {
         EntityUtils.deleteAll(sSrvc);
         // Create two things
 
-        Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
+        Entity location1 = sMdl.buildLocation()
+                .setName("LocationThing1")
+                .setDescription("Location of Thing 1")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 50))
+                .build();
         sSrvc.create(location1);
 
-        Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing1 = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.create(thing1);
 
-        Entity thing2 = sMdl.newThing("Thing 2", "The second thing.");
+        Entity thing2 = sMdl.buildThing()
+                .setName("Thing 2")
+                .setDescription("The second thing.")
+                .build();
         thing2.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.create(thing2);
 
-        Entity sensor1 = sMdl.newSensor("Test Thermometre", "Test Sensor", "None", "-");
+        Entity sensor1 = sMdl.buildSensor()
+                .setName("Test Thermometre")
+                .setDescription("Test Sensor")
+                .setEncodingType("None")
+                .setMetadata("-")
+                .build();
         sSrvc.create(sensor1);
 
-        Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://example.org", "-");
+        Entity obsProp1 = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://example.org")
+                .setDescription("-")
+                .build();
         sSrvc.create(obsProp1);
 
-        Entity datastream1 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
-        datastream1.setProperty(sMdl.npDatastreamThing, thing1);
-        datastream1.setProperty(sMdl.npDatastreamSensor, sensor1);
-        datastream1.setProperty(sMdl.npDatastreamObservedproperty, obsProp1);
+        Entity datastream1 = sMdl.buildDatastream()
+                .setName("Ds 1, Thing 1")
+                .setDescription("The datastream of Thing 1")
+                .setObservationType("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement")
+                .setUnitOfMeasurement(new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"))
+                .setThing(thing1)
+                .setSensor(sensor1)
+                .setObservedProperty(obsProp1)
+                .build();
         sSrvc.create(datastream1);
 
-        Entity obs1 = sMdl.newObservation(1.0, datastream1);
+        Entity obs1 = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(datastream1)
+                .build();
         sSrvc.create(obs1);
 
         testGet(thing1, datastream1, thing2);
@@ -339,27 +426,51 @@ public abstract class AdditionalTests extends AbstractTestClass {
         DATASTREAMS.clear();
         // Create two things
 
-        Entity location1 = sMdl.newLocation("LocationThing1", "Location of Thing 1", "application/geo+json", new Point(8, 50));
+        Entity location1 = sMdl.buildLocation()
+                .setName("LocationThing1")
+                .setDescription("Location of Thing 1")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 50))
+                .build();
         sSrvc.create(location1);
 
-        Entity thing1 = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing1 = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         thing1.getProperty(sMdl.npThingLocations).add(location1.withOnlyPk());
         sSrvc.create(thing1);
 
-        Entity sensor1 = sMdl.newSensor("Test Thermometre", "Test Sensor", "None", "-");
+        Entity sensor1 = sMdl.buildSensor()
+                .setName("Test Thermometre")
+                .setDescription("Test Sensor")
+                .setEncodingType("None")
+                .setMetadata("-")
+                .build();
         sSrvc.create(sensor1);
 
-        Entity obsProp1 = sMdl.newObservedProperty("Temperature", "http://example.org", "-");
+        Entity obsProp1 = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://example.org")
+                .setDescription("-")
+                .build();
         sSrvc.create(obsProp1);
 
-        Entity datastream1 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
-        datastream1.setProperty(sMdl.npDatastreamThing, thing1.withOnlyPk());
-        datastream1.setProperty(sMdl.npDatastreamSensor, sensor1.withOnlyPk());
-        datastream1.setProperty(sMdl.npDatastreamObservedproperty, obsProp1.withOnlyPk());
+        Entity datastream1 = sMdl.buildDatastream()
+                .setName("Ds 1, Thing 1")
+                .setDescription("The datastream of Thing 1")
+                .setUnitOfMeasurement(new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"))
+                .setThing(thing1.withOnlyPk())
+                .setSensor(sensor1.withOnlyPk())
+                .setObservedProperty(obsProp1.withOnlyPk())
+                .build();
         sSrvc.create(datastream1);
         DATASTREAMS.add(datastream1);
 
-        Entity obs1 = sMdl.newObservation(1.0, datastream1);
+        Entity obs1 = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(datastream1)
+                .build();
         sSrvc.create(obs1);
 
         Entity foiGenerated1 = sSrvc.dao(sMdl.etObservation).find(obs1.getPrimaryKeyValues()).getProperty(sMdl.npObservationFeatureofinterest);
@@ -367,7 +478,10 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
         sSrvc.delete(foiGenerated1);
 
-        Entity obs2 = sMdl.newObservation(1.0, datastream1);
+        Entity obs2 = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(datastream1)
+                .build();
         sSrvc.create(obs2);
 
         Entity foiGenerated2 = sSrvc.dao(sMdl.etObservation).find(obs2.getPrimaryKeyValues()).getProperty(sMdl.npObservationFeatureofinterest);
@@ -375,10 +489,14 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
         assertNotEquals(foiGenerated1, foiGenerated2);
 
-        Entity datastream2 = sMdl.newDatastream("Ds 1, Thing 1", "The datastream of Thing 1", new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"));
-        datastream2.setProperty(sMdl.npDatastreamThing, thing1.withOnlyPk());
-        datastream2.setProperty(sMdl.npDatastreamSensor, sensor1.withOnlyPk());
-        datastream2.setProperty(sMdl.npDatastreamObservedproperty, obsProp1.withOnlyPk());
+        Entity datastream2 = sMdl.buildDatastream()
+                .setName("Ds 2, Thing 1")
+                .setDescription("The second datastream of Thing 1")
+                .setUnitOfMeasurement(new UnitOfMeasurement("Degrees Celcius", "°C", "http://qudt.org/vocab/unit#DegreeCelsius"))
+                .setThing(thing1.withOnlyPk())
+                .setSensor(sensor1.withOnlyPk())
+                .setObservedProperty(obsProp1.withOnlyPk())
+                .build();
         sSrvc.create(datastream2);
         DATASTREAMS.add(datastream2);
     }
@@ -387,7 +505,10 @@ public abstract class AdditionalTests extends AbstractTestClass {
     void test06DoubleConflictingNavProp() throws ServiceFailureException {
         LOGGER.info("  test06DoubleConflictingNavProp");
         Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
-        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(1));
+        Entity observation = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(DATASTREAMS.get(1))
+                .build();
         StatusCodeException exc = Assertions.assertThrows(StatusCodeException.class,
                 () -> doa.create(observation),
                 "Creating an Observation with conflicting Datastreams should have failed.");
@@ -398,7 +519,10 @@ public abstract class AdditionalTests extends AbstractTestClass {
     void test07DoubleNonConflictingNavProp() throws ServiceFailureException {
         LOGGER.info("  test07DoubleNonConflictingNavProp");
         Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
-        Entity observation = sMdl.newObservation(1.0, DATASTREAMS.get(0));
+        Entity observation = sMdl.buildObservation()
+                .setResult(1.0)
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         doa.create(observation);
         OBSERVATIONS.add(observation);
 
@@ -409,7 +533,10 @@ public abstract class AdditionalTests extends AbstractTestClass {
 
     @Test
     void test08IncompletePut() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing Put", "A thing for testing PUT.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing Put")
+                .setDescription("A thing for testing PUT.")
+                .build();
         sSrvc.create(thing);
 
         String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), EntityType.THING, thing.getPrimaryKeyValues().get(0), null, null);

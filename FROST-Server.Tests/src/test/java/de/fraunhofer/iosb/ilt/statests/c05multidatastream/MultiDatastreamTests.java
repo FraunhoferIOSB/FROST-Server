@@ -113,44 +113,83 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
      * @throws URISyntaxException
      */
     private static void createEntities() throws ServiceFailureException {
-        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         thing.getProperty(sMdl.npThingLocations).add(location.withOnlyPk());
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 2", "The second thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 2")
+                .setDescription("The second thing.")
+                .build();
         thing.getProperty(sMdl.npThingLocations).add(location.withOnlyPk());
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
         sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        sensor = sMdl.newSensor("Sensor 2", "The second sensor.", "text", "Some metadata.");
+        sensor = sMdl.buildSensor()
+                .setName("Sensor 2")
+                .setDescription("The second sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
         sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        Entity obsProp = sMdl.newObservedProperty("ObservedProperty 1", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("ObservedProperty 1")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        obsProp = sMdl.newObservedProperty("ObservedProperty 2", "http://ucom.org/humidity", "The humidity of the thing.");
+        obsProp = sMdl.buildObservedProperty()
+                .setName("ObservedProperty 2")
+                .setDefinition("http://ucom.org/humidity")
+                .setDescription("The humidity of the thing.")
+                .build();
         sSrvc.create(obsProp);
         OBSERVED_PROPS.add(obsProp);
 
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .build();
         DATASTREAMS.add(datastream);
         datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
         datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
         datastream.setProperty(sMdl.npDatastreamObservedproperty, OBSERVED_PROPS.get(0).withOnlyPk());
         sSrvc.create(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 2, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 2")
+                .setDescription("The temperature of thing 2, sensor 2.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .build();
         DATASTREAMS.add(datastream);
         datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).withOnlyPk());
         datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
@@ -164,7 +203,10 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     private static void createObservation(Entity ds, double result) throws ServiceFailureException {
         Entity o;
         if (sMdl.etDatastream.equals(ds.getType())) {
-            o = sMdl.newObservation(result, ds);
+            o = sMdl.buildObservation()
+                    .setResult(result)
+                    .setDatastream(ds)
+                    .build();
         } else {
             createObservationMds(ds, result);
             return;
@@ -173,12 +215,19 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
         OBSERVATIONS.add(o);
     }
 
-    private static void createObservationMds(Entity ds, double... result) throws ServiceFailureException {
+    private static void createObservationMds(Entity mds, double... result) throws ServiceFailureException {
         Entity o;
-        if (sMdl.etDatastream.equals(ds.getType())) {
-            o = sMdl.newObservation(result, ds);
+        if (sMdl.etDatastream.equals(mds.getType())) {
+            o = sMdl.buildObservation()
+                    .setResult(result)
+                    .setDatastream(mds)
+                    .build();
         } else {
-            o = mMdl.newObservation(result, ds);
+            o = sMdl.buildObservation()
+                    .setResult(result)
+                    .extend(mMdl.observationExtender())
+                    .setMultiDatastream(mds)
+                    .build();
         }
         sSrvc.create(o);
         OBSERVATIONS.add(o);
@@ -207,53 +256,66 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test01MultiDatastream() throws ServiceFailureException {
         LOGGER.info("  test01MultiDatastream");
         // Create a MultiDatastream with one ObservedProperty.
-        Entity md1 = mMdl.newMultiDatastream("MultiDatastream 1", "The first test MultiDatastream.", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-
-        md1.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-        md1.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
-        md1.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        Entity md1 = mMdl.buildMultiDatastream()
+                .setName("MultiDatastream 1")
+                .setDescription("The first test MultiDatastream.")
+                .setUnitOfMeasurements(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .createMultiObservationDataType()
+                .setThing(THINGS.get(0).withOnlyPk())
+                .setSensor(SENSORS.get(0).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(0).withOnlyPk())
+                .build();
 
         sSrvc.create(md1);
         MULTIDATASTREAMS.add(md1);
 
         // Create a MultiDatastream with two different ObservedProperties.
-        Entity md2 = mMdl.newMultiDatastream("MultiDatastream 2", "The second test MultiDatastream.",
-                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
-                new UnitOfMeasurement("percent", "%", "ucum:%"));
-
-        md2.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-        md2.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
-
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
-        md2.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyPk());
+        Entity md2 = mMdl.buildMultiDatastream()
+                .setName("MultiDatastream 2")
+                .setDescription("The second test MultiDatastream.")
+                .setUnitOfMeasurements(
+                        new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
+                        new UnitOfMeasurement("percent", "%", "ucum:%"))
+                .createMultiObservationDataType()
+                .setThing(THINGS.get(0).withOnlyPk())
+                .setSensor(SENSORS.get(0).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(0).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(1).withOnlyPk())
+                .build();
 
         sSrvc.create(md2);
         MULTIDATASTREAMS.add(md2);
 
         // Create a MultiDatastream with two different ObservedProperties, in the opposite order.
-        Entity md3 = mMdl.newMultiDatastream("MultiDatastream 3", "The third test MultiDatastream.",
-                new UnitOfMeasurement("percent", "%", "ucum:%"),
-                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-
-        md3.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-        md3.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
-
-        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(1).withOnlyPk());
-        md3.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        Entity md3 = mMdl.buildMultiDatastream()
+                .setName("MultiDatastream 3")
+                .setDescription("The third test MultiDatastream.")
+                .setUnitOfMeasurements(
+                        new UnitOfMeasurement("percent", "%", "ucum:%"),
+                        new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .createMultiObservationDataType()
+                .setThing(THINGS.get(0).withOnlyPk())
+                .setSensor(SENSORS.get(0).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(1).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(0).withOnlyPk())
+                .build();
 
         sSrvc.create(md3);
         MULTIDATASTREAMS.add(md3);
 
         // Create a MultiDatastream with two of the same ObservedProperties.
-        Entity md4 = mMdl.newMultiDatastream("MultiDatastream 4", "The fourth test MultiDatastream.",
-                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
-                new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-
-        md4.setProperty(sMdl.npDatastreamThing, THINGS.get(0).withOnlyPk());
-        md4.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
-
-        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
-        md4.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, OBSERVED_PROPS.get(0).withOnlyPk());
+        Entity md4 = mMdl.buildMultiDatastream()
+                .setName("MultiDatastream 4")
+                .setDescription("The fourth test MultiDatastream.")
+                .setUnitOfMeasurements(
+                        new UnitOfMeasurement("degree celcius", "°C", "ucum:T"),
+                        new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .createMultiObservationDataType()
+                .setThing(THINGS.get(0).withOnlyPk())
+                .setSensor(SENSORS.get(1).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(0).withOnlyPk())
+                .addObservedProperty(OBSERVED_PROPS.get(0).withOnlyPk())
+                .build();
 
         sSrvc.create(md4);
         MULTIDATASTREAMS.add(md4);
@@ -285,7 +347,11 @@ public abstract class MultiDatastreamTests extends AbstractTestClass {
     void test03ObservationInMultiDatastreamIncorrect() {
         LOGGER.info("  test03ObservationInMultiDatastreamIncorrect");
         Assertions.assertThrows(ServiceFailureException.class, () -> {
-            Entity o = mMdl.newObservation(1, MULTIDATASTREAMS.get(1).withOnlyPk());
+            Entity o = sMdl.buildObservation()
+                    .setResult(1)
+                    .extend(mMdl.observationExtender())
+                    .setMultiDatastream(MULTIDATASTREAMS.get(1).withOnlyPk())
+                    .build();
             sSrvc.create(o);
         }, "Service should have rejected posting non-array result to a multidatastream.");
 

@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.statests.v2cud;
 
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
-
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.datatypes.MqttUtf8String;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
@@ -30,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV20Core;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInterval;
 import de.fraunhofer.iosb.ilt.frostclient.models.swecommon.util.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -45,7 +44,6 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -141,78 +139,114 @@ public class MqttRequestResponse20 extends AbstractTestClass {
     }
 
     private static void createThings() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 2", "The second thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 2")
+                .setDescription("The second thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 3", "The third thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 3")
+                .setDescription("The third thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
-        thing = sMdl.newThing("Thing 4", "The fourt thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 4")
+                .setDescription("The fourt thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
     }
 
     private static void createSensor() throws ServiceFailureException {
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
         sSrvc.create(sensor);
         SENSORS.add(sensor);
     }
 
     private static void createObsProp() throws ServiceFailureException {
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
     }
 
     private static void createDatastreams() throws ServiceFailureException {
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(0).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 2, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(1).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 2")
+                .setDescription("The temperature of thing 2, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(1).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 3", "The temperature of thing 3, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(2).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 3")
+                .setDescription("The temperature of thing 3, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(2).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 4", "The temperature of thing 4, sensor 1.",
-                O_PROPS.get(0).getSelfLink(false),
-                new UnitOfMeasurement()
-                        .setLabel("degree celcius")
-                        .setSymbol("°C")
-                        .setCode("ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(3).asReference());
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0).asReference());
-        datastream.addNavigationEntity(sMdl.npDatastreamObservedproperties, O_PROPS.get(0).asReference());
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 4")
+                .setDescription("The temperature of thing 4, sensor 1.")
+                .withQuantity(
+                        O_PROPS.get(0).getSelfLink(false),
+                        new UnitOfMeasurement()
+                                .setLabel("degree celcius")
+                                .setSymbol("°C")
+                                .setCode("ucum:T"))
+                .setThing(THINGS.get(3).asReference())
+                .setSensor(SENSORS.get(0).asReference())
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
     }
@@ -220,18 +254,32 @@ public class MqttRequestResponse20 extends AbstractTestClass {
     private static void createLocation0() throws ServiceFailureException {
         // Locations 0
         Point gjo = new Point(8, 51);
-        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/vnd.geo+json", gjo);
-        location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0).asReference());
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("First Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(gjo)
+                .addThing(THINGS.get(0).asReference())
+                .build();
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity featureOfInterest = sMdl.newFeature("FoI 0", "This should be FoI #0.", "application/geo+json", gjo);
+        Entity featureOfInterest = sMdl.buildFeature()
+                .setName("FoI 0")
+                .setDescription("This should be FoI #0.")
+                .setEncodingType("application/geo+json")
+                .setFeature(gjo)
+                .build();
         sSrvc.create(featureOfInterest);
         FEATURES.add(featureOfInterest);
 
-        Entity o = sMdl.newObservation(1, ZonedDateTime.parse("2016-01-01T01:01:01.000Z"), DATASTREAMS.get(0).asReference())
-                .setProperty(sMdl.npObservationProximateFoi, featureOfInterest)
-                .setProperty(EP_VALIDTIME, TimeInterval.create(Instant.parse("2016-01-01T01:01:01.000Z"), Instant.parse("2016-01-01T23:59:59.999Z")));
+        Entity o = sMdl.buildObservation()
+                .setResult(1)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-01T01:01:01.000Z"))
+                .setValidTime(TimeInterval.create(Instant.parse("2016-01-01T01:01:01.000Z"), Instant.parse("2016-01-01T23:59:59.999Z")))
+                .setDatastream(DATASTREAMS.get(0).asReference())
+                .setProximateFoi(featureOfInterest)
+                .build();
         sSrvc.create(o);
         OBSERVATIONS.add(o);
     }

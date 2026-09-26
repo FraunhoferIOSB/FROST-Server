@@ -21,7 +21,6 @@ import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DEFI
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_ENCODINGTYPE;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_DATASTREAM;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_FEATURE;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.NAME_HISTORICALLOCATION;
@@ -155,17 +154,19 @@ public class EntityHelper20 extends EntityHelperAbstract {
     @Override
     public Entity newObservation(Entity datastream) {
         var list = getCache(sMdl.etObservation);
-        Entity obs = sMdl.newObservation(list.size())
-                .setProperty(sMdl.npObservationDatastream, datastream)
-                .setProperty(EP_PHENOMENONTIME, TimeValue.create(Instant.parse("2015-03-01T00:40:00.000Z")))
-                .setProperty(EP_RESULTTIME, TimeInstant.parse("2015-03-01T00:40:00.000Z"))
-                .setProperty(EP_VALIDTIME, TimeInterval.create(
+        Entity obs = sMdl.buildObservation()
+                .setResult(list.size())
+                .setDatastream(datastream)
+                .setPhenomenonTime(TimeValue.create(Instant.parse("2015-03-01T00:40:00.000Z")))
+                .setResultTime(TimeInstant.parse("2015-03-01T00:40:00.000Z"))
+                .setValidTime(TimeInterval.create(
                         Instant.parse("2016-01-01T02:01:01+01:00"),
                         Instant.parse("2016-01-02T00:59:59+01:00")))
-                .setProperty(EP_PROPERTIES, propertiesBuilder()
+                .setProperties(propertiesBuilder()
                         .addItem("param1", "some value1")
                         .addItem("param2", "some value2")
-                        .build());
+                        .build())
+                .build();
         list.add(obs);
         return obs;
     }
@@ -192,7 +193,10 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newThing() {
-        final Entity newThing = sMdl.newThing("Test Thing", "This is a Test Thing");
+        final Entity newThing = sMdl.buildThing()
+                .setName("Test Thing")
+                .setDescription("This is a Test Thing")
+                .build();
         getCache(sMdl.etThing).add(newThing);
         return newThing;
     }
@@ -206,11 +210,12 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newSensor() {
-        final Entity newSensor = sMdl.newSensor(
-                "Fuguro Barometer 1",
-                "Our first Fuguro Barometer",
-                "http://schema.org/description",
-                "Barometer");
+        final Entity newSensor = sMdl.buildSensor()
+                .setName("Fuguro Barometer 1")
+                .setDescription("Our first Fuguro Barometer")
+                .setEncodingType("http://schema.org/description")
+                .setMetadata("Barometer")
+                .build();
         getCache(sMdl.etSensor).add(newSensor);
         return newSensor;
     }
@@ -224,10 +229,12 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newLocation() {
-        final Entity newLocation = sMdl.newLocation(
-                "Rhine",
-                "The river Thine",
-                new Point(-32.01, 50.05));
+        final Entity newLocation = sMdl.buildLocation()
+                .setName("Rhine")
+                .setDescription("The river Thine")
+                .usingGeoJson()
+                .setLocation(new Point(-32.01, 50.05))
+                .build();
         getCache(sMdl.etLocation).add(newLocation);
         return newLocation;
     }
@@ -254,10 +261,11 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newObservedProperty() {
-        final Entity newObservedProperty = sMdl.newObservedProperty(
-                "Dewpoint temperature",
-                "http://dbpedia.org/page/Dew_point",
-                "The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form.");
+        final Entity newObservedProperty = sMdl.buildObservedProperty()
+                .setName("Dewpoint temperature")
+                .setDefinition("http://dbpedia.org/page/Dew_point")
+                .setDescription("The dewpoint temperature is the temperature to which the air must be cooled, at constant pressure, for dew to form.")
+                .build();
         getCache(sMdl.etObservedProperty).add(newObservedProperty);
         return newObservedProperty;
     }
@@ -271,10 +279,12 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newFeatureOfInterest(int idx) {
-        final Entity newFeatureOfInterest = sMdl.newFeature(
-                "Weather Station " + idx,
-                "Weather station " + idx + " in my garden.",
-                new Point(10.0 + 1 * idx, 10.0 + 1 * idx));
+        final Entity newFeatureOfInterest = sMdl.buildFeature()
+                .setName("Weather Station " + idx)
+                .setDescription("Weather station " + idx + " in my garden.")
+                .usingGeoJson()
+                .setFeature(new Point(10.0 + 1 * idx, 10.0 + 1 * idx))
+                .build();
         getCache(sMdl.etFeature).add(newFeatureOfInterest);
         return newFeatureOfInterest;
     }
@@ -288,14 +298,16 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newDatastream(Entity observedProperty, Entity sensor) {
-        final Entity newDatastream = sMdl.newDatastream(
-                "test datastream",
-                "A datatream for testing",
-                observedProperty.getSelfLink(false),
-                new UnitOfMeasurement().setLabel("Celcius").setSymbol("degC").setHref("http://qudt.org/vocab/unit#DegreeCelsius"))
+        final Entity newDatastream = sMdl.buildDatastream()
+                .setName("test datastream")
+                .setDescription("A datatream for testing")
+                .withQuantity(
+                        observedProperty.getSelfLink(false),
+                        new UnitOfMeasurement().setLabel("Celcius").setSymbol("degC").setHref("http://qudt.org/vocab/unit#DegreeCelsius"))
+                .setSensor(sensor)
+                .build()
                 .setProperty(EP_PHENOMENONTIMEDS, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"))
-                .setProperty(EP_RESULTTIMEDS, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"))
-                .setProperty(sMdl.npDatastreamSensor, sensor);
+                .setProperty(EP_RESULTTIMEDS, TimeInterval.parse("2014-03-01T13:00:00Z/2015-05-11T15:30:00Z"));
         getCache(sMdl.etDatastream).add(newDatastream);
         return newDatastream;
     }
@@ -315,10 +327,11 @@ public class EntityHelper20 extends EntityHelperAbstract {
 
     @Override
     public Entity newHistoricalLocation(Entity thing, Entity location) {
-        final Entity newHistoricalLocation = sMdl.newHistoricalLocation()
-                .setProperty(EP_TIME, TimeInstant.parse("2015-03-01T00:40:00.000Z"))
-                .setProperty(sMdl.npHistlocThing, thing)
-                .addNavigationEntity(sMdl.npHistlocLocations, location);
+        final Entity newHistoricalLocation = sMdl.buildHistoricalLocation()
+                .setTime(TimeInstant.parse("2015-03-01T00:40:00.000Z"))
+                .setThing(thing)
+                .addLocation(location)
+                .build();
         getCache(sMdl.etHistoricalLocation).add(newHistoricalLocation);
         return newHistoricalLocation;
     }

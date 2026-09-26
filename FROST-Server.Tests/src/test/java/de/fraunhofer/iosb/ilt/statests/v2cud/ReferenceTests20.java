@@ -20,8 +20,6 @@ package de.fraunhofer.iosb.ilt.statests.v2cud;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DEFINITION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_DESCRIPTION;
 import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_NAME;
-import static de.fraunhofer.iosb.ilt.frostclient.models.CommonProperties.EP_PROPERTIES;
-import static de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing.EP_VALIDTIME;
 import static de.fraunhofer.iosb.ilt.statests.util.Utils.getFromList;
 
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
@@ -144,68 +142,113 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     private static void createEntities() throws ServiceFailureException {
         {
-            Entity thing = mdlCore.newThing("Thing 1", "The first thing.");
+            Entity thing = mdlCore.buildThing()
+                    .setName("Thing 1")
+                    .setDescription("The first thing.")
+                    .build();
             sSrvc.create(thing);
             THINGS.add(thing);
         }
         {
-            Entity location = mdlCore.newLocation("Location Des Dings von ILT", "First Location of Thing 1.", "application/vnd.geo+json", new Point(8, 49));
+            Entity location = mdlCore.buildLocation()
+                    .setName("Location Des Dings von ILT")
+                    .setDescription("First Location of Thing 1.")
+                    .setEncodingType("application/vnd.geo+json")
+                    .setLocation(new Point(8, 49))
+                    .build();
             location.addNavigationEntity(mdlCore.npLocationThings, THINGS.get(0));
             sSrvc.create(location);
             LOCATIONS.add(location);
         }
         {
-            Entity sensor1 = mdlCore.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+            Entity sensor1 = mdlCore.buildSensor()
+                    .setName("Sensor 1")
+                    .setDescription("The first sensor.")
+                    .setEncodingType("text")
+                    .setMetadata("Some metadata.")
+                    .build();
             sSrvc.create(sensor1);
             SENSORS.add(sensor1);
         }
         {
-            Entity sensor2 = mdlCore.newSensor("Sensor 2", "The second sensor", "text", "Some metadata.");
+            Entity sensor2 = mdlCore.buildSensor()
+                    .setName("Sensor 2")
+                    .setDescription("The second sensor")
+                    .setEncodingType("text")
+                    .setMetadata("Some metadata.")
+                    .build();
             sSrvc.create(sensor2);
             SENSORS.add(sensor2);
         }
-        Entity obsProp1 = mdlCore.newObservedProperty("Temperature", "http://ucom.org/temperature", "The temperature of the thing.");
+        Entity obsProp1 = mdlCore.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://ucom.org/temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp1);
         OPROPS.add(obsProp1);
 
-        Entity obsProp2 = mdlCore.newObservedProperty("Humidity", "http://ucom.org/humidity", "The humidity of the thing.");
+        Entity obsProp2 = mdlCore.buildObservedProperty()
+                .setName("Humidity")
+                .setDefinition("http://ucom.org/humidity")
+                .setDescription("The humidity of the thing.")
+                .build();
         sSrvc.create(obsProp2);
         OPROPS.add(obsProp2);
 
         {
-            Entity datastream1 = mdlCore.newDatastream(
-                    "Datastream Temp",
-                    "The temperature of thing 1, sensor 1.",
-                    obsProp1.getSelfLink(false),
-                    new UnitOfMeasurement().setLabel("degree celcius").setSymbol("°C").setCode("ucum:T"));
-            datastream1.setProperty(mdlCore.npDatastreamThing, THINGS.get(0).withOnlyPk());
-            datastream1.setProperty(mdlCore.npDatastreamSensor, SENSORS.get(0).withOnlyPk());
+            Entity datastream1 = mdlCore.buildDatastream()
+                    .setName("Datastream Temp")
+                    .setDescription("The temperature of thing 1, sensor 1.")
+                    .withQuantity(
+                            obsProp1.getSelfLink(false),
+                            new UnitOfMeasurement().setLabel("degree celcius").setSymbol("°C").setCode("ucum:T"))
+                    .setThing(THINGS.get(0).withOnlyPk())
+                    .setSensor(SENSORS.get(0).withOnlyPk())
+                    .build();
             sSrvc.create(datastream1);
             DATASTREAMS.add(datastream1);
         }
         {
-            Entity datastream2 = mdlCore.newDatastream(
-                    "Datastream LF",
-                    "The humidity of thing 1, sensor 2.",
-                    obsProp2.getSelfLink(false),
-                    new UnitOfMeasurement().setLabel("relative humidity").setSymbol("%").setCode("ucum:Humidity"))
-                    .setProperty(mdlCore.npDatastreamThing, THINGS.get(0).withOnlyPk())
-                    .setProperty(mdlCore.npDatastreamSensor, SENSORS.get(1).withOnlyPk());
+            Entity datastream2 = mdlCore.buildDatastream()
+                    .setName("Datastream LF")
+                    .setDescription("The humidity of thing 1, sensor 2.")
+                    .withQuantity(
+                            obsProp2.getSelfLink(false),
+                            new UnitOfMeasurement().setLabel("relative humidity").setSymbol("%").setCode("ucum:Humidity"))
+                    .setThing(THINGS.get(0).withOnlyPk())
+                    .setSensor(SENSORS.get(1).withOnlyPk())
+                    .build();
             sSrvc.create(datastream2);
             DATASTREAMS.add(datastream2);
         }
         {
-            Entity feature = mdlCore.newFeature("Feature 1", "The first Features", new Point(8.0, 50.0));
+            Entity feature = mdlCore.buildFeature()
+                    .setName("Feature 1")
+                    .setDescription("The first Features")
+                    .usingGeoJson()
+                    .setFeature(new Point(8.0, 50.0))
+                    .build();
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
         {
-            Entity feature = mdlCore.newFeature("Feature 2", "The second Features", new Point(9.0, 50.0));
+            Entity feature = mdlCore.buildFeature()
+                    .setName("Feature 2")
+                    .setDescription("The second Features")
+                    .usingGeoJson()
+                    .setFeature(new Point(9.0, 50.0))
+                    .build();
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
         {
-            Entity feature = mdlCore.newFeature("Feature 3", "The third Features", new Point(9.0, 51.0));
+            Entity feature = mdlCore.buildFeature()
+                    .setName("Feature 3")
+                    .setDescription("The third Features")
+                    .usingGeoJson()
+                    .setFeature(new Point(9.0, 51.0))
+                    .build();
             sSrvc.create(feature);
             FEATURES.add(feature);
         }
@@ -326,7 +369,10 @@ public class ReferenceTests20 extends AbstractTestClass {
 
     @Test
     void test10_omLinkingTimeAutomation() throws ServiceFailureException {
-        Entity thing = mdlCore.newThing("NetworkThing 1", "The first thing to network.");
+        Entity thing = mdlCore.buildThing()
+                .setName("NetworkThing 1")
+                .setDescription("The first thing to network.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
@@ -481,9 +527,13 @@ public class ReferenceTests20 extends AbstractTestClass {
         int idx = registry.size();
         MapValue properties = new MapValue(TypeComplex.STA_MAP);
         properties.put("idx", idx);
-        Entity obs = mdlCore.newObservation(result, phenomenonTime, datastream)
-                .setProperty(EP_VALIDTIME, validTime)
-                .setProperty(EP_PROPERTIES, properties);
+        Entity obs = mdlCore.buildObservation()
+                .setResult(result)
+                .setPhenomenonTime(TimeValue.create(phenomenonTime))
+                .setValidTime(validTime)
+                .setProperties(properties)
+                .setDatastream(datastream)
+                .build();
         srvc.create(obs);
         registry.add(obs);
         return obs;

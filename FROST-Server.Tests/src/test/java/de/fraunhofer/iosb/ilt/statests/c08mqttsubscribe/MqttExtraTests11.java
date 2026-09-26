@@ -99,88 +99,136 @@ public class MqttExtraTests11 extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         sSrvc.create(thing);
         eh.cache(thing);
 
-        thing = sMdl.newThing("Thing 2", "The second thing.")
+        thing = sMdl.buildThing()
+                .setName("Thing 2")
+                .setDescription("The second thing.")
+                .build()
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 2).build());
         sSrvc.create(thing);
         eh.cache(thing);
 
-        thing = sMdl.newThing("Thing 3", "The third thing.")
+        thing = sMdl.buildThing()
+                .setName("Thing 3")
+                .setDescription("The third thing.")
+                .build()
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 3).build());
         sSrvc.create(thing);
         eh.cache(thing);
 
-        thing = sMdl.newThing("Thing 4", "The fourth thing.");
+        thing = sMdl.buildThing()
+                .setName("Thing 4")
+                .setDescription("The fourth thing.")
+                .build();
         sSrvc.create(thing);
         eh.cache(thing);
 
         // Locations 0
-        Entity location = sMdl.newLocation("Location 1.0", "First Location of Thing 1.", "application/geo+json", new Point(8, 51))
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("First Location of Thing 1.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 51))
+                .build()
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 1).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 0));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 1
-        location = sMdl.newLocation("Location 1.1", "Second Location of Thing 1.", "application/geo+json", new Point(8, 52))
+        location = sMdl.buildLocation()
+                .setName("Location 1.1")
+                .setDescription("Second Location of Thing 1.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 52))
+                .build()
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 1.1).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 0));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 2
-        location = sMdl.newLocation("Location 2", "Location of Thing 2.", "application/geo+json", new Point(8, 53))
+        location = sMdl.buildLocation()
+                .setName("Location 2")
+                .setDescription("Location of Thing 2.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 53))
+                .build()
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 2).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 1));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 3
-        location = sMdl.newLocation("Location 3", "Location of Thing 3.", "application/geo+json", new Point(8, 54))
+        location = sMdl.buildLocation()
+                .setName("Location 3")
+                .setDescription("Location of Thing 3.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Point(8, 54))
+                .build()
                 .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 3).build())
                 .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 2));
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 4
-        location = sMdl.newLocation("Location 4", "Location of Thing 4.", "application/geo+json",
-                new Polygon(
+        location = sMdl.buildLocation()
+                .setName("Location 4")
+                .setDescription("Location of Thing 4.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new Polygon(
                         new LngLatAlt(8, 53),
                         new LngLatAlt(7, 52),
                         new LngLatAlt(7, 53),
                         new LngLatAlt(8, 53)))
-                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 4).build())
-                .addNavigationEntity(sMdl.npLocationThings, eh.getCache(sMdl.etThing, 3));
+                .setProperties(propertiesBuilder().addItem("field", 4).build())
+                .addThing(eh.getCache(sMdl.etThing, 3))
+                .build();
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 5
-        location = sMdl.newLocation("Location 5", "A line.", "application/geo+json",
-                new LineString(
+        location = sMdl.buildLocation()
+                .setName("Location 5")
+                .setDescription("A line.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new LineString(
                         new LngLatAlt(5, 52),
                         new LngLatAlt(5, 53)))
-                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 5).build());
+                .setProperties(propertiesBuilder().addItem("field", 5).build())
+                .build();
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 6
-        location = sMdl.newLocation("Location 6", "A longer line.", "application/geo+json",
-                new LineString(
+        location = sMdl.buildLocation()
+                .setName("Location 6")
+                .setDescription("A longer line.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new LineString(
                         new LngLatAlt(5, 52),
                         new LngLatAlt(6, 53)))
-                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 6).build());
+                .setProperties(propertiesBuilder().addItem("field", 6).build())
+                .build();
         sSrvc.create(location);
         eh.cache(location);
 
         // Locations 7
-        location = sMdl.newLocation("Location 7", "The longest line.", "application/geo+json",
-                new LineString(
+        location = sMdl.buildLocation()
+                .setName("Location 7")
+                .setDescription("The longest line.")
+                .setEncodingType("application/geo+json")
+                .setLocation(new LineString(
                         new LngLatAlt(4, 52),
                         new LngLatAlt(8, 52)))
-                .setProperty(EP_PROPERTIES, propertiesBuilder().addItem("field", 7).build());
+                .setProperties(propertiesBuilder().addItem("field", 7).build())
+                .build();
         sSrvc.create(location);
         eh.cache(location);
 

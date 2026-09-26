@@ -25,6 +25,7 @@ import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.frostclient.model.PkValue;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11MultiDatastream;
 import de.fraunhofer.iosb.ilt.frostclient.models.SensorThingsV11Sensing;
+import de.fraunhofer.iosb.ilt.frostclient.models.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostclient.models.ext.UnitOfMeasurement;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerSettings;
@@ -35,7 +36,6 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods.HttpResponse;
 import de.fraunhofer.iosb.ilt.statests.util.ServiceUrlHelper;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -412,106 +412,197 @@ public abstract class DataArrayTests extends AbstractTestClass {
     }
 
     private static void createEntities() throws ServiceFailureException {
-        Entity thing = sMdl.newThing("Thing 1", "The first thing.");
+        Entity thing = sMdl.buildThing()
+                .setName("Thing 1")
+                .setDescription("The first thing.")
+                .build();
         sSrvc.create(thing);
         THINGS.add(thing);
 
         // Locations 0
-        Entity location = sMdl.newLocation("Location 1.0", "Location of Thing 1.", "application/vnd.geo+json", new Point(8, 51));
+        Entity location = sMdl.buildLocation()
+                .setName("Location 1.0")
+                .setDescription("Location of Thing 1.")
+                .setEncodingType("application/vnd.geo+json")
+                .setLocation(new Point(8, 51))
+                .build();
         location.addNavigationEntity(sMdl.npLocationThings, THINGS.get(0));
         sSrvc.create(location);
         LOCATIONS.add(location);
 
-        Entity sensor = sMdl.newSensor("Sensor 1", "The first sensor.", "text", "Some metadata.");
+        Entity sensor = sMdl.buildSensor()
+                .setName("Sensor 1")
+                .setDescription("The first sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
         sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        sensor = sMdl.newSensor("Sensor 2", "The second sensor.", "text", "Some metadata.");
+        sensor = sMdl.buildSensor()
+                .setName("Sensor 2")
+                .setDescription("The second sensor.")
+                .setEncodingType("text")
+                .setMetadata("Some metadata.")
+                .build();
         sSrvc.create(sensor);
         SENSORS.add(sensor);
 
-        Entity obsProp = sMdl.newObservedProperty("Temperature", "http://dbpedia.org/page/Temperature", "The temperature of the thing.");
+        Entity obsProp = sMdl.buildObservedProperty()
+                .setName("Temperature")
+                .setDefinition("http://dbpedia.org/page/Temperature")
+                .setDescription("The temperature of the thing.")
+                .build();
         sSrvc.create(obsProp);
         O_PROPS.add(obsProp);
 
-        Entity datastream = sMdl.newDatastream("Datastream 1", "The temperature of thing 1, sensor 1.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        Entity datastream = sMdl.buildDatastream()
+                .setName("Datastream 1")
+                .setDescription("The temperature of thing 1, sensor 1.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .setThing(THINGS.get(0))
+                .setSensor(SENSORS.get(0))
+                .setObservedProperty(obsProp)
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        datastream = sMdl.newDatastream("Datastream 2", "The temperature of thing 1, sensor 2.", "someType", new UnitOfMeasurement("degree celcius", "°C", "ucum:T"));
-        datastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
-        datastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(1));
-        datastream.setProperty(sMdl.npDatastreamObservedproperty, obsProp);
+        datastream = sMdl.buildDatastream()
+                .setName("Datastream 2")
+                .setDescription("The temperature of thing 1, sensor 2.")
+                .setObservationType("someType")
+                .setUnitOfMeasurement(new UnitOfMeasurement("degree celcius", "°C", "ucum:T"))
+                .setThing(THINGS.get(0))
+                .setSensor(SENSORS.get(1))
+                .setObservedProperty(obsProp)
+                .build();
         sSrvc.create(datastream);
         DATASTREAMS.add(datastream);
 
-        Entity foi = sMdl.newFeatureOfInterest("Feature 1", "Feature 1 for thing 1, sensor 1", "application/vnd.geo+json", new Point(8, 51));
+        Entity foi = sMdl.buildFeature()
+                .setName("Feature 1")
+                .setDescription("Feature 1 for thing 1, sensor 1")
+                .setEncodingType("application/vnd.geo+json")
+                .setFeature(new Point(8, 51))
+                .build();
         sSrvc.create(foi);
         FEATURES.add(foi);
 
-        foi = sMdl.newFeatureOfInterest("Feature 2", "Feature 2 for thing 1, sensor 2", "application/vnd.geo+json", new Point(8, 51));
+        foi = sMdl.buildFeature()
+                .setName("Feature 2")
+                .setDescription("Feature 2 for thing 1, sensor 2")
+                .setEncodingType("application/vnd.geo+json")
+                .setFeature(new Point(8, 51))
+                .build();
         sSrvc.create(foi);
         FEATURES.add(foi);
 
-        Entity o = sMdl.newObservation(1, ZonedDateTime.parse("2016-01-01T01:01:01.000Z"), DATASTREAMS.get(0));
+        Entity o = sMdl.buildObservation()
+                .setResult(1)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-01T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
         sSrvc.create(o);
         OBSERVATIONS.add(o);
 
-        o = sMdl.newObservation(2, ZonedDateTime.parse("2016-01-02T01:01:01.000Z"), DATASTREAMS.get(1));
+        o = sMdl.buildObservation()
+                .setResult(2)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-02T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(1))
+                .build();
         o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
         sSrvc.create(o);
         OBSERVATIONS.add(o);
 
-        o = sMdl.newObservation(3, ZonedDateTime.parse("2016-01-03T01:01:01.000Z"), DATASTREAMS.get(0));
+        o = sMdl.buildObservation()
+                .setResult(3)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-03T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(0))
+                .build();
         o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(1));
         sSrvc.create(o);
         OBSERVATIONS.add(o);
 
-        o = sMdl.newObservation(4, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), DATASTREAMS.get(1));
+        o = sMdl.buildObservation()
+                .setResult(4)
+                .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-04T01:01:01.000Z"))
+                .setDatastream(DATASTREAMS.get(1))
+                .build();
         o.setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(1));
         sSrvc.create(o);
         OBSERVATIONS.add(o);
 
         if (serverSettings.implementsRequirement(version, serverSettings.MULTIDATA_REQ)) {
-            Entity obsProp1 = sMdl.newObservedProperty("Wind speed", "http://dbpedia.org/page/Wind_speed", "The wind speed.");
+            Entity obsProp1 = sMdl.buildObservedProperty()
+                    .setName("Wind speed")
+                    .setDefinition("http://dbpedia.org/page/Wind_speed")
+                    .setDescription("The wind speed.")
+                    .build();
             sSrvc.create(obsProp1);
             O_PROPS.add(obsProp1);
 
-            Entity obsProp2 = sMdl.newObservedProperty("Wind direction", "http://dbpedia.org/page/Wind_direction", "The wind direction.");
+            Entity obsProp2 = sMdl.buildObservedProperty()
+                    .setName("Wind direction")
+                    .setDefinition("http://dbpedia.org/page/Wind_direction")
+                    .setDescription("The wind direction.")
+                    .build();
             sSrvc.create(obsProp2);
             O_PROPS.add(obsProp2);
 
-            Entity multiDatastream = mMdl.newMultiDatastream("MultiDatastream 1", "The wind at thing 1.",
-                    new UnitOfMeasurement("m/s", "m/s", "m/s"),
-                    new UnitOfMeasurement("degrees", "deg", "deg"));
-            multiDatastream.setProperty(sMdl.npDatastreamThing, THINGS.get(0));
-            multiDatastream.setProperty(sMdl.npDatastreamSensor, SENSORS.get(0));
-            multiDatastream.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, obsProp1);
-            multiDatastream.addNavigationEntity(mMdl.npMultidatastreamObservedproperties, obsProp2);
+            Entity multiDatastream = mMdl.buildMultiDatastream()
+                    .setName("MultiDatastream 1")
+                    .setDescription("The wind at thing 1.")
+                    .setUnitOfMeasurements(
+                            new UnitOfMeasurement("m/s", "m/s", "m/s"),
+                            new UnitOfMeasurement("degrees", "deg", "deg"))
+                    .createMultiObservationDataType()
+                    .setThing(THINGS.get(0))
+                    .setSensor(SENSORS.get(0))
+                    .addObservedProperty(obsProp1)
+                    .addObservedProperty(obsProp2)
+                    .build();
             sSrvc.create(multiDatastream);
             MULTIDATASTREAMS.add(multiDatastream);
 
-            o = mMdl.newObservation(new Double[]{5.0, 45.0}, ZonedDateTime.parse("2016-01-01T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
-                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            o = sMdl.buildObservation()
+                    .setResult(new Double[]{5.0, 45.0})
+                    .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-01T01:01:01.000Z"))
+                    .setFeatureOfInterest(FEATURES.get(0))
+                    .extend(mMdl.observationExtender())
+                    .setMultiDatastream(MULTIDATASTREAMS.get(0))
+                    .build();
             sSrvc.create(o);
             OBSERVATIONS.add(o);
 
-            o = mMdl.newObservation(new Double[]{5.0, 45.0}, ZonedDateTime.parse("2016-01-02T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
-                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            o = sMdl.buildObservation()
+                    .setResult(new Double[]{5.0, 45.0})
+                    .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-02T01:01:01.000Z"))
+                    .setFeatureOfInterest(FEATURES.get(0))
+                    .extend(mMdl.observationExtender())
+                    .setMultiDatastream(MULTIDATASTREAMS.get(0))
+                    .build();
             sSrvc.create(o);
             OBSERVATIONS.add(o);
 
-            o = mMdl.newObservation(new Double[]{5.0, 45.0}, ZonedDateTime.parse("2016-01-03T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
-                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            o = sMdl.buildObservation()
+                    .setResult(new Double[]{5.0, 45.0})
+                    .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-03T01:01:01.000Z"))
+                    .setFeatureOfInterest(FEATURES.get(0))
+                    .extend(mMdl.observationExtender())
+                    .setMultiDatastream(MULTIDATASTREAMS.get(0))
+                    .build();
             sSrvc.create(o);
             OBSERVATIONS.add(o);
 
-            o = mMdl.newObservation(new Double[]{6.0, 50.0}, ZonedDateTime.parse("2016-01-04T01:01:01.000Z"), MULTIDATASTREAMS.get(0))
-                    .setProperty(sMdl.npObservationFeatureofinterest, FEATURES.get(0));
+            o = sMdl.buildObservation()
+                    .setResult(new Double[]{6.0, 50.0})
+                    .setPhenomenonTimeStart(TimeInstant.parseMoment("2016-01-04T01:01:01.000Z"))
+                    .setFeatureOfInterest(FEATURES.get(0))
+                    .extend(mMdl.observationExtender())
+                    .setMultiDatastream(MULTIDATASTREAMS.get(0))
+                    .build();
             sSrvc.create(o);
             OBSERVATIONS.add(o);
         }
