@@ -425,11 +425,11 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
                     continue;
                 }
                 if (!property.isNullable() && entity.getProperty(property) == null) {
-                    throw new IncompleteEntityException("Property '" + property.getJsonName() + "' must be non-NULL.");
+                    throw new IncompleteEntityException("Property '" + getName() + "/" + property.getJsonName() + "' must be non-NULL.");
                 }
             } else {
                 if (property.isRequired()) {
-                    throw new IncompleteEntityException("Missing required property '" + property.getJsonName() + "'");
+                    throw new IncompleteEntityException("Missing required property '" + getName() + "/" + property.getJsonName() + "'");
                 }
             }
         }
@@ -446,7 +446,7 @@ public class EntityType implements Annotatable, Comparable<EntityType>, Containe
                     continue;
                 }
                 if (!property.isNullable() && entity.getProperty(property) == null) {
-                    throw new IncompleteEntityException("Property '" + property.getJsonName() + "' must be non-NULL.");
+                    throw new IncompleteEntityException("Property '" + getName() + "/" + property.getJsonName() + "' must be non-NULL.");
                 }
             }
         }
