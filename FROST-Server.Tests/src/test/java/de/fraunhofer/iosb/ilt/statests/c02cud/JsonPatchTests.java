@@ -30,13 +30,11 @@ import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.util.EntityUtils;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
-import jakarta.json.Json;
-import jakarta.json.JsonPatch;
-import jakarta.json.JsonValue;
 import java.util.ArrayList;
 import java.util.List;
 import org.geojson.Point;
 import org.junit.jupiter.api.Test;
+import org.opentmf.commons.patch.JsonPatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.node.LongNode;
@@ -175,7 +173,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     void jsonPatchThingTest() throws ServiceFailureException {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
-        JsonPatch patch = Json.createPatchBuilder()
+        JsonPatch patch = JsonPatch.builder()
                 .add("/properties/key1", 1)
                 .build();
         sSrvc.patch(thingOnlyId, patch);
@@ -185,10 +183,9 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         assertEquals(LongNode.valueOf(1), updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
         message = "properties/key0 was changed.";
         assertEquals(StringNode.valueOf("zero"), updatedThing.getProperty(EP_PROPERTIES).get("key0"), message);
-
-        patch = Json.createPatchBuilder()
-                .copy("/properties/keyCopy1", "/properties/key1")
-                .move("/properties/key2", "/properties/key1")
+        patch = JsonPatch.builder()
+                .copy("/properties/key1", "/properties/keyCopy1")
+                .move("/properties/key1", "/properties/key2")
                 .build();
         sSrvc.patch(thingOnlyId, patch);
         updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
@@ -208,8 +205,8 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     void jsonPatchThingNoOpTest() throws ServiceFailureException {
         LOGGER.info("  jsonPatchThingTest");
         Entity thingOnlyId = THINGS.get(0).withOnlyPk();
-        JsonPatch patch = Json.createPatchBuilder()
-                .add("/properties", Utils.MAPPER.readValue("{\"key1\": 2}", JsonValue.class))
+        JsonPatch patch = JsonPatch.builder()
+                .add("/properties", Utils.MAPPER.readTree("{\"key1\": 2}"))
                 .build();
         sSrvc.patch(thingOnlyId, patch);
         Entity updatedThing = sSrvc.dao(sMdl.etThing).find(thingOnlyId.getPrimaryKeyValues());
@@ -218,7 +215,7 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         assertEquals(new LongNode(2), updatedThing.getProperty(EP_PROPERTIES).get("key1"), message);
 
         // This patch should result in no change.
-        patch = Json.createPatchBuilder()
+        patch = JsonPatch.builder()
                 .replace("/properties/key1", 2)
                 .build();
         sSrvc.patch(thingOnlyId, patch);
@@ -238,8 +235,8 @@ public abstract class JsonPatchTests extends AbstractTestClass {
     void jsonPatchDatastreamTest() throws ServiceFailureException {
         LOGGER.info("  jsonPatchDatastreamTest");
         Entity dsOnlyId = DATASTREAMS.get(0).withOnlyPk();
-        JsonPatch patch = Json.createPatchBuilder()
-                .add("/properties", Utils.MAPPER.readValue("{\"key1\": 1}", JsonValue.class))
+        JsonPatch patch = JsonPatch.builder()
+                .add("/properties", Utils.MAPPER.readTree("{\"key1\": 1}"))
                 .build();
         sSrvc.patch(dsOnlyId, patch);
         Entity updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
@@ -247,9 +244,9 @@ public abstract class JsonPatchTests extends AbstractTestClass {
         String message = "properties/key1 was not added correctly.";
         assertEquals(LongNode.valueOf(1), updatedDs.getProperty(EP_PROPERTIES).get("key1"), message);
 
-        patch = Json.createPatchBuilder()
-                .copy("/properties/keyCopy1", "/properties/key1")
-                .move("/properties/key2", "/properties/key1")
+        patch = JsonPatch.builder()
+                .copy("/properties/key1", "/properties/keyCopy1")
+                .move("/properties/key1", "/properties/key2")
                 .build();
         sSrvc.patch(dsOnlyId, patch);
         updatedDs = sSrvc.dao(sMdl.etDatastream).find(dsOnlyId.getPrimaryKeyValues());
