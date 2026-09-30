@@ -40,6 +40,7 @@ public class GitVersionInfo {
     };
     public static final String PACKAGE_NAME = "FROST-Server.Core";
 
+    private static final String PATH_GIT_BUILD_VERSION = "git.build.version";
     private static final String PATH_GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe";
 
     /**
@@ -62,6 +63,11 @@ public class GitVersionInfo {
             final String version = gitData.get(PATH_GIT_COMMIT_ID_DESCRIBE);
             LOGGER.info("{} Version: {}", PACKAGE_NAME, version);
         }
+    }
+
+    public static String getBuildVersion() {
+        init();
+        return gitData.get(PATH_GIT_BUILD_VERSION);
     }
 
     public static String getGitDescription() {
