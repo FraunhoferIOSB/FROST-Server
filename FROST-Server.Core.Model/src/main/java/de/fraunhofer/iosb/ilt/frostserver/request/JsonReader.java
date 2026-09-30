@@ -21,7 +21,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import java.io.Reader;
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The interface for json parsers.
@@ -33,7 +33,7 @@ public interface JsonReader {
      *
      * @return the ObjectMapper used by this JsonReader.
      */
-    public ObjectMapper getMapper();
+    public JsonMapper getMapper();
 
     /**
      * Get the API version that this JsonReader works on.

@@ -17,32 +17,48 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.json.deserialize;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomDeserializationManager;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityChangedMessageDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.GeoJsonDeserializier;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.DateSerialiser;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityChangedMessageSerializer;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityPropertySerialiser;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySerializer;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntitySetResultSerializer;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.EntityTypeSerialiser;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.MomentSerializer;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.OffsetDateTimeSerializer;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.TimeObjectSerializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityChangedMessage;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntitySetImpl;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.EntitySetResult;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInterval;
+import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeObject;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.request.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.io.Reader;
+import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import net.time4j.Moment;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
@@ -56,12 +72,12 @@ public class JsonReaderDefault implements JsonReader {
     /**
      * The mappers to use for normal users.
      */
-    private static final Map<ModelRegistry, ObjectMapper> mappers = new HashMap<>();
+    private static final Map<ModelRegistry, JsonMapper> mappers = new HashMap<>();
 
     /**
      * The mappers to use for admin users.
      */
-    private static final Map<ModelRegistry, ObjectMapper> mappersAdmin = new HashMap<>();
+    private static final Map<ModelRegistry, JsonMapper> mappersAdmin = new HashMap<>();
 
     /**
      * Get an object mapper for the given id Class. If the id class is the same
@@ -71,8 +87,8 @@ public class JsonReaderDefault implements JsonReader {
      * mapper for.
      * @return The cached or created object mapper.
      */
-    public static ObjectMapper getObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
-        ObjectMapper mapper;
+    public static JsonMapper getObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
+        JsonMapper mapper;
         if (isAdmin) {
             mapper = mappersAdmin.get(modelRegistry);
         } else {
@@ -85,7 +101,7 @@ public class JsonReaderDefault implements JsonReader {
         return mapper;
     }
 
-    private static synchronized ObjectMapper initObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
+    private static synchronized JsonMapper initObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         if (isAdmin) {
             return mappersAdmin.computeIfAbsent(modelRegistry, mr -> createObjectMapper(mr, version, isAdmin));
         } else {
@@ -100,7 +116,7 @@ public class JsonReaderDefault implements JsonReader {
      * mapper for.
      * @return The created object mapper.
      */
-    private static synchronized ObjectMapper createObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
+    private static synchronized JsonMapper createObjectMapper(ModelRegistry modelRegistry, Version version, boolean isAdmin) {
         GeoJsonDeserializier geoJsonDeserializier = new GeoJsonDeserializier();
         for (String encodingType : GeoJsonDeserializier.ENCODINGS) {
             CustomDeserializationManager.registerDeserializer(encodingType, geoJsonDeserializier);
@@ -115,12 +131,25 @@ public class JsonReaderDefault implements JsonReader {
         module.addDeserializer(TimeInstant.class, new TimeInstantDeserializer());
         module.addDeserializer(TimeInterval.class, new TimeIntervalDeserializer());
         module.addDeserializer(TimeValue.class, new TimeValueDeserializer());
+        module.addSerializer(Entity.class, new EntitySerializer());
+        module.addSerializer(EntityChangedMessage.class, new EntityChangedMessageSerializer());
+        module.addSerializer(EntitySetResult.class, new EntitySetResultSerializer());
+        module.addSerializer(TimeObject.class, new TimeObjectSerializer());
+        module.addSerializer(OffsetDateTime.class, new OffsetDateTimeSerializer());
+        module.addSerializer(Moment.class, new MomentSerializer());
+        module.addSerializer(EntityType.class, new EntityTypeSerialiser());
+        module.addSerializer(Property.class, new EntityPropertySerialiser());
+        module.addSerializer(Date.class, new DateSerialiser());
 
         return JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+                .changeDefaultPropertyInclusion(incl -> incl.withContentInclusion(JsonInclude.Include.NON_EMPTY))
                 .disable(EnumFeature.READ_ENUMS_USING_TO_STRING)
                 .disable(EnumFeature.WRITE_ENUMS_USING_TO_STRING)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
                 .addModule(module)
                 .build();
     }
@@ -128,7 +157,7 @@ public class JsonReaderDefault implements JsonReader {
     /**
      * The objectMapper for this instance of EntityParser.
      */
-    private final ObjectMapper mapper;
+    private final JsonMapper mapper;
     private final ModelRegistry modelRegistry;
     private final Version version;
 
@@ -167,7 +196,7 @@ public class JsonReaderDefault implements JsonReader {
     }
 
     @Override
-    public ObjectMapper getMapper() {
+    public JsonMapper getMapper() {
         return mapper;
     }
 
