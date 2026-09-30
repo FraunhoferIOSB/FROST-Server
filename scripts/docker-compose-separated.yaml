@@ -30,6 +30,7 @@ services:
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
       - persistence_autoUpdateDatabase=true
+      - persistence_countMode=LIMIT_ESTIMATE
       # STRING/UUID entity ids need uuid-ossp (installed by the uuid-ossp service):
       # - plugins_coreModel_idType=STRING
       - extension_filterDelete_enable=true
@@ -68,6 +69,7 @@ services:
       - persistence_db_url=jdbc:postgresql://database:5432/sensorthings
       - persistence_db_username=sensorthings
       - persistence_db_password=ChangeMe
+      - persistence_countMode=LIMIT_ESTIMATE
 
   mosquitto:
     image: eclipse-mosquitto
@@ -97,9 +99,7 @@ services:
       - PGPASSWORD=ChangeMe
     restart: "no"
     entrypoint: ["/bin/sh", "-c"]
-    command: >
-      psql -h database -U sensorthings -d sensorthings
-      -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+    command: '"psql -h database -U sensorthings -d sensorthings -c ''CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";''"'
 
 volumes:
     postgis_volume:
