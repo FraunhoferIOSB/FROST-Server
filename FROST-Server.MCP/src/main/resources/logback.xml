@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <!-- reset all previous level configurations of all j.u.l. loggers -->
+        <resetJUL>true</resetJUL>
+    </contextListener> 
+
+    <variable name="FROST_LL" value="${FROST_LL:-INFO}" />
+    <variable name="FROST_LL_parser" value="${FROST_LL_parser:-INFO}" />
+    <variable name="FROST_LL_requests" value="${FROST_LL_requests:-INFO}" />
+    <variable name="FROST_LL_service" value="${FROST_LL_service:-INFO}" />
+    <variable name="FROST_LL_settings" value="${FROST_LL_settings:-INFO}" />
+    <variable name="FROST_LL_queries" value="${FROST_LL_queries:-INFO}" />
+    <variable name="FROST_LL_io_moquette" value="${FROST_LL_io_moquette:-WARN}" />
+    <variable name="FROST_LL_liquibase" value="${FROST_LL_liquibase:-INFO}" />
+    <variable name="FROST_LL_org_jooq" value="${FROST_LL_org_jooq:-INFO}" />
+
+    <variable name="FROST_LOG_maxtotalsize" value="${FROST_LOG_maxtotalsize:-200MB}" />
+    <variable name="FROST_LOG_maxfilesize" value="${FROST_LOG_maxfilesize:-50MB}" />
+    <variable name="FROST_LOG_maxfilecount" value="${FROST_LOG_maxfilecount:-5}" />
+    <variable name="FROST_LOG_path" value="${FROST_LOG_path:-logs}" />
+    <variable name="FROST_LOG_filename" value="${FROST_LOG_filename:-FROST-Server}" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %40logger{40} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${FROST_LOG_path}/${FROST_LOG_filename}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- daily rollover. Make sure the path matches the one in the file element or else
+            the rollover logs are placed in the working directory. -->
+            <fileNamePattern>${FROST_LOG_path}/${FROST_LOG_filename}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${FROST_LOG_maxfilesize}</maxFileSize>
+            <!-- keep x days' worth of history -->
+            <maxHistory>${FROST_LOG_maxfilecount}</maxHistory>
+            <totalSizeCap>${FROST_LOG_maxtotalsize}</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d %-4relative %-5level %40logger{40} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.http.common.HttpRequestDecoder" level="${FROST_LL_requests}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.parser" level="${FROST_LL_parser}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder" level="${FROST_LL_queries}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.service" level="${FROST_LL_service}"/>
+    <logger name="de.fraunhofer.iosb.ilt.frostserver.settings" level="${FROST_LL_settings}"/>
+    <logger name="io.moquette" level="${FROST_LL_io_moquette}"/>
+    <logger name="liquibase" level="${FROST_LL_liquibase}"/>
+    <logger name="org.jooq" level="${FROST_LL_org_jooq}"/>
+
+    <root level="${FROST_LL}">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>

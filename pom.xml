@@ -38,6 +38,7 @@
         <module>FROST-Server.MQTTP</module>
         <module>FROST-Server.HTTP</module>
         <module>FROST-Server.HTTP.Common</module>
+        <module>FROST-Server.MCP</module>
         <module>FROST-Server.MQTT</module>
         <module>FROST-Server.MQTT.Moquette</module>
         <module>FROST-Server.Core.Model</module>
@@ -195,6 +196,11 @@
                 <groupId>de.grundid.opendatalab</groupId>
                 <artifactId>geojson-jackson</artifactId>
                 <version>${version.jacksonGeojson}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.modelcontextprotocol.sdk</groupId>
+                <artifactId>mcp</artifactId>
+                <version>2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
