@@ -193,6 +193,7 @@ public class ModelRegistry {
     }
 
     public ModelRegistry registerPropertyType(PropertyType type) {
+        namespaces.add(type.getNamespace());
         String fullName = fullName(type.getNamespace(), type.getName());
         PropertyType old = propertyTypes.put(fullName, type);
         if (old != null && old != type) {
