@@ -56,6 +56,7 @@ public class ServletMain extends HttpServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
     private static final String NOT_FOUND = "{\"error\":\"Version Not Found\"}";
+    private static final String REDIRECT_FAILED = "Redirect Failed";
 
     private static final Histogram REQUEST_DURATION = Histogram.builder()
             .name("http_request_duration_seconds")
@@ -85,7 +86,9 @@ public class ServletMain extends HttpServlet {
                 response.sendRedirect(coreSettings.getQueryDefaults().getServiceRootUrl() + "/");
                 return;
             } catch (IOException ex) {
-                sendResponse(Service.errorResponse(null, 500, NOT_FOUND), response);
+                LOGGER.error("{}: {}", REDIRECT_FAILED, ex.getMessage());
+                LOGGER.debug(REDIRECT_FAILED, ex);
+                sendResponse(Service.errorResponse(null, 500, REDIRECT_FAILED), response);
                 return;
             }
         }
