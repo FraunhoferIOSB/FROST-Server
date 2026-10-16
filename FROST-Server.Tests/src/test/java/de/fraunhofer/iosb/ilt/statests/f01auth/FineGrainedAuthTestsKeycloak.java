@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostclient.utils.TokenManagerOpenIDConnect;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.projects.ProjectRoleDecoder;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestCore;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -131,11 +132,13 @@ abstract class FineGrainedAuthTestsKeycloak extends FineGrainedAuthTests {
         try {
             if (!baseService.isBaseUrlSet()) {
                 baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .addHook(HTTPMethods.getCountHook())
                         .init();
             }
             return new SensorThingsService(baseService.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .setVersion(baseService.getVersion())
+                    .addHook(HTTPMethods.getCountHook())
                     .init();
         } catch (MalformedURLException | URISyntaxException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);

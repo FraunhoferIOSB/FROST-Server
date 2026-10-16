@@ -30,6 +30,6 @@ public class KeyCloakTests10 extends KeyCloakTests {
     @AfterAll
     static void stats() {
         KeyCloakTests.cleanup();
-        HTTPMethods.expectStats("KeyCloakTests10", 12, 37, 4, 6, 0);
+        HTTPMethods.expectStats("KeyCloakTests10", 12, 38, 4, 6, 0);
     }
 }

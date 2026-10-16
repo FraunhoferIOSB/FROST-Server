@@ -132,6 +132,7 @@ abstract class KeyCloakTests extends AbstractAuthTests {
         try {
             if (!baseService.isBaseUrlSet()) {
                 baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .addHook(HTTPMethods.getCountHook())
                         .init();
             }
             return new SensorThingsService(baseService.getModelRegistry())

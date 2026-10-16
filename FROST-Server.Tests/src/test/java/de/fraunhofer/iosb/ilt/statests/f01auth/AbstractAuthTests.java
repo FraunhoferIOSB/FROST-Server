@@ -117,6 +117,7 @@ abstract class AbstractAuthTests extends AbstractTestClass {
             }
             if (!sSrvc.isBaseUrlSet()) {
                 sSrvc.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .addHook(HTTPMethods.getCountHook())
                         .init();
             }
             return new SensorThingsService(sSrvc.getModelRegistry())

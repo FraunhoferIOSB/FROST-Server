@@ -22,6 +22,7 @@ import static de.fraunhofer.iosb.ilt.statests.TestCore.KEY_DB_NAME;
 import de.fraunhofer.iosb.ilt.frostclient.SensorThingsService;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestCore;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -87,11 +88,13 @@ abstract class ProjectAuthTestsBasicAnon extends ProjectAuthTests {
         try {
             if (!baseService.isBaseUrlSet()) {
                 baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .addHook(HTTPMethods.getCountHook())
                         .init();
             }
             return new SensorThingsService(baseService.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .setVersion(baseService.getVersion())
+                    .addHook(HTTPMethods.getCountHook())
                     .init();
         } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);

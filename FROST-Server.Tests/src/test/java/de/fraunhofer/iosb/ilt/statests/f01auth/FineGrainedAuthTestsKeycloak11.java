@@ -33,6 +33,6 @@ public class FineGrainedAuthTestsKeycloak11 extends FineGrainedAuthTestsKeycloak
     @AfterAll
     static void stats() {
         FineGrainedAuthTestsKeycloak.cleanup();
-        HTTPMethods.expectStats("FineGrainedAuthTestsKeycloak11", 0, 19, 0, 2, 0);
+        HTTPMethods.expectStats("FineGrainedAuthTestsKeycloak11", 41, 214, 16, 51, 0);
     }
 }

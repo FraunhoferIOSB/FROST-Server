@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostclient.exception.ServiceFailureException;
 import de.fraunhofer.iosb.ilt.frostclient.model.Entity;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestCore;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.mqtt.MqttHelper11.EntityCreator;
 import java.io.IOException;
@@ -98,11 +99,13 @@ abstract class FineGrainedAuthTestsBasic extends FineGrainedAuthTests {
         try {
             if (!baseService.isBaseUrlSet()) {
                 baseService.setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
+                        .addHook(HTTPMethods.getCountHook())
                         .init();
             }
             return new SensorThingsService(baseService.getModelRegistry())
                     .setBaseUrl(new URI(serverSettings.getServiceUrl(version)))
                     .setVersion(baseService.getVersion())
+                    .addHook(HTTPMethods.getCountHook())
                     .init();
         } catch (URISyntaxException | MalformedURLException ex) {
             throw new IllegalArgumentException("Serversettings contains malformed URL.", ex);
