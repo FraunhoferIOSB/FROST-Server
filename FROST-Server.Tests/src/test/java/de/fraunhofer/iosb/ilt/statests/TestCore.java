@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.Connector;
@@ -97,9 +98,9 @@ public class TestCore {
 
     private static TestCore instance;
 
-    private final Map<Integer, Server> httpServers = new HashMap<>();
-    private final Map<Integer, FrostMqttServer> mqttServers = new HashMap<>();
-    private final Map<Integer, ServerSettings> serverSettings = new HashMap<>();
+    private final Map<Integer, Server> httpServers = new ConcurrentHashMap<>();
+    private final Map<Integer, FrostMqttServer> mqttServers = new ConcurrentHashMap<>();
+    private final Map<Integer, ServerSettings> serverSettings = new ConcurrentHashMap<>();
 
     private final AtomicInteger nextBusId = new AtomicInteger(1);
     private final AtomicInteger nextDbId = new AtomicInteger(1);
@@ -352,10 +353,11 @@ public class TestCore {
         serverSettings.remove(key);
     }
 
-    public synchronized void stopAllServers() {
+    public void stopAllServers() {
         List<Thread> shutdownThreads = new ArrayList<>();
         // we copy the keys since the set is changed during shutdown.
-        for (Integer key : httpServers.keySet().toArray(new Integer[httpServers.size()])) {
+        final Integer[] keys = httpServers.keySet().toArray(Integer[]::new);
+        for (Integer key : keys) {
             Thread t = new Thread(() -> {
                 stopServer(key);
             });
