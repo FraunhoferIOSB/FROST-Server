@@ -221,15 +221,15 @@ public class HTTPMethods {
                         HTTPMethods.incrementCountGet();
                     }
                     case HttpPatch.METHOD_NAME -> {
-                        LOGGER.debug("    Getting: {}", request);
+                        LOGGER.debug("    Patching: {}", request);
                         HTTPMethods.incrementCountPatch();
                     }
                     case HttpPost.METHOD_NAME -> {
-                        LOGGER.debug("    Getting: {}", request);
+                        LOGGER.debug("    Posting: {}", request);
                         HTTPMethods.incrementCountPost();
                     }
                     case HttpPut.METHOD_NAME -> {
-                        LOGGER.debug("    Getting: {}", request);
+                        LOGGER.debug("    Putting: {}", request);
                         HTTPMethods.incrementCountPut();
                     }
                 }
@@ -285,8 +285,7 @@ public class HTTPMethods {
     }
 
     public static HttpResponse doGet(final SensorThingsService service, String urlString) throws ParseException, IOException {
-        LOGGER.debug("    Getting: {}", urlString);
-        countGet.incrementAndGet();
+        // Logged and counted by the service hook.
         HttpGet request = new HttpGet(urlString);
         try (CloseableHttpResponse response = service.execute(request)) {
             HttpResponse result = new HttpResponse(response.getStatusLine().getStatusCode());

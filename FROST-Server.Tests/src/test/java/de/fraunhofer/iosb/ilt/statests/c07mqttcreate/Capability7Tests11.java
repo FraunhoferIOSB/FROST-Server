@@ -30,6 +30,6 @@ public class Capability7Tests11 extends Capability7Tests {
     @AfterAll
     static void stats() {
         Capability7Tests.cleanup();
-        HTTPMethods.expectStats("Capability7Tests11", 19, 26, 0, 15, 0);
+        HTTPMethods.expectStats("Capability7Tests11", 19, 22, 0, 15, 0);
     }
 }

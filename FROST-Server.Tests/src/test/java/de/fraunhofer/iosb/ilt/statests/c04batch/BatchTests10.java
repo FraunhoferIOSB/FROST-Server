@@ -30,6 +30,6 @@ public class BatchTests10 extends BatchTests {
     @AfterAll
     static void stats() {
         BatchTests.cleanup();
-        HTTPMethods.expectStats("BatchTests10", 12, 31, 0, 15, 0);
+        HTTPMethods.expectStats("BatchTests10", 12, 23, 0, 15, 0);
     }
 }

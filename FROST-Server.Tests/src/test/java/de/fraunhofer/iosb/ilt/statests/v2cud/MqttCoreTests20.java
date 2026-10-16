@@ -125,7 +125,7 @@ public class MqttCoreTests20 extends AbstractTestClass {
     @AfterAll
     static void stats() {
         cleanup();
-        HTTPMethods.expectStats("MqttCoreTests20", 99, 686, 33, 139, 42);
+        HTTPMethods.expectStats("MqttCoreTests20", 99, 527, 33, 139, 42);
     }
 
     public static void cleanup() {

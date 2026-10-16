@@ -33,6 +33,6 @@ public class ProjectAuthTestsBasic11 extends ProjectAuthTestsBasic {
     @AfterAll
     static void stats() {
         ProjectAuthTestsBasic.cleanup();
-        HTTPMethods.expectStats("ProjectAuthTestsBasic11", 0, 21, 0, 10, 0);
+        HTTPMethods.expectStats("ProjectAuthTestsBasic11", 47, 278, 30, 78, 0);
     }
 }

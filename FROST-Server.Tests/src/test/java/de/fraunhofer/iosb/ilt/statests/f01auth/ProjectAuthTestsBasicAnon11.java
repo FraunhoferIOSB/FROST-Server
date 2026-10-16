@@ -33,6 +33,6 @@ public class ProjectAuthTestsBasicAnon11 extends ProjectAuthTestsBasicAnon {
     @AfterAll
     static void stats() {
         ProjectAuthTestsBasicAnon.cleanup();
-        HTTPMethods.expectStats("ProjectAuthTestsBasicAnon11", 0, 10, 0, 10, 0);
+        HTTPMethods.expectStats("ProjectAuthTestsBasicAnon11", 47, 260, 22, 78, 0);
     }
 }

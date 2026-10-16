@@ -33,6 +33,6 @@ public class FineGrainedAuthTestsBasic11 extends FineGrainedAuthTestsBasic {
     @AfterAll
     static void stats() {
         FineGrainedAuthTestsBasic.cleanup();
-        HTTPMethods.expectStats("FineGrainedAuthTestsBasic11", 0, 19, 0, 2, 0);
+        HTTPMethods.expectStats("FineGrainedAuthTestsBasic11", 41, 223, 24, 51, 0);
     }
 }
