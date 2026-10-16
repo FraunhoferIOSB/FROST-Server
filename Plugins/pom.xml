@@ -13,22 +13,11 @@
     <name>FROST-Server.Plugins</name>
 
     <modules>
-        <module>Actuation</module>
         <module>BatchProcessing</module>
-        <module>CoreModel</module>
-        <module>CoreModelV2</module>
-        <module>FormatCsv</module>
-        <module>FormatDataArray</module>
-        <module>FormatGeoJson</module>
-        <module>ModelLoader</module>
-        <module>ModelOM</module>
-        <module>ModelRelations</module>
-        <module>ModelSampling</module>
-        <module>MultiDatastream</module>
+        <module>DataModels</module>
+        <module>Formats</module>
         <module>OData</module>
         <module>OpenApi</module>
-        <module>OpenCitySense</module>
-        <module>Projects</module>
     </modules>
 
     <properties>
