@@ -1,0 +1,17 @@
+
+Server-side, all Content implementations should accept Readers and Iterators as alternative to Strings and Lists.
+
+**Expected Behavior**
+
+On the server side, response data should not be required to be fully loaded in memory at any point in time. An application should be able to provide a Reader for string data, and the contents of this Reader should be directly piped to the client.
+Similarly, instead of List<Map<String, Object>> content, an Iterator should be accepted. This allows database results to be a wrapper that operates directly on a database cursor, avoiding loading the entire result set in memory.
+
+**Current Behavior**
+
+All result content is first fully loaded into memory before any further handling is done.
+This is very memory inefficient, which is a problem for any server that handles many parallel sessions.
+It also means that the sending of results can not start until the result is fully loaded.
+
+This probably requires changing the McpJsonMapper interface to allow working on streams.
+
+This is related to, but not the same as #156. That issue only addresses one single inefficiency.
