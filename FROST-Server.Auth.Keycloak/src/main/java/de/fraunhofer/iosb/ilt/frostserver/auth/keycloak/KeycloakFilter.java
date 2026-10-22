@@ -106,6 +106,19 @@ public class KeycloakFilter implements Filter {
         final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
         roleMappersByPath.put("/Data", method -> Role.ADMIN);
         roleMappersByPath.put("/keyc", method -> Role.ADMIN);
+        // When the MCP server registers this filter for the /mcp endpoint, it does
+        // so with authenticateOnly-only semantics; the mapper exists so the path
+        // lookup succeeds (roles are enforced by the persistence layer).
+        final Utils.MethodRoleMapper roleMapperMcp = (HttpMethod method) -> {
+            switch (method) {
+                case OPTIONS:
+                    return Role.NONE;
+
+                default:
+                    return Role.READ;
+            }
+        };
+        roleMappersByPath.put("/mcp", roleMapperMcp);
         final Utils.MethodRoleMapper roleMapperSta = (HttpMethod method) -> {
             switch (method) {
                 case DELETE:
@@ -301,7 +314,8 @@ public class KeycloakFilter implements Filter {
             pathInfo = servletPath;
         }
         LOGGER.trace("\nrequestURI: {}\ncontextPath: {}\nservletPath: {}\nfullPath: {}\npathInfo: {}", requestURI, contextPath, servletPath, preVersionPath, pathInfo);
-        Utils.MethodRoleMapper mapper = roleMappersByPath.get(pathInfo.substring(0, 5));
+        final String pathKey = pathInfo.length() <= 5 ? pathInfo : pathInfo.substring(0, 5);
+        Utils.MethodRoleMapper mapper = roleMappersByPath.get(pathKey);
         if (mapper == null) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("No role mapper for servletPath: {}", StringHelper.cleanForLogging(servletPath));
