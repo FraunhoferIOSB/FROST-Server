@@ -158,6 +158,15 @@ Therefore, we strongly recommend you contact us for support if your use case req
   A comma-separated list of meta data files to load. Each entry is prefixed with **plugins.modelLoader.metadataPath**. Each file is loaded and its JSON-content is merged into the serverSettings object on the ROOT-URL.
 
 
+### OpenCitySense
+
+The [OpenCitySense plugin](../extensions/DataModel-OpenCitySense.md) extends the standard data model with various classes that help with sensor management.
+This plugin requires the ModelLoader and either CoreModel or CoreModelV2 plugins, with the actuation plugin.
+
+* **plugins.openCitySense.enable:**  
+  Toggle indicating the ProOpenCitySensejects plugin should be enabled. Default: `false`.
+
+
 ### Projects
 
 The [Projects plugin](../extensions/DataModel-Projects.md) extends the standard data model with a Project class and User/Role classes that allow fine-grained access control.
