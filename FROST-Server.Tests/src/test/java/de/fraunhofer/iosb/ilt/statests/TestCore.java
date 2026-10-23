@@ -178,9 +178,10 @@ public class TestCore {
         maybeStartMessagebus();
         parameters.computeIfAbsent(KEY_DB_NAME, t -> "db" + nextDbId.incrementAndGet());
         try {
-            LOGGER.info("Testing if Mosquitto works...");
+            final String mosquittoUrl = "tcp://" + mqttBus.getHost() + ":" + mqttBus.getFirstMappedPort();
+            LOGGER.info("Testing if Mosquitto works at: {}", mosquittoUrl);
             MqttClient client = new MqttClient(
-                    "tcp://127.0.0.1:" + mqttBus.getFirstMappedPort(),
+                    mosquittoUrl,
                     MqttClient.generateClientId(),
                     new MemoryPersistence());
             client.connect();
