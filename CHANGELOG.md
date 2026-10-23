@@ -3,6 +3,7 @@
 ## Version 2.8.2-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Added option to enable/disable MQTT Request/Reponse functionality.
 
 
 ## Version 2.8.1
