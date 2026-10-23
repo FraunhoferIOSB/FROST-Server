@@ -90,6 +90,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         SERVER_PROPERTIES.put("plugins.coreModel.idType", "LONG");
         SERVER_PROPERTIES.put("plugins.coreService.enable", "true");
         SERVER_PROPERTIES.put("plugins.coreModelV2.enable", "true");
+        SERVER_PROPERTIES.put("mqtt.allowRequestResponse", "true");
     }
 
     public MqttRequestResponse20() {

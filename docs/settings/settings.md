@@ -162,8 +162,12 @@ These are settings for the MQTT package.
 * **mqtt.exposedEndpoints:** Default: empty  
   A comma separated list of MQTT endpoints to list on the index page.
   when not present, FROST will try to generate this list itself.
+* **mqtt.allowExpand:** Since 2.3.2, Default: `true`  
+  When true, MQTT topics may contain `$expand` query parameters.
 * **mqtt.allowFilter:** Since 2.3.2, Default: `false`  
   When true, MQTT topics may contain `$filter` query parameters.
+* **mqtt.allowRequestResponse:** Since 2.8.2, Default: `false`  
+  When true, clients can use the Request/Reponse pattern over the MQTT interface.
 
 
 ## Persistence Settings

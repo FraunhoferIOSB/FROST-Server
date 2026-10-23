@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mqtt;
 
+import static de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings.TAG_MQTT_ALLOW_REQUEST_RESPONSE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.MQTT_TOPIC_REQUEST;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.MQTT_USER_PROPERTY_NAME_TYPE;
 import static de.fraunhofer.iosb.ilt.frostserver.util.Constants.MQTT_USER_PROPERTY_NAME_URL;
@@ -112,6 +113,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
     private LoggingStatus logStatus;
 
     private boolean enabledMqtt = false;
+    private boolean enabledMqttRequestResponse = false;
     private boolean shutdown = false;
 
     public MqttManager(CoreSettings settings) {
@@ -132,6 +134,7 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         MqttSettings mqttSettings = settings.getMqttSettings();
         if (mqttSettings.isEnableMqtt()) {
             enabledMqtt = true;
+            enabledMqttRequestResponse = mqttSettings.getBoolean(TAG_MQTT_ALLOW_REQUEST_RESPONSE);
             shutdown = false;
 
             int entityChangedPoolSize = mqttSettings.getSubscribeThreadPoolSize();
@@ -244,7 +247,9 @@ public class MqttManager implements SubscriptionListener, MessageListener, Reque
         try (Service service = new Service(settings)) {
             final ServiceResponseDefault serviceResponse = new ServiceResponseDefault();
             if (path.equals(MQTT_TOPIC_REQUEST)) {
-                handleRestRequest(e, version, service, serviceResponse, topic);
+                if (enabledMqttRequestResponse) {
+                    handleRestRequest(e, version, service, serviceResponse, topic);
+                }
             } else {
                 handleSimpleCreate(e, version, path, service, serviceResponse, topic);
             }

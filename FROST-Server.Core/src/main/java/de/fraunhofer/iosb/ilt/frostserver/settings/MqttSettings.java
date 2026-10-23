@@ -22,7 +22,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.PREFIX_MQ
 import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
-import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.ConfigProvider;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Settings for the MQTT service in FROST.
  */
-public class MqttSettings implements ConfigDefaults {
+public class MqttSettings extends ConfigProvider<MqttSettings> {
 
     /**
      * Tags
@@ -71,6 +71,8 @@ public class MqttSettings implements ConfigDefaults {
     public static final String TAG_MQTT_ALLOW_EXPAND = "allowExpand";
     @DefaultValueBoolean(false)
     public static final String TAG_MQTT_ALLOW_FILTER = "allowFilter";
+    @DefaultValueBoolean(false)
+    public static final String TAG_MQTT_ALLOW_REQUEST_RESPONSE = "allowRequestResponse";
 
     /**
      * Constraints
@@ -157,6 +159,7 @@ public class MqttSettings implements ConfigDefaults {
     private Settings customSettings;
 
     public MqttSettings(CoreSettings coreSettings, Settings settings) {
+        super(settings);
         if (settings == null) {
             throw new IllegalArgumentException("settings most be non-null");
         }
@@ -180,6 +183,9 @@ public class MqttSettings implements ConfigDefaults {
 
         if (enableMqtt) {
             coreSettings.getEnabledExtensions().add(Extension.MQTT);
+            if (getBoolean(TAG_MQTT_ALLOW_REQUEST_RESPONSE)) {
+                coreSettings.getEnabledExtensions().add(Extension.MQTT_REQUEST_RESPONSE);
+            }
         }
     }
 

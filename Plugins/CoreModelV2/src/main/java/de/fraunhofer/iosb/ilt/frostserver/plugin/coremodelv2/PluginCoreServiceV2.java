@@ -111,10 +111,13 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
     private static final String REQ_CLASS_API_READ = "http://www.opengis.net/spec/sensorthings/2.0/req-class/api/read";
     private static final String REQ_CLASS_BINDING_HTTP = "http://www.opengis.net/spec/sensorthings/2.0/req-class/binding/http";
     private static final String REQ_CLASS_BINDING_MQTT = "http://www.opengis.net/spec/sensorthings/2.0/req-class/binding/mqtt";
+    private static final String REQ_CLASS_BINDING_MQTT_REQUEST_RESPONSE = "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/request_response";
 
     static {
-        CONFORMANCE_BY_EXTENSION.put(Extension.CORE,
-                Arrays.asList(REQ_CLASS_API_READ,
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.CORE,
+                Arrays.asList(
+                        REQ_CLASS_API_READ,
                         REQ_CLASS_API_CUD,
                         "http://www.opengis.net/spec/sensorthings/2.0/req/api/read/options/select_distinct",
                         "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/deep_update",
@@ -122,23 +125,31 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
                         "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/replace",
                         REQ_CLASS_BINDING_HTTP,
                         "http://www.opengis.net/spec/sensorthings/2.0/req/binding/http/request_response"));
-        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT,
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.MQTT,
                 Arrays.asList(
                         REQ_CLASS_BINDING_MQTT,
-                        "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/request_response",
                         "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub",
                         "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub/select",
                         "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/simple_create"));
-        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT_EXPAND,
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.MQTT_REQUEST_RESPONSE,
+                Arrays.asList(
+                        REQ_CLASS_BINDING_MQTT_REQUEST_RESPONSE));
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.MQTT_EXPAND,
                 Arrays.asList(
                         "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub/expand"));
-        CONFORMANCE_BY_EXTENSION.put(Extension.MQTT_FILTER,
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.MQTT_FILTER,
                 Arrays.asList(
                         "http://www.opengis.net/spec/sensorthings/2.0/req/binding/mqtt/pub_sub/filter"));
-        CONFORMANCE_BY_EXTENSION.put(Extension.FILTERED_DELETES,
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.FILTERED_DELETES,
                 Arrays.asList(
                         "http://www.opengis.net/spec/sensorthings/2.0/req/api/cud/filtered_delete"));
-        CONFORMANCE_BY_EXTENSION.put(Extension.ENTITY_LINKING,
+        CONFORMANCE_BY_EXTENSION.put(
+                Extension.ENTITY_LINKING,
                 Arrays.asList(
                         "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
                         "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",

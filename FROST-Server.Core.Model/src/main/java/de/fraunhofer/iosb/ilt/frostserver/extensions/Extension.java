@@ -26,7 +26,8 @@ public enum Extension {
     FILTERED_DELETES,
     MQTT,
     MQTT_EXPAND,
-    MQTT_FILTER;
+    MQTT_FILTER,
+    MQTT_REQUEST_RESPONSE;
 
     /**
      * Flag indicating the server feature should be exposed on the index page.
