@@ -107,13 +107,11 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         int maxClientsPerUser = authSettings.getInt(TAG_MAX_CLIENTS_PER_USER, getClass());
         userCaches.setMaxClientsPerUser(maxClientsPerUser);
 
-        if (authenticateOnly) {
-            try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
-                if (pm instanceof JooqPersistenceManager jpm) {
-                    // Ensure security validators are initialised even if no specific
-                    // security validators are defined.
-                    jpm.getTableCollection().addSecurityValidator("", null);
-                }
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
+            if (pm instanceof JooqPersistenceManager jpm) {
+                // Ensure security validators are initialised even if no specific
+                // security validators are defined.
+                jpm.getTableCollection().addSecurityValidator("", null);
             }
         }
 
