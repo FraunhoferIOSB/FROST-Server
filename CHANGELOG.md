@@ -1,8 +1,11 @@
 # Changelog
 
-## Version 2.8.2-SNAPSHOT
+## Version 2.8.2
 
 **Internal changes & Bugfixes**
+* Improved missing property error message.
+* Fixed tools page at server root not working in all-in-one version.
+* Fixed exception when using empty username or password with basic auth.
 * Fixed namespaces with only property types not being registered.
 * Fixed "is null" not working on phenomenonTime/end.
 * Added option to enable/disable MQTT Request/Reponse functionality.
