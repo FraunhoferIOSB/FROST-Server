@@ -120,7 +120,7 @@ public class ReferenceTests20 extends AbstractTestClass {
     @AfterAll
     static void stats() {
         cleanup();
-        HTTPMethods.expectStats("ReferenceTests20", 22, 57, 1, 33, 6);
+        HTTPMethods.expectStats("ReferenceTests20", 18, 35, 0, 27, 6);
     }
 
     public static void cleanup() {
