@@ -505,16 +505,21 @@ in the persistence-layer security validators.
   MCP process (per-process settings), where the HTTP layer only authenticates
   (Bearer tokens, sessions) and the persistence layer authorizes. Existing
   deployments are unaffected (none of them map `/mcp`).
-* **Mandatory persistence-layer authorization at boot.** Independent of the global
-  `auth.authenticateOnly`, the MCP boot ensures the PM-side default security validators
-  are installed (`jpm.getTableCollection().addSecurityValidator("", null)` — the same
-  idiom `BasicAuthProvider.init`/`KeycloakAuthProvider.init` use), so
+* **Persistence-layer authorization at boot.** When — and only when — the MCP boot
+  actually resolved an auth provider for `/mcp` (`auth.provider` mapping to
+  `BasicAuthProvider`/`KeycloakAuthProvider`), it installs the PM-side default security
+  validators (`jpm.getTableCollection().addSecurityValidator("", null)` — the same
+  idiom `BasicAuthProvider.init`/`KeycloakAuthProvider.init` use in authenticate-only
+  mode), so
   `TableCollection` installs `CheckUserHasRoles` hooks for insert/update/delete on all
   tables (`ROLE_ADMIN` or `roleCreate`/`typeName+create` etc., `Type.ANY`). These
   validators read `PrincipalExtended.getLocalPrincipal()` (the ThreadLocal that
   `ServiceRequest.setLocalRequest` sets — the same call the tool handlers make), so
   writes via MCP are role-checked at the data layer even when the HTTP-authenticated
-  identity carries only "authenticated" semantics.
+  identity carries only "authenticated" semantics. Without a resolved provider (e.g.
+  the stand-alone deployment's default no-auth mode), *no* validators are armed —
+  matching the plain HTTP no-auth deployment, where nothing installs them either, and
+  anonymous writes are allowed.
 * **Read gate mirroring the MQTT adapter.** The persistence layer does *not* check the
   read role (HTTP filters do that per-method; MQTT checks it explicitly in
   `AuthWrapper.canRead`). Since the MCP filter runs in authenticate-only mode, the
@@ -573,6 +578,13 @@ in the persistence-layer security validators.
    `ServiceResponseDefault` (in-memory writer), then `removeLocalRequest()` — the exact
    `ServletMain.executeService` pattern. The core formats the result JSON (default
    ResultFormatter) into the response writer.
+   *Detail (CUD responses):* the STA v1.1 plugin (`PluginCoreService.execute`) forces
+   `$format=noResponse` on every CREATE/UPDATE/DELETE, so 2xx responses carry an empty
+   formatted body — over HTTP the new entity's id travels in the `Location` header
+   instead. MCP tool results have no headers, so when the formatted body is empty the
+   tool layer falls back to the raw result object (`ServiceResponseDefault.getResult()`,
+   the inserted/updated `Entity`) serialized with the core `JsonWriter`. Agents thus
+   always receive the created entity JSON (with `@iot.id`) as `structuredContent`.
 5. Cap checks (§8: clamping happened in step 3; byte cap checked here on the formatted
    result).
 6. Build `CallToolResult`: `content=[text(prettyJson)]`, `structuredContent=parsed`,
@@ -590,7 +602,7 @@ same request types the STA plugin decodes for the same HTTP methods/content type
 |---|---|
 | Path/query parse failure, unknown entity set, bad enum, invalid `$filter` (from `PathParser`/`QueryParser`, or `IllegalArgumentException`) | JSON-RPC **protocol error** `-32602 Invalid params`, message carries the parser message. (Fails fast before touching the DB; distinguishes malformed MCP calls from data-level errors.) |
 | Everything executed by `Service` returning 2xx | Success result (above). |
-| `404 Not Found` (entity, path) | Tool result, `isError: true`, `structuredContent = { "statusCode": 404, "message": "…" }`. |
+| `404 Not Found` (entity, path) | Tool result, `isError: true`, `structuredContent = { "statusCode": 404, "message": "…" }`. For errors that `Service.errorResponse` renders as STA error JSON (`{"type","code","message"}`), the tool layer re-keys it: `statusCode` (from the HTTP-like code) + `type` + `message`, dropping the original `code` field to avoid confusing the agent with two code-ish fields. |
 | `400 BadRequest` (semantic violations caught inside `Service`, e.g. incomplete entity) | Tool result, `isError: true`, `{ "statusCode": 400, "message": … }`. |
 | `401 Unauthorized` / `403 Forbidden` (from `UnauthorizedException`/`ForbiddenException`) | Tool result, `isError: true`, `{ "statusCode": 401|403, "message": … }` — the *tool* protocol layer stays 200 so the agent sees and can react to the auth problem. |
 | `409/4xx` duplicates etc. | as 4xx tool result. |
@@ -717,14 +729,21 @@ Class-level notes:
    `TestModel` builder from `FROST-Server.Core` tests for a compact fake model — proves
    model-agnosticism incl. free-form properties); `ModelResourceGenerator` output on fake
    registries.
-2. **Integration tests** (`FROST-Server.Tests`, Testcontainers Postgres as used today for
-   `SQLjooq`): boot `FrostMcpServer` (with an in-memory or test DB) in the test JVM,
-   drive it with the SDK's **MCP Java client** (`HttpClientStreamableHttpTransport`):
-   initialize handshake, `tools/list` (assert generated enum for the deployed model),
-   full CRUD round-trip against the standard test entities (also exercising deep inserts
-   and `$expand`), paging via `@iot.nextLink` beyond `mcp.maxTop`, error mapping
-   (404 → isError result), auth on/off (anonymous vs. filter-secured), free-form property
-   round-trip.
+ 2. **Integration tests** (`FROST-Server.Tests`, Testcontainers Postgres as used today for
+    `SQLjooq`): boot `FrostMcpServer` (with an in-memory or test DB) in the test JVM,
+    drive it with the SDK's **MCP Java client** (`HttpClientStreamableHttpTransport`):
+    initialize handshake, `tools/list` (assert generated enum for the deployed model),
+    full CRUD round-trip against the standard test entities (also exercising deep inserts
+    and `$expand`), paging via `@iot.nextLink` beyond `mcp.maxTop`, error mapping
+    (404 → isError result), auth on/off (anonymous vs. filter-secured), free-form property
+    round-trip. Implemented as `McpSmokeTest` (TestCore boots a
+    stand-alone `FrostMcpServer` next to the HTTP server, same DB). Note for write tests:
+    the MCP server's `CoreSettings` needs a message bus for entity-change events —
+    `mcp.startBus=T` with the in-JVM `InternalMessageBus` (no listeners, events dropped)
+    sidesteps mosquitto without cross-talk on the HTTP deployment's bus topic; without a
+    bus the persistence layer NPEs on commit (`AbstractPersistenceManager.
+    fireEntityChangeEvents`) — a pre-existing FROST-Server behaviour shared with any
+    bus-less deployment.
 3. **Conformance:** optionally run the official MCP conformance suite
    (`npx @modelcontextprotocol/conformance server --url http://…/mcp --suite active`; the
    SDK itself documents 40/40 server conformance) in CI against a running `FrostMcpServer`.
@@ -744,7 +763,7 @@ Class-level notes:
 | 4 | Include `frost://sta/{path}` resource template in v1 or defer? | **Settled: Include** — near-zero code, good agent ergonomics. |
 | 5 | Pin SDK `2.1.0` vs. milestone `2.2.0-M1`. | **Settled:** `2.1.0` stable; bump opportunistically. |
 | 6 | `mcp.maxTop` default (100) vs. aligning with STA `defaultTop` (100). | **Settled: keep independent settings.** |
-| 7 | How to secure `/mcp` given `AuthFilterSta` is version-path-mapped with per-method roles (can't gate POST-only JSON-RPC)? | **Settled (user decision):** Basic → MCP boot registers its own `AuthFilterMcp` (`BasicAuthFilter`, `authenticateOnly=T`) for `/mcp`; Keycloak → small backward-compatible `KeycloakFilter` patch (safe path key + `"/mcp"` mapper entry) + `auth.authenticateOnly=T` in `FrostMcp.properties`; unknown provider + `mcp.auth.requireAuthenticated=T` → **boot fails**; MCP boot always installs PM-side default security validators (§10). |
+| 7 | How to secure `/mcp` given `AuthFilterSta` is version-path-mapped with per-method roles (can't gate POST-only JSON-RPC)? | **Settled (user decision):** Basic → MCP boot registers its own `AuthFilterMcp` (`BasicAuthFilter`, `authenticateOnly=T`) for `/mcp`; Keycloak → small backward-compatible `KeycloakFilter` patch (safe path key + `"/mcp"` mapper entry) + `auth.authenticateOnly=T` in `FrostMcp.properties`; unknown provider + `mcp.auth.requireAuthenticated=T` → **boot fails**; MCP boot installs PM-side default security validators **only when an auth provider was resolved** (§10) — no-provider deployments stay writable, exactly like their HTTP counterparts. |
 
 ---
 
