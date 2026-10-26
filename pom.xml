@@ -124,7 +124,7 @@
         <version.maven.plugin.sonar>5.8.0.7211</version.maven.plugin.sonar>
         <version.maven.plugin.source>3.4.0</version.maven.plugin.source>
         <version.maven.plugin.spotless>3.10.4</version.maven.plugin.spotless>
-        <version.maven.plugin.surefire>3.6.0</version.maven.plugin.surefire>
+        <version.maven.plugin.surefire>3.6.1</version.maven.plugin.surefire>
         <version.maven.plugin.war>3.5.1</version.maven.plugin.war>
 
         <version.moquette>0.18.6</version.moquette>
