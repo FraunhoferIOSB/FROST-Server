@@ -17,6 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
@@ -56,6 +57,7 @@ import java.util.SequencedSet;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 
 /**
@@ -411,13 +413,28 @@ public class FrostToolHandler {
             String toolName, String path, PrincipalExtended principal, String versionName,
             ServiceResponseDefault response) {
         final int code = response.getCode();
-        final String formatted = response.getFormattedResult();
+        String formatted = response.getFormattedResult();
+        if (response.isSuccessful() && StringHelper.isNullOrEmpty(formatted.trim())) {
+            // The STA v1.1 plugin forces $format=noResponse on all CUD
+            // requests, leaving the formatted result empty (over HTTP the new
+            // id travels in the Location header). MCP tool results carry no
+            // headers, so fall back to the raw result object.
+            final Object raw = response.getResult();
+            if (raw != null) {
+                try {
+                    formatted = JsonWriter.writeObject(raw);
+                } catch (JacksonException ex) {
+                    LOGGER.warn("Failed to serialise raw result for tool response.", ex);
+                }
+            }
+        }
+        final String resultText = formatted;
         String outcome = OUTCOME_SUCCESS;
         try (Timer timer = TOOL_DURATION.labelValues(toolName).startTimer()) {
             if (response.isSuccessful()) {
-                final var parsed = StaJsonHelper.parseOrNull(formatted);
+                final var parsed = StaJsonHelper.parseOrNull(resultText);
                 final Object structured = StaJsonHelper.toStructuredContent(parsed);
-                if (formatted.getBytes(StandardCharsets.UTF_8).length > mcpSettings.getMaxResultSize()) {
+                if (resultText.getBytes(StandardCharsets.UTF_8).length > mcpSettings.getMaxResultSize()) {
                     outcome = OUTCOME_TOO_LARGE;
                     return errorResult(tooLargeObject(parsed));
                 }
@@ -436,11 +453,21 @@ public class FrostToolHandler {
                 outcome = OUTCOME_CLIENT_ERROR;
             }
             // For error responses, Service.errorResponse puts the STA error
-            // JSON ({"type","code","message"}) in both the message and the
-            // formatted result; surface it verbatim as structuredContent.
-            final JsonNode parsed = StaJsonHelper.parseOrNull(formatted);
+            // JSON ({"type","code","message"}) in the formatted result.
+            // Surface it as structuredContent, but keyed on statusCode (the
+            // design document's mapping contract) instead of the HTTP-ish
+            // "code", keeping the STA fields as companions.
+            final JsonNode parsed = StaJsonHelper.parseOrNull(resultText);
             if (parsed != null && parsed.isObject()) {
-                return errorResult(StaJsonHelper.toStructuredContent(parsed));
+                final Object staErrorObject = StaJsonHelper.toStructuredContent(parsed);
+                final Map<String, Object> structure = new LinkedHashMap<>();
+                structure.put("statusCode", code);
+                if (staErrorObject instanceof Map) {
+                    structure.putAll((Map<String, ?>) staErrorObject);
+                }
+                structure.remove("code");
+                structure.putIfAbsent("message", response.getMessage());
+                return errorResult(structure);
             }
             final String message = StringHelper.isNullOrEmpty(response.getMessage())
                     ? "Request failed with status " + code + "."

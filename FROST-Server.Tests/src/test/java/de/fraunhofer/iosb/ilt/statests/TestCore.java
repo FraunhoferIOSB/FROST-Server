@@ -28,9 +28,11 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings.TA
 import static org.junit.jupiter.api.Assertions.fail;
 
 import dasniko.testcontainers.keycloak.KeycloakContainer;
+import de.fraunhofer.iosb.ilt.frostserver.FrostMcpServer;
 import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletMain;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
@@ -79,6 +81,7 @@ public class TestCore {
     public static final String KEY_HAS_MULTI_DATASTREAM = "hasMultiDatastream";
     public static final String KEY_HAS_ACTUATION = "hasActuation";
     public static final String KEY_DB_NAME = "dbName";
+    public static final String KEY_MCP_ENABLED = "mcpEnabled";
 
     public static final String VAL_PERSISTENCE_MANAGER = "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager";
     public static final String VAL_ID_TYPE_DEFAULT = Constants.VALUE_ID_TYPE_LONG;
@@ -99,6 +102,7 @@ public class TestCore {
 
     private final Map<Integer, Server> httpServers = new HashMap<>();
     private final Map<Integer, FrostMqttServer> mqttServers = new HashMap<>();
+    private final Map<Integer, FrostMcpServer> mcpServers = new HashMap<>();
     private final Map<Integer, ServerSettings> serverSettings = new HashMap<>();
 
     private final AtomicInteger nextBusId = new AtomicInteger(1);
@@ -193,6 +197,9 @@ public class TestCore {
 
         startHttpServer(key, parameters);
         startMqttServer(key, parameters);
+        if ("true".equalsIgnoreCase(parameters.getOrDefault(KEY_MCP_ENABLED, "false"))) {
+            startMcpServer(key, parameters);
+        }
     }
 
     private void startHttpServer(int key, Map<String, String> parameters) {
@@ -326,6 +333,57 @@ public class TestCore {
         mqttServers.put(key, server);
     }
 
+    private void startMcpServer(int key, Map<String, String> parameters) throws IOException {
+        LOGGER.info("MCP Server starting...");
+        ServerSettings serverSetting = serverSettings.get(key);
+
+        int mcpPort = findRandomPort();
+        Properties properties = new Properties();
+        properties.put(CoreSettings.TAG_LOG_SENSITIVE_DATA, Boolean.TRUE.toString());
+        properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
+        properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
+
+        properties.put("mcp." + McpSettings.TAG_ENABLE, "true");
+        properties.put("mcp." + McpSettings.TAG_HOST, "localhost");
+        properties.put("mcp." + McpSettings.TAG_PORT, "" + mcpPort);
+        properties.put("mcp." + McpSettings.TAG_DEFAULT_VERSION, "v1.1");
+        properties.put("mcp." + McpSettings.TAG_START_BUS, "true");
+        properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.InternalMessageBus");
+        properties.put("mcp." + McpSettings.TAG_REQUIRE_AUTHENTICATED, "false");
+
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_DEFAULT, VAL_ID_TYPE_DEFAULT);
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_LOCATION, VAL_ID_TYPE_LOCATIONS);
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBSERVATION, VAL_ID_TYPE_OBSERVATIONS);
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_OBS_PROPERTY, VAL_ID_TYPE_OBSERVEDPROPERTIES);
+        properties.put(PREFIX_PLUGINS + CoreModelSettings.TAG_ID_TYPE_HIST_LOCATION, VAL_ID_TYPE_HIST_LOCATIONS);
+
+        String dbDriver = parameters.getOrDefault(PREFIX_PERSISTENCE + TAG_DB_DRIVER, "org.postgresql.Driver");
+        properties.put(PREFIX_PERSISTENCE + PersistenceSettings.TAG_IMPLEMENTATION_CLASS, VAL_PERSISTENCE_MANAGER);
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_DRIVER, dbDriver);
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_URL, createDbUrl(dbDriver, parameters.get(KEY_DB_NAME)));
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_USERNAME, VAL_PG_USER);
+        properties.put(PREFIX_PERSISTENCE + TAG_DB_PASSWRD, VAL_PG_PASS);
+        properties.putAll(parameters);
+        properties.put(PREFIX_PERSISTENCE + TAG_AUTO_UPDATE_DATABASE, "false");
+        properties.put(PREFIX_AUTH + TAG_AUTO_UPDATE_DATABASE, "false");
+
+        try {
+            CoreSettings coreSettings = new CoreSettings(properties);
+            FrostMcpServer server = new FrostMcpServer(coreSettings);
+            server.start();
+            serverSetting.setMcpUrl("http://localhost:" + mcpPort + "/mcp");
+            LOGGER.info("MCP Server started on port {}", mcpPort);
+            mcpServers.put(key, server);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            LOGGER.error("Interrupted starting MCP server!", ex);
+            throw new IllegalStateException(ex);
+        } catch (Exception ex) {
+            LOGGER.error("Exception starting MCP server!", ex);
+            throw new IllegalStateException(ex);
+        }
+    }
+
     public void stopServer(int key) {
         if (!httpServers.containsKey(key)) {
             return;
@@ -340,6 +398,16 @@ public class TestCore {
             }
         }
         httpServers.remove(key);
+        FrostMcpServer mcpServer = mcpServers.get(key);
+        if (mcpServer != null) {
+            try {
+                mcpServer.stop();
+            } catch (RuntimeException ex) {
+                LOGGER.error("Exception stopping MCP server!", ex);
+                throw new IllegalStateException(ex);
+            }
+        }
+        mcpServers.remove(key);
         FrostMqttServer mqttServer = mqttServers.get(key);
         if (mqttServer != null) {
             try {
