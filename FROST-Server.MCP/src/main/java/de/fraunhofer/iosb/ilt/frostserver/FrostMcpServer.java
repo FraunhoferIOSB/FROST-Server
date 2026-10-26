@@ -132,21 +132,27 @@ public class FrostMcpServer {
         }
 
         PersistenceManagerFactory.init(coreSettings);
-        installSecurityValidators();
+        resolveAuthFilter();
+        if (authFilterClass != null) {
+            // Only arm the persistence-layer role checks when an auth
+            // provider is actually mapped onto /mcp — mirroring the auth
+            // providers' own init, so no-auth deployments stay writable
+            // through the MCP tools, exactly like through HTTP.
+            installSecurityValidators();
+        }
         if (mcpSettings.isStartBus()) {
             MessageBusFactory.createMessageBus(coreSettings);
         }
 
-        resolveAuthFilter();
         startJetty();
         LOGGER.info("FROST MCP server started on port {}.", mcpSettings.getPort());
     }
 
     /**
      * Ensures the persistence-layer default security validators are
-     * installed (insert/update/delete role checks), independent of the
-     * auth.authenticateOnly setting — the same idiom the auth providers use
-     * in their init.
+     * installed (insert/update/delete role checks) when an auth provider is
+     * mapped onto /mcp — the same idiom the auth providers use in their
+     * init when running authenticate-only.
      */
     private void installSecurityValidators() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {

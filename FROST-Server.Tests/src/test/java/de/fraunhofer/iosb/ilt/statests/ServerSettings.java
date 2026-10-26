@@ -47,6 +47,8 @@ public class ServerSettings {
 
     private String mqttUrl = "";
 
+    private String mcpUrl = "";
+
     private final Map<ServerVersion, Set<Requirement>> implementedRequirements = new EnumMap(ServerVersion.class);
     private final Set<ServerVersion> implementedVersions = new LinkedHashSet<>();
 
@@ -105,6 +107,17 @@ public class ServerSettings {
 
     public void setMqttUrl(String mqttUrl) {
         this.mqttUrl = mqttUrl;
+    }
+
+    /**
+     * @return the mcpUrl
+     */
+    public String getMcpUrl() {
+        return mcpUrl;
+    }
+
+    public void setMcpUrl(String mcpUrl) {
+        this.mcpUrl = mcpUrl;
     }
 
     public boolean hasTasking(ServerVersion version) {
