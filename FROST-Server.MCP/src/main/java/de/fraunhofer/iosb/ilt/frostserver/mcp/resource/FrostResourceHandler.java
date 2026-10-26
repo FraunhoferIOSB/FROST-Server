@@ -175,17 +175,26 @@ public class FrostResourceHandler {
         if (staPath == null) {
             throw McpError.RESOURCE_NOT_FOUND.apply(request.uri());
         }
-        // The template URI may carry a query part, e.g.
-        // frost://sta/Things?$top=1 — split it off before parsing the path.
-        String path = staPath;
-        String query = null;
-        final int queryStart = staPath.indexOf('?');
-        if (queryStart >= 0) {
-            path = staPath.substring(0, queryStart);
-            query = staPath.substring(queryStart + 1);
-        }
-        final String json = executeStaRead(exchange, path, query);
+        final String[] pathAndQuery = splitStaTarget(staPath);
+        final String json = executeStaRead(exchange, pathAndQuery[0], pathAndQuery[1]);
         return textResult(request.uri(), json);
+    }
+
+    /**
+     * Splits a frost://sta/ target into its STA path and query parts. The
+     * template URI may carry a query part, e.g. frost://sta/Things?$top=1 —
+     * it is split at the first '?'. Package-private for unit testing.
+     *
+     * @param staPath The target under frost://sta/, after the prefix.
+     * @return a two-element array {path, query}; the query is null when
+     * absent.
+     */
+    static String[] splitStaTarget(String staPath) {
+        final int queryStart = staPath.indexOf('?');
+        if (queryStart < 0) {
+            return new String[]{staPath, null};
+        }
+        return new String[]{staPath.substring(0, queryStart), staPath.substring(queryStart + 1)};
     }
 
     /**
