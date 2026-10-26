@@ -180,7 +180,7 @@ public class FrostToolQuery implements FrostTool {
      * @param count The $count value. May be null.
      * @return the query string, or null when no options are present.
      */
-    private String assembleQuery(String filter, List<String> select, List<String> expand,
+    String assembleQuery(String filter, List<String> select, List<String> expand,
             String orderby, Integer top, Integer skip, Boolean count) {
         final StringBuilder sb = new StringBuilder();
         appendOption(sb, "$filter", filter);

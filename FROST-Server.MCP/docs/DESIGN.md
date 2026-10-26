@@ -729,6 +729,20 @@ Class-level notes:
    `TestModel` builder from `FROST-Server.Core` tests for a compact fake model — proves
    model-agnosticism incl. free-form properties); `ModelResourceGenerator` output on fake
    registries.
+   *Deviation (implemented):* `FROST-Server.Core` publishes no test-jar, so the unit
+   tests carry their own compact fake model, `TestModelMcp` (House/Room plus an
+   admin-only `Safe` type, `@iot.id` primary key, an `Edm.Untyped` property and the STA
+   free-form `properties` object). Coverage: `StaJsonHelper` (parse/wrap), `McpSettings`
+   (defaults, allowlists), `FrostToolHandler` (version resolution, tool ACLs, read
+   permission matrix incl. `allowAnonymousRead`, query validation, `$top` clamping,
+   result wrapping, byte cap), `FrostToolQuery` argument parsing/assembly, and the two
+   `frost://` resource generators. Two testability deviations in the main code:
+   `FrostToolQuery.assembleQuery` and `FrostResourceHandler.splitStaTarget` are
+   package-private (was private / newly extracted) so the tests can exercise them.
+   The `Edm.Untyped` annotation test exposed a real generator bug: `TypeSimplePrimitive`
+   splits `Edm.Untyped` into namespace `Edm` + name `Untyped`, so the check must compare
+   the *full* name (`ModelRegistry.fullName`) — fixed in
+   `ModelResourceGenerator.isUntyped`.
  2. **Integration tests** (`FROST-Server.Tests`, Testcontainers Postgres as used today for
     `SQLjooq`): boot `FrostMcpServer` (with an in-memory or test DB) in the test JVM,
     drive it with the SDK's **MCP Java client** (`HttpClientStreamableHttpTransport`):
