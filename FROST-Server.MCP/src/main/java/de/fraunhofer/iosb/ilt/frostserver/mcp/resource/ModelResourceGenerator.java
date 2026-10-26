@@ -118,13 +118,18 @@ public class ModelResourceGenerator {
         map.put("name", property.getName());
         map.put("jsonName", property.getJsonName());
         map.put("type", edmName(property.getType()));
-        if (property.getType() != null && TypeSimplePrimitive.EDM_UNTYPED_NAME.equals(property.getType().getName())) {
+        if (isUntyped(property.getType())) {
             map.put("jsonSchema", UNTYPED_ANNOTATION);
         }
         map.put("required", property.isRequired());
         map.put("nullable", property.isNullable());
         map.put("readOnly", property.isReadOnly());
         return map;
+    }
+
+    private boolean isUntyped(PropertyType type) {
+        return type != null
+                && TypeSimplePrimitive.EDM_UNTYPED_NAME.equals(ModelRegistry.fullName(type.getNamespace(), type.getName()));
     }
 
     private Map<String, Object> generateNavigationProperty(NavigationProperty property) {
