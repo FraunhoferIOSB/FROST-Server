@@ -137,7 +137,7 @@ public class FrostResourceHandler {
     }
 
     private McpSchema.ReadResourceResult readIndex(McpSyncServerExchange exchange, McpSchema.ReadResourceRequest request) {
-        final String json = executeStaRead(exchange, "");
+        final String json = executeStaRead(exchange, "", null);
         return textResult(request.uri(), json);
     }
 
@@ -175,7 +175,16 @@ public class FrostResourceHandler {
         if (staPath == null) {
             throw McpError.RESOURCE_NOT_FOUND.apply(request.uri());
         }
-        final String json = executeStaRead(exchange, staPath);
+        // The template URI may carry a query part, e.g.
+        // frost://sta/Things?$top=1 — split it off before parsing the path.
+        String path = staPath;
+        String query = null;
+        final int queryStart = staPath.indexOf('?');
+        if (queryStart >= 0) {
+            path = staPath.substring(0, queryStart);
+            query = staPath.substring(queryStart + 1);
+        }
+        final String json = executeStaRead(exchange, path, query);
         return textResult(request.uri(), json);
     }
 
@@ -220,9 +229,11 @@ public class FrostResourceHandler {
      * @param exchange The MCP server exchange carrying the principal.
      * @param staPath The STA path, relative to the version root. Empty string
      * reads the index document.
+     * @param decodedQuery Optional raw query options, without leading '?' and
+     * not URL-encoded. May be null.
      * @return the STA JSON (or error JSON) text.
      */
-    private String executeStaRead(McpSyncServerExchange exchange, String staPath) {
+    private String executeStaRead(McpSyncServerExchange exchange, String staPath, String decodedQuery) {
         final PrincipalExtended principal = handler.principalFrom(exchange);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
@@ -231,7 +242,7 @@ public class FrostResourceHandler {
         final Version version = handler.resolveVersion(null);
         final var queryDefaults = handler.getCoreSettings().getQueryDefaults().copy();
         final var context = handler.buildContext(queryDefaults, version);
-        final var query = handler.parseAndValidateQuery(context, version, principal, staPath, null);
+        final var query = handler.parseAndValidateQuery(context, version, principal, staPath, decodedQuery);
         final String urlQuery = query == null ? null : handler.queryStringFrom(query);
         final ServiceRequest serviceRequest = new ServiceRequest()
                 .setContext(context)
