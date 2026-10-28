@@ -134,8 +134,10 @@ public class TimeValue implements TimeObject, ComplexValue<TimeValue> {
         }
         if (isInterval()) {
             return interval.getProperty(property);
-        } else {
+        } else if (property == EP_START_TIME) {
             return (P) instant;
+        } else {
+            return null;
         }
     }
 

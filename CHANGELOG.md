@@ -3,6 +3,7 @@
 ## Version 2.9.0-SNAPSHOT
 
 **New Features**
+* Added JsonArray format for more compact results. (`$format=jsonarray`)
 * Added option to enable/disable MQTT Request/Reponse functionality.
 * [ModelOM] Added time attribute to MonitoringProgram and MonitoringActivity.
 * [ModelOM] Added LinkingTime EntityType between Thing and Network.
