@@ -640,7 +640,40 @@ STANDARD `initialize`, `tools/list`, `resources/list`, `resources/templates/list
 * The wars (`FROST-Server.HTTP`, `FROST-Server.MQTTP`) do **not** change: MCP is a
   stand-alone sibling process, like MQTT.
 
-### 12.2 Classes (package `de.fraunhofer.iosb.ilt.frostserver.mcp`)
+### 12.2 Packaging and Distribution (Docker image + runnable jar)
+
+The module ships exactly like its template `FROST-Server.MQTT`:
+
+* **Docker image:** `FROST-Server.MCP/Dockerfile` — `eclipse-temurin:21-alpine` base,
+  copies the `jar-with-dependencies` assembly to `/usr/local/FROST/FROST-Mcp.jar` and
+  runs it (`CMD ["java", "-jar", "FROST-Mcp.jar"]`). `EXPOSE 8080` (`mcp.port`, the
+  `/mcp` endpoint) and `EXPOSE 9400` (`metrics.endpointPort`, the optional internal
+  Prometheus server, active only with `metrics.useInternalHttpServer=T`). The `ARTIFACT_FILE`
+  build-arg takes the assembly jar name, as in the MQTT image.
+  Published to DockerHub as **`fraunhoferiosb/frost-server-mcp`**, tagged like the
+  sibling images: `v2.x`-branch builds also push `latest`; develop-branch builds also push
+  `develop-<branch>-<version>`; tag builds push full (`2.x.y`) and short (`2.x`) version
+  tags.
+* **Runnable jar:** the assembly
+  (`FROST-Server.MCP-<version>-jar-with-dependencies.jar`) is attached to GitHub
+  releases (tag builds) and uploaded as a workflow artifact (all deploys), alongside the
+  HTTP/MQTTP wars and the MQTT jar.
+* **CI wiring** (`.github/workflows/`), mirroring the existing per-image steps:
+  * `maven-deploy.yml`: export `MCP_ARTIFACT` after the install; upload-artifact step;
+    `gh release upload` in the Create Release step; a `Build and push - MCP`
+    docker/build-push-action step (`linux/amd64,linux/arm64`) with full + short tags.
+  * `maven-build.yml`: export `MCP_ARTIFACT`; `Build and push - MCP` steps for both the
+    v2.x branch (`latest` + version) and develop branches (branch-version tags).
+  * `update-release.yml`: like maven-deploy, plus guards (`env.MCP_ARTIFACT != ''` /
+    artifact-file existence) so re-running the workflow against pre-MCP tags skips the
+    MCP steps instead of failing.
+  * `maven-build-scheduled.yml`: like maven-deploy, plus the same pre-MCP-tag guards
+    (`|| true` on the export, prefix check on the `if:` condition).
+* Where a workflow runs against a ref that may predate the module, the MCP steps are
+  conditional (see guards above); on current branches the module always exists and the
+  steps behave like the HTTP/MQTT ones.
+
+### 12.3 Classes (package `de.fraunhofer.iosb.ilt.frostserver.mcp`)
 
 ```
 de.fraunhofer.iosb.ilt.frostserver        // main() entry, mirrors FrostMqttServer

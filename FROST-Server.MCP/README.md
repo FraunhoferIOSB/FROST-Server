@@ -75,6 +75,27 @@ Then run:
 java -jar FROST-Server.MCP.jar
 ```
 
+### Docker image and release jar
+
+CI publishes the module like the other frontends: the runnable
+`FROST-Server.MCP-<version>-jar-with-dependencies.jar` is attached to GitHub releases
+(and uploaded as a workflow artifact), and a Docker image is pushed to DockerHub as
+`fraunhoferiosb/frost-server-mcp` (tags `latest` + version on the `v2.x` branch,
+`develop-<branch>-<version>` on develop branches, full/short version tags on releases).
+
+```bash
+docker run -d --name frost-mcp \
+    -p 8080:8080 \
+    -v $(pwd)/FrostMcp.properties:/usr/local/FROST/FrostMcp.properties \
+    fraunhoferiosb/frost-server-mcp:latest
+```
+
+The image exposes `mcp.port` (8080) and, when enabled with
+`metrics.useInternalHttpServer`, the internal Prometheus endpoint (9400).
+Mount the config file next to the jar as shown; since the image has no nested
+configuration, all settings come from `FrostMcp.properties` (path is optionally the
+first program argument — adjust the CMD/entrypoint if you put it elsewhere).
+
 ## Client example
 
 Any MCP host (Claude Desktop, IDEs, etc. via Streamable HTTP at
