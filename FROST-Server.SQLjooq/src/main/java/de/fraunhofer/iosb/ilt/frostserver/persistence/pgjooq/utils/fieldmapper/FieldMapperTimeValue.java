@@ -32,8 +32,7 @@ import org.jooq.Name;
 import org.jooq.Table;
 
 /**
- *
- * @author hylke
+ * Maps two time columns to a TimeValue (TM_Object).
  */
 public class FieldMapperTimeValue extends FieldMapperAbstractEp {
 

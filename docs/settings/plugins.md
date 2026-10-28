@@ -211,6 +211,15 @@ in the SensorThings API standard.
   Toggle indicating the ResultFormat dataArray should be enabled. Default: `true`.
 
 
+### JsonArray
+
+The JsonArray plugin implements the SensorThings JsonArray Extension as described in the
+OGC SensorThings API 2.0 Extensions standard.
+
+* **plugins.formatJsonArray.enable:**  
+  Toggle indicating the Format jsonArray should be enabled. Default: `true`.
+
+
 ### CSV Result Format
 
 The CSV plugin implements a CSV result formatter, enabling CSV output as described

@@ -3,6 +3,7 @@
 ## Version 2.9.0-SNAPSHOT
 
 **New Features**
+* Added JsonArray format for more compact results. (`$format=jsonarray`)
 * Added configurable limit to allowed length of Authorization header for Basic auth.
 * Added option to enable/disable MQTT Request/Reponse functionality.
 * [ModelOM] Added time attribute to MonitoringProgram and MonitoringActivity.

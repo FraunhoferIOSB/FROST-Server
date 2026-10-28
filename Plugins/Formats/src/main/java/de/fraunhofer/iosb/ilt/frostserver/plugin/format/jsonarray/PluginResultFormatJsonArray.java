@@ -1,0 +1,137 @@
+/*
+ * Copyright (C) 2024 Fraunhofer Institut IOSB, Fraunhoferstr. 1, D 76131
+ * Karlsruhe, Germany.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package de.fraunhofer.iosb.ilt.frostserver.plugin.format.jsonarray;
+
+import de.fraunhofer.iosb.ilt.frostserver.formatter.ResultFormatter;
+import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreServiceV2;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.odata.PluginOData;
+import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
+import de.fraunhofer.iosb.ilt.frostserver.request.Version;
+import de.fraunhofer.iosb.ilt.frostserver.service.InitResult;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginResultFormat;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginRootDocument;
+import de.fraunhofer.iosb.ilt.frostserver.service.PluginService;
+import de.fraunhofer.iosb.ilt.frostserver.service.Service;
+import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
+import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
+import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
+import de.fraunhofer.iosb.ilt.settings.Settings;
+import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import tools.jackson.databind.module.SimpleModule;
+
+/**
+ *
+ */
+public class PluginResultFormatJsonArray implements PluginResultFormat, PluginService, PluginRootDocument, ConfigDefaults {
+
+    @DefaultValueBoolean(true)
+    public static final String TAG_ENABLE_FORMAT_ARRAY = "formatJsonArray.enable";
+
+    private static final String REQUIREMENT_FORMAT_ARRAY = "http://www.opengis.net/spec/sta/2.0/req/format/jsonarray";
+    /**
+     * The "name" of the dataArray resultFormatter.
+     */
+    public static final String FORMAT_ARRAY_NAME = "jsonarray";
+
+    private static boolean modifiedEntityFormatter = false;
+
+    private CoreSettings settings;
+    private boolean enabled;
+
+    @Override
+    public InitResult init(CoreSettings settings) {
+        this.settings = settings;
+        Settings pluginSettings = settings.getPluginSettings();
+        enabled = pluginSettings.getBoolean(TAG_ENABLE_FORMAT_ARRAY, getClass());
+        if (enabled) {
+            settings.getPluginManager().registerPlugin(this);
+            modifyEntityFormatter();
+        }
+        return InitResult.INIT_OK;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public Collection<String> getFormatNames() {
+        return Arrays.asList(FORMAT_ARRAY_NAME);
+    }
+
+    @Override
+    public ResultFormatter getResultFormatter(String format) {
+        return new ResultFormatterJsonArray(settings);
+    }
+
+    @Override
+    public void modifyServiceDocument(ServiceRequest request, Map<String, Object> result) {
+        Map<String, Object> serverSettings = (Map<String, Object>) result.get(Service.KEY_SERVER_SETTINGS);
+        if (serverSettings == null) {
+            // Nothing to add to.
+            return;
+        }
+        Set<String> extensionList = (Set<String>) serverSettings.get(Service.KEY_CONFORMANCE_LIST);
+        extensionList.add(REQUIREMENT_FORMAT_ARRAY);
+    }
+
+    @Override
+    public Collection<Version> getVersions() {
+        return Arrays.asList(PluginCoreServiceV2.VERSION_STA_2_0, PluginOData.VERSION_ODATA_40, PluginOData.VERSION_ODATA_401);
+    }
+
+    @Override
+    public Collection<String> getVersionedUrlPaths() {
+        return Arrays.asList(ServiceArrayFormat.PATH_CREATE_OBSERVATIONS);
+    }
+
+    @Override
+    public Collection<String> getRequestTypes() {
+        return Arrays.asList(ServiceArrayFormat.REQUEST_TYPE_CREATE_OBSERVATIONS);
+    }
+
+    @Override
+    public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
+        if (HttpMethod.POST.equals(method) && ServiceArrayFormat.PATH_CREATE_OBSERVATIONS.equals(path)) {
+            return ServiceArrayFormat.REQUEST_TYPE_CREATE_OBSERVATIONS;
+        }
+        throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
+    }
+
+    @Override
+    public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
+        return new ServiceArrayFormat(settings).executeCreateObservations(service, request, response);
+    }
+
+    public static void modifyEntityFormatter() {
+        if (modifiedEntityFormatter) {
+            return;
+        }
+        modifiedEntityFormatter = true;
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(JsonArrayResult.class, new JsonArrayResultSerializer());
+        JsonWriter.addModule(module);
+    }
+}
