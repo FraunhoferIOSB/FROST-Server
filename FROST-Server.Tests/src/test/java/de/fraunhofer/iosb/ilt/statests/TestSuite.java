@@ -197,8 +197,11 @@ class TestSuite {
             final int countPost = HTTPMethods.getCountPost();
             final int countPut = HTTPMethods.getCountPut();
             HTTPMethods.resetStats();
+            // The McpSmokeTest boots its own HTTP server (distinct parameter
+            // key), whose start-up probes (findImplementedVersions +
+            // checkServiceRootUri) add 6 GET calls to the total.
             Assertions.assertEquals(190, countDelete, "Unexpected number of DELETE calls.");
-            Assertions.assertEquals(6773, countGet, "Unexpected number of GET calls.");
+            Assertions.assertEquals(6779, countGet, "Unexpected number of GET calls.");
             Assertions.assertEquals(46, countPatch, "Unexpected number of PATCH calls.");
             Assertions.assertEquals(204, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(64, countPut, "Unexpected number of PUT calls.");
