@@ -42,12 +42,14 @@ jobs:
         export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MODEL_EDITOR_NAME=$(mvn -pl Tools/ModelEditor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MODEL_EXTRACTOR_NAME=$(mvn -pl Tools/ModelExtractor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        
+        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+
         echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
         echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
         echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
         echo "MODEL_EDITOR_ARTIFACT=${MODEL_EDITOR_NAME}-shaded.jar" >> $GITHUB_ENV
         echo "MODEL_EXTRACTOR_ARTIFACT=${MODEL_EXTRACTOR_NAME}-shaded.jar" >> $GITHUB_ENV
+        echo "MCP_ARTIFACT=${MCP_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
 
         export version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
         echo "DOCKER_TAG_FULL=${version}"     >> $GITHUB_ENV
@@ -85,6 +87,13 @@ jobs:
         path: Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }}
         archive: false
 
+    - name: Upload MCP jar
+      if: env.MCP_ARTIFACT != ''
+      uses: actions/upload-artifact@v7
+      with:
+        path: FROST-Server.MCP/target/${{ env.MCP_ARTIFACT }}
+        archive: false
+
 
     - name: Create Release
       env:
@@ -96,6 +105,9 @@ jobs:
         gh release upload ${{ github.event.inputs.target_tag }} FROST-Server.MQTT/target/${{ env.MQTT_ARTIFACT }} --clobber
         gh release upload ${{ github.event.inputs.target_tag }} Tools/ModelEditor/target/${{ env.MODEL_EDITOR_ARTIFACT }} --clobber
         gh release upload ${{ github.event.inputs.target_tag }} Tools/ModelExtractor/target/${{ env.MODEL_EXTRACTOR_ARTIFACT }} --clobber
+        if [ -n "${MCP_ARTIFACT}" ] && [ -f "FROST-Server.MCP/target/${MCP_ARTIFACT}" ]; then
+          gh release upload ${{ github.event.inputs.target_tag }} "FROST-Server.MCP/target/${MCP_ARTIFACT}" --clobber
+        fi
 
 
     - name: Set up QEMU
@@ -148,4 +160,17 @@ jobs:
         tags: |
           fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_FULL }}
           fraunhoferiosb/frost-server-mqtt:${{ env.DOCKER_TAG_SHORT }}
+
+    - name: Build and push - MCP
+      if: env.MCP_ARTIFACT != ''
+      uses: docker/build-push-action@v7
+      with:
+        platforms: linux/amd64,linux/arm64
+        context: "./FROST-Server.MCP"
+        push: true
+        build-args: |
+          ARTIFACT_FILE=${{ env.MCP_ARTIFACT }}
+        tags: |
+          fraunhoferiosb/frost-server-mcp:${{ env.DOCKER_TAG_FULL }}
+          fraunhoferiosb/frost-server-mcp:${{ env.DOCKER_TAG_SHORT }}
 
