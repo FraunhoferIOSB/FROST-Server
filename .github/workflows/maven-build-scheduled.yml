@@ -2,7 +2,7 @@ name: Maven Scheduled Build
 
 on:
   schedule:
-    - cron: '0 0 * * 4'
+    - cron: '0 0 * * 1,4'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -50,19 +50,19 @@ jobs:
 
     - name: Build with Maven
       run: |
-        mvn -B install -Dmaven.javadoc.skip=true
+        ./mvnw -B install -Dmaven.javadoc.skip=true -DskipTests=true
 
 
     - name: Create environment variables
       run: |
         echo "Exporting Variables"
-        export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export HTTP_NAME=$(./mvnw -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MQTTP_NAME=$(./mvnw -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MQTT_NAME=$(./mvnw -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
         echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
         echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
-        export version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
+        export version=$(./mvnw -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
         echo "DOCKER_TAG_FULL=${version}"     >> $GITHUB_ENV
         echo "DOCKER_TAG_SHORT=${version%.*}" >> $GITHUB_ENV
 
