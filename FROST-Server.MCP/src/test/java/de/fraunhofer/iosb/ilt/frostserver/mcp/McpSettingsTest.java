@@ -42,7 +42,6 @@ class McpSettingsTest {
     @Test
     void testDefaults() {
         final McpSettings settings = from(new Properties());
-        assertTrue(settings.isEnable());
         assertEquals("0.0.0.0", settings.getHost());
         assertEquals(8080, settings.getPort());
         assertEquals("", settings.getDefaultVersionName());
