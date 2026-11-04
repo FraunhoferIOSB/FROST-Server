@@ -39,7 +39,6 @@ Results are plain data in `structuredContent` — no `outputSchema` is advertise
 
 | Property | Default | Meaning |
 |---|---|---|
-| `mcp.enable` | `true` | Start the MCP server. |
 | `mcp.host` | `0.0.0.0` | Jetty bind address. |
 | `mcp.port` | `8080` | Jetty port for `/mcp`. |
 | `mcp.defaultVersion` | (none → model's first) | STA version used when a tool call omits `version`. |
