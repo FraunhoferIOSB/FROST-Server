@@ -344,7 +344,6 @@ public class TestCore {
         properties.put(CoreSettings.TAG_SERVICE_ROOT_URL, serverSetting.getServiceRootUrl());
         properties.put(CoreSettings.TAG_TEMP_PATH, System.getProperty("java.io.tmpdir"));
 
-        properties.put("mcp." + McpSettings.TAG_ENABLE, "true");
         properties.put("mcp." + McpSettings.TAG_HOST, "localhost");
         properties.put("mcp." + McpSettings.TAG_PORT, "" + mcpPort);
         properties.put("mcp." + McpSettings.TAG_DEFAULT_VERSION, "v1.1");

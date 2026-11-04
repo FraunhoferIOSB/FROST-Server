@@ -33,8 +33,6 @@ public class McpSettings implements ConfigDefaults {
 
     public static final String PREFIX_MCP = "mcp.";
 
-    @DefaultValueBoolean(true)
-    public static final String TAG_ENABLE = "enable";
     @DefaultValue("0.0.0.0")
     public static final String TAG_HOST = "host";
     @DefaultValueInt(8080)
@@ -56,7 +54,6 @@ public class McpSettings implements ConfigDefaults {
 
     private final Settings customSettings;
 
-    private boolean enable;
     private String host;
     private int port;
     private String defaultVersionName;
@@ -76,7 +73,6 @@ public class McpSettings implements ConfigDefaults {
     }
 
     private void init(Settings settings) {
-        enable = settings.getBoolean(TAG_ENABLE, getClass());
         host = settings.get(TAG_HOST, getClass());
         port = settings.getInt(TAG_PORT, getClass());
         defaultVersionName = settings.get(TAG_DEFAULT_VERSION, getClass());
@@ -96,10 +92,6 @@ public class McpSettings implements ConfigDefaults {
 
     public Settings getCustomSettings() {
         return customSettings;
-    }
-
-    public boolean isEnable() {
-        return enable;
     }
 
     public String getHost() {
