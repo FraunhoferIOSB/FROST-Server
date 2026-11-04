@@ -43,8 +43,6 @@ public class McpSettings implements ConfigDefaults {
     public static final String TAG_MAX_TOP = "maxTop";
     @DefaultValueInt(1024 * 1024)
     public static final String TAG_MAX_RESULT_SIZE = "maxResultSize";
-    @DefaultValueBoolean(true)
-    public static final String TAG_COUNT = "count";
     @DefaultValue("get,query,create,update,replace,delete")
     public static final String TAG_ALLOW_TOOLS = "allowTools";
     @DefaultValueBoolean(false)
@@ -59,7 +57,6 @@ public class McpSettings implements ConfigDefaults {
     private String defaultVersionName;
     private int maxTop;
     private int maxResultSize;
-    private boolean count;
     private Set<String> allowTools;
     private boolean requireAuthenticated;
     private boolean startBus;
@@ -78,7 +75,6 @@ public class McpSettings implements ConfigDefaults {
         defaultVersionName = settings.get(TAG_DEFAULT_VERSION, getClass());
         maxTop = settings.getInt(TAG_MAX_TOP, getClass());
         maxResultSize = settings.getInt(TAG_MAX_RESULT_SIZE, getClass());
-        count = settings.getBoolean(TAG_COUNT, getClass());
         requireAuthenticated = settings.getBoolean(TAG_REQUIRE_AUTHENTICATED, getClass());
         startBus = settings.getBoolean(TAG_START_BUS, getClass());
         allowTools = new LinkedHashSet<>();
@@ -112,10 +108,6 @@ public class McpSettings implements ConfigDefaults {
 
     public int getMaxResultSize() {
         return maxResultSize;
-    }
-
-    public boolean isCount() {
-        return count;
     }
 
     public Set<String> getAllowTools() {
