@@ -44,7 +44,6 @@ Results are plain data in `structuredContent` — no `outputSchema` is advertise
 | `mcp.defaultVersion` | (none → model's first) | STA version used when a tool call omits `version`. |
 | `mcp.maxTop` | `100` | `$top` clamp; implicit top when a query specifies none. |
 | `mcp.maxResultSize` | `1048576` | Result byte cap. Over-size answers return a structured `statusCode: 413` with guidance to narrow the query. |
-| `mcp.count` | `true` | Force `$count=true` on all queries. |
 | `mcp.allowTools` | `get,query,create,update,replace,delete` | Tool ACL (subset/expand as needed; e.g. read-only deployments: `allowTools=get,query`). |
 | `mcp.auth.requireAuthenticated` | `false` | Fail boot if no known auth provider could be resolved for `/mcp`. |
 | `mcp.startBus` | `false` | Start an internal message bus in this process (needed when writes are enabled on a stand-alone MCP server; see below). |

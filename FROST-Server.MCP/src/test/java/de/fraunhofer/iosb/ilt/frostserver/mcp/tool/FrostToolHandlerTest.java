@@ -48,7 +48,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for FrostToolHandler: version resolution, the read gate, tool
  * gating, query validation with MCP caps (maxTop clamping, implicit top,
- * forced count), query-string round-tripping and result mapping (success,
+ * explicit $count passthrough), query-string round-tripping and result mapping (success,
  * STA error re-keying, payload byte cap). The Service execution itself needs
  * persistence and stays covered by the Tests-module McpSmokeTest.
  */
@@ -151,12 +151,16 @@ class FrostToolHandlerTest {
         query = handler.parseAndValidateQuery(context, version, principal, "Houses", "$top=5");
         assertEquals(5, query.getTop().orElse(-1));
 
-        // ... and $count=true is forced on entity sets ...
-        assertTrue(query.getCount().orElse(false), "mcp.count defaults to true and forces $count.");
+        // ... and $count is not forced: the default follows the global
+        // defaultCount setting; an explicit $count from the agent is kept.
+        query = handler.parseAndValidateQuery(context, version, principal, "Houses", null);
+        assertTrue(query.getCount().isEmpty(), "No forced $count without defaultCount.");
 
-        // ... unless the client sent one.
         query = handler.parseAndValidateQuery(context, version, principal, "Houses", "$count=false");
         assertFalse(query.getCount().orElse(true));
+
+        query = handler.parseAndValidateQuery(context, version, principal, "Houses", "$count=true");
+        assertTrue(query.getCount().orElse(false));
 
         // Single entities get no caps.
         query = handler.parseAndValidateQuery(context, version, principal, "Houses(1)", "$select=name");

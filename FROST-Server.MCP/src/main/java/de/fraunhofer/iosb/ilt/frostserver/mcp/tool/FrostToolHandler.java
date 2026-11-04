@@ -307,8 +307,9 @@ public class FrostToolHandler {
 
     /**
      * Applies the MCP caps to a read query: $top is clamped to mcp.maxTop
-     * (implicit top for entity sets), and $count is forced on entity sets
-     * unless already present, when configured.
+     * (implicit top for entity sets). The $count default follows the global
+     * defaultCount setting (a real default: an explicit $count from the
+     * agent is kept).
      *
      * @param query The parsed query.
      * @param path The parsed path.
@@ -321,9 +322,6 @@ public class FrostToolHandler {
                 query.setTop(maxTop);
             } else if (top.get() > maxTop) {
                 query.setTop(maxTop);
-            }
-            if (mcpSettings.isCount() && query.getCount().isEmpty()) {
-                query.setCount(true);
             }
         }
     }
