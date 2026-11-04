@@ -457,7 +457,6 @@ the `settings-annotation` processor so they appear in generated docs):
 
 | Property | Type | Default | Meaning |
 |---|---|---|---|
-| `mcp.enable` | boolean | **true** (stand-alone module; setting exists for symmetry/wiring guards) | Serves MCP only when true. |
 | `mcp.host` | string | `0.0.0.0` | Jetty bind address. |
 | `mcp.port` | int | 8080 | Jetty port for `/mcp`. |
 | `mcp.defaultVersion` | string | *first registered default version, usually `v1.1`* | Used when a tool call omits `version`. Resolved via `PluginManager.getVersion(...)`. |
