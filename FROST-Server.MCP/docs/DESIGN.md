@@ -436,9 +436,11 @@ LLM context is the scarce resource; MCP results must be bounded independently of
    $top to page" plus the count. For entity sets the byte cap practically never triggers
    below `$top` 100 unless individual entities are huge (large free-form properties);
    single large reads must be narrowed.
-3. **Count default:** `mcp.count` (default **true**): MCP always asks for `@iot.count`
-   on entity sets so the agent immediately learns the total size and can plan paging.
-   (STA's default is false, `defaultCount`.)
+3. **Count default:** follows the global `defaultCount` setting (a real default: an
+   explicit `$count` from the agent is kept). Deployments that want the MCP-friendliest
+   behaviour — the agent immediately learning the total size and being able to plan
+   paging — set `defaultCount=true`; the MCP-specific `mcp.count` that previously
+   force-set `$count=true` was removed again as a duplicate of `defaultCount`.
 4. **Writes minimal by option:** `frost_create.prefer = "minimal"` suppresses the full
    entity echo for very large creates.
 
@@ -462,7 +464,6 @@ the `settings-annotation` processor so they appear in generated docs):
 | `mcp.defaultVersion` | string | *first registered default version, usually `v1.1`* | Used when a tool call omits `version`. Resolved via `PluginManager.getVersion(...)`. |
 | `mcp.maxTop` | int | 100 | Paging cap (§8.1). |
 | `mcp.maxResultSize` | int (bytes) | 1048576 | Byte cap (§8.2). |
-| `mcp.count` | boolean | true | Force `@iot.count` on entity sets (§8.3). |
 | `mcp.allowTools` | — | `get,query,create,update,replace,delete` | Comma-separated list of enabled tools; lets deployments expose a read-only MCP ("get,query") or a write MCP. |
 | `mcp.auth.requireAuthenticated` | boolean | false | When true, anonymous MCP sessions (unauthenticated principal) are rejected; default follows the container outcome like STA does. |
 | `mcp.startBus` | boolean | false | Start a `MessageBus` in this process (needed only if a plugin requires an active bus; the core tool path does not). |
