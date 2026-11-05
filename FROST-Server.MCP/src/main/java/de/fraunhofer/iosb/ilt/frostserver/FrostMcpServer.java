@@ -140,9 +140,9 @@ public class FrostMcpServer {
             // through the MCP tools, exactly like through HTTP.
             installSecurityValidators();
         }
-        if (mcpSettings.isStartBus()) {
-            MessageBusFactory.createMessageBus(coreSettings);
-        }
+        // The persistence layer sends change events on commit; without a bus
+        // instance every request that commits NPEs, so always create one.
+        MessageBusFactory.createMessageBus(coreSettings);
 
         startJetty();
         LOGGER.info("FROST MCP server started on port {}.", mcpSettings.getPort());

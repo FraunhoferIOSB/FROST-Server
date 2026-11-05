@@ -346,7 +346,6 @@ public class TestCore {
         properties.put("mcp." + McpSettings.TAG_HOST, "localhost");
         properties.put("mcp." + McpSettings.TAG_PORT, "" + mcpPort);
         properties.put("mcp." + McpSettings.TAG_DEFAULT_VERSION, "v1.1");
-        properties.put("mcp." + McpSettings.TAG_START_BUS, "true");
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.InternalMessageBus");
         properties.put("mcp." + McpSettings.TAG_REQUIRE_AUTHENTICATED, "false");
 
