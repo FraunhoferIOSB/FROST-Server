@@ -46,7 +46,6 @@ Results are plain data in `structuredContent` — no `outputSchema` is advertise
 | `mcp.maxResultSize` | `1048576` | Result byte cap. Over-size answers return a structured `statusCode: 413` with guidance to narrow the query. |
 | `mcp.allowTools` | `get,query,create,update,replace,delete` | Tool ACL (subset/expand as needed; e.g. read-only deployments: `allowTools=get,query`). |
 | `mcp.auth.requireAuthenticated` | `false` | Fail boot if no known auth provider could be resolved for `/mcp`. |
-| `mcp.startBus` | `false` | Start an internal message bus in this process (needed when writes are enabled on a stand-alone MCP server; see below). |
 
 ## Deployment
 
@@ -61,11 +60,10 @@ persistence.db.username=postgres
 persistence.db.password=changeMe
 auth.provider=de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthFilter
 auth.allowAnonymousRead=false
-mcp.startBus=true
 ```
 
-For **write-capable** stand-alone deployments set `mcp.startBus=true` (starts the
-in-JVM `InternalMessageBus` the persistence layer needs to fire entity-change events).
+A `MessageBus` (default: the in-JVM `InternalMessageBus`) is always started, since
+the persistence layer fires entity-change events on every commit.
 
 Then run:
 

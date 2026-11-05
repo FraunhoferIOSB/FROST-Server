@@ -148,8 +148,8 @@ descriptions, enums and resources are generated from the live `ModelRegistry`.
   short-lived and blocking, matching `Service`'s one-transaction-per-call semantics.
   (The SDK's reactive plumbing stays an internal detail.)
 * **Shut-down:** shutdown hook mirrors `FrostMqttServer.stop()`: stop Jetty → stop
-  metrics endpoint → `MessageBusFactory` bus stop (only if the MCP process also owns
-  local services — see §9 `mcp.startBus`).
+  metrics endpoint → `MessageBusFactory` bus stop (the MCP process always owns the
+  bus, like every other FROST front-end boot).
 
 ---
 
@@ -466,7 +466,10 @@ the `settings-annotation` processor so they appear in generated docs):
 | `mcp.maxResultSize` | int (bytes) | 1048576 | Byte cap (§8.2). |
 | `mcp.allowTools` | — | `get,query,create,update,replace,delete` | Comma-separated list of enabled tools; lets deployments expose a read-only MCP ("get,query") or a write MCP. |
 | `mcp.auth.requireAuthenticated` | boolean | false | When true, anonymous MCP sessions (unauthenticated principal) are rejected; default follows the container outcome like STA does. |
-| `mcp.startBus` | boolean | false | Start a `MessageBus` in this process (needed only if a plugin requires an active bus; the core tool path does not). |
+
+A `MessageBus` (default: the in-JVM `InternalMessageBus`) is always created — like every
+other FROST front-end boot, and required because the persistence layer fires
+entity-change events on every commit.
 
 Config file (`FrostMcp.properties`) follows `FrostMqtt.properties`: the same
 `bus.*` / `persistence.*` / `auth.*` / `plugins.*` keys drive `CoreSettings`, plus the
@@ -784,13 +787,10 @@ Class-level notes:
     and `$expand`), paging via `@iot.nextLink` beyond `mcp.maxTop`, error mapping
     (404 → isError result), auth on/off (anonymous vs. filter-secured), free-form property
     round-trip. Implemented as `McpSmokeTest` (TestCore boots a
-    stand-alone `FrostMcpServer` next to the HTTP server, same DB). Note for write tests:
-    the MCP server's `CoreSettings` needs a message bus for entity-change events —
-    `mcp.startBus=T` with the in-JVM `InternalMessageBus` (no listeners, events dropped)
-    sidesteps mosquitto without cross-talk on the HTTP deployment's bus topic; without a
-    bus the persistence layer NPEs on commit (`AbstractPersistenceManager.
-    fireEntityChangeEvents`) — a pre-existing FROST-Server behaviour shared with any
-    bus-less deployment.
+    stand-alone `FrostMcpServer` next to the HTTP server, same DB). The MCP server's
+    `CoreSettings` always gets a message bus for entity-change events — the in-JVM
+    `InternalMessageBus` (no listeners, events dropped) sidesteps mosquitto without
+    cross-talk on the HTTP deployment's bus topic.
 3. **Conformance:** optionally run the official MCP conformance suite
    (`npx @modelcontextprotocol/conformance server --url http://…/mcp --suite active`; the
    SDK itself documents 40/40 server conformance) in CI against a running `FrostMcpServer`.
