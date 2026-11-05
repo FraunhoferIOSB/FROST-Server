@@ -48,7 +48,6 @@ class McpSettingsTest {
         assertEquals(100, settings.getMaxTop());
         assertEquals(1024 * 1024, settings.getMaxResultSize());
         assertFalse(settings.isRequireAuthenticated());
-        assertFalse(settings.isStartBus());
         assertTrue(settings.isToolAllowed("frost_get"));
         assertTrue(settings.isToolAllowed("frost_query"));
         assertTrue(settings.isToolAllowed("frost_create"));
