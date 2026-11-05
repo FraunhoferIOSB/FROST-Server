@@ -47,8 +47,6 @@ public class McpSettings implements ConfigDefaults {
     public static final String TAG_ALLOW_TOOLS = "allowTools";
     @DefaultValueBoolean(false)
     public static final String TAG_REQUIRE_AUTHENTICATED = "auth.requireAuthenticated";
-    @DefaultValueBoolean(false)
-    public static final String TAG_START_BUS = "startBus";
 
     private final Settings customSettings;
 
@@ -59,7 +57,6 @@ public class McpSettings implements ConfigDefaults {
     private int maxResultSize;
     private Set<String> allowTools;
     private boolean requireAuthenticated;
-    private boolean startBus;
 
     public McpSettings(Settings settings) {
         if (settings == null) {
@@ -76,7 +73,6 @@ public class McpSettings implements ConfigDefaults {
         maxTop = settings.getInt(TAG_MAX_TOP, getClass());
         maxResultSize = settings.getInt(TAG_MAX_RESULT_SIZE, getClass());
         requireAuthenticated = settings.getBoolean(TAG_REQUIRE_AUTHENTICATED, getClass());
-        startBus = settings.getBoolean(TAG_START_BUS, getClass());
         allowTools = new LinkedHashSet<>();
         for (String entry : settings.get(TAG_ALLOW_TOOLS, getClass()).split(",")) {
             final String name = entry.trim().toLowerCase();
@@ -116,10 +112,6 @@ public class McpSettings implements ConfigDefaults {
 
     public boolean isRequireAuthenticated() {
         return requireAuthenticated;
-    }
-
-    public boolean isStartBus() {
-        return startBus;
     }
 
     /**
