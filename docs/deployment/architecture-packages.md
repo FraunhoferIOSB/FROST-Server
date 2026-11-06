@@ -7,11 +7,12 @@ order: 10
 
 # Package Architecture
 
-The FROST-Server comes in three packages, and thus also in three docker images:
+The FROST-Server comes in the following packages, and thus also in docker images:
 
 * [fraunhoferiosb/frost-server](https://hub.docker.com/r/fraunhoferiosb/frost-server/) The all-in-one package
 * [fraunhoferiosb/frost-server-http](https://hub.docker.com/r/fraunhoferiosb/frost-server-http/) The HTTP-only package
 * [fraunhoferiosb/frost-server-mqtt](https://hub.docker.com/r/fraunhoferiosb/frost-server-mqtt/) The MQTT-only package
+* [fraunhoferiosb/frost-server-mcp](https://hub.docker.com/r/fraunhoferiosb/frost-server-mcp/) The MCP-only package, for LLM agents (see [MCP Interface](../extensions/MCP-Server.md))
 
 ## All In One
 
@@ -33,5 +34,8 @@ To make it possible to have multiple HTTP and MQTT instances, a message bus was 
 
 This way, there can be an arbitrary number of HTTP and MQTT components, connecting to the same (replicated) database, and communicating among each
 other through the message bus. Currently there is only one implementation of the message bus connector, that uses an external MQTT server.
+
+The [MCP package](../extensions/MCP-Server.md) is another stand-alone frontend, built the same way: it connects to the same
+(replicated) database, and communicates with the other components through the message bus, so agents see the data live.
 
 
