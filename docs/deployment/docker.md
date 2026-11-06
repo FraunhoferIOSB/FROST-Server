@@ -38,11 +38,12 @@ If you have docker and docker-compose
 
 ## Details
 
-There are three docker images available:
+The following docker images are available:
 
 * [fraunhoferiosb/frost-server](https://hub.docker.com/r/fraunhoferiosb/frost-server/) The all-in-one package
 * [fraunhoferiosb/frost-server-http](https://hub.docker.com/r/fraunhoferiosb/frost-server-http/) The HTTP-only package
 * [fraunhoferiosb/frost-server-mqtt](https://hub.docker.com/r/fraunhoferiosb/frost-server-mqtt/) The MQTT-only package
+* [fraunhoferiosb/frost-server-mcp](https://hub.docker.com/r/fraunhoferiosb/frost-server-mcp/) The MCP-only package, for LLM agents (see [MCP Interface](../extensions/MCP-Server.md))
 
 To make deployment of these images easier, two example docker-compose files are provided.
 The `docker-compose.yaml` file uses the all-in-one server, and adds the required postgresql / postgis database.
@@ -57,7 +58,7 @@ If you want to build your own docker images, you can do this by calling:
 
 ```
 mvn install
-mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP
+mvn dockerfile:build -pl FROST-Server.HTTP,FROST-Server.MQTT,FROST-Server.MQTTP,FROST-Server.MCP
 ```
 
 All data is stored inside the PostGIS database. To keep this state there's a volume automatically mapped to the PostGIS container.
