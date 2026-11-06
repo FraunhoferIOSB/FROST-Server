@@ -9,7 +9,7 @@ order: 20
 
 There are several ways to deploy the different packages the make up the FROST-Server.
 The HTTP and all-in-one MQTTP packages can be run in Tomcat or Wildfly, or as a docker image.
-The MQTT package is a stand-alone application that can be run directly from the command line, or as a docker image.
+The MQTT and MCP packages are stand-alone applications that can be run directly from the command line, or as a docker image.
 For each option, the configuration is taken from (in order of priority):
 
 * Tomcat
@@ -22,9 +22,9 @@ For each option, the configuration is taken from (in order of priority):
 * Wildfly
   1. Enviroment variables
   1. web.xml
-* Standalone MQTT
+* Standalone MQTT / MCP
   1. Enviroment variables
-  1. The config file: FrostMqtt.properties
+  1. The config file: FrostMqtt.properties / FrostMcp.properties
 
 **Important when using Environment variables:** Environment variables are not allowed to have the dot (`.`) character in the name. You must replace all of the dots in the names with an underscore (`_`).
 
@@ -168,6 +168,32 @@ These are settings for the MQTT package.
   When true, MQTT topics may contain `$filter` query parameters.
 * **mqtt.allowRequestResponse:** Since 2.8.2, Default: `false`  
   When true, clients can use the Request/Reponse pattern over the MQTT interface.
+
+
+## MCP settings
+
+These are settings for the MCP ([Model Context Protocol](https://modelcontextprotocol.io)) package,
+which exposes the server to LLM agents. See the
+[MCP Interface](../extensions/MCP-Server.md) extension page for details.
+
+* **mcp.host:** Default: `0.0.0.0`  
+  The address the MCP server binds on.
+* **mcp.port:** Default: `8080`  
+  The port the MCP server listens on. The endpoint is served at `http://host:port/mcp`.
+* **mcp.defaultVersion:** Default: *first available version*  
+  The API version used when a tool call does not specify a version.
+* **mcp.maxTop:** Default: `100`  
+  The maximum page size the MCP interface will serve. Results are paged with
+  `@iot.nextLink` when a query asks for more.
+* **mcp.maxResultSize:** Default: `1048576` (1 MB)  
+  The maximum result size in bytes the MCP interface will send to an agent. Larger
+  answers are refused with a message instructing the agent to narrow the query.
+* **mcp.allowTools:** Default: `get,query,create,update,replace,delete`  
+  Comma-separated list of enabled tools. A read-only MCP server, for example, uses
+  `get,query`. Tools not in the list are not advertised to clients.
+* **mcp.auth.requireAuthenticated:** Default: `false`  
+  When true, anonymous MCP sessions are rejected: clients must authenticate with the
+  configured authentication provider.
 
 
 ## Persistence Settings
