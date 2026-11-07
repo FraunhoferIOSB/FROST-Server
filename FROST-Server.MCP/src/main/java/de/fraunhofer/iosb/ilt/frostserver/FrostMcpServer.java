@@ -52,6 +52,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Duration;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Properties;
@@ -219,6 +220,9 @@ public class FrostMcpServer {
     /**
      * Builds the MCP streamable HTTP transport: the SDK's HttpServlet on
      * /mcp, with the shared FROST JsonMapper and the principal extractor.
+     * The transport knobs (request size cap, keep-alive and session sweep
+     * intervals) map one-to-one onto the mcp.* settings, so the whole, fixed
+     * set of SDK transport options is admin-configurable.
      *
      * @return the transport provider, an HttpServlet.
      */
@@ -227,6 +231,9 @@ public class FrostMcpServer {
                 .jsonMapper(new JacksonMcpJsonMapper(StaJsonHelper.getJsonMapper()))
                 .mcpEndpoint(SERVLET_PATH)
                 .contextExtractor(new PrincipalExtractor())
+                .maxRequestSize(mcpSettings.getMaxRequestSize())
+                .keepAliveInterval(Duration.ofSeconds(mcpSettings.getKeepAliveIntervalSec()))
+                .sessionSweepInterval(Duration.ofSeconds(mcpSettings.getSessionSweepIntervalSec()))
                 .build();
     }
 

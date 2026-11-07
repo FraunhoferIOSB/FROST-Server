@@ -120,3 +120,11 @@ The MCP server has the following settings, in the `mcp.` group:
   endpoints. Since the MCP server usually runs as a separate process with its own
   address, this list must be configured explicitly; when it is empty the MCP
   endpoint is not advertised.
+* **mcp.maxRequestSize:** Default: `16777216` (16 MB)
+  The maximum size in bytes of a single MCP request (JSON-RPC message) the server
+  accepts; larger requests are rejected.
+* **mcp.keepAliveIntervalSec:** Default: `1800` (30 minutes)
+  The interval in seconds of the transport keep-alive signal, relevant for
+  long-lived listening streams behind proxies.
+* **mcp.sessionSweepIntervalSec:** Default: `1800` (30 minutes)
+  The interval in seconds at which the transport removes stale MCP sessions.
