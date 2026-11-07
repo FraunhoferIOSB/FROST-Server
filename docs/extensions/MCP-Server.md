@@ -114,3 +114,9 @@ The MCP server has the following settings, in the `mcp.` group:
 * **mcp.auth.requireAuthenticated:** Default: `false`
   When true, anonymous MCP sessions are rejected: clients must authenticate with the
   configured authentication provider.
+* **mcp.exposedEndpoints:** Default: *empty*
+  Comma-separated list of MCP endpoint URLs to advertise on the index document
+  (landing page) of the HTTP server, in the `serverSettings` next to the MQTT
+  endpoints. Since the MCP server usually runs as a separate process with its own
+  address, this list must be configured explicitly; when it is empty the MCP
+  endpoint is not advertised.
