@@ -51,7 +51,7 @@ The MCP server can be added next to an existing instance sharing the same databa
 
 ## Tools
 
-Agents interact with the server through six tools, which cover the full SensorThings
+Agents interact with the server through eight tools, which cover the full SensorThings
 API path and query language:
 
 | Tool | Purpose |
@@ -62,11 +62,38 @@ API path and query language:
 | `frost_update` | Patch entities: `mode=patch` sends the changed properties, `mode=changeset` sends an RFC 6902 JSON Patch. |
 | `frost_replace` | Replace an entity (PUT semantics). |
 | `frost_delete` | Delete an entity by id path, e.g. `Things(1)`. |
+| `frost_subscribe` | Subscribe the session to entity-change notifications: an entity set (optionally narrowed with `$filter` and `$select`) or a single entity. |
+| `frost_unsubscribe` | Remove one subscription (by id) or all subscriptions of the session. |
 
 All tools accept an optional `version` argument for servers that serve multiple API
 versions, so one MCP server can serve all versions at once.
 Results are STA JSON, delivered both as pretty-printed text and as structured content,
 so both simple and capable clients can use them.
+
+## Subscriptions
+
+`frost_subscribe` turns an MCP session into a lightweight MQTT-style client: change
+events for the subscribed entities arrive without polling, pushed over the session's
+own MCP notification stream.
+
+* **Topics:** an entity set (`Things`), a single entity (`Things(1)`), or a navigation
+  target (`Things(1)/Datastreams`). Entity-set subscriptions accept a `filter`
+  (STA `$filter` expression) and a `select` (properties to include; `@id` allowed).
+* **Notifications:** arrive as MCP logging notifications — logger `"frost"`, level
+  `info` — carrying the subscription id, the event type (`create`, `update`, `delete`),
+  the entity type, the entity itself (delete notifications carry the pre-delete
+  entity), and a `truncated` flag for entities exceeding `mcp.maxResultSize`.
+* **Sessions:** subscriptions are bound to the MCP session and disappear with it.
+  Identical repeated subscriptions return the existing subscription id; a session can
+  hold at most `mcp.maxSubscriptionsPerSession` subscriptions (default 16).
+* **Permissions:** subscribing requires the read role for the entity type; the same
+  per-user and per-property rules apply as for reading via `frost_get`.
+
+Note: the MCP server pushes notifications it receives via its **own** message bus
+connection. As a stand-alone process it uses the in-JVM internal bus by default, which
+only sees the events of that process; connect it to the shared bus
+(`bus.busImplementationClass=de.fraunhofer.iosb.ilt.sta.messagebus.MqttMessageBus`) to
+receive events caused by other FROST front-ends writing to the same database.
 
 ## Resources
 
@@ -108,7 +135,7 @@ The MCP server has the following settings, in the `mcp.` group:
 * **mcp.maxResultSize:** Default: `1048576` (1 MB)
   The maximum result size, applied after paging. Larger answers are refused with a
   message instructing the agent to narrow the query.
-* **mcp.allowTools:** Default: `get,query,create,update,replace,delete`
+* **mcp.allowTools:** Default: `get,query,create,update,replace,delete,subscribe,unsubscribe`
   Comma-separated list of enabled tools. A read-only MCP server, for example, uses
   `get,query`. Tools not in the list are not advertised to clients.
 * **mcp.auth.requireAuthenticated:** Default: `false`
@@ -128,3 +155,6 @@ The MCP server has the following settings, in the `mcp.` group:
   long-lived listening streams behind proxies.
 * **mcp.sessionSweepIntervalSec:** Default: `1800` (30 minutes)
   The interval in seconds at which the transport removes stale MCP sessions.
+* **mcp.maxSubscriptionsPerSession:** Default: `16`
+  The maximum number of active subscriptions per MCP session; further
+  `frost_subscribe` calls answer with status code 429.

@@ -2,7 +2,7 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for the
 OGC SensorThings API. It exposes a FROST-Server instance — any FROST model, not just
-Sensing — to LLM agents through six generic tools and a small set of `frost://`
+Sensing — to LLM agents through eight generic tools and a small set of `frost://`
 resources. Agents never see raw URLs or STA syntax; the tool descriptions guide them,
 and the server validates, clamps, and maps everything onto the internal `Service`.
 
@@ -21,10 +21,15 @@ Design document: [docs/DESIGN.md](docs/DESIGN.md).
 | `frost_update` | Patch entities; `mode=changeset` wraps a multi-property change in one changeset. |
 | `frost_replace` | Replace an entity. |
 | `frost_delete` | Delete by fully-qualified id path (`Things(1)`). |
+| `frost_subscribe` | Subscribe the session to entity-change notifications — an entity set (optionally with `$filter`/`$select`) or a single entity (also via navigation, e.g. `Things(1)/Datastreams`). Notifications arrive as MCP logging notifications (logger `frost`, level INFO) carrying `subscriptionId`, `eventType`, `entityType` and the entity. |
+| `frost_unsubscribe` | Remove one subscription (by `subscriptionId`) or all subscriptions of the session. |
 
 All tools accept an optional `version` arg (defaults to `mcp.defaultVersion`) so one
 server can serve multiple STA API versions if the deployed model defines them.
 Results are plain data in `structuredContent` — no `outputSchema` is advertised.
+Subscriptions survive per session only; identical repeated `frost_subscribe` calls
+return the existing subscription id, and sessions are limited to
+`mcp.maxSubscriptionsPerSession` (default 16) active subscriptions.
 
 ## Resources (frost://…
 
@@ -44,12 +49,13 @@ Results are plain data in `structuredContent` — no `outputSchema` is advertise
 | `mcp.defaultVersion` | (none → model's first) | STA version used when a tool call omits `version`. |
 | `mcp.maxTop` | `100` | `$top` clamp; implicit top when a query specifies none. |
 | `mcp.maxResultSize` | `1048576` | Result byte cap. Over-size answers return a structured `statusCode: 413` with guidance to narrow the query. |
-| `mcp.allowTools` | `get,query,create,update,replace,delete` | Tool ACL (subset/expand as needed; e.g. read-only deployments: `allowTools=get,query`). |
+| `mcp.allowTools` | `get,query,create,update,replace,delete,subscribe,unsubscribe` | Tool ACL (subset/expand as needed; e.g. read-only deployments: `allowTools=get,query`). |
 | `mcp.auth.requireAuthenticated` | `false` | Fail boot if no known auth provider could be resolved for `/mcp`. |
 | `mcp.exposedEndpoints` | (empty) | Comma-separated MCP endpoint URLs advertised in the index document `serverSettings` (next to the MQTT endpoints). Empty: not advertised. |
 | `mcp.maxRequestSize` | `16777216` | Byte cap on a single MCP request (JSON-RPC message); larger requests are rejected. |
 | `mcp.keepAliveIntervalSec` | `1800` | Transport keep-alive interval (seconds) for long-lived listening streams. |
 | `mcp.sessionSweepIntervalSec` | `1800` | Interval (seconds) at which stale MCP sessions are swept. |
+| `mcp.maxSubscriptionsPerSession` | `16` | Per-session cap on active subscriptions; beyond it `frost_subscribe` answers `429`. |
 
 ## Deployment
 
@@ -121,10 +127,12 @@ System.out.println(result.structuredContent());
 
 ## Tests
 
-In-module unit tests (35) cover settings, JSON handling, tool handling (version
+In-module unit tests (50) cover settings, JSON handling, tool handling (version
 resolution, ACLs, permissions, query validation, result formation, byte cap),
-query assembly, and the resource generators — against a compact local fake model
-(`TestModelMcp`). Integration tests live in `FROST-Server.Tests` (`McpSmokeTest`).
+query assembly, the resource generators, and the subscription registry — against a
+compact local fake model (`TestModelMcp`). Integration tests live in
+`FROST-Server.Tests` (`McpSmokeTest`, including a subscribe → notify → unsubscribe
+round-trip).
 
 ```bash
 mvn -pl FROST-Server.MCP test
