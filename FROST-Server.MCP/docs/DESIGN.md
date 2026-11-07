@@ -157,7 +157,8 @@ descriptions, enums and resources are generated from the live `ModelRegistry`.
 
 Design rule: **fixed, small, path/query-addressed tool set** ("Layer 1"). The STA path
 language already encodes entity sets, entities, navigation links, property access (`/name`,
-`/$value`), so six generic tools are complete for any model.
+`/$value`), so six data tools are complete for any model; §5.1 adds the two
+subscription tools (session state, not model surface).
 
 ### 5.1 Tool List
 
@@ -169,6 +170,8 @@ language already encodes entity sets, entities, navigation links, property acces
 | `frost_update` | PATCH (patch/changeset) an existing entity | `UPDATE_CHANGES` / `UPDATE_CHANGESET` | `destructiveHint: false`, `idempotentHint: true` |
 | `frost_replace` | PUT an existing entity — full replace | `UPDATE_ALL` | `destructiveHint: true`, `idempotentHint: true` |
 | `frost_delete` | DELETE an entity | `DELETE` | `destructiveHint: true`, `idempotentHint: true` |
+| `frost_subscribe` | Subscribe the session to change notifications on an entity set or single entity | message bus (`EntityChangedMessage`) | `readOnlyHint: true`, `idempotentHint: true` |
+| `frost_unsubscribe` | Remove one (by id) or all subscriptions of the session | registry | `readOnlyHint: true`, `idempotentHint: false` |
 
 Rationale for having both `frost_get` and `frost_query`: LLMs make fewer mistakes with
 structured, typed arguments (arrays for `$select`, explicit integers for `$top`), but the
@@ -345,6 +348,61 @@ path as `frost_get`. Follow-up pages: read `@iot.nextLink` from the result and i
 }
 ```
 
+#### frost_subscribe / frost_unsubscribe (added in v1)
+
+`frost_subscribe` registers the calling MCP **session** for entity-change
+notifications; `frost_unsubscribe` removes one subscription (by id) or all
+subscriptions of the session. Both are wired through the
+`FrostSubscriptionRegistry` (§14.3 — implemented).
+
+```jsonc
+{
+  "name": "frost_subscribe",
+  "inputSchema": {
+    "type": "object",
+    "required": ["path"],
+    "properties": {
+      "path":    { "type": "string",
+                   "description": "Entity set or single entity, relative to the version root. Navigation syntax allowed. Examples: 'Things', 'Things(1)', 'Datastreams(7)/Observations'." },
+      "filter":  { "type": "string", "description": "STA $filter, without the '$filter=' prefix. Entity-set subscriptions only." },
+      "select":  { "type": "array", "items": { "type": "string" }, "description": "Properties for $select in notifications; '@id' allowed. Entity-set subscriptions only." },
+      "version": { "type": "string" }
+    },
+    "additionalProperties": false
+  }
+}
+// success structuredContent:
+// { "subscriptionId": 42, "topic": "v1.1/Things", "sessionActive": true }
+// identical repeated subscription:
+// { "subscriptionId": 42, "topic": "v1.1/Things", "sessionActive": true,
+//   "note": "An identical subscription already existed; no new subscription created." }
+
+{
+  "name": "frost_unsubscribe",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "subscriptionId": { "type": "integer", "description": "The id to remove. Omit to remove all subscriptions of this session." },
+      "version":       { "type": "string" }
+    },
+    "additionalProperties": false
+  }
+}
+// success structuredContent: { "removed": 1 }
+// unknown id for this session: isError result, statusCode 404 (§11.2)
+```
+
+**Notifications** arrive as MCP logging notifications (logger `"frost"`, level
+`INFO`) whose `data` is the envelope
+`{"subscriptionId", "eventType": "create|update|delete", "entityType": <plural>, "truncated": bool, "entity": …}`
+— delete notifications carry the pre-delete entity. `$select` reduces the
+entity; oversized entities (§8.2) are delivered `truncated: true` with the
+entity replaced by a note. Both tools keep `readOnlyHint: true`: they change
+only the session's own push configuration, not server data. Gate failures
+(invalid path, `$filter` on an entity subscription, unknown options) surface as
+MCP protocol errors (-32602) like the other tools' argument problems; the
+per-session cap answers `429` as a tool result (§14.3).
+
 ### 5.4 Worked Example
 
 ```jsonc
@@ -464,12 +522,13 @@ the `settings-annotation` processor so they appear in generated docs):
 | `mcp.defaultVersion` | string | *first registered default version, usually `v1.1`* | Used when a tool call omits `version`. Resolved via `PluginManager.getVersion(...)`. |
 | `mcp.maxTop` | int | 100 | Paging cap (§8.1). |
 | `mcp.maxResultSize` | int (bytes) | 1048576 | Byte cap (§8.2). |
-| `mcp.allowTools` | — | `get,query,create,update,replace,delete` | Comma-separated list of enabled tools; lets deployments expose a read-only MCP ("get,query") or a write MCP. |
+| `mcp.allowTools` | — | `get,query,create,update,replace,delete,subscribe,unsubscribe` | Comma-separated list of enabled tools; lets deployments expose a read-only MCP ("get,query") or a write MCP. |
 | `mcp.auth.requireAuthenticated` | boolean | false | When true, anonymous MCP sessions (unauthenticated principal) are rejected; default follows the container outcome like STA does. |
 | `mcp.exposedEndpoints` | string | (empty) | Comma-separated MCP endpoint URLs advertised in the index document `serverSettings` (next to the MQTT endpoints). Empty: not advertised. |
 | `mcp.maxRequestSize` | int (bytes) | 16777216 | Byte cap on a single MCP request (JSON-RPC message), mapped to the SDK transport's `maxRequestSize`. |
 | `mcp.keepAliveIntervalSec` | int (sec) | 1800 | Transport keep-alive interval, mapped to the SDK transport's `keepAliveInterval`. |
 | `mcp.sessionSweepIntervalSec` | int (sec) | 1800 | Stale-session sweep interval, mapped to the SDK transport's `sessionSweepInterval`. |
+| `mcp.maxSubscriptionsPerSession` | int | 16 | Per-session cap on active subscriptions; the 4th-beyond-cap `frost_subscribe` answers 429 (§14.3). |
 
 The SDK has no string-keyed config interface like Moquette's `IConfig` (which
 `ConfigWrapper` bridges to `Settings` in the MQTT module); it is a fixed, typed
@@ -632,6 +691,11 @@ same request types the STA plugin decodes for the same HTTP methods/content type
 | `500` internal (`errorResponse` 500, unexpected exception) | Tool result, `isError: true`, generic message (details in server log, honour existing "See logs for details." behaviour). |
 | `tools/call` with disabled tool name (mcp.allowTools) | JSON-RPC `-32601 Method not found`. |
 | Byte cap exceeded (§8.2) | Tool result, `isError: true`, `{ "statusCode": 499-ish "tooLarge" code?}` — defined as `"statusCode": 413, "message": "…" }` guidance text (see §8.2). |
+| Subscription path/option gate failure (§14.3: options on entity sub, property path, unknown set) | JSON-RPC protocol error `-32602` (same class as parse failures above). |
+| Subscription cap exceeded (§14.3, `mcp.maxSubscriptionsPerSession`) | Tool result, `isError: true`, `{ "statusCode": 429, "message": … }`. |
+| Unsubscribe unknown id (foreign or stale) | Tool result, `isError: true`, `{ "statusCode": 404, "message": … }` — ids of other sessions are indistinguishable from stale (no information leak). |
+| Subscribed entity hidden for principal (admin type, no rights) | Tool result, `isError: true`, `{ "statusCode": 404, "message": … }`. |
+| Notification delivery fails (stream closed mid-send, session gone) | Registration dropped + debug log (§14.3 self-healing; no per-client error propagates to the bus listener). |
 
 STANDARD `initialize`, `tools/list`, `resources/list`, `resources/templates/list`,
 `ping` are answered by the SDK directly (our registrations feed them).
@@ -716,13 +780,28 @@ de.fraunhofer.iosb.ilt.frostserver.mcp
 │   ├── FrostToolCreate                   // frost_create (Prefer handling)
 │   ├── FrostToolUpdate                   // frost_update (patch / changeset)
 │   ├── FrostToolReplace                  // frost_replace (put: full replace)
-│   └── FrostToolDelete                   // frost_delete
+│   ├── FrostToolDelete                   // frost_delete
+│   ├── FrostToolSubscribe                // frost_subscribe (session → registry, §14.3)
+│   └── FrostToolUnsubscribe              // frost_unsubscribe
+├── subscription/                         // §14.3 (implemented)
+│   ├── FrostSubscriptionRegistry         // per-server registry: sessionId → subscriptions;
+│   │                                     //   bus listener, dedupe, cap, visibility, cleanup
+│   ├── FrostSubscriptionFactory          // STA path/Query → typed subscriptions (gates:
+│   │                                     //   no $orderby injected — parses alwaysOrder=false)
+│   ├── FrostEntitySetSubscription        // set-level matcher (type + optional select/filter)
+│   ├── FrostEntitySubscription           // single-entity matcher (pk + navigation children)
+│   ├── FrostSubscriptionResult           // subscribe outcome → structuredContent
+│   ├── FrostSubscriptionException        // visibility (404/403) + cap (429) as STA codes
+│   └── NotificationSink                  // per-server delivery: (sessionId, envelope) →
+│                                          //   transportProvider.notifyClient
 ├── resource/
 │   ├── ModelResourceGenerator            // ModelRegistry → frost://model JSON (also feeds
 │   │                                     //   frost_query enum + tool descriptions)
 │   └── FrostResourceHandler              // frost://index, frost://model, templates → STA calls
 └── util/
-    └── StaJsonHelper                     // bounded pretty-print + parse + byte-cap check
+    ├── StaJsonHelper                     // bounded pretty-print + parse + byte-cap check
+    └── McpSdkWorkarounds                  // session-presence hook + cancelled-notification
+                                          //   handler on the SDK server builder
 ```
 
 Class-level notes:
@@ -763,10 +842,13 @@ Class-level notes:
    schemas are required by clients.
 2. **Batch tool** mapping to `Plugins/BatchProcessing` (deep-insert bundling, transactions
    over many operations).
-3. **Notifications/subscriptions:** map `MessageBus`/`SubscriptionManager` (MQTT-style
-   entity-change events) to MCP `notifications/*` + a `frost_subscribe` tool — turns MCP
-   sessions into lightweight MQTT clients and pairs naturally with §8 (push instead of
-   poll). Requires the SDK's notification plumbing (session-bound GET SSE streams).
+3. **Notifications/subscriptions — DONE (v1):** `frost_subscribe`/`frost_unsubscribe`
+   map `MessageBus` `EntityChangedMessage`s to MCP logging notifications (`logger "frost"`,
+   level INFO) via a per-server `FrostSubscriptionRegistry` (dedupe by canonical topic,
+   per-session cap `mcp.maxSubscriptionsPerSession`, per-entity visibility, session-drop
+   cleanup). Covered by `FrostSubscriptionRegistryTest` (unit) and the `McpSmokeTest`
+   subscription round-trip (integration). User-facing docs: module `README.md` and
+   `docs/extensions/MCP-Server.md`.
 4. **OAuth 2.1 resource-server support** per the MCP authorization spec (the SDK provides
    hooks; complements rather than replaces the filter chain).
 5. **Streaming serialization** per `FROST-Server.MCP/issues.txt` — Readers/Iterators accepted
@@ -797,10 +879,22 @@ Class-level notes:
    `frost://` resource generators. Two testability deviations in the main code:
    `FrostToolQuery.assembleQuery` and `FrostResourceHandler.splitStaTarget` are
    package-private (was private / newly extracted) so the tests can exercise them.
-   The `Edm.Untyped` annotation test exposed a real generator bug: `TypeSimplePrimitive`
-   splits `Edm.Untyped` into namespace `Edm` + name `Untyped`, so the check must compare
-   the *full* name (`ModelRegistry.fullName`) — fixed in
-   `ModelResourceGenerator.isUntyped`.
+    The `Edm.Untyped` annotation test exposed a real generator bug: `TypeSimplePrimitive`
+    splits `Edm.Untyped` into namespace `Edm` + name `Untyped`, so the check must compare
+    the *full* name (`ModelRegistry.fullName`) — fixed in
+    `ModelResourceGenerator.isUntyped`.
+    *Subscriptions (implemented):* `FrostSubscriptionRegistryTest` (12 tests) covers
+    registry semantics on the in-module fake model (`TestModelMcp` + in-memory
+    `TestPmMcp`/`CapturingSink`): create/update/delete delivery, cross-type isolation,
+    parent scoping, pk-matcher + visibility on single entities, session dedupe,
+    select round-trip (`id` → `@iot.id`, parenthesized `$filter`, no injected
+    `$orderby` — the registry parses with `alwaysOrder=false`, because
+    `Query.validate()` otherwise injects the default `$orderby` the subscription gates
+    reject), gates via IAE (entity+options, property paths, unknown sets, empty/null),
+    per-session cap with 429 (dedupe still passes at cap), unsubscribe (by id, all,
+    unknown id), stop-after-unsubscribe, sink-failure session drop and missing-session
+    registration drop. `McpSettingsTest` pins `mcp.maxSubscriptionsPerSession`
+    (default 16) and the `subscribe`/`unsubscribe` entries of `mcp.allowTools`.
  2. **Integration tests** (`FROST-Server.Tests`, Testcontainers Postgres as used today for
     `SQLjooq`): boot `FrostMcpServer` (with an in-memory or test DB) in the test JVM,
     drive it with the SDK's **MCP Java client** (`HttpClientStreamableHttpTransport`):
@@ -808,11 +902,15 @@ Class-level notes:
     full CRUD round-trip against the standard test entities (also exercising deep inserts
     and `$expand`), paging via `@iot.nextLink` beyond `mcp.maxTop`, error mapping
     (404 → isError result), auth on/off (anonymous vs. filter-secured), free-form property
-    round-trip. Implemented as `McpSmokeTest` (TestCore boots a
-    stand-alone `FrostMcpServer` next to the HTTP server, same DB). The MCP server's
-    `CoreSettings` always gets a message bus for entity-change events — the in-JVM
-    `InternalMessageBus` (no listeners, events dropped) sidesteps mosquitto without
-    cross-talk on the HTTP deployment's bus topic.
+     round-trip. The smoke test also drives a subscription round-trip: subscribe →
+     create → notification on the client's `loggingConsumer` (envelope assertions)
+     → unsubscribe (removed / 404) — implemented in `McpSmokeTest`. TestCore boots a
+     stand-alone `FrostMcpServer` next to the HTTP server, same DB. The MCP server's
+     `CoreSettings` always gets a message bus for entity-change events — the in-JVM
+     `InternalMessageBus` (no listeners, events dropped) sidesteps mosquitto without
+     cross-talk on the HTTP deployment's bus topic. For subscriptions the bus carries
+     the events (its own registry listens), so the MCP server pushes its own
+     notifications independently of the HTTP deployment's bus.
 3. **Conformance:** optionally run the official MCP conformance suite
    (`npx @modelcontextprotocol/conformance server --url http://…/mcp --suite active`; the
    SDK itself documents 40/40 server conformance) in CI against a running `FrostMcpServer`.
@@ -833,6 +931,8 @@ Class-level notes:
 | 5 | Pin SDK `2.1.0` vs. milestone `2.2.0-M1`. | **Settled:** `2.1.0` stable; bump opportunistically. |
 | 6 | `mcp.maxTop` default (100) vs. aligning with STA `defaultTop` (100). | **Settled: keep independent settings.** |
 | 7 | How to secure `/mcp` given `AuthFilterSta` is version-path-mapped with per-method roles (can't gate POST-only JSON-RPC)? | **Settled (user decision):** Basic → MCP boot registers its own `AuthFilterMcp` (`BasicAuthFilter`, `authenticateOnly=T`) for `/mcp`; Keycloak → small backward-compatible `KeycloakFilter` patch (safe path key + `"/mcp"` mapper entry) + `auth.authenticateOnly=T` in `FrostMcp.properties`; unknown provider + `mcp.auth.requireAuthenticated=T` → **boot fails**; MCP boot installs PM-side default security validators **only when an auth provider was resolved** (§10) — no-provider deployments stay writable, exactly like their HTTP counterparts. |
+| 8 | Deliver change notifications as MCP `notifications/message` (logging) or a custom method? | **Settled:** logging notifications, logger `"frost"`, level `INFO` — they ride the session's already-open GET SSE stream, pass the SDK's default `minLoggingLevel` (INFO), and every MCP client surfaces a logging hook; a custom method would need client-side handler registration. No extra `loggingLevel` tool; the level is fixed. |
+| 9 | Should `frost_subscribe` respect the generic `mcp.allowTools` gate? | **Settled:** yes — `subscribe` and `unsubscribe` are listed as separate tool names in `mcp.allowTools` (default on), so read-only deployments can strip push too. |
 
 ---
 
