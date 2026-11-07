@@ -63,6 +63,7 @@ public class CoreSettings implements ConfigDefaults {
      */
     public static final String PREFIX_BUS = "bus.";
     public static final String PREFIX_MQTT = "mqtt.";
+    public static final String PREFIX_MCP = "mcp.";
     public static final String PREFIX_HTTP = "http.";
     public static final String PREFIX_AUTH = "auth.";
     public static final String PREFIX_EXTENSION = "extension.";
@@ -181,6 +182,10 @@ public class CoreSettings implements ConfigDefaults {
      * The MQTT settings.
      */
     private MqttSettings mqttSettings;
+    /**
+     * The MCP settings.
+     */
+    private McpSettings mcpSettings;
     /**
      * The message bus settings.
      */
@@ -302,6 +307,7 @@ public class CoreSettings implements ConfigDefaults {
         pluginManager.setCoreSettings(this);
 
         mqttSettings = new MqttSettings(this, settings.getSubSettings(PREFIX_MQTT));
+        mcpSettings = new McpSettings(this, settings.getSubSettings(PREFIX_MCP));
         persistenceSettings = new PersistenceSettings(settings.getSubSettings(PREFIX_PERSISTENCE));
         busSettings = new BusSettings(settings.getSubSettings(PREFIX_BUS));
         httpSettings = settings.getSubSettings(PREFIX_HTTP);
@@ -403,6 +409,10 @@ public class CoreSettings implements ConfigDefaults {
 
     public MqttSettings getMqttSettings() {
         return mqttSettings;
+    }
+
+    public McpSettings getMcpSettings() {
+        return mcpSettings;
     }
 
     public PersistenceSettings getPersistenceSettings() {

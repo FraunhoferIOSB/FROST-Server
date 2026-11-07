@@ -24,6 +24,7 @@ public enum Extension {
     CORE,
     ENTITY_LINKING,
     FILTERED_DELETES,
+    MCP,
     MQTT,
     MQTT_EXPAND,
     MQTT_FILTER,

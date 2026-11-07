@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class McpSettingsTest {
         final CoreSettings coreSettings = new CoreSettings();
         final Settings settings = coreSettings.getSettings();
         properties.forEach((key, value) -> settings.set(String.valueOf(key), String.valueOf(value)));
-        return new McpSettings(settings.getSubSettings(McpSettings.PREFIX_MCP));
+        return new McpSettings(coreSettings, settings.getSubSettings(McpSettings.PREFIX_MCP));
     }
 
     @Test
@@ -71,4 +72,15 @@ class McpSettingsTest {
         assertFalse(settings.isToolAllowed(null));
     }
 
+    @Test
+    void testExposedEndpoints() {
+        final McpSettings defaults = from(new Properties());
+        assertTrue(defaults.getEndpoints().isEmpty(), "Without mcp.exposedEndpoints nothing is advertised.");
+
+        final Properties properties = new Properties();
+        properties.put(McpSettings.PREFIX_MCP + McpSettings.TAG_EXPOSED_MCP_ENDPOINTS, "http://mcp.example.com:8080/mcp");
+        final McpSettings settings = from(properties);
+        assertEquals(1, settings.getEndpoints().size());
+        assertEquals("http://mcp.example.com:8080/mcp", settings.getEndpoints().get(0));
+    }
 }

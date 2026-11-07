@@ -466,6 +466,13 @@ the `settings-annotation` processor so they appear in generated docs):
 | `mcp.maxResultSize` | int (bytes) | 1048576 | Byte cap (§8.2). |
 | `mcp.allowTools` | — | `get,query,create,update,replace,delete` | Comma-separated list of enabled tools; lets deployments expose a read-only MCP ("get,query") or a write MCP. |
 | `mcp.auth.requireAuthenticated` | boolean | false | When true, anonymous MCP sessions (unauthenticated principal) are rejected; default follows the container outcome like STA does. |
+| `mcp.exposedEndpoints` | string | (empty) | Comma-separated MCP endpoint URLs advertised in the index document `serverSettings` (next to the MQTT endpoints). Empty: not advertised. |
+
+`McpSettings` lives in the Core settings package (`de.fraunhofer.iosb.ilt.frostserver.settings`),
+constructed by `CoreSettings.initChildSettings()` for every front-end process, mirroring
+`MqttSettings`. A non-empty endpoint list enables the `MCP` extension, which the
+v1.1/v2.0 index-document plugins translate into the conformance list and the
+`serverSettings` MCP endpoints map.
 
 A `MessageBus` (default: the in-JVM `InternalMessageBus`) is always created — like every
 other FROST front-end boot, and required because the persistence layer fires
@@ -681,8 +688,10 @@ The module ships exactly like its template `FROST-Server.MQTT`:
 ```
 de.fraunhofer.iosb.ilt.frostserver        // main() entry, mirrors FrostMqttServer
 └── FrostMcpServer                        // boot: CoreSettings → filters → Jetty → SDK server
+de.fraunhofer.iosb.ilt.frostserver.settings
+├── McpSettings                           // ConfigProvider for mcp.* (@DefaultValue…);
+│                                         //   lives in Core, constructed by CoreSettings
 de.fraunhofer.iosb.ilt.frostserver.mcp
-├── McpSettings                           // ConfigProvider for mcp.* (@DefaultValue…)
 ├── session/
 │   └── PrincipalExtractor                // contextExtractor(HttpServletRequest): extracts
 │                                         //   PrincipalExtended from the request

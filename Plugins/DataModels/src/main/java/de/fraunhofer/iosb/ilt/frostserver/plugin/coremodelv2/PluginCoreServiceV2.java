@@ -55,6 +55,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
@@ -154,6 +155,9 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
                         "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#NavigationLinks",
                         "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Expand",
                         "https://github.com/INSIDE-information-systems/SensorThingsAPI/blob/master/EntityLinking/Linking.md#Filter"));
+        CONFORMANCE_BY_EXTENSION.put(Extension.MCP,
+                Arrays.asList(
+                        "https://fraunhoferiosb.github.io/FROST-Server/extensions/MCP-Server.html"));
     }
 
     @Override
@@ -296,6 +300,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
 
         addHttpEndpoint(serverSettings);
         addMqttEndpoint(serverSettings);
+        addMcpEndpoint(serverSettings);
     }
 
     private void collectFuncionNames() {
@@ -336,6 +341,18 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
             Map<String, Object> mqttData = new HashMap<>();
             mqttData.put("endpoints", endpoints);
             target.put(REQ_CLASS_BINDING_MQTT, mqttData);
+        }
+    }
+
+    private void addMcpEndpoint(Map<String, Object> target) {
+        final McpSettings mcpSettings = coreSettings.getMcpSettings();
+        List<String> endpoints = mcpSettings.getEndpoints();
+        if (!endpoints.isEmpty()) {
+            Map<String, Object> mcpData = new HashMap<>();
+            mcpData.put("endpoints", endpoints);
+            for (String requirement : CONFORMANCE_BY_EXTENSION.get(Extension.MCP)) {
+                target.put(requirement, mcpData);
+            }
         }
     }
 

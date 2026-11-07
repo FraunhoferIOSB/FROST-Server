@@ -19,7 +19,6 @@ package de.fraunhofer.iosb.ilt.frostserver;
 
 import de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthFilter;
 import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakFilter;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.resource.FrostResourceHandler;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostTool;
@@ -36,6 +35,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -102,7 +102,7 @@ public class FrostMcpServer {
 
     public FrostMcpServer(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
-        this.mcpSettings = new McpSettings(coreSettings.getSettings().getSubSettings(McpSettings.PREFIX_MCP));
+        this.mcpSettings = coreSettings.getMcpSettings();
     }
 
     private McpSettings mcpSettings() {

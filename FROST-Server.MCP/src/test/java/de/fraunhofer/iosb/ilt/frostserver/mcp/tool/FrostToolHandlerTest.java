@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.TestModelMcp;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
@@ -34,6 +33,7 @@ import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.modelcontextprotocol.spec.McpError;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -74,7 +74,7 @@ class FrostToolHandlerTest {
         testModel.initModel(coreSettings.getModelRegistry(), VALUE_ID_TYPE_LONG);
         testModel.init(coreSettings);
         coreSettings.getModelRegistry().initFinalise();
-        final McpSettings mcpSettings = new McpSettings(coreSettings.getSettings().getSubSettings(McpSettings.PREFIX_MCP));
+        final McpSettings mcpSettings = new McpSettings(coreSettings, coreSettings.getSettings().getSubSettings(McpSettings.PREFIX_MCP));
         handler = new FrostToolHandler(coreSettings, mcpSettings);
         assertEquals(50, mcpSettings.getMaxTop());
         version = handler.resolveVersion(null);
@@ -243,7 +243,7 @@ class FrostToolHandlerTest {
         properties.put(McpSettings.PREFIX_MCP + McpSettings.TAG_MAX_RESULT_SIZE, "4");
         final CoreSettings smallCore = new CoreSettings();
         properties.forEach((key, value) -> smallCore.getSettings().set(String.valueOf(key), String.valueOf(value)));
-        final McpSettings smallMcp = new McpSettings(smallCore.getSettings().getSubSettings(McpSettings.PREFIX_MCP));
+        final McpSettings smallMcp = new McpSettings(smallCore, smallCore.getSettings().getSubSettings(McpSettings.PREFIX_MCP));
         final FrostToolHandler smallHandler = new FrostToolHandler(smallCore, smallMcp);
         assertEquals(4, smallMcp.getMaxResultSize());
 
