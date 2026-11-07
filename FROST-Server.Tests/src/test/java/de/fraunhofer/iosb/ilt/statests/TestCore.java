@@ -32,11 +32,11 @@ import de.fraunhofer.iosb.ilt.frostserver.FrostMcpServer;
 import de.fraunhofer.iosb.ilt.frostserver.FrostMqttServer;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.DatabaseStatus;
 import de.fraunhofer.iosb.ilt.frostserver.http.common.ServletMain;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MqttMessageBus;
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.CoreModelSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.BusSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.MqttSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.PersistenceSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
@@ -347,6 +347,7 @@ public class TestCore {
         properties.put("mcp." + McpSettings.TAG_HOST, "localhost");
         properties.put("mcp." + McpSettings.TAG_PORT, "" + mcpPort);
         properties.put("mcp." + McpSettings.TAG_DEFAULT_VERSION, "v1.1");
+        properties.put("mcp." + McpSettings.TAG_EXPOSED_MCP_ENDPOINTS, "http://localhost:" + mcpPort + "/mcp");
         properties.put("bus." + BusSettings.TAG_IMPLEMENTATION_CLASS, "de.fraunhofer.iosb.ilt.frostserver.messagebus.InternalMessageBus");
         properties.put("mcp." + McpSettings.TAG_REQUIRE_AUTHENTICATED, "false");
 

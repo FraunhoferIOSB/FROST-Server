@@ -18,7 +18,6 @@
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
@@ -35,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.service.PluginManager;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;

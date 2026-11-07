@@ -15,22 +15,33 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.mcp;
+package de.fraunhofer.iosb.ilt.frostserver.settings;
 
+import de.fraunhofer.iosb.ilt.frostserver.extensions.Extension;
 import de.fraunhofer.iosb.ilt.settings.ConfigDefaults;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValue;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueBoolean;
 import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Settings for the MCP service in FROST. Read from the "mcp." sub-settings of
- * the core settings; the Core module stays untouched.
+ * the core settings.
  */
 public class McpSettings implements ConfigDefaults {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(McpSettings.class);
+
+    /**
+     * The prefix used for the MCP settings.
+     */
     public static final String PREFIX_MCP = "mcp.";
 
     @DefaultValue("0.0.0.0")
@@ -47,6 +58,8 @@ public class McpSettings implements ConfigDefaults {
     public static final String TAG_ALLOW_TOOLS = "allowTools";
     @DefaultValueBoolean(false)
     public static final String TAG_REQUIRE_AUTHENTICATED = "auth.requireAuthenticated";
+    @DefaultValue("")
+    public static final String TAG_EXPOSED_MCP_ENDPOINTS = "exposedEndpoints";
 
     private final Settings customSettings;
 
@@ -57,28 +70,34 @@ public class McpSettings implements ConfigDefaults {
     private int maxResultSize;
     private Set<String> allowTools;
     private boolean requireAuthenticated;
+    private List<String> endpoints = null;
 
-    public McpSettings(Settings settings) {
+    public McpSettings(CoreSettings coreSettings, Settings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings must be non-null");
         }
         this.customSettings = settings;
-        init(settings);
+        init(coreSettings, settings);
     }
 
-    private void init(Settings settings) {
-        host = settings.get(TAG_HOST, getClass());
-        port = settings.getInt(TAG_PORT, getClass());
-        defaultVersionName = settings.get(TAG_DEFAULT_VERSION, getClass());
-        maxTop = settings.getInt(TAG_MAX_TOP, getClass());
-        maxResultSize = settings.getInt(TAG_MAX_RESULT_SIZE, getClass());
-        requireAuthenticated = settings.getBoolean(TAG_REQUIRE_AUTHENTICATED, getClass());
+    private void init(CoreSettings coreSettings, Settings customSettings) {
+        host = customSettings.get(TAG_HOST, getClass());
+        port = customSettings.getInt(TAG_PORT, getClass());
+        defaultVersionName = customSettings.get(TAG_DEFAULT_VERSION, getClass());
+        maxTop = customSettings.getInt(TAG_MAX_TOP, getClass());
+        maxResultSize = customSettings.getInt(TAG_MAX_RESULT_SIZE, getClass());
+        requireAuthenticated = customSettings.getBoolean(TAG_REQUIRE_AUTHENTICATED, getClass());
         allowTools = new LinkedHashSet<>();
-        for (String entry : settings.get(TAG_ALLOW_TOOLS, getClass()).split(",")) {
+        for (String entry : customSettings.get(TAG_ALLOW_TOOLS, getClass()).split(",")) {
             final String name = entry.trim().toLowerCase();
             if (!name.isEmpty()) {
                 allowTools.add(name);
             }
+        }
+        if (getEndpoints().isEmpty()) {
+            LOGGER.debug("No MCP endpoints exposed; the MCP server will not be advertised on the index page.");
+        } else {
+            coreSettings.getEnabledExtensions().add(Extension.MCP);
         }
     }
 
@@ -112,6 +131,36 @@ public class McpSettings implements ConfigDefaults {
 
     public boolean isRequireAuthenticated() {
         return requireAuthenticated;
+    }
+
+    /**
+     * The MCP endpoints to list on the index page, or an empty list when the
+     * MCP server is not exposed.
+     *
+     * @return the list of MCP endpoints.
+     */
+    public List<String> getEndpoints() {
+        if (endpoints == null) {
+            searchExposedEndpoints();
+        }
+        return endpoints;
+    }
+
+    private void searchExposedEndpoints() {
+        String endpointsString = customSettings.get(TAG_EXPOSED_MCP_ENDPOINTS, getClass());
+        if (!endpointsString.isEmpty()) {
+            String[] splitEndpoints = endpointsString.split(",");
+            List<String> endpointList = new ArrayList<>();
+            for (String endpoint : splitEndpoints) {
+                final String trimmed = endpoint.trim();
+                if (!trimmed.isEmpty()) {
+                    endpointList.add(trimmed);
+                }
+            }
+            endpoints = Collections.unmodifiableList(endpointList);
+        } else {
+            endpoints = Collections.emptyList();
+        }
     }
 
     /**

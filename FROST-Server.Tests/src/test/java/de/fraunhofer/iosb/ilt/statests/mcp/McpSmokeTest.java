@@ -192,6 +192,13 @@ public class McpSmokeTest extends AbstractTestClass {
         assertFalse(index.contents().isEmpty(), "frost://index must yield content.");
         assertTrue(textOf(index).contains("Things"),
                 "The index resource must mention the Things entity set.");
+        String indexJson = textOf(index);
+        assertTrue(indexJson.contains("MCP-Server"),
+                "The index document must list the MCP conformance URL.");
+        assertTrue(indexJson.contains("\"endpoints\""),
+                "The index document must carry an endpoints map for MCP.");
+        assertTrue(indexJson.contains(serverSettings.getMcpUrl()),
+                "The index document must advertise the MCP endpoint: " + serverSettings.getMcpUrl());
 
         ReadResourceResult model = mcpClient.readResource(
                 new McpSchema.ReadResourceRequest("frost://model"));
