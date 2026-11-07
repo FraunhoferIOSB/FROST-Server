@@ -29,6 +29,7 @@ import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolQuery;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolReplace;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolUpdate;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.util.McpSdkWorkarounds;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
@@ -306,6 +307,7 @@ public class FrostMcpServer {
 
         final HttpServletStreamableServerTransportProvider transportProvider = buildTransportProvider();
         buildMcpServer(transportProvider);
+        McpSdkWorkarounds.installCancelledNotificationHandler(transportProvider);
         final ServletHolder servletHolder = new ServletHolder(transportProvider);
         servletHolder.setAsyncSupported(true);
         contextHandler.addServlet(servletHolder, SERVLET_PATH);

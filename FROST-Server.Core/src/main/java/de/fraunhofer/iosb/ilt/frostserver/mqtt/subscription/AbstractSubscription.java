@@ -97,7 +97,7 @@ public abstract class AbstractSubscription implements Subscription {
         this.settings = settings;
         LOGGER.debug("Subscription for {} on {}", userPrincipal, topic);
         final Version version = path.getVersion();
-        final QueryDefaults queryDefaults = settings.getQueryDefaults().setAlwaysOrder(false);
+        final QueryDefaults queryDefaults = settings.getQueryDefaults().copy().setAlwaysOrder(false);
         context = new ServiceContext()
                 .setModelRegistry(settings.getModelRegistry())
                 .setFunctionRegistry(settings.getFunctionRegistry())
