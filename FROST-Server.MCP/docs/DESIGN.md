@@ -223,7 +223,7 @@ interface would place after `/v1.1/`.
     "properties": {
       "path": {
         "type": "string",
-        "description": "STA path, relative to the version root. Examples: 'Things', 'Things(1)', 'Things(1)/Datastreams', 'Things(1)/name', 'Things(1)/name/$value', 'Datastreams(7)/Observations'. An empty path fetches the service index document."
+        "description": "STA path, relative to the version root. Examples: 'Things', 'Things(1)', 'Things(1)/Datastreams', 'Things(1)/name', 'Things(1)/name/$value', 'Datastreams(7)/Observations'. A single '/' fetches the service index document."
       },
       "query": {
         "type": "string",

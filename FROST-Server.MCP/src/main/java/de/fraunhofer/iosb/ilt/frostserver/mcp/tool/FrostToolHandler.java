@@ -270,9 +270,9 @@ public class FrostToolHandler {
     /**
      * Validates path and query with the STA parsers, applies the MCP paging and
      * count caps to entity-set reads. Parse failures surface as MCP protocol
-     * errors (-32602). An empty path (index document) is not parsed at all —
-     * the Service answers it before parsing — and returns null so callers pass
-     * no query.
+     * errors (-32602). A null, empty or "/" path (index document) is not
+     * parsed at all — the Service answers it before parsing — and returns
+     * null so callers pass no query.
      *
      * @param context The service context.
      * @param version The resolved version.

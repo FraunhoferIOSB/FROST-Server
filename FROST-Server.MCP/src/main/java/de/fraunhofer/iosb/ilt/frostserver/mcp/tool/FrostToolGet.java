@@ -49,7 +49,7 @@ public class FrostToolGet implements FrostTool {
         return NAME;
     }
 
-    private static final String PATH_DESCRIPTION = "STA path, relative to the version root. Examples: 'Things', 'Things(1)', 'Things(1)/Datastreams', 'Things(1)/name', 'Things(1)/name/$value', 'Datastreams(7)/Observations'. An empty path fetches the service index document.";
+    private static final String PATH_DESCRIPTION = "STA path, relative to the version root. Examples: 'Things', 'Things(1)', 'Things(1)/Datastreams', 'Things(1)/name', 'Things(1)/name/$value', 'Datastreams(7)/Observations'. A single '/' fetches the service index document.";
 
     private final FrostToolHandler handler;
 
