@@ -199,6 +199,14 @@ which exposes the server to LLM agents. See the
   the index document (landing page) alongside the MQTT endpoints. Only when this
   list is non-empty is the MCP endpoint listed; an HTTP server cannot guess the
   address of a separately deployed MCP server, so it must be configured explicitly.
+* **mcp.maxRequestSize:** Default: `16777216` (16 MB)  
+  The maximum size in bytes of a single MCP request (JSON-RPC message) the server
+  accepts; larger requests are rejected.
+* **mcp.keepAliveIntervalSec:** Default: `1800` (30 minutes)  
+  The interval in seconds of the transport keep-alive signal, relevant for
+  long-lived listening streams behind proxies.
+* **mcp.sessionSweepIntervalSec:** Default: `1800` (30 minutes)  
+  The interval in seconds at which the transport removes stale MCP sessions.
 
 
 ## Persistence Settings
