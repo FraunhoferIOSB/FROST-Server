@@ -51,6 +51,7 @@ class McpSettingsTest {
         assertEquals(16 * 1024 * 1024, settings.getMaxRequestSize(), "SDK default request cap.");
         assertEquals(30 * 60, settings.getKeepAliveIntervalSec());
         assertEquals(30 * 60, settings.getSessionSweepIntervalSec());
+        assertEquals(16, settings.getMaxSubscriptionsPerSession());
         assertFalse(settings.isRequireAuthenticated());
         assertTrue(settings.isToolAllowed("frost_get"));
         assertTrue(settings.isToolAllowed("frost_query"));
@@ -58,6 +59,8 @@ class McpSettingsTest {
         assertTrue(settings.isToolAllowed("frost_update"));
         assertTrue(settings.isToolAllowed("frost_replace"));
         assertTrue(settings.isToolAllowed("frost_delete"));
+        assertTrue(settings.isToolAllowed("frost_subscribe"));
+        assertTrue(settings.isToolAllowed("frost_unsubscribe"));
         assertFalse(settings.isToolAllowed("frost_other"));
     }
 
@@ -97,5 +100,13 @@ class McpSettingsTest {
         assertEquals(2048, settings.getMaxRequestSize());
         assertEquals(60, settings.getKeepAliveIntervalSec());
         assertEquals(120, settings.getSessionSweepIntervalSec());
+    }
+
+    @Test
+    void testSubscriptionKnobs() {
+        final Properties transportProps = new Properties();
+        transportProps.put(McpSettings.PREFIX_MCP + McpSettings.TAG_MAX_SUBSCRIPTIONS_PER_SESSION, "7");
+        final McpSettings settings = from(transportProps);
+        assertEquals(7, settings.getMaxSubscriptionsPerSession());
     }
 }
