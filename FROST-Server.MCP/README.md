@@ -46,6 +46,7 @@ Results are plain data in `structuredContent` — no `outputSchema` is advertise
 | `mcp.maxResultSize` | `1048576` | Result byte cap. Over-size answers return a structured `statusCode: 413` with guidance to narrow the query. |
 | `mcp.allowTools` | `get,query,create,update,replace,delete` | Tool ACL (subset/expand as needed; e.g. read-only deployments: `allowTools=get,query`). |
 | `mcp.auth.requireAuthenticated` | `false` | Fail boot if no known auth provider could be resolved for `/mcp`. |
+| `mcp.exposedEndpoints` | (empty) | Comma-separated MCP endpoint URLs advertised in the index document `serverSettings` (next to the MQTT endpoints). Empty: not advertised. |
 
 ## Deployment
 

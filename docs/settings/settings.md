@@ -194,6 +194,11 @@ which exposes the server to LLM agents. See the
 * **mcp.auth.requireAuthenticated:** Default: `false`  
   When true, anonymous MCP sessions are rejected: clients must authenticate with the
   configured authentication provider.
+* **mcp.exposedEndpoints:** Default: *empty*  
+  Comma-separated list of MCP endpoint URLs to advertise in the `serverSettings` of
+  the index document (landing page) alongside the MQTT endpoints. Only when this
+  list is non-empty is the MCP endpoint listed; an HTTP server cannot guess the
+  address of a separately deployed MCP server, so it must be configured explicitly.
 
 
 ## Persistence Settings

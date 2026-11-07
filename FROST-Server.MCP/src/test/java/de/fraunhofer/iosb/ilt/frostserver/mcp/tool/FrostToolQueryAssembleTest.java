@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.fraunhofer.iosb.ilt.frostserver.mcp.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.TestModelMcp;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.DefaultFunctions;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -52,7 +51,7 @@ class FrostToolQueryAssembleTest {
         properties.forEach((key, value) -> coreSettings.getSettings().set(String.valueOf(key), String.valueOf(value)));
         tool = new FrostToolQuery(new FrostToolHandler(
                 coreSettings,
-                new McpSettings(coreSettings.getSettings().getSubSettings(McpSettings.PREFIX_MCP))));
+                coreSettings.getMcpSettings()));
     }
 
     @Test
