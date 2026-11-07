@@ -54,8 +54,10 @@ public class McpSettings implements ConfigDefaults {
     public static final String TAG_MAX_TOP = "maxTop";
     @DefaultValueInt(1024 * 1024)
     public static final String TAG_MAX_RESULT_SIZE = "maxResultSize";
-    @DefaultValue("get,query,create,update,replace,delete")
+    @DefaultValue("get,query,create,update,replace,delete,subscribe,unsubscribe")
     public static final String TAG_ALLOW_TOOLS = "allowTools";
+    @DefaultValueInt(16)
+    public static final String TAG_MAX_SUBSCRIPTIONS_PER_SESSION = "maxSubscriptionsPerSession";
     @DefaultValueBoolean(false)
     public static final String TAG_REQUIRE_AUTHENTICATED = "auth.requireAuthenticated";
     @DefaultValue("")
@@ -80,6 +82,7 @@ public class McpSettings implements ConfigDefaults {
     private int maxRequestSize;
     private int keepAliveIntervalSec;
     private int sessionSweepIntervalSec;
+    private int maxSubscriptionsPerSession;
 
     public McpSettings(CoreSettings coreSettings, Settings settings) {
         if (settings == null) {
@@ -99,6 +102,7 @@ public class McpSettings implements ConfigDefaults {
         maxRequestSize = customSettings.getInt(TAG_MAX_REQUEST_SIZE, getClass());
         keepAliveIntervalSec = customSettings.getInt(TAG_KEEP_ALIVE_INTERVAL_SEC, getClass());
         sessionSweepIntervalSec = customSettings.getInt(TAG_SESSION_SWEEP_INTERVAL_SEC, getClass());
+        maxSubscriptionsPerSession = customSettings.getInt(TAG_MAX_SUBSCRIPTIONS_PER_SESSION, getClass());
         allowTools = new LinkedHashSet<>();
         for (String entry : customSettings.get(TAG_ALLOW_TOOLS, getClass()).split(",")) {
             final String name = entry.trim().toLowerCase();
@@ -173,6 +177,17 @@ public class McpSettings implements ConfigDefaults {
      */
     public int getSessionSweepIntervalSec() {
         return sessionSweepIntervalSec;
+    }
+
+    /**
+     * The maximum number of active subscriptions a single MCP session may
+     * hold. When the limit is reached further subscribe calls fail (default
+     * 16).
+     *
+     * @return the maximum number of subscriptions per MCP session.
+     */
+    public int getMaxSubscriptionsPerSession() {
+        return maxSubscriptionsPerSession;
     }
 
     /**
