@@ -48,6 +48,9 @@ class McpSettingsTest {
         assertEquals("", settings.getDefaultVersionName());
         assertEquals(100, settings.getMaxTop());
         assertEquals(1024 * 1024, settings.getMaxResultSize());
+        assertEquals(16 * 1024 * 1024, settings.getMaxRequestSize(), "SDK default request cap.");
+        assertEquals(30 * 60, settings.getKeepAliveIntervalSec());
+        assertEquals(30 * 60, settings.getSessionSweepIntervalSec());
         assertFalse(settings.isRequireAuthenticated());
         assertTrue(settings.isToolAllowed("frost_get"));
         assertTrue(settings.isToolAllowed("frost_query"));
@@ -82,5 +85,17 @@ class McpSettingsTest {
         final McpSettings settings = from(properties);
         assertEquals(1, settings.getEndpoints().size());
         assertEquals("http://mcp.example.com:8080/mcp", settings.getEndpoints().get(0));
+    }
+
+    @Test
+    void testTransportKnobs() {
+        final Properties properties = new Properties();
+        properties.put(McpSettings.PREFIX_MCP + McpSettings.TAG_MAX_REQUEST_SIZE, "2048");
+        properties.put(McpSettings.PREFIX_MCP + McpSettings.TAG_KEEP_ALIVE_INTERVAL_SEC, "60");
+        properties.put(McpSettings.PREFIX_MCP + McpSettings.TAG_SESSION_SWEEP_INTERVAL_SEC, "120");
+        final McpSettings settings = from(properties);
+        assertEquals(2048, settings.getMaxRequestSize());
+        assertEquals(60, settings.getKeepAliveIntervalSec());
+        assertEquals(120, settings.getSessionSweepIntervalSec());
     }
 }

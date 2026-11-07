@@ -467,6 +467,19 @@ the `settings-annotation` processor so they appear in generated docs):
 | `mcp.allowTools` | — | `get,query,create,update,replace,delete` | Comma-separated list of enabled tools; lets deployments expose a read-only MCP ("get,query") or a write MCP. |
 | `mcp.auth.requireAuthenticated` | boolean | false | When true, anonymous MCP sessions (unauthenticated principal) are rejected; default follows the container outcome like STA does. |
 | `mcp.exposedEndpoints` | string | (empty) | Comma-separated MCP endpoint URLs advertised in the index document `serverSettings` (next to the MQTT endpoints). Empty: not advertised. |
+| `mcp.maxRequestSize` | int (bytes) | 16777216 | Byte cap on a single MCP request (JSON-RPC message), mapped to the SDK transport's `maxRequestSize`. |
+| `mcp.keepAliveIntervalSec` | int (sec) | 1800 | Transport keep-alive interval, mapped to the SDK transport's `keepAliveInterval`. |
+| `mcp.sessionSweepIntervalSec` | int (sec) | 1800 | Stale-session sweep interval, mapped to the SDK transport's `sessionSweepInterval`. |
+
+The SDK has no string-keyed config interface like Moquette's `IConfig` (which
+`ConfigWrapper` bridges to `Settings` in the MQTT module); it is a fixed, typed
+builder. The complete set of *transport* builder options is therefore mapped
+one-to-one onto the `mcp.*` settings above — the whole option surface is
+admin-configurable in the ConfigWrapper spirit. The remaining builder knobs are
+either already wired (`serverInfo`, `instructions`, `tools`, `resources`,
+`resourceTemplates`, `jsonMapper`), auto-derived (`capabilities` from the
+registrations), server→client only (`requestTimeout`, 10 s, no sampling) or
+superseded by FROST's own auth filters (`securityValidator`, `httpHeaderValidator`).
 
 `McpSettings` lives in the Core settings package (`de.fraunhofer.iosb.ilt.frostserver.settings`),
 constructed by `CoreSettings.initChildSettings()` for every front-end process, mirroring
