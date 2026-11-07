@@ -188,7 +188,7 @@ which exposes the server to LLM agents. See the
 * **mcp.maxResultSize:** Default: `1048576` (1 MB)  
   The maximum result size in bytes the MCP interface will send to an agent. Larger
   answers are refused with a message instructing the agent to narrow the query.
-* **mcp.allowTools:** Default: `get,query,create,update,replace,delete`  
+* **mcp.allowTools:** Default: `get,query,create,update,replace,delete,subscribe,unsubscribe`  
   Comma-separated list of enabled tools. A read-only MCP server, for example, uses
   `get,query`. Tools not in the list are not advertised to clients.
 * **mcp.auth.requireAuthenticated:** Default: `false`  
@@ -207,6 +207,9 @@ which exposes the server to LLM agents. See the
   long-lived listening streams behind proxies.
 * **mcp.sessionSweepIntervalSec:** Default: `1800` (30 minutes)  
   The interval in seconds at which the transport removes stale MCP sessions.
+* **mcp.maxSubscriptionsPerSession:** Default: `16`  
+  The maximum number of active subscriptions per MCP session; further
+  `frost_subscribe` calls answer with status code 429.
 
 
 ## Persistence Settings

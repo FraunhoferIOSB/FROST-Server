@@ -21,6 +21,8 @@ import de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthFilter;
 import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakFilter;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.resource.FrostResourceHandler;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.NotificationSink;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostTool;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolCreate;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolDelete;
@@ -28,6 +30,8 @@ import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolGet;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolQuery;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolReplace;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolSubscribe;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolUnsubscribe;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.McpSdkWorkarounds;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
@@ -45,6 +49,7 @@ import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import jakarta.servlet.DispatcherType;
@@ -90,6 +95,7 @@ public class FrostMcpServer {
     private static final String INSTRUCTIONS = "Tools for the OGC SensorThings API. "
             + "Use frost_query for typed entity-set queries (results carry @iot.nextLink for paging) "
             + "and frost_get for arbitrary paths (deep paths, $value, index document). "
+            + "Use frost_subscribe to get change notifications as MCP logging notifications (logger 'frost') and frost_unsubscribe to end them. "
             + "Structural details are available as frost://index and frost://model resources.";
 
     private final CoreSettings coreSettings;
@@ -97,6 +103,7 @@ public class FrostMcpServer {
     private HTTPServer metricsServer;
     private Server jettyServer;
     private McpSyncServer mcpServer;
+    private FrostSubscriptionRegistry subscriptionRegistry;
     private Thread shutdownHook;
 
     private Class<? extends jakarta.servlet.Filter> authFilterClass;
@@ -241,8 +248,9 @@ public class FrostMcpServer {
     private McpSyncServer buildMcpServer(HttpServletStreamableServerTransportProvider transportProvider) {
         final FrostToolHandler toolHandler = new FrostToolHandler(coreSettings, mcpSettings);
         final FrostResourceHandler resourceHandler = new FrostResourceHandler(toolHandler);
+        subscriptionRegistry = new FrostSubscriptionRegistry(coreSettings, buildNotificationSink(transportProvider), McpSdkWorkarounds.sessionPresence(transportProvider));
 
-        final McpServerFeatures.SyncToolSpecification[] tools = collectTools(toolHandler);
+        final McpServerFeatures.SyncToolSpecification[] tools = collectTools(toolHandler, subscriptionRegistry);
         final McpServer.SyncSpecification<McpServer.StreamableSyncSpecification> specification = McpServer.sync(transportProvider)
                 .serverInfo("FROST-Server-MCP", GitVersionInfo.getBuildVersion())
                 .instructions(INSTRUCTIONS)
@@ -254,16 +262,30 @@ public class FrostMcpServer {
         return mcpServer;
     }
 
-    private McpServerFeatures.SyncToolSpecification[] collectTools(FrostToolHandler handler) {
+    private McpServerFeatures.SyncToolSpecification[] collectTools(FrostToolHandler handler, FrostSubscriptionRegistry registry) {
         return Stream.of(
                 toolSpec(handler, new FrostToolGet(handler)),
                 toolSpec(handler, new FrostToolQuery(handler)),
                 toolSpec(handler, new FrostToolCreate(handler)),
                 toolSpec(handler, new FrostToolUpdate(handler)),
                 toolSpec(handler, new FrostToolReplace(handler)),
-                toolSpec(handler, new FrostToolDelete(handler)))
+                toolSpec(handler, new FrostToolDelete(handler)),
+                toolSpec(handler, new FrostToolSubscribe(handler, registry)),
+                toolSpec(handler, new FrostToolUnsubscribe(handler, registry)))
                 .filter(Objects::nonNull)
                 .toArray(McpServerFeatures.SyncToolSpecification[]::new);
+    }
+
+    /**
+     * The production notification sink: subscription envelopes go out as
+     * MCP logging notifications via the transport provider.
+     *
+     * @param transportProvider The transport provider to deliver with.
+     * @return the sink.
+     */
+    private NotificationSink buildNotificationSink(HttpServletStreamableServerTransportProvider transportProvider) {
+        return (sessionId, notification) -> transportProvider.notifyClient(
+                sessionId, McpSchema.METHOD_NOTIFICATION_MESSAGE, notification);
     }
 
     /**
@@ -321,6 +343,9 @@ public class FrostMcpServer {
             Runtime.getRuntime().removeShutdownHook(shutdownHook);
         } catch (IllegalStateException ex) {
             LOGGER.trace("Already shutting down.", ex);
+        }
+        if (subscriptionRegistry != null) {
+            subscriptionRegistry.shutdown();
         }
         if (mcpServer != null) {
             mcpServer.close();
