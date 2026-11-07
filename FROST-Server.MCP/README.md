@@ -47,6 +47,9 @@ Results are plain data in `structuredContent` — no `outputSchema` is advertise
 | `mcp.allowTools` | `get,query,create,update,replace,delete` | Tool ACL (subset/expand as needed; e.g. read-only deployments: `allowTools=get,query`). |
 | `mcp.auth.requireAuthenticated` | `false` | Fail boot if no known auth provider could be resolved for `/mcp`. |
 | `mcp.exposedEndpoints` | (empty) | Comma-separated MCP endpoint URLs advertised in the index document `serverSettings` (next to the MQTT endpoints). Empty: not advertised. |
+| `mcp.maxRequestSize` | `16777216` | Byte cap on a single MCP request (JSON-RPC message); larger requests are rejected. |
+| `mcp.keepAliveIntervalSec` | `1800` | Transport keep-alive interval (seconds) for long-lived listening streams. |
+| `mcp.sessionSweepIntervalSec` | `1800` | Interval (seconds) at which stale MCP sessions are swept. |
 
 ## Deployment
 

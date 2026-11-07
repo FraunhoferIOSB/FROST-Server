@@ -60,6 +60,12 @@ public class McpSettings implements ConfigDefaults {
     public static final String TAG_REQUIRE_AUTHENTICATED = "auth.requireAuthenticated";
     @DefaultValue("")
     public static final String TAG_EXPOSED_MCP_ENDPOINTS = "exposedEndpoints";
+    @DefaultValueInt(16 * 1024 * 1024)
+    public static final String TAG_MAX_REQUEST_SIZE = "maxRequestSize";
+    @DefaultValueInt(30 * 60)
+    public static final String TAG_KEEP_ALIVE_INTERVAL_SEC = "keepAliveIntervalSec";
+    @DefaultValueInt(30 * 60)
+    public static final String TAG_SESSION_SWEEP_INTERVAL_SEC = "sessionSweepIntervalSec";
 
     private final Settings customSettings;
 
@@ -71,6 +77,9 @@ public class McpSettings implements ConfigDefaults {
     private Set<String> allowTools;
     private boolean requireAuthenticated;
     private List<String> endpoints = null;
+    private int maxRequestSize;
+    private int keepAliveIntervalSec;
+    private int sessionSweepIntervalSec;
 
     public McpSettings(CoreSettings coreSettings, Settings settings) {
         if (settings == null) {
@@ -87,6 +96,9 @@ public class McpSettings implements ConfigDefaults {
         maxTop = customSettings.getInt(TAG_MAX_TOP, getClass());
         maxResultSize = customSettings.getInt(TAG_MAX_RESULT_SIZE, getClass());
         requireAuthenticated = customSettings.getBoolean(TAG_REQUIRE_AUTHENTICATED, getClass());
+        maxRequestSize = customSettings.getInt(TAG_MAX_REQUEST_SIZE, getClass());
+        keepAliveIntervalSec = customSettings.getInt(TAG_KEEP_ALIVE_INTERVAL_SEC, getClass());
+        sessionSweepIntervalSec = customSettings.getInt(TAG_SESSION_SWEEP_INTERVAL_SEC, getClass());
         allowTools = new LinkedHashSet<>();
         for (String entry : customSettings.get(TAG_ALLOW_TOOLS, getClass()).split(",")) {
             final String name = entry.trim().toLowerCase();
@@ -131,6 +143,36 @@ public class McpSettings implements ConfigDefaults {
 
     public boolean isRequireAuthenticated() {
         return requireAuthenticated;
+    }
+
+    /**
+     * The maximum size, in bytes, of a single MCP request the server accepts
+     * (SDK default 16 MB). Larger requests are rejected by the transport.
+     *
+     * @return the maximum request size in bytes.
+     */
+    public int getMaxRequestSize() {
+        return maxRequestSize;
+    }
+
+    /**
+     * The interval, in seconds, of the transport keep-alive signal (SDK
+     * default 30 minutes). Only relevant for long-lived listening streams.
+     *
+     * @return the keep-alive interval in seconds.
+     */
+    public int getKeepAliveIntervalSec() {
+        return keepAliveIntervalSec;
+    }
+
+    /**
+     * The interval, in seconds, at which the transport sweeps stale sessions
+     * (SDK default 30 minutes).
+     *
+     * @return the session sweep interval in seconds.
+     */
+    public int getSessionSweepIntervalSec() {
+        return sessionSweepIntervalSec;
     }
 
     /**
