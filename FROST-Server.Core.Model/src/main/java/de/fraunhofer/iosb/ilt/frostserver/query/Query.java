@@ -748,10 +748,16 @@ public class Query {
                 } else {
                     firstDone = true;
                 }
-                if (inExpand) {
-                    sb.append(property.getName());
+                final String propertyName;
+                if (property == StandardProperties.EP_SELFLINK) {
+                    propertyName = getVersion().selfLinkName;
                 } else {
-                    sb.append(encoder.encode(property.getName()));
+                    propertyName = property.getName();
+                }
+                if (inExpand) {
+                    sb.append(propertyName);
+                } else {
+                    sb.append(encoder.encode(propertyName));
                 }
             }
         }
