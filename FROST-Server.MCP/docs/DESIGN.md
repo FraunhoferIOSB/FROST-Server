@@ -895,6 +895,14 @@ Class-level notes:
     unknown id), stop-after-unsubscribe, sink-failure session drop and missing-session
     registration drop. `McpSettingsTest` pins `mcp.maxSubscriptionsPerSession`
     (default 16) and the `subscribe`/`unsubscribe` entries of `mcp.allowTools`.
+    *SelfLink round-trips (implemented):* `SelfLinkSelectRoundTripTest` pins the
+    version-dependent name of the synthetic selfLink property in `$select` on all
+    four API versions (STA 1.1 `@iot.selfLink`, STA 2.0 and OData 4.01 `@id`,
+    OData 4.0 `@odata.id`): the re-rendered query string must use the version's own
+    name and re-parse on the same version (the MCP parse/serialise/parse pipeline
+    and the server's own nextLinks depend on this). A companion test asserts the
+    primary-key property (`@iot.id`, alias `id`) is a different property and keeps
+    its canonical name on every version.
  2. **Integration tests** (`FROST-Server.Tests`, Testcontainers Postgres as used today for
     `SQLjooq`): boot `FrostMcpServer` (with an in-memory or test DB) in the test JVM,
     drive it with the SDK's **MCP Java client** (`HttpClientStreamableHttpTransport`):
