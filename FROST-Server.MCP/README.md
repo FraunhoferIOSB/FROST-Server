@@ -127,10 +127,12 @@ System.out.println(result.structuredContent());
 
 ## Tests
 
-In-module unit tests (50) cover settings, JSON handling, tool handling (version
+In-module unit tests (52) cover settings, JSON handling, tool handling (version
 resolution, ACLs, permissions, query validation, result formation, byte cap),
 query assembly, the resource generators, and the subscription registry — against a
-compact local fake model (`TestModelMcp`). Integration tests live in
+compact local fake model (`TestModelMcp`). The version-dependent selfLink name in
+`$select` (`@iot.selfLink`, `@id`, `@odata.id`) is pinned by round-trip tests over
+all four API versions. Integration tests live in
 `FROST-Server.Tests` (`McpSmokeTest`, including a subscribe → notify → unsubscribe
 round-trip).
 
