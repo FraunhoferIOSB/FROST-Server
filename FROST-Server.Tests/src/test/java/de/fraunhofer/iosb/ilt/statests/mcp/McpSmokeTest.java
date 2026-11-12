@@ -92,7 +92,7 @@ public class McpSmokeTest extends AbstractTestClass {
         LOGGER.info("Connecting MCP client to {}", mcpUrl);
         mcpClient = McpClient.sync(
                 HttpClientStreamableHttpTransport.builder(mcpUrl).build())
-                .clientInfo(new McpSchema.Implementation("FROST-MCP-SmokeTest", "1.0.0"))
+                .clientInfo(McpSchema.Implementation.builder("FROST-MCP-SmokeTest", "1.0.0").build())
                 .loggingConsumer(loggingNotifications::add)
                 .build();
         mcpClient.initialize();
@@ -209,7 +209,7 @@ public class McpSmokeTest extends AbstractTestClass {
     public void testResources() {
         LOGGER.info("  testResources");
         ReadResourceResult index = mcpClient.readResource(
-                new McpSchema.ReadResourceRequest("frost://index"));
+                McpSchema.ReadResourceRequest.builder("frost://index").build());
         assertNotNull(index);
         assertFalse(index.contents().isEmpty(), "frost://index must yield content.");
         assertTrue(textOf(index).contains("Things"),
@@ -223,17 +223,17 @@ public class McpSmokeTest extends AbstractTestClass {
                 "The index document must advertise the MCP endpoint: " + serverSettings.getMcpUrl());
 
         ReadResourceResult model = mcpClient.readResource(
-                new McpSchema.ReadResourceRequest("frost://model"));
+                McpSchema.ReadResourceRequest.builder("frost://model").build());
         assertNotNull(model);
         assertTrue(textOf(model).contains("Things"), "The model resource must describe Things.");
 
         ReadResourceResult modelThings = mcpClient.readResource(
-                new McpSchema.ReadResourceRequest("frost://model/Things"));
+                McpSchema.ReadResourceRequest.builder("frost://model/Things").build());
         assertNotNull(modelThings);
         assertTrue(textOf(modelThings).contains("name"), "The Things model resource must list the name property.");
 
         ReadResourceResult sta = mcpClient.readResource(
-                new McpSchema.ReadResourceRequest("frost://sta/Things?$top=1"));
+                McpSchema.ReadResourceRequest.builder("frost://sta/Things?$top=1").build());
         assertNotNull(sta);
         assertFalse(sta.contents().isEmpty(), "frost://sta/Things must yield content.");
     }
@@ -245,7 +245,8 @@ public class McpSmokeTest extends AbstractTestClass {
         // MCP protocol error (-32602) instead of a tool result.
         Assertions.assertThrows(
                 McpError.class,
-                () -> mcpClient.callTool(new CallToolRequest("frost_get", Map.of("path", "NotAnEntitySet"))),
+                () -> mcpClient.callTool(CallToolRequest.builder("frost_get")
+                        .arguments(Map.of("path", "NotAnEntitySet")).build()),
                 "Calling with an invalid path must raise an MCP error.");
     }
 
@@ -303,7 +304,8 @@ public class McpSmokeTest extends AbstractTestClass {
         // other tools.
         Assertions.assertThrows(
                 McpError.class,
-                () -> mcpClient.callTool(new CallToolRequest("frost_subscribe", Map.of("path", "NotAnEntitySet"))),
+                () -> mcpClient.callTool(CallToolRequest.builder("frost_subscribe")
+                        .arguments(Map.of("path", "NotAnEntitySet")).build()),
                 "Subscribing to an invalid path must raise an MCP error.");
     }
 
@@ -342,7 +344,7 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     private CallToolResult callTool(String name, Map<String, Object> arguments) {
-        return mcpClient.callTool(new CallToolRequest(name, arguments));
+        return mcpClient.callTool(CallToolRequest.builder(name).arguments(arguments).build());
     }
 
     private static boolean isError(CallToolResult result) {
