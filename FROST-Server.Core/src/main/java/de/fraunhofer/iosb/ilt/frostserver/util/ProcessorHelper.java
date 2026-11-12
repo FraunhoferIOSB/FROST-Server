@@ -71,9 +71,12 @@ public class ProcessorHelper {
                     Thread.sleep(SHUTDOWN_WAIT_STEP_IN_MILLIS);
                     timeoutInMillis -= SHUTDOWN_WAIT_STEP_IN_MILLIS;
                 }
-                executorService.shutdownNow();
                 if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
                     LOGGER.debug("executoreService did not terminate in time");
+                }
+                List<Runnable> list = executorService.shutdownNow();
+                if (!list.isEmpty()) {
+                    LOGGER.warn("There were {} tasks left on the queue.", list.size());
                 }
             } catch (InterruptedException ie) {
                 executorService.shutdownNow();
