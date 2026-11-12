@@ -83,7 +83,9 @@ public class InternalMessageBus implements MessageBus, ConfigDefaults {
             Thread.currentThread().interrupt();
         }
         List<Runnable> list = entityChangedExecutorService.shutdownNow();
-        LOGGER.warn("There were {} messages left on the queue.", list.size());
+        if (!list.isEmpty()) {
+            LOGGER.warn("There were {} messages left on the queue.", list.size());
+        }
     }
 
     @Override
