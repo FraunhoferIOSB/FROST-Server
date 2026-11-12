@@ -22,9 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.fraunhofer.iosb.ilt.frostclient.json.SimpleJsonMapper;
+import de.fraunhofer.iosb.ilt.frostclient.utils.TypeReferencesHelper;
 import de.fraunhofer.iosb.ilt.statests.AbstractTestClass;
 import de.fraunhofer.iosb.ilt.statests.ServerVersion;
 import de.fraunhofer.iosb.ilt.statests.TestCore;
+import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
@@ -44,17 +47,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
 
 /**
  * Smoke test for the FROST MCP server: boots the stand-alone FrostMcpServer
  * alongside the regular HTTP/MQTT test servers (same database, no bus of its
  * own) and drives it with the MCP Java SDK client over the streamable-HTTP
  * transport: initialize handshake, tools/list, a full CRUD round-trip through
- * the frost_* tools, error mapping, the frost:// resources, and a
- * subscription round-trip with a logging-notification consumer.
+ * the frost_* tools, error mapping, the frost:// resources, and a subscription
+ * round-trip with a logging-notification consumer.
  */
 public class McpSmokeTest extends AbstractTestClass {
 
@@ -94,7 +99,12 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     @AfterAll
-    public static void disconnect() {
+    static void stats() {
+        cleanup();
+        HTTPMethods.expectStats("McpSmokeTest", 0, 1, 0, 0, 0);
+    }
+
+    public static void cleanup() {
         if (mcpClient != null) {
             mcpClient.close();
             mcpClient = null;
@@ -104,6 +114,7 @@ public class McpSmokeTest extends AbstractTestClass {
 
     @Test
     public void testInitializeHandshake() {
+        LOGGER.info("  testInitializeHandshake");
         // initialize() ran during setUpVersion; a working tools/list proves it.
         assertNotNull(mcpClient, "Client must be initialised.");
         McpSchema.ListToolsResult tools = mcpClient.listTools();
@@ -112,6 +123,7 @@ public class McpSmokeTest extends AbstractTestClass {
 
     @Test
     public void testToolsList() {
+        LOGGER.info("  testToolsList");
         List<Tool> tools = mcpClient.listTools().tools();
         Set<String> names = tools.stream().map(Tool::name).collect(Collectors.toSet());
         assertEquals(EXPECTED_TOOLS, names, "All eight generic tools must be listed.");
@@ -125,6 +137,7 @@ public class McpSmokeTest extends AbstractTestClass {
 
     @Test
     public void testCrudRoundTrip() {
+        LOGGER.info("  testCrudRoundTrip");
         // CREATE a Thing
         Map<String, Object> thing = new LinkedHashMap<>();
         thing.put("name", "MCP Smoke Test Thing");
@@ -194,6 +207,7 @@ public class McpSmokeTest extends AbstractTestClass {
 
     @Test
     public void testResources() {
+        LOGGER.info("  testResources");
         ReadResourceResult index = mcpClient.readResource(
                 new McpSchema.ReadResourceRequest("frost://index"));
         assertNotNull(index);
@@ -226,18 +240,18 @@ public class McpSmokeTest extends AbstractTestClass {
 
     @Test
     public void testInvalidPathBecomesProtocolError() {
+        LOGGER.info("  testInvalidPathBecomesProtocolError");
         // Invalid entity set name; rejected by the STA parser surfaces as an
         // MCP protocol error (-32602) instead of a tool result.
-        try {
-            mcpClient.callTool(new CallToolRequest("frost_get", Map.of("path", "NotAnEntitySet")));
-            throw new AssertionError("Calling with an invalid path must raise an MCP error.");
-        } catch (McpError ex) {
-            LOGGER.info("Expected MCP error for invalid path: {}", ex.getMessage());
-        }
+        Assertions.assertThrows(
+                McpError.class,
+                () -> mcpClient.callTool(new CallToolRequest("frost_get", Map.of("path", "NotAnEntitySet"))),
+                "Calling with an invalid path must raise an MCP error.");
     }
 
     @Test
     public void testSubscriptionRoundTrip() throws InterruptedException {
+        LOGGER.info("  testSubscriptionRoundTrip");
         loggingNotifications.clear();
 
         // Subscribe to Thing creations.
@@ -287,12 +301,10 @@ public class McpSmokeTest extends AbstractTestClass {
 
         // An invalid subscription path is an MCP protocol error, like the
         // other tools.
-        try {
-            mcpClient.callTool(new CallToolRequest("frost_subscribe", Map.of("path", "NotAnEntitySet")));
-            throw new AssertionError("Subscribing to an invalid path must raise an MCP error.");
-        } catch (McpError ex) {
-            LOGGER.info("Expected MCP error for invalid subscription path: {}", ex.getMessage());
-        }
+        Assertions.assertThrows(
+                McpError.class,
+                () -> mcpClient.callTool(new CallToolRequest("frost_subscribe", Map.of("path", "NotAnEntitySet"))),
+                "Subscribing to an invalid path must raise an MCP error.");
     }
 
     private Map<String, Object> awaitNotification(long subscriptionId) throws InterruptedException {
@@ -310,9 +322,10 @@ public class McpSmokeTest extends AbstractTestClass {
 
     private static Map<String, Object> parseEnvelope(String json) {
         try {
-            return new com.fasterxml.jackson.databind.ObjectMapper().readValue(
-                    json, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
-        } catch (Exception ex) {
+            return SimpleJsonMapper.getSimpleObjectMapper().readValue(
+                    json,
+                    TypeReferencesHelper.TYPE_REFERENCE_MAP);
+        } catch (JacksonException ex) {
             throw new AssertionError("The notification envelope must be valid JSON: " + json, ex);
         }
     }
