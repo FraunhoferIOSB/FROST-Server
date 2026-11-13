@@ -31,14 +31,15 @@ import reactor.core.publisher.Mono;
  * the server keeps working when the SDK internals change: none of these may
  * fail the boot, and each falls back to the previous behaviour.
  *
- * <p>Known SDK issue: the server registers no handler for the
+ * <p>
+ * Known SDK issue: the server registers no handler for the
  * "notifications/cancelled" client notification, so every cancelled tool call
  * logs a WARN ("No handler registered for notification method:
  * notifications/cancelled"). The handler map built by
  * McpAsyncServer.prepareNotificationHandlers is a plain HashMap that the
  * DefaultMcpStreamableServerSessionFactory shares, by reference, with every
- * session it creates. Installing a no-op handler in that map therefore
- * covers all future sessions of the transport provider.</p>
+ * session it creates. Installing a no-op handler in that map therefore covers
+ * all future sessions of the transport provider.</p>
  */
 public final class McpSdkWorkarounds {
 
@@ -55,12 +56,12 @@ public final class McpSdkWorkarounds {
     }
 
     /**
-     * Installs a no-op handler for the "notifications/cancelled"
-     * notification in the transport provider's session factory, silencing
-     * the benign WARN the SDK logs for every client-side cancellation.
-     * Call after building the McpServer (the factory is wired during
-     * build()), before serving requests. Best-effort: on any reflection
-     * failure the server runs unchanged, only the WARN stays.
+     * Installs a no-op handler for the "notifications/cancelled" notification
+     * in the transport provider's session factory, silencing the benign WARN
+     * the SDK logs for every client-side cancellation. Call after building the
+     * McpServer (the factory is wired during build()), before serving requests.
+     * Best-effort: on any reflection failure the server runs unchanged, only
+     * the WARN stays.
      *
      * @param provider The transport provider the McpServer was built on. May
      * not be null.
@@ -83,20 +84,20 @@ public final class McpSdkWorkarounds {
                 return Mono.empty();
             });
             LOGGER.debug("Installed no-op handler for {}.", METHOD_NOTIFICATION_CANCELLED);
-        } catch (Throwable ex) {
+        } catch (ReflectiveOperationException | RuntimeException ex) {
             LOGGER.warn("Could not install the notifications/cancelled handler (SDK internals changed?): {}", ex.getMessage());
             LOGGER.trace("Failure details:", ex);
         }
     }
 
     /**
-     * A predicate telling whether the transport provider currently knows an
-     * MCP session id. Used to avoid pushing notifications into dead
-     * sessions; on any reflection failure the predicate always says true, so
-     * notifications are still attempted and the send-failure path cleans up.
+     * A predicate telling whether the transport provider currently knows an MCP
+     * session id. Used to avoid pushing notifications into dead sessions; on
+     * any reflection failure the predicate always says true, so notifications
+     * are still attempted and the send-failure path cleans up.
      *
-     * @param provider The transport provider the McpServer was built on.
-     * May not be null.
+     * @param provider The transport provider the McpServer was built on. May
+     * not be null.
      * @return a session-presence predicate, never null.
      */
     public static Predicate<String> sessionPresence(HttpServletStreamableServerTransportProvider provider) {

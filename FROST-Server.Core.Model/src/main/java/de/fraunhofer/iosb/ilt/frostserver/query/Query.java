@@ -736,29 +736,30 @@ public class Query {
     }
 
     private void addSelectToUrl(StringBuilder sb, char separator, boolean inExpand, Encoder encoder) {
-        if (!select.isEmpty()) {
-            sb.append(separator).append("$select=");
-            if (isSelectDistinct()) {
-                sb.append("distinct:");
+        if (select.isEmpty()) {
+            return;
+        }
+        sb.append(separator).append("$select=");
+        if (isSelectDistinct()) {
+            sb.append("distinct:");
+        }
+        boolean firstDone = false;
+        for (Property property : select) {
+            if (firstDone) {
+                sb.append(",");
+            } else {
+                firstDone = true;
             }
-            boolean firstDone = false;
-            for (Property property : select) {
-                if (firstDone) {
-                    sb.append(",");
-                } else {
-                    firstDone = true;
-                }
-                final String propertyName;
-                if (property == StandardProperties.EP_SELFLINK) {
-                    propertyName = getVersion().selfLinkName;
-                } else {
-                    propertyName = property.getName();
-                }
-                if (inExpand) {
-                    sb.append(propertyName);
-                } else {
-                    sb.append(encoder.encode(propertyName));
-                }
+            final String propertyName;
+            if (property == StandardProperties.EP_SELFLINK) {
+                propertyName = getVersion().selfLinkName;
+            } else {
+                propertyName = property.getName();
+            }
+            if (inExpand) {
+                sb.append(propertyName);
+            } else {
+                sb.append(encoder.encode(propertyName));
             }
         }
     }

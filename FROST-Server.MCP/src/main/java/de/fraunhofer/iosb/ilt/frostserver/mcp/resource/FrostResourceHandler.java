@@ -36,13 +36,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The frost:// resources: the STA index document, the generated model
- * overview, per-entity-type model details and live STA reads. Resource reads
- * execute with the session principal's rights, exactly like tools; error
- * outcomes and over-size results surface as JSON error documents in the
- * resource text.
+ * The frost:// resources: the STA index document, the generated model overview,
+ * per-entity-type model details and live STA reads. Resource reads execute with
+ * the session principal's rights, exactly like tools; error outcomes and
+ * over-size results surface as JSON error documents in the resource text.
  */
 public class FrostResourceHandler {
+
+    private static final String ANONYMOUS_ACCESS_NOT_ALLOWED = "Anonymous access is not allowed.";
+    private static final String READ_PERMISSION_DENIED = "Read permission denied.";
 
     /**
      * URI of the index resource.
@@ -82,9 +84,7 @@ public class FrostResourceHandler {
      * @return the sync resource specification.
      */
     public McpServerFeatures.SyncResourceSpecification indexSpecification() {
-        final McpSchema.Resource resource = McpSchema.Resource.builder()
-                .uri(URI_INDEX)
-                .name("STA index document")
+        final McpSchema.Resource resource = McpSchema.Resource.builder(URI_INDEX, "STA index document")
                 .description("The SensorThings API index document: entity set URLs, server settings, conformance list.")
                 .mimeType(MIME_JSON)
                 .build();
@@ -97,9 +97,7 @@ public class FrostResourceHandler {
      * @return the sync resource specification.
      */
     public McpServerFeatures.SyncResourceSpecification modelSpecification() {
-        final McpSchema.Resource resource = McpSchema.Resource.builder()
-                .uri(URI_MODEL)
-                .name("STA model overview")
+        final McpSchema.Resource resource = McpSchema.Resource.builder(URI_MODEL, "STA model overview")
                 .description("The generated model overview: entity types with properties and navigation properties.")
                 .mimeType(MIME_JSON)
                 .build();
@@ -112,9 +110,7 @@ public class FrostResourceHandler {
      * @return the sync resource template specification.
      */
     public McpServerFeatures.SyncResourceTemplateSpecification modelSetSpecification() {
-        final McpSchema.ResourceTemplate template = McpSchema.ResourceTemplate.builder()
-                .uriTemplate(URI_TEMPLATE_MODEL_SET)
-                .name("STA entity model")
+        final McpSchema.ResourceTemplate template = McpSchema.ResourceTemplate.builder(URI_TEMPLATE_MODEL_SET, "STA entity model")
                 .description("Model detail for one entity set: properties, navigation properties, key.")
                 .mimeType(MIME_JSON)
                 .build();
@@ -127,9 +123,7 @@ public class FrostResourceHandler {
      * @return the sync resource template specification.
      */
     public McpServerFeatures.SyncResourceTemplateSpecification staSpecification() {
-        final McpSchema.ResourceTemplate template = McpSchema.ResourceTemplate.builder()
-                .uriTemplate(URI_TEMPLATE_STA)
-                .name("Live STA resource")
+        final McpSchema.ResourceTemplate template = McpSchema.ResourceTemplate.builder(URI_TEMPLATE_STA, "Live STA resource")
                 .description("Live read of a STA path with the MCP paging caps applied, e.g. frost://sta/Things(1).")
                 .mimeType(MIME_JSON)
                 .build();
@@ -146,7 +140,7 @@ public class FrostResourceHandler {
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
             return textResult(request.uri(), errorJson(readGate,
-                    readGate == 401 ? "Anonymous access is not allowed." : "Read permission denied."));
+                    readGate == 401 ? ANONYMOUS_ACCESS_NOT_ALLOWED : READ_PERMISSION_DENIED));
         }
         final String json = modelCache.computeIfAbsent(URI_MODEL, key -> modelGenerator.generateModel());
         return textResult(request.uri(), json);
@@ -161,7 +155,7 @@ public class FrostResourceHandler {
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
             return textResult(request.uri(), errorJson(readGate,
-                    readGate == 401 ? "Anonymous access is not allowed." : "Read permission denied."));
+                    readGate == 401 ? ANONYMOUS_ACCESS_NOT_ALLOWED : READ_PERMISSION_DENIED));
         }
         final String json = modelGenerator.generateEntityType(entitySet);
         if (json == null) {
@@ -182,12 +176,11 @@ public class FrostResourceHandler {
 
     /**
      * Splits a frost://sta/ target into its STA path and query parts. The
-     * template URI may carry a query part, e.g. frost://sta/Things?$top=1 —
-     * it is split at the first '?'. Package-private for unit testing.
+     * template URI may carry a query part, e.g. frost://sta/Things?$top=1 — it
+     * is split at the first '?'. Package-private for unit testing.
      *
      * @param staPath The target under frost://sta/, after the prefix.
-     * @return a two-element array {path, query}; the query is null when
-     * absent.
+     * @return a two-element array {path, query}; the query is null when absent.
      */
     static String[] splitStaTarget(String staPath) {
         final int queryStart = staPath.indexOf('?');
@@ -246,7 +239,7 @@ public class FrostResourceHandler {
         final PrincipalExtended principal = handler.principalFrom(exchange);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
-            return errorJson(readGate, readGate == 401 ? "Anonymous access is not allowed." : "Read permission denied.");
+            return errorJson(readGate, readGate == 401 ? ANONYMOUS_ACCESS_NOT_ALLOWED : READ_PERMISSION_DENIED);
         }
         final Version version = handler.resolveVersion(null);
         final var queryDefaults = handler.getCoreSettings().getQueryDefaults().copy();
@@ -283,8 +276,11 @@ public class FrostResourceHandler {
     }
 
     private McpSchema.ReadResourceResult textResult(String uri, String text) {
-        return new McpSchema.ReadResourceResult(List.of(
-                new TextResourceContents(uri, MIME_JSON, text)));
+        final List<McpSchema.ResourceContents> contents = List.of(
+                TextResourceContents.builder(uri, text)
+                        .mimeType(MIME_JSON)
+                        .build());
+        return McpSchema.ReadResourceResult.builder(contents).build();
     }
 
 }

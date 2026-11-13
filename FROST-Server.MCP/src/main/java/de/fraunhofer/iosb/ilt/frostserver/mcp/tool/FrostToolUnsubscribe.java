@@ -17,6 +17,17 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_INTEGER;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolSubscribe.KEY_SUBSCRIPTION_ID;
+
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
@@ -28,6 +39,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The frost_unsubscribe tool: removes one subscription (by id) or all
@@ -59,17 +71,16 @@ public class FrostToolUnsubscribe implements FrostTool {
      * @return the JSON schema map.
      */
     public Map<String, Object> inputSchema() {
-        return Map.of(
-                "type", "object",
-                "required", List.of(),
-                "properties", Map.of(
-                        "subscriptionId", Map.of(
-                                "type", "integer",
-                                "description", "The subscription id to remove, as returned by frost_subscribe. Omit to remove all subscriptions of this session."),
-                        "version", Map.of(
-                                "type", "string",
-                                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version.")),
-                "additionalProperties", false);
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(),
+                KEY_PROPERTIES, Map.of(
+                        KEY_SUBSCRIPTION_ID, Map.of(
+                                KEY_TYPE, TYPE_INTEGER,
+                                KEY_DESCRIPTION, "The subscription id to remove, as returned by frost_subscribe. Omit to remove all subscriptions of this session."),
+                        KEY_VERSION, Map.of(
+                                KEY_TYPE, TYPE_STRING,
+                                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version.")),
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -77,12 +88,11 @@ public class FrostToolUnsubscribe implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
                 .title("Unsubscribe from entity changes")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .readOnlyHint(Boolean.TRUE)
                         .idempotentHint(Boolean.FALSE)
@@ -101,8 +111,8 @@ public class FrostToolUnsubscribe implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final Integer subscriptionId = FrostToolGet.intArg(arguments, "subscriptionId");
-        final String versionName = FrostToolGet.stringArg(arguments, "version");
+        final Optional<Integer> subscriptionId = FrostToolGet.intArg(arguments, KEY_SUBSCRIPTION_ID);
+        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
@@ -112,11 +122,11 @@ public class FrostToolUnsubscribe implements FrostTool {
             throw FrostToolHandler.invalidParams("Subscriptions need a session; no session id on this exchange.");
         }
         final String sessionId = exchange.sessionId();
-        if (subscriptionId != null && registry.subscriptionIds(sessionId).contains(subscriptionId.longValue())) {
-            final int removed = registry.unsubscribe(sessionId, subscriptionId.longValue());
+        if (subscriptionId.isPresent() && registry.subscriptionIds(sessionId).contains(subscriptionId.get().longValue())) {
+            final int removed = registry.unsubscribe(sessionId, subscriptionId.get().longValue());
             return result(removed);
         }
-        if (subscriptionId == null) {
+        if (subscriptionId.isEmpty()) {
             return result(registry.unsubscribe(sessionId, null));
         }
         final ServiceResponseDefault response = new ServiceResponseDefault(404, "No subscription with id " + subscriptionId + " in this session.");
