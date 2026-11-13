@@ -17,6 +17,29 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_COUNT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ENTITY_SET;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ENUM;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_EXPAND;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_FILTER;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ITEMS;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_MINIMUM;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ORDERBY;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_SELECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_SKIP;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TOP;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_ARRAY;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_BOOLEAN;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_INTEGER;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
@@ -31,6 +54,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The frost_query tool: a structured, LLM-friendly entity-set query. Typed
@@ -64,42 +88,43 @@ public class FrostToolQuery implements FrostTool {
      */
     public Map<String, Object> inputSchema() {
         final Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("entitySet", Map.of(
-                "type", "string",
-                "enum", handler.entitySetNames(),
-                "description", "The entity set to query."));
-        properties.put("filter", Map.of(
-                "type", "string",
-                "description", "STA $filter expression, without the '$filter=' prefix. Example: 'properties/temperature gt 20 and phenomenonTime gt 2026-01-01T00:00:00Z'."));
-        properties.put("select", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "description", "Properties for $select; '@id' allowed."));
-        properties.put("expand", Map.of(
-                "type", "array",
-                "items", Map.of("type", "string"),
-                "description", "$expand paths, e.g. 'Datastream', 'Things($select=id,name)'."));
-        properties.put("orderby", Map.of(
-                "type", "string",
-                "description", "STA $orderby expression, e.g. 'phenomenonTime desc'."));
-        properties.put("top", Map.of(
-                "type", "integer",
-                "minimum", 1,
-                "description", "Page size. Clamped to the MCP maximum (mcp.maxTop)."));
-        properties.put("skip", Map.of(
-                "type", "integer",
-                "minimum", 0));
-        properties.put("count", Map.of(
-                "type", "boolean",
-                "description", "Request @iot.count total."));
-        properties.put("version", Map.of(
-                "type", "string",
-                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version."));
-        return Map.of(
-                "type", "object",
-                "required", List.of("entitySet"),
-                "properties", properties,
-                "additionalProperties", false);
+        properties.put(KEY_ENTITY_SET, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_ENUM, handler.entitySetNames(),
+                KEY_DESCRIPTION, "The entity set to query."));
+        properties.put(KEY_FILTER, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "STA $filter expression, without the '$filter=' prefix. Example: 'properties/temperature gt 20 and phenomenonTime gt 2026-01-01T00:00:00Z'."));
+        properties.put(KEY_SELECT, Map.of(
+                KEY_TYPE, TYPE_ARRAY,
+                KEY_ITEMS, Map.of(
+                        KEY_TYPE, TYPE_STRING),
+                KEY_DESCRIPTION, "Properties for $select; '@id' allowed."));
+        properties.put(KEY_EXPAND, Map.of(
+                KEY_TYPE, TYPE_ARRAY,
+                KEY_ITEMS, Map.of(
+                        KEY_TYPE, TYPE_STRING),
+                KEY_DESCRIPTION, "$expand paths, e.g. 'Datastream', 'Things($select=id,name)'."));
+        properties.put(KEY_ORDERBY, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "STA $orderby expression, e.g. 'phenomenonTime desc'."));
+        properties.put(KEY_TOP, Map.of(
+                KEY_TYPE, TYPE_INTEGER,
+                KEY_MINIMUM, 1,
+                KEY_DESCRIPTION, "Page size. Clamped to the MCP maximum (mcp.maxTop)."));
+        properties.put(KEY_SKIP, Map.of(
+                KEY_TYPE, TYPE_INTEGER,
+                KEY_MINIMUM, 0));
+        properties.put(KEY_COUNT, Map.of(
+                KEY_TYPE, TYPE_BOOLEAN,
+                KEY_DESCRIPTION, "Request @iot.count total."));
+        properties.put(KEY_VERSION, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version."));
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_ENTITY_SET),
+                KEY_PROPERTIES, properties,
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -107,12 +132,11 @@ public class FrostToolQuery implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
                 .title("Query an entity set")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .readOnlyHint(Boolean.TRUE)
                         .idempotentHint(Boolean.TRUE)
@@ -134,15 +158,15 @@ public class FrostToolQuery implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String entitySet = FrostToolGet.requireStringArg(arguments, "entitySet");
-        final String filter = FrostToolGet.stringArg(arguments, "filter");
-        final List<String> select = FrostToolGet.stringListArg(arguments, "select");
-        final List<String> expand = FrostToolGet.stringListArg(arguments, "expand");
-        final String orderby = FrostToolGet.stringArg(arguments, "orderby");
-        final Integer top = FrostToolGet.intArg(arguments, "top");
-        final Integer skip = FrostToolGet.intArg(arguments, "skip");
-        final Boolean count = FrostToolGet.boolArg(arguments, "count");
-        final String versionName = FrostToolGet.stringArg(arguments, "version");
+        final String entitySet = FrostToolGet.requireStringArg(arguments, KEY_ENTITY_SET);
+        final String filter = FrostToolGet.stringArg(arguments, KEY_FILTER);
+        final List<String> select = FrostToolGet.stringListArg(arguments, KEY_SELECT);
+        final List<String> expand = FrostToolGet.stringListArg(arguments, KEY_EXPAND);
+        final String orderby = FrostToolGet.stringArg(arguments, KEY_ORDERBY);
+        final Optional<Integer> top = FrostToolGet.intArg(arguments, KEY_TOP);
+        final Optional<Integer> skip = FrostToolGet.intArg(arguments, KEY_SKIP);
+        final Optional<Boolean> count = FrostToolGet.boolArg(arguments, KEY_COUNT);
+        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
 
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
@@ -181,20 +205,20 @@ public class FrostToolQuery implements FrostTool {
      * @return the query string, or null when no options are present.
      */
     String assembleQuery(String filter, List<String> select, List<String> expand,
-            String orderby, Integer top, Integer skip, Boolean count) {
+            String orderby, Optional<Integer> top, Optional<Integer> skip, Optional<Boolean> count) {
         final StringBuilder sb = new StringBuilder();
         appendOption(sb, "$filter", filter);
         appendOption(sb, "$select", joinList(select));
         appendOption(sb, "$expand", joinList(expand));
         appendOption(sb, "$orderby", orderby);
-        if (top != null) {
-            appendOption(sb, "$top", String.valueOf(top));
+        if (top.isPresent()) {
+            appendOption(sb, "$top", top.get().toString());
         }
-        if (skip != null) {
-            appendOption(sb, "$skip", String.valueOf(skip));
+        if (skip.isPresent()) {
+            appendOption(sb, "$skip", skip.get().toString());
         }
-        if (count != null) {
-            appendOption(sb, "$count", String.valueOf(count));
+        if (count.isPresent()) {
+            appendOption(sb, "$count", count.get().toString());
         }
         return sb.isEmpty() ? null : sb.toString();
     }

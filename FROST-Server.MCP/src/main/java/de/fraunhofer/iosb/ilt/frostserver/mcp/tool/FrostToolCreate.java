@@ -17,6 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DEFAULT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ENTITY;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ENUM;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PREFER;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
@@ -35,8 +49,8 @@ import java.util.Map;
 /**
  * The frost_create tool: POSTs a new entity (or deep insert) to an entity set.
  * The prefer argument maps to the STA Prefer header semantics: 'minimal'
- * returns only the new @iot.id, 'representation' the full created entity
- * ( honoured by STA v2; v1 always creates with an empty body, like HTTP).
+ * returns only the new @iot.id, 'representation' the full created entity (
+ * honoured by STA v2; v1 always creates with an empty body, like HTTP).
  */
 public class FrostToolCreate implements FrostTool {
 
@@ -63,25 +77,24 @@ public class FrostToolCreate implements FrostTool {
      */
     public Map<String, Object> inputSchema() {
         final Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("path", Map.of(
-                "type", "string",
-                "description", "Target entity set, optionally nested under an entity. Examples: 'Things', 'Things(1)/HistoricalLocations', 'Datastreams(3)/Observations'."));
-        properties.put("entity", Map.of(
-                "type", "object",
-                "description", "The entity to create, as STA JSON. Required/nullable/read-only rules and navigation by @id link are validated by the server (EntityType.validateCreate)."));
-        properties.put("prefer", Map.of(
-                "type", "string",
-                "enum", List.of(Constants.VALUE_RETURN_REPRESENTATION, Constants.VALUE_RETURN_MINIMAL),
-                "default", Constants.VALUE_RETURN_REPRESENTATION,
-                "description", "'minimal' returns only the new @iot.id; 'representation' returns the full created entity."));
-        properties.put("version", Map.of(
-                "type", "string",
-                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version."));
-        return Map.of(
-                "type", "object",
-                "required", List.of("path", "entity"),
-                "properties", properties,
-                "additionalProperties", false);
+        properties.put(KEY_PATH, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "Target entity set, optionally nested under an entity. Examples: 'Things', 'Things(1)/HistoricalLocations', 'Datastreams(3)/Observations'."));
+        properties.put(KEY_ENTITY, Map.of(
+                KEY_TYPE, TYPE_OBJECT,
+                KEY_DESCRIPTION, "The entity to create, as STA JSON. Required/nullable/read-only rules and navigation by @id link are validated by the server (EntityType.validateCreate)."));
+        properties.put(KEY_PREFER, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_ENUM, List.of(Constants.VALUE_RETURN_REPRESENTATION, Constants.VALUE_RETURN_MINIMAL),
+                KEY_DEFAULT, Constants.VALUE_RETURN_REPRESENTATION,
+                KEY_DESCRIPTION, "'minimal' returns only the new @iot.id; 'representation' returns the full created entity."));
+        properties.put(KEY_VERSION, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version."));
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_PATH, KEY_ENTITY),
+                KEY_PROPERTIES, properties,
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -89,12 +102,11 @@ public class FrostToolCreate implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
                 .title("Create a new entity")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .destructiveHint(Boolean.FALSE)
                         .idempotentHint(Boolean.FALSE)
@@ -115,12 +127,12 @@ public class FrostToolCreate implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = FrostToolGet.requireStringArg(arguments, "path");
-        final Object entity = arguments.get("entity");
+        final String path = FrostToolGet.requireStringArg(arguments, KEY_PATH);
+        final Object entity = arguments.get(KEY_ENTITY);
         if (!(entity instanceof Map)) {
             throw FrostToolHandler.invalidParams("Missing required argument 'entity' (must be a JSON object).");
         }
-        final String prefer = FrostToolGet.stringArg(arguments, "prefer");
+        final String prefer = FrostToolGet.stringArg(arguments, KEY_PREFER);
         final String versionName = FrostToolGet.stringArg(arguments, "version");
         final String entityJson = StaJsonHelper.writeValueAsString(entity);
 

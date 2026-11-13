@@ -17,6 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DEFAULT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_QUERY;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.query.QueryDefaults;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
@@ -30,12 +42,13 @@ import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * The frost_get tool: reads any STA path with optional raw query options.
- * The path/query are validated with the STA parsers (parse failures surface
- * as MCP protocol errors), the MCP paging/count caps are applied, and the
- * request is executed against the FROST core Service.
+ * The frost_get tool: reads any STA path with optional raw query options. The
+ * path/query are validated with the STA parsers (parse failures surface as MCP
+ * protocol errors), the MCP paging/count caps are applied, and the request is
+ * executed against the FROST core Service.
  */
 public class FrostToolGet implements FrostTool {
 
@@ -63,19 +76,20 @@ public class FrostToolGet implements FrostTool {
      * @return the JSON schema map.
      */
     public Map<String, Object> inputSchema() {
-        return Map.of(
-                "type", "object",
-                "required", List.of("path"),
-                "properties", Map.of(
-                        "path", Map.of("type", "string", "description", PATH_DESCRIPTION),
-                        "query", Map.of(
-                                "type", "string",
-                                "description", "Raw STA query options, without leading '?'. Example: '$filter=properties/temperature gt 20 and phenomenonTime gt 2026-01-01T00:00:00Z&$orderby=phenomenonTime desc&$top=5&$select=id,result,phenomenonTime'. Validated by the STA query parser.",
-                                "default", ""),
-                        "version", Map.of(
-                                "type", "string",
-                                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version.")),
-                "additionalProperties", false);
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_PATH),
+                KEY_PROPERTIES, Map.of(
+                        KEY_PATH, Map.of(
+                                KEY_TYPE, TYPE_STRING,
+                                KEY_DESCRIPTION, PATH_DESCRIPTION),
+                        KEY_QUERY, Map.of(
+                                KEY_TYPE, TYPE_STRING,
+                                KEY_DESCRIPTION, "Raw STA query options, without leading '?'. Example: '$filter=properties/temperature gt 20 and phenomenonTime gt 2026-01-01T00:00:00Z&$orderby=phenomenonTime desc&$top=5&$select=id,result,phenomenonTime'. Validated by the STA query parser.",
+                                KEY_DEFAULT, ""),
+                        KEY_VERSION, Map.of(
+                                KEY_TYPE, TYPE_STRING,
+                                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version.")),
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -83,12 +97,11 @@ public class FrostToolGet implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
                 .title("Read a STA resource")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .readOnlyHint(Boolean.TRUE)
                         .idempotentHint(Boolean.TRUE)
@@ -112,9 +125,9 @@ public class FrostToolGet implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = stringArg(arguments, "path");
-        final String rawQuery = stringArg(arguments, "query");
-        final String versionName = stringArg(arguments, "version");
+        final String path = stringArg(arguments, KEY_PATH);
+        final String rawQuery = stringArg(arguments, KEY_QUERY);
+        final String versionName = stringArg(arguments, KEY_VERSION);
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
@@ -163,33 +176,33 @@ public class FrostToolGet implements FrostTool {
         throw FrostToolHandler.invalidParams("Argument '" + name + "' must be an array of strings.");
     }
 
-    static Integer intArg(Map<String, Object> arguments, String name) {
+    static Optional<Integer> intArg(Map<String, Object> arguments, String name) {
         final Object value = arguments.get(name);
         if (value == null) {
-            return null;
+            return Optional.empty();
         }
         if (value instanceof Integer number) {
-            return number;
+            return Optional.of(number);
         }
         if (value instanceof Number number) {
-            return number.intValue();
+            return Optional.of(number.intValue());
         }
         try {
-            return Integer.valueOf(String.valueOf(value));
+            return Optional.of(Integer.valueOf(String.valueOf(value)));
         } catch (NumberFormatException ex) {
             throw FrostToolHandler.invalidParams("Argument '" + name + "' must be an integer.");
         }
     }
 
-    static Boolean boolArg(Map<String, Object> arguments, String name) {
+    static Optional<Boolean> boolArg(Map<String, Object> arguments, String name) {
         final Object value = arguments.get(name);
         if (value == null) {
-            return null;
+            return Optional.empty();
         }
         if (value instanceof Boolean bool) {
-            return bool;
+            return Optional.of(bool);
         }
-        return Boolean.valueOf(String.valueOf(value));
+        return Optional.of(Boolean.valueOf(String.valueOf(value)));
     }
 
 }
