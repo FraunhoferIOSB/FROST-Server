@@ -17,6 +17,8 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.property.SpecialNames.AT_IOT_COUNT;
+
 import de.fraunhofer.iosb.ilt.frostserver.json.serialize.JsonWriter;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
@@ -68,8 +70,39 @@ import tools.jackson.databind.JsonNode;
  */
 public class FrostToolHandler {
 
+    public static final String KEY_ADDITIONAL_PROPERTIES = "additionalProperties";
+    public static final String KEY_CODE = "code";
+    public static final String KEY_COUNT = "count";
+    public static final String KEY_DEFAULT = "default";
+    public static final String KEY_DESCRIPTION = "description";
+    public static final String KEY_ENTITY = "entity";
+    public static final String KEY_ENTITY_SET = "entitySet";
+    public static final String KEY_ENUM = "enum";
+    public static final String KEY_EXPAND = "expand";
+    public static final String KEY_FILTER = "filter";
+    public static final String KEY_ITEMS = "items";
+    public static final String KEY_MESSAGE = "message";
+    public static final String KEY_MINIMUM = "minimum";
+    public static final String KEY_ORDERBY = "orderby";
+    public static final String KEY_PATH = "path";
+    public static final String KEY_PREFER = "prefer";
+    public static final String KEY_QUERY = "query";
+    public static final String KEY_PROPERTIES = "properties";
+    public static final String KEY_REQUIRED = "required";
+    public static final String KEY_SELECT = "select";
+    public static final String KEY_SKIP = "skip";
+    public static final String KEY_STATUS_CODE = "statusCode";
+    public static final String KEY_TOP = "top";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_VERSION = "version";
+
+    public static final String TYPE_ARRAY = "array";
+    public static final String TYPE_BOOLEAN = "boolean";
+    public static final String TYPE_INTEGER = "integer";
+    public static final String TYPE_OBJECT = "object";
+    public static final String TYPE_STRING = "string";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FrostToolHandler.class);
-    private static final Logger AUDIT_LOG = LoggerFactory.getLogger("de.fraunhofer.iosb.ilt.frostserver.mcp.audit");
 
     private static final String LABEL_TOOL = "tool";
     private static final String LABEL_OUTCOME = "outcome";
@@ -225,8 +258,8 @@ public class FrostToolHandler {
     }
 
     /**
-     * The coarse read gate, mirroring the MQTT adapter: the principal must
-     * have the read or admin role; anonymous principals are only allowed when
+     * The coarse read gate, mirroring the MQTT adapter: the principal must have
+     * the read or admin role; anonymous principals are only allowed when
      * anonymous read is enabled in the settings.
      *
      * @param principal The principal making the call.
@@ -270,15 +303,15 @@ public class FrostToolHandler {
     /**
      * Validates path and query with the STA parsers, applies the MCP paging and
      * count caps to entity-set reads. Parse failures surface as MCP protocol
-     * errors (-32602). A null, empty or "/" path (index document) is not
-     * parsed at all — the Service answers it before parsing — and returns
-     * null so callers pass no query.
+     * errors (-32602). A null, empty or "/" path (index document) is not parsed
+     * at all — the Service answers it before parsing — and returns null so
+     * callers pass no query.
      *
      * @param context The service context.
      * @param version The resolved version.
      * @param principal The principal of the session, for admin-only paths.
-     * @param staPath The STA path, relative to the version root. May be null
-     * or empty.
+     * @param staPath The STA path, relative to the version root. May be null or
+     * empty.
      * @param decodedQuery The query string, without leading '?' and decoded.
      * May be null or empty.
      * @return the validated query with caps applied, or null for the index
@@ -308,8 +341,8 @@ public class FrostToolHandler {
     /**
      * Applies the MCP caps to a read query: $top is clamped to mcp.maxTop
      * (implicit top for entity sets). The $count default follows the global
-     * defaultCount setting (a real default: an explicit $count from the
-     * agent is kept).
+     * defaultCount setting (a real default: an explicit $count from the agent
+     * is kept).
      *
      * @param query The parsed query.
      * @param path The parsed path.
@@ -330,8 +363,8 @@ public class FrostToolHandler {
      * Re-joins the validated query into a decoded query string, via
      * Query.toUnencodedString: the string is later re-parsed by the Service
      * layer from the already-decoded urlQuery field (matching the HTTP layer's
-     * urlDecode contract), so it must not be URL-encoded. Returns null when
-     * the query carries no options.
+     * urlDecode contract), so it must not be URL-encoded. Returns null when the
+     * query carries no options.
      *
      * @param query The validated query with caps applied. May not be null.
      * @return the decoded query string, or null when empty.
@@ -459,12 +492,12 @@ public class FrostToolHandler {
             if (parsed != null && parsed.isObject()) {
                 final Object staErrorObject = StaJsonHelper.toStructuredContent(parsed);
                 final Map<String, Object> structure = new LinkedHashMap<>();
-                structure.put("statusCode", code);
+                structure.put(KEY_STATUS_CODE, code);
                 if (staErrorObject instanceof Map) {
                     structure.putAll((Map<String, ?>) staErrorObject);
                 }
-                structure.remove("code");
-                structure.putIfAbsent("message", response.getMessage());
+                structure.remove(KEY_CODE);
+                structure.putIfAbsent(KEY_MESSAGE, response.getMessage());
                 return errorResult(structure);
             }
             final String message = StringHelper.isNullOrEmpty(response.getMessage())
@@ -495,17 +528,17 @@ public class FrostToolHandler {
      */
     public static Map<String, Object> errorObject(int code, String message) {
         final Map<String, Object> error = new LinkedHashMap<>();
-        error.put("statusCode", code);
-        error.put("message", message);
+        error.put(KEY_STATUS_CODE, code);
+        error.put(KEY_MESSAGE, message);
         return error;
     }
 
     private Map<String, Object> tooLargeObject(JsonNode parsed) {
         final Map<String, Object> guidance = new LinkedHashMap<>();
-        guidance.put("statusCode", 413);
-        guidance.put("message", "Result too large for MCP; use $select/$expand to narrow the query and $top to page.");
-        if (parsed != null && parsed.isObject() && parsed.has("@iot.count")) {
-            guidance.put("@iot.count", parsed.get("@iot.count"));
+        guidance.put(KEY_STATUS_CODE, 413);
+        guidance.put(KEY_MESSAGE, "Result too large for MCP; use $select/$expand to narrow the query and $top to page.");
+        if (parsed != null && parsed.isObject() && parsed.has(AT_IOT_COUNT)) {
+            guidance.put(AT_IOT_COUNT, parsed.get(AT_IOT_COUNT));
         }
         return guidance;
     }
@@ -536,8 +569,8 @@ public class FrostToolHandler {
     }
 
     private void auditLog(String toolName, String versionName, String path, PrincipalExtended principal, int statusCode) {
-        if (AUDIT_LOG.isInfoEnabled()) {
-            AUDIT_LOG.info("tool={} version={} path={} user={} status={}",
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("tool={} version={} path={} user={} status={}",
                     toolName, versionName, StringHelper.cleanForLogging(Objects.toString(path, "")),
                     principal == null ? "anonymous" : Objects.toString(principal.getName(), "anonymous"),
                     statusCode);

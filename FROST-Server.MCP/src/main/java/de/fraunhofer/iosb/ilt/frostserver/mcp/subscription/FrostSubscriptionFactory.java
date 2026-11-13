@@ -35,13 +35,13 @@ import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.List;
 
 /**
- * Builds MCP subscriptions from tool arguments: parses path and query with
- * the STA parsers, applies the subscription gates ($filter/$select only, on
+ * Builds MCP subscriptions from tool arguments: parses path and query with the
+ * STA parsers, applies the subscription gates ($filter/$select only, on
  * entity-set paths; no options at all on entity paths; property paths are
- * rejected), builds the canonical topic used for per-session deduplication,
- * and chooses the anonymous or fine-grained-authorisation constructor
- * variant. Parse and gate failures surface as IllegalArgumentException for
- * the tool layer to map to MCP -32602.
+ * rejected), builds the canonical topic used for per-session deduplication, and
+ * chooses the anonymous or fine-grained-authorisation constructor variant.
+ * Parse and gate failures surface as IllegalArgumentException for the tool
+ * layer to map to MCP -32602.
  */
 public class FrostSubscriptionFactory {
 
@@ -129,14 +129,13 @@ public class FrostSubscriptionFactory {
 
     private static boolean isAnonymous(PrincipalExtended principal) {
         return principal == PrincipalExtended.ANONYMOUS_PRINCIPAL
-                || principal.getName() == null
-                || principal.getName().isEmpty()
+                || StringHelper.isNullOrEmpty(principal.getName())
                 || PrincipalExtended.USER_NAME_ANONYMOUS.equals(principal.getName());
     }
 
     /**
-     * Assembles the raw, decoded query string from the typed arguments, in
-     * the same shape frost_query uses (entries joined with '&').
+     * Assembles the raw, decoded query string from the typed arguments, in the
+     * same shape frost_query uses (entries joined with '&').
      *
      * @param filter The $filter expression, without prefix. May be null.
      * @param select The $select items. May be null or empty.

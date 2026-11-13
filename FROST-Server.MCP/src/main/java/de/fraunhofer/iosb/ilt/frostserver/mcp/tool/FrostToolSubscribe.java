@@ -17,6 +17,20 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_FILTER;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ITEMS;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_SELECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_ARRAY;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionException;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
@@ -30,12 +44,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The frost_subscribe tool: registers a session for change notifications on
- * an entity set (optionally narrowed with $filter and $select) or a single
- * entity. The notifications arrive as MCP logging notifications (logger
- * "frost", level INFO).
+ * The frost_subscribe tool: registers a session for change notifications on an
+ * entity set (optionally narrowed with $filter and $select) or a single entity.
+ * The notifications arrive as MCP logging notifications (logger "frost", level
+ * INFO).
  */
 public class FrostToolSubscribe implements FrostTool {
+
+    public static final String KEY_SUBSCRIPTION_ID = "subscriptionId";
 
     /**
      * The tool name.
@@ -61,24 +77,23 @@ public class FrostToolSubscribe implements FrostTool {
      * @return the JSON schema map.
      */
     public Map<String, Object> inputSchema() {
-        return Map.of(
-                "type", "object",
-                "required", List.of("path"),
-                "properties", Map.of(
-                        "path", Map.of(
-                                "type", "string",
-                                "description", "STA path to subscribe to, relative to the version root. Entity sets and single entities; navigation syntax allowed. Examples: 'Things', 'Things(1)', 'Things(1)/Datastreams', 'Datastreams(7)/Observations'."),
-                        "filter", Map.of(
-                                "type", "string",
-                                "description", "STA $filter expression, without the '$filter=' prefix. Only allowed for entity-set subscriptions. Example: 'properties/temperature gt 20'."),
-                        "select", Map.of(
-                                "type", "array",
-                                "items", Map.of("type", "string"),
-                                "description", "Properties for $select in notifications; '@id' allowed. Only allowed for entity-set subscriptions."),
-                        "version", Map.of(
-                                "type", "string",
-                                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version.")),
-                "additionalProperties", false);
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_PATH),
+                KEY_PROPERTIES, Map.of(KEY_PATH, Map.of(
+                        KEY_TYPE, TYPE_STRING,
+                        KEY_DESCRIPTION, "STA path to subscribe to, relative to the version root. Entity sets and single entities; navigation syntax allowed. Examples: 'Things', 'Things(1)', 'Things(1)/Datastreams', 'Datastreams(7)/Observations'."),
+                        KEY_FILTER, Map.of(
+                                KEY_TYPE, TYPE_STRING,
+                                KEY_DESCRIPTION, "STA $filter expression, without the '$filter=' prefix. Only allowed for entity-set subscriptions. Example: 'properties/temperature gt 20'."),
+                        KEY_SELECT, Map.of(
+                                KEY_TYPE, TYPE_ARRAY,
+                                KEY_ITEMS, Map.of(
+                                        KEY_TYPE, TYPE_STRING),
+                                KEY_DESCRIPTION, "Properties for $select in notifications; '@id' allowed. Only allowed for entity-set subscriptions."),
+                        KEY_VERSION, Map.of(
+                                KEY_TYPE, TYPE_STRING,
+                                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version.")),
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -86,12 +101,11 @@ public class FrostToolSubscribe implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
                 .title("Subscribe to entity changes")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .readOnlyHint(Boolean.TRUE)
                         .idempotentHint(Boolean.TRUE)
@@ -114,10 +128,10 @@ public class FrostToolSubscribe implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = FrostToolGet.requireStringArg(arguments, "path");
-        final String filter = FrostToolGet.stringArg(arguments, "filter");
-        final List<String> select = FrostToolGet.stringListArg(arguments, "select");
-        final String versionName = FrostToolGet.stringArg(arguments, "version");
+        final String path = FrostToolGet.requireStringArg(arguments, KEY_PATH);
+        final String filter = FrostToolGet.stringArg(arguments, KEY_FILTER);
+        final List<String> select = FrostToolGet.stringListArg(arguments, KEY_SELECT);
+        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {

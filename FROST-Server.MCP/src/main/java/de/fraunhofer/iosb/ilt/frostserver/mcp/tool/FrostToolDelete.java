@@ -17,6 +17,16 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
@@ -57,17 +67,17 @@ public class FrostToolDelete implements FrostTool {
      */
     public Map<String, Object> inputSchema() {
         final Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("path", Map.of(
-                "type", "string",
-                "description", "Path to the entity to delete, e.g. 'Observations(4711)'."));
-        properties.put("version", Map.of(
-                "type", "string",
-                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version."));
+        properties.put(KEY_PATH, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "Path to the entity to delete, e.g. 'Observations(4711)'."));
+        properties.put(KEY_VERSION, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version."));
         return Map.of(
-                "type", "object",
-                "required", List.of("path"),
-                "properties", properties,
-                "additionalProperties", false);
+                KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_PATH),
+                KEY_PROPERTIES, properties,
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -75,6 +85,7 @@ public class FrostToolDelete implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
         final McpSchema.Tool tool = McpSchema.Tool.builder()
                 .name(NAME)
@@ -100,7 +111,7 @@ public class FrostToolDelete implements FrostTool {
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
         final String path = FrostToolGet.requireStringArg(arguments, "path");
-        final String versionName = FrostToolGet.stringArg(arguments, "version");
+        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
 
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
