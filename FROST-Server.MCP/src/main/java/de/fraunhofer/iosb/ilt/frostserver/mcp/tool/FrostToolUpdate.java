@@ -17,6 +17,18 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DEFAULT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ENUM;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PATH;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_TYPE;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_VERSION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
+
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
@@ -33,9 +45,9 @@ import java.util.Map;
 
 /**
  * The frost_update tool: PATCH or JSON-Patch (changeset) an existing entity,
- * both changing only the addressed properties. Full replace (PUT) is a
- * separate tool, frost_replace (FrostToolReplace), because MCP tool
- * annotations are static per registration and only a separate tool can carry
+ * both changing only the addressed properties. Full replace (PUT) is a separate
+ * tool, frost_replace (FrostToolReplace), because MCP tool annotations are
+ * static per registration and only a separate tool can carry
  * destructiveHint=true for the full-replace semantics.
  */
 public class FrostToolUpdate implements FrostTool {
@@ -44,6 +56,9 @@ public class FrostToolUpdate implements FrostTool {
      * The tool name.
      */
     public static final String NAME = "frost_update";
+
+    public static final String KEY_MODE = "mode";
+    public static final String KEY_CHANGES = "changes";
 
     /**
      * The supported update modes.
@@ -69,24 +84,23 @@ public class FrostToolUpdate implements FrostTool {
      */
     public Map<String, Object> inputSchema() {
         final Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("path", Map.of(
-                "type", "string",
-                "description", "Path to the entity (or property) to update, e.g. 'Things(1)' or 'Things(1)/name'."));
-        properties.put("changes", Map.of(
-                "description", "'patch': an STA JSON object (entity or single property value). 'changeset': a JSON Patch array of operations."));
-        properties.put("mode", Map.of(
-                "type", "string",
-                "enum", List.of(MODE_PATCH, MODE_CHANGESET),
-                "default", MODE_PATCH,
-                "description", "patch: PATCH semantics, only listed properties change (UPDATE_CHANGES). changeset: RFC 6902 JSON Patch (UPDATE_CHANGESET)."));
-        properties.put("version", Map.of(
-                "type", "string",
-                "description", "STA version part, e.g. 'v1.1'. Default: the server's default version."));
-        return Map.of(
-                "type", "object",
-                "required", List.of("path", "changes"),
-                "properties", properties,
-                "additionalProperties", false);
+        properties.put(KEY_PATH, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "Path to the entity (or property) to update, e.g. 'Things(1)' or 'Things(1)/name'."));
+        properties.put(KEY_CHANGES, Map.of(
+                KEY_DESCRIPTION, "'patch': an STA JSON object (entity or single property value). 'changeset': a JSON Patch array of operations."));
+        properties.put(KEY_MODE, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_ENUM, List.of(MODE_PATCH, MODE_CHANGESET),
+                KEY_DEFAULT, MODE_PATCH,
+                KEY_DESCRIPTION, "patch: PATCH semantics, only listed properties change (UPDATE_CHANGES). changeset: RFC 6902 JSON Patch (UPDATE_CHANGESET)."));
+        properties.put(KEY_VERSION, Map.of(
+                KEY_TYPE, TYPE_STRING,
+                KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version."));
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_PATH, KEY_CHANGES),
+                KEY_PROPERTIES, properties,
+                KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
@@ -94,12 +108,11 @@ public class FrostToolUpdate implements FrostTool {
      *
      * @return the sync tool specification.
      */
+    @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
                 .title("Update an existing entity")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .destructiveHint(Boolean.FALSE)
                         .idempotentHint(Boolean.TRUE)
@@ -120,13 +133,13 @@ public class FrostToolUpdate implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = FrostToolGet.requireStringArg(arguments, "path");
-        final Object changes = arguments.get("changes");
+        final String path = FrostToolGet.requireStringArg(arguments, KEY_PATH);
+        final Object changes = arguments.get(KEY_CHANGES);
         if (changes == null) {
             throw FrostToolHandler.invalidParams("Missing required argument 'changes'.");
         }
-        final String mode = FrostToolGet.stringArg(arguments, "mode");
-        final String versionName = FrostToolGet.stringArg(arguments, "version");
+        final String mode = FrostToolGet.stringArg(arguments, KEY_MODE);
+        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
 
         final String resolvedMode = mode == null || mode.isEmpty() ? MODE_PATCH : mode;
         final String requestType;
@@ -142,8 +155,7 @@ public class FrostToolUpdate implements FrostTool {
             }
             default ->
                 throw FrostToolHandler.invalidParams(
-                        "Unknown mode '" + resolvedMode + "'. Known modes: patch, changeset. "
-                                + "(Full replace is a separate tool: frost_replace.)");
+                        "Unknown mode '" + resolvedMode + "'. Known modes: patch, changeset. (Full replace is a separate tool: frost_replace.)");
         }
         if (!changeset && !(changes instanceof Map)) {
             throw FrostToolHandler.invalidParams("Argument 'changes' must be a JSON object for mode 'patch'.");

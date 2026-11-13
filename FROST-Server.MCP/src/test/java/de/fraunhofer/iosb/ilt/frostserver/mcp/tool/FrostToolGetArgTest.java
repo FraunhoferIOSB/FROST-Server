@@ -27,11 +27,12 @@ import io.modelcontextprotocol.spec.McpSchema;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for the package-private argument helpers in FrostToolGet,
- * shared by all frost_* tools.
+ * Unit tests for the package-private argument helpers in FrostToolGet, shared
+ * by all frost_* tools.
  */
 class FrostToolGetArgTest {
 
@@ -71,13 +72,13 @@ class FrostToolGetArgTest {
     @Test
     void testIntArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        assertNull(FrostToolGet.intArg(arguments, "top"));
+        assertEquals(Optional.empty(), FrostToolGet.intArg(arguments, "top"));
         arguments.put("top", 5);
-        assertEquals(5, FrostToolGet.intArg(arguments, "top"));
+        assertEquals(Optional.of(5), FrostToolGet.intArg(arguments, "top"));
         arguments.put("top", 5.7);
-        assertEquals(5, FrostToolGet.intArg(arguments, "top"), "Floating point numbers are truncated.");
+        assertEquals(Optional.of(5), FrostToolGet.intArg(arguments, "top"), "Floating point numbers are truncated.");
         arguments.put("top", "12");
-        assertEquals(12, FrostToolGet.intArg(arguments, "top"), "Numeric strings are parsed.");
+        assertEquals(Optional.of(12), FrostToolGet.intArg(arguments, "top"), "Numeric strings are parsed.");
         arguments.put("top", "twelve");
         final McpError error = assertThrows(McpError.class, () -> FrostToolGet.intArg(arguments, "top"));
         assertEquals(McpSchema.ErrorCodes.INVALID_PARAMS, error.getJsonRpcError().code());
@@ -86,14 +87,14 @@ class FrostToolGetArgTest {
     @Test
     void testBoolArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        assertNull(FrostToolGet.boolArg(arguments, "count"));
+        assertEquals(Optional.empty(), FrostToolGet.boolArg(arguments, "count"));
         arguments.put("count", true);
-        assertEquals(Boolean.TRUE, FrostToolGet.boolArg(arguments, "count"));
+        assertEquals(Optional.of(Boolean.TRUE), FrostToolGet.boolArg(arguments, "count"));
         arguments.put("count", "true");
-        assertEquals(Boolean.TRUE, FrostToolGet.boolArg(arguments, "count"));
+        assertEquals(Optional.of(Boolean.TRUE), FrostToolGet.boolArg(arguments, "count"));
         arguments.put("count", "false");
-        assertEquals(Boolean.FALSE, FrostToolGet.boolArg(arguments, "count"));
-        assertTrue(FrostToolGet.boolArg(new HashMap<>(Map.of("count", Boolean.FALSE)), "count").equals(Boolean.FALSE));
+        assertEquals(Optional.of(Boolean.FALSE), FrostToolGet.boolArg(arguments, "count"));
+        assertTrue(FrostToolGet.boolArg(new HashMap<>(Map.of("count", Boolean.FALSE)), "count").get().equals(Boolean.FALSE));
     }
 
 }
