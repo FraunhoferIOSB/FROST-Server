@@ -19,9 +19,9 @@ package de.fraunhofer.iosb.ilt.frostserver.mcp.util;
 
 import io.modelcontextprotocol.server.McpNotificationHandler;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -68,13 +68,13 @@ public final class McpSdkWorkarounds {
      */
     public static void installCancelledNotificationHandler(HttpServletStreamableServerTransportProvider provider) {
         try {
-            final Object factory = readField(provider, "sessionFactory");
+            final Object factory = FieldUtils.readField(provider, "sessionFactory", true);
             if (factory == null) {
                 LOGGER.debug("No session factory (yet); not installing the cancelled handler.");
                 return;
             }
             @SuppressWarnings("unchecked")
-            final Map<String, McpNotificationHandler> handlers = (Map<String, McpNotificationHandler>) readField(factory, "notificationHandlers");
+            final Map<String, McpNotificationHandler> handlers = (Map<String, McpNotificationHandler>) FieldUtils.readField(factory, "notificationHandlers", true);
             if (handlers == null) {
                 LOGGER.debug("No notification handlers map found; not installing the cancelled handler.");
                 return;
@@ -103,29 +103,14 @@ public final class McpSdkWorkarounds {
     public static Predicate<String> sessionPresence(HttpServletStreamableServerTransportProvider provider) {
         try {
             @SuppressWarnings("unchecked")
-            final Map<String, ?> sessions = (Map<String, ?>) readField(provider, "sessions");
+            final Map<String, ?> sessions = (Map<String, ?>) FieldUtils.readField(provider, "sessions", true);
             if (sessions != null) {
-                return sessionId -> sessions.containsKey(sessionId);
+                return sessions::containsKey;
             }
-        } catch (Throwable ex) {
+        } catch (ReflectiveOperationException | RuntimeException ex) {
             LOGGER.warn("Could not access the session map (SDK internals changed?): {}", ex.getMessage());
             LOGGER.trace("Failure details:", ex);
         }
         return sessionId -> true;
     }
-
-    private static Object readField(Object target, String name) throws ReflectiveOperationException {
-        Class<?> type = target.getClass();
-        while (type != null) {
-            try {
-                final Field field = type.getDeclaredField(name);
-                field.setAccessible(true);
-                return field.get(target);
-            } catch (NoSuchFieldException ex) {
-                type = type.getSuperclass();
-            }
-        }
-        throw new NoSuchFieldException(name + " not found on " + target.getClass().getName());
-    }
-
 }

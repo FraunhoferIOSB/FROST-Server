@@ -334,7 +334,7 @@ public class TestCore {
         mqttServers.put(key, server);
     }
 
-    private void startMcpServer(int key, Map<String, String> parameters) throws IOException {
+    private void startMcpServer(int key, Map<String, String> parameters) {
         LOGGER.info("MCP Server starting...");
         ServerSettings serverSetting = serverSettings.get(key);
 

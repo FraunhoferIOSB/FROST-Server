@@ -82,6 +82,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
     private static final EditFeatures INSERT_STA_20 = new EditFeatures(true, false, false);
     private static final EditFeatures UPDATE_STA_20 = new EditFeatures(true, true, true);
 
+    public static final String KEY_ENDPOINTS = "endpoints";
     public static final String VERSION_STA_V20_NAME = "v2.0";
 
     public static final Version VERSION_STA_2_0 = builder()
@@ -329,7 +330,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         Map<String, Object> mqttData = new HashMap<>();
         final String endpointUrl = coreSettings.getQueryDefaults().getServiceRootUrl() + URI_PATH_SEP + VERSION_STA_V20_NAME + URI_PATH_SEP;
         List<String> endpoints = Arrays.asList(endpointUrl);
-        mqttData.put("endpoints", endpoints);
+        mqttData.put(KEY_ENDPOINTS, endpoints);
         target.put(REQ_CLASS_BINDING_HTTP, mqttData);
     }
 
@@ -339,7 +340,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         if (enableMqtt) {
             List<String> endpoints = mqttSettings.getEndpoints();
             Map<String, Object> mqttData = new HashMap<>();
-            mqttData.put("endpoints", endpoints);
+            mqttData.put(KEY_ENDPOINTS, endpoints);
             target.put(REQ_CLASS_BINDING_MQTT, mqttData);
         }
     }
@@ -349,7 +350,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
         List<String> endpoints = mcpSettings.getEndpoints();
         if (!endpoints.isEmpty()) {
             Map<String, Object> mcpData = new HashMap<>();
-            mcpData.put("endpoints", endpoints);
+            mcpData.put(KEY_ENDPOINTS, endpoints);
             for (String requirement : CONFORMANCE_BY_EXTENSION.get(Extension.MCP)) {
                 target.put(requirement, mcpData);
             }
