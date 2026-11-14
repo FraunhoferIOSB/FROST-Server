@@ -72,11 +72,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /**
- * The stand-alone FROST MCP server: boots the FROST core (settings,
- * persistence manager, optional message bus), installs the MCP auth filter
- * for the /mcp endpoint in authenticate-only mode, and serves the MCP
- * streamable-HTTP transport with the FROST tools and resources. The tool
- * layer itself lives in
+ * The stand-alone FROST MCP server: boots the FROST core (settings, persistence
+ * manager, optional message bus), installs the MCP auth filter for the /mcp
+ * endpoint in authenticate-only mode, and serves the MCP streamable-HTTP
+ * transport with the FROST tools and resources. The tool layer itself lives in
  * de.fraunhofer.iosb.ilt.frostserver.mcp.tool.
  */
 public class FrostMcpServer {
@@ -158,10 +157,10 @@ public class FrostMcpServer {
     }
 
     /**
-     * Ensures the persistence-layer default security validators are
-     * installed (insert/update/delete role checks) when an auth provider is
-     * mapped onto /mcp — the same idiom the auth providers use in their
-     * init when running authenticate-only.
+     * Ensures the persistence-layer default security validators are installed
+     * (insert/update/delete role checks) when an auth provider is mapped onto
+     * /mcp — the same idiom the auth providers use in their init when running
+     * authenticate-only.
      */
     private void installSecurityValidators() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
@@ -185,9 +184,9 @@ public class FrostMcpServer {
     }
 
     /**
-     * Resolves the auth provider class configured in auth.provider and
-     * prepares the MCP filter registration. Basic and Keycloak map onto /mcp
-     * with authenticate-only semantics; anything else fails the boot when
+     * Resolves the auth provider class configured in auth.provider and prepares
+     * the MCP filter registration. Basic and Keycloak map onto /mcp with
+     * authenticate-only semantics; anything else fails the boot when
      * authentication is required, and starts with a warning otherwise.
      */
     private void resolveAuthFilter() {
@@ -226,9 +225,9 @@ public class FrostMcpServer {
     }
 
     /**
-     * Builds the MCP streamable HTTP transport: the SDK's HttpServlet on
-     * /mcp, with the shared FROST JsonMapper and the principal extractor.
-     * The transport knobs (request size cap, keep-alive and session sweep
+     * Builds the MCP streamable HTTP transport: the SDK's HttpServlet on /mcp,
+     * with the shared FROST JsonMapper and the principal extractor. The
+     * transport knobs (request size cap, keep-alive and session sweep
      * intervals) map one-to-one onto the mcp.* settings, so the whole, fixed
      * set of SDK transport options is admin-configurable.
      *
@@ -277,8 +276,8 @@ public class FrostMcpServer {
     }
 
     /**
-     * The production notification sink: subscription envelopes go out as
-     * MCP logging notifications via the transport provider.
+     * The production notification sink: subscription envelopes go out as MCP
+     * logging notifications via the transport provider.
      *
      * @param transportProvider The transport provider to deliver with.
      * @return the sink.
@@ -290,18 +289,19 @@ public class FrostMcpServer {
 
     /**
      * Returns the tool registration, or null when mcp.allowTools does not
-     * include the tool — deployments can use it to expose a read-only MCP
-     * (e.g. "get,query"). A disabled tool is not listed by tools/list; if it
-     * is still called, the per-call gate answers with McpError -32601
-     * ("Method not found") as defence in depth.
+     * include the tool — deployments can use it to expose a read-only MCP (e.g.
+     * "get,query"). A disabled tool is not listed by tools/list; if it is still
+     * called, the per-call gate answers with McpError -32601 ("Method not
+     * found") as defence in depth.
      *
      * @param handler the shared tool handler.
      * @param tool the tool.
      * @return the spec, or null when the tool is disabled.
      */
     private McpServerFeatures.SyncToolSpecification toolSpec(FrostToolHandler handler, FrostTool tool) {
-        if (!handler.getMcpSettings().isToolAllowed(tool.toolName())) {
-            LOGGER.info("Tool {} disabled by mcp.allowTools; not registering it.", tool.toolName());
+        final String toolName = tool.toolName();
+        if (!handler.getMcpSettings().isToolAllowed(toolName)) {
+            LOGGER.info("Tool {} disabled by mcp.allowTools; not registering it.", toolName);
             return null;
         }
         return tool.specification();

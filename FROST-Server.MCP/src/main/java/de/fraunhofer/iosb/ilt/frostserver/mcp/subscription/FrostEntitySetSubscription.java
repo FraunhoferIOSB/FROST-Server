@@ -34,12 +34,11 @@ import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestExcepti
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 
 /**
- * An MCP subscription on an entity set, including navigation-property
- * addresses like Things(1)/Datastreams. Unlike the MQTT variant it always
- * allows $filter and $select, and never allows $count/$skip/$top/$orderby
- * and $expand. The query is supplied pre-parsed by the
- * FrostSubscriptionFactory; this class only applies the subscription gates
- * and builds the matcher infrastructure.
+ * An MCP subscription on an entity set, including navigation-property addresses
+ * like Things(1)/Datastreams. Unlike the MQTT variant it always allows $filter
+ * and $select, and never allows $count/$skip/$top/$orderby and $expand. The
+ * query is supplied pre-parsed by the FrostSubscriptionFactory; this class only
+ * applies the subscription gates and builds the matcher infrastructure.
  */
 public class FrostEntitySetSubscription extends AbstractSubscription {
 
@@ -118,6 +117,16 @@ public class FrostEntitySetSubscription extends AbstractSubscription {
         } finally {
             PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
 }

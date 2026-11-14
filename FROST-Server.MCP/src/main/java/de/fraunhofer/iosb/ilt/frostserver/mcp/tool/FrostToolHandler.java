@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.SequencedSet;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
@@ -160,7 +159,7 @@ public class FrostToolHandler {
     public List<String> entitySetNames() {
         return modelRegistry.getEntityTypes().stream()
                 .map(type -> type.plural)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -351,9 +350,7 @@ public class FrostToolHandler {
         final int maxTop = mcpSettings.getMaxTop();
         if (path.getMainElement() instanceof PathElementEntitySet) {
             final Optional<Integer> top = query.getTop();
-            if (top.isEmpty()) {
-                query.setTop(maxTop);
-            } else if (top.get() > maxTop) {
+            if (top.isEmpty() || top.get() > maxTop) {
                 query.setTop(maxTop);
             }
         }
@@ -444,22 +441,7 @@ public class FrostToolHandler {
             String toolName, String path, PrincipalExtended principal, String versionName,
             ServiceResponseDefault response) {
         final int code = response.getCode();
-        String formatted = response.getFormattedResult();
-        if (response.isSuccessful() && StringHelper.isNullOrEmpty(formatted.trim())) {
-            // The STA v1.1 plugin forces $format=noResponse on all CUD
-            // requests, leaving the formatted result empty (over HTTP the new
-            // id travels in the Location header). MCP tool results carry no
-            // headers, so fall back to the raw result object.
-            final Object raw = response.getResult();
-            if (raw != null) {
-                try {
-                    formatted = JsonWriter.writeObject(raw);
-                } catch (JacksonException ex) {
-                    LOGGER.warn("Failed to serialise raw result for tool response.", ex);
-                }
-            }
-        }
-        final String resultText = formatted;
+        String resultText = formatResultForMcp(response);
         String outcome = OUTCOME_SUCCESS;
         try (Timer timer = TOOL_DURATION.labelValues(toolName).startTimer()) {
             if (response.isSuccessful()) {
@@ -508,6 +490,25 @@ public class FrostToolHandler {
             TOOL_CALLS.labelValues(toolName, outcome).inc();
             auditLog(toolName, versionName, path, principal, code);
         }
+    }
+
+    public String formatResultForMcp(ServiceResponseDefault response) {
+        String formatted = response.getFormattedResult();
+        if (response.isSuccessful() && StringHelper.isNullOrEmpty(formatted.trim())) {
+            // The STA v1.1 plugin forces $format=noResponse on all CUD
+            // requests, leaving the formatted result empty (over HTTP the new
+            // id travels in the Location header). MCP tool results carry no
+            // headers, so fall back to the raw result object.
+            final Object raw = response.getResult();
+            if (raw != null) {
+                try {
+                    formatted = JsonWriter.writeObject(raw);
+                } catch (JacksonException ex) {
+                    LOGGER.warn("Failed to serialise raw result for tool response.", ex);
+                }
+            }
+        }
+        return formatted;
     }
 
     private McpSchema.CallToolResult errorResult(Object structured) {

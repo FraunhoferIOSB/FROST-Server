@@ -42,22 +42,27 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.JsonNode;
 
 /**
  * Unit tests for the MCP subscription registry and factory: gates, canonical
  * topic dedupe, the per-session cap, the per-entity visibility check,
  * unsubscribe flows, session dropping and the event path through the
- * InternalMessageBus with a capturing sink. Uses the TestModelMcp model and
- * the TestPmMcp dummy persistence manager, mirroring the core module's
+ * InternalMessageBus with a capturing sink. Uses the TestModelMcp model and the
+ * TestPmMcp dummy persistence manager, mirroring the core module's
  * MqttManagerTest idiom.
  */
 class FrostSubscriptionRegistryTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FrostSubscriptionRegistryTest.class);
 
     private static final String SESSION_A = "session-a";
     private static final String SESSION_B = "session-b";
@@ -105,7 +110,8 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testEntitySetSubscriptionDeliversCreateUpdateDelete() throws Exception {
+    void testEntitySetSubscriptionDeliversCreateUpdateDelete() throws FrostSubscriptionException {
+        LOGGER.info("*** testEntitySetSubscriptionDeliversCreateUpdateDelete ***");
         final FrostSubscriptionResult result = subscribe(SESSION_A, "Rooms", null, null);
         assertFalse(result.alreadyExisted());
         assertTrue(result.sessionActive());
@@ -130,33 +136,40 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testBareSetIgnoresOtherTypes() throws Exception {
+    void testBareSetIgnoresOtherTypes() throws FrostSubscriptionException {
+        LOGGER.info("*** testBareSetIgnoresOtherTypes ***");
         subscribe(SESSION_A, "Houses", null, null);
         sendMessage(entityEvent(testModel.etHouse, 7, EntityChangedMessage.Type.CREATE));
         awaitCount(1, "A House event must notify a Houses subscription.");
 
         sink.clear();
         sendMessage(creEvent(8, 2L, EntityChangedMessage.Type.CREATE));
-        awaitQuiesce();
+        Awaitility.await()
+                .atMost(500, TimeUnit.MILLISECONDS)
+                .until(() -> sink.size() == 0);
         assertEquals(0, sink.size(), "A Room event must not notify a Houses subscription.");
     }
 
     @Timeout(60)
     @Test
-    void testParentedSetMatchesOnlyItsParent() throws Exception {
+    void testParentedSetMatchesOnlyItsParent() throws FrostSubscriptionException {
+        LOGGER.info("*** testParentedSetMatchesOnlyItsParent ***");
         subscribe(SESSION_A, "Houses(1)/Rooms", null, null);
         sendMessage(creEvent(7, 1L, EntityChangedMessage.Type.CREATE));
         awaitCount(1, "Room of House 1 must notify.");
 
         sink.clear();
         sendMessage(creEvent(8, 2L, EntityChangedMessage.Type.CREATE));
-        awaitQuiesce();
+        Awaitility.await()
+                .atMost(500, TimeUnit.MILLISECONDS)
+                .until(() -> sink.size() == 0);
         assertEquals(0, sink.size(), "Room of House 2 must not notify.");
     }
 
     @Timeout(60)
     @Test
-    void testEntitySubscriptionPkMatcherAndVisibility() throws Exception {
+    void testEntitySubscriptionPkMatcherAndVisibility() throws FrostSubscriptionException {
+        LOGGER.info("*** testEntitySubscriptionPkMatcherAndVisibility ***");
         final FrostSubscriptionResult ok = subscribe(SESSION_A, "Rooms(1)", null, null);
         assertFalse(ok.alreadyExisted());
         assertEquals("int/Rooms(1)", ok.topic(), "The entity subscription topic carries no query.");
@@ -173,13 +186,17 @@ class FrostSubscriptionRegistryTest {
 
         sink.clear();
         sendMessage(creEvent(2, 1L, EntityChangedMessage.Type.CREATE));
-        awaitQuiesce();
+        Awaitility.await()
+                .atMost(500, TimeUnit.MILLISECONDS)
+                .until(() -> sink.size() == 0);
+
         assertEquals(0, sink.size(), "Another Room must not notify the entity subscription.");
     }
 
     @Timeout(60)
     @Test
-    void testDedupeSessionsAndSelect() throws Exception {
+    void testDedupeSessionsAndSelect() throws FrostSubscriptionException {
+        LOGGER.info("*** testDedupeSessionsAndSelect ***");
         final FrostSubscriptionResult first = subscribe(SESSION_A, "Rooms", null, null);
         final FrostSubscriptionResult duplicate = subscribe(SESSION_A, "Rooms", null, null);
         assertTrue(duplicate.alreadyExisted(), "Identical subscription must dedupe.");
@@ -204,7 +221,8 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testSelectTopicRoundTrip() throws Exception {
+    void testSelectTopicRoundTrip() throws FrostSubscriptionException {
+        LOGGER.info("*** testSelectTopicRoundTrip ***");
         final FrostSubscriptionResult selected = subscribe(SESSION_A, "Rooms", null, List.of("id", "name"));
         assertTrue(selected.topic().startsWith("int/Rooms?"), "Topic: " + selected.topic());
         assertTrue(selected.topic().contains("$select=@iot.id,name"), "Topic: " + selected.topic());
@@ -218,7 +236,8 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testGates() throws Exception {
+    void testGates() {
+        LOGGER.info("*** testGates ***");
         // Entity path with query options.
         assertInvalidSubscribe(() -> subscribe(SESSION_A, "Rooms(1)", "name eq 'x'", null));
         // Property path.
@@ -233,7 +252,8 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testCap() throws Exception {
+    void testCap() throws FrostSubscriptionException {
+        LOGGER.info("*** testCap ***");
         subscribe(SESSION_A, "Rooms", null, null);
         subscribe(SESSION_A, "Houses", null, null);
         subscribe(SESSION_A, "Houses(1)/Rooms", null, null);
@@ -253,7 +273,8 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testUnsubscribe() throws Exception {
+    void testUnsubscribe() throws FrostSubscriptionException {
+        LOGGER.info("*** testUnsubscribe ***");
         final FrostSubscriptionResult one = subscribe(SESSION_A, "Rooms", null, null);
         subscribe(SESSION_A, "Houses", null, null);
         assertEquals(2, registry.registrationCount());
@@ -269,7 +290,8 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testEventsStopAfterUnsubscribe() throws Exception {
+    void testEventsStopAfterUnsubscribe() throws FrostSubscriptionException {
+        LOGGER.info("*** testEventsStopAfterUnsubscribe ***");
         subscribe(SESSION_A, "Rooms", null, null);
         sendMessage(creEvent(7, 1L, EntityChangedMessage.Type.CREATE));
         awaitCount(1);
@@ -277,13 +299,16 @@ class FrostSubscriptionRegistryTest {
 
         sink.clear();
         sendMessage(creEvent(8, 1L, EntityChangedMessage.Type.CREATE));
-        awaitQuiesce();
+        Awaitility.await()
+                .atMost(500, TimeUnit.MILLISECONDS)
+                .until(() -> sink.size() == 0);
         assertEquals(0, sink.size(), "No notifications after unsubscribe.");
     }
 
     @Timeout(60)
     @Test
-    void testDeliveryFailureDropsSession() throws Exception {
+    void testDeliveryFailureDropsSession() throws FrostSubscriptionException {
+        LOGGER.info("*** testDeliveryFailureDropsSession ***");
         // SESSION_GONE deliveries fail in the sink → the registry drops that
         // session's registrations; SESSION_A keeps receiving.
         subscribe(SESSION_GONE, "Rooms", null, null);
@@ -291,19 +316,24 @@ class FrostSubscriptionRegistryTest {
         sendMessage(creEvent(7, 1L, EntityChangedMessage.Type.CREATE));
         awaitCount(1);
         assertEquals(SESSION_A, sink.getNotifications().peek().sessionId());
-        awaitQuiesce();
+        Awaitility.await()
+                .atMost(500, TimeUnit.MILLISECONDS)
+                .until(() -> registry.registrationCount() == 1);
         assertEquals(1, registry.registrationCount(), "The failing session's subscriptions must be dropped.");
         assertEquals(List.of(), registry.subscriptionIds(SESSION_GONE));
     }
 
     @Timeout(60)
     @Test
-    void testMissingSessionDropsRegistrations() throws Exception {
+    void testMissingSessionDropsRegistrations() throws FrostSubscriptionException {
+        LOGGER.info("*** testMissingSessionDropsRegistrations ***");
         subscribe(SESSION_A, "Rooms", null, null);
         assertEquals(1, registry.registrationCount());
         sessionPresent = false;
         sendMessage(creEvent(7, 1L, EntityChangedMessage.Type.CREATE));
-        awaitQuiesce();
+        Awaitility.await()
+                .atMost(500, TimeUnit.MILLISECONDS)
+                .until(() -> registry.registrationCount() == 0);
         assertEquals(0, registry.registrationCount(), "Subscriptions of gone sessions must be dropped.");
     }
 
@@ -347,20 +377,16 @@ class FrostSubscriptionRegistryTest {
                 .setEntity(entity);
     }
 
-    private void awaitCount(int count) throws InterruptedException {
+    private void awaitCount(int count) {
         awaitCount(count, "");
     }
 
-    private void awaitCount(int count, String message) throws InterruptedException {
-        final long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30);
-        while (sink.size() < count && System.currentTimeMillis() < deadline) {
-            Thread.sleep(50);
-        }
+    private void awaitCount(int count, String message) {
+        Awaitility.await()
+                .atMost(30, TimeUnit.SECONDS)
+                .pollInterval(50, TimeUnit.MILLISECONDS)
+                .until(() -> sink.size() >= count);
         assertEquals(count, sink.size(), message);
-    }
-
-    private void awaitQuiesce() throws InterruptedException {
-        Thread.sleep(500);
     }
 
     private void assertEnvelope(CapturingSink.Captured captured, long subscriptionId, String eventType, String entityType) {
