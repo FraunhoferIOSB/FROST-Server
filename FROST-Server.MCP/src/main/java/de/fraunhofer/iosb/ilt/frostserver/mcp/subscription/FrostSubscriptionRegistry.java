@@ -49,14 +49,14 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 /**
- * Maps FROST message-bus EntityChangedMessages to MCP logging
- * notifications, per session. Subscriptions are created by the
- * frost_subscribe tool and delivered as MCP "notifications/message"
- * notifications with logger "frost": the notification data is a JSON
- * envelope carrying the subscription id, the event type, the entity type
- * and the formatted entity.
+ * Maps FROST message-bus EntityChangedMessages to MCP logging notifications,
+ * per session. Subscriptions are created by the frost_subscribe tool and
+ * delivered as MCP "notifications/message" notifications with logger "frost":
+ * the notification data is a JSON envelope carrying the subscription id, the
+ * event type, the entity type and the formatted entity.
  *
- * <p>Concurrency: the registry is a MessageBus listener (worker threads) and
+ * <p>
+ * Concurrency: the registry is a MessageBus listener (worker threads) and
  * receives subscribe/unsubscribe calls from HTTP threads. The registration
  * mutations are synchronized on the registry; the event path uses
  * concurrency-friendly collections and one shared persistence manager per
@@ -116,8 +116,8 @@ public class FrostSubscriptionRegistry implements MessageListener {
 
     /**
      * Subscribes a session. Parse and gate failures surface as
-     * IllegalArgumentException for the tool layer to map to MCP -32602; cap
-     * and visibility failures as FrostSubscriptionException.
+     * IllegalArgumentException for the tool layer to map to MCP -32602; cap and
+     * visibility failures as FrostSubscriptionException.
      *
      * @param sessionId The MCP session id. May not be null.
      * @param principal The principal of the session.
@@ -146,7 +146,7 @@ public class FrostSubscriptionRegistry implements MessageListener {
             throw new FrostSubscriptionException(429, "Subscription limit reached: at most " + cap + " active subscriptions per session (mcp.maxSubscriptionsPerSession).");
         }
         if (subscription instanceof FrostEntitySubscription entitySubscription) {
-            requireEntityVisible(sessionId, principal, entitySubscription);
+            requireEntityVisible(principal, entitySubscription);
         }
         final long newId = idCounter.incrementAndGet();
         addRegistration(new Registration(newId, sessionId, subscription));
@@ -155,8 +155,8 @@ public class FrostSubscriptionRegistry implements MessageListener {
     }
 
     /**
-     * Removes subscriptions of a session. With a null id all subscriptions
-     * of the session are removed.
+     * Removes subscriptions of a session. With a null id all subscriptions of
+     * the session are removed.
      *
      * @param sessionId The MCP session id.
      * @param subscriptionId The subscription id, or null for all.
@@ -186,8 +186,8 @@ public class FrostSubscriptionRegistry implements MessageListener {
     }
 
     /**
-     * The ids of the subscriptions of a session (for tests and the
-     * unsubscribe result).
+     * The ids of the subscriptions of a session (for tests and the unsubscribe
+     * result).
      *
      * @param sessionId The MCP session id.
      * @return an unmodifiable copy of the ids, never null.
@@ -232,28 +232,33 @@ public class FrostSubscriptionRegistry implements MessageListener {
             Version lastVersion = null;
             for (Registration reg : registrations) {
                 final Subscription subscription = reg.subscription();
-                try {
-                    if (!subscription.matches(persistenceManager, entity, changedFields)) {
-                        continue;
-                    }
-                    if (lastVersion != subscription.getVersion()) {
-                        entity.setSelfLink(null);
-                        lastVersion = subscription.getVersion();
-                    }
-                    final Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
-                    final String envelope = buildEnvelope(reg.id(), message, subscription, newEntity);
-                    if (envelope == null) {
-                        continue;
-                    }
-                    deliverTo(reg, envelope);
-                } catch (RuntimeException ex) {
-                    LOGGER.warn("Failed to handle subscription {}: {}", reg, ex.getMessage());
-                    LOGGER.trace("Failure details:", ex);
-                }
+                handleSubscription(subscription, persistenceManager, entity, changedFields, lastVersion, reg, message);
             }
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             LOGGER.error("Error handling change message for {}.", entityType, ex);
         }
+    }
+
+    private Version handleSubscription(final Subscription subscription, final PersistenceManager persistenceManager, final Entity entity, final Set<Property> changedFields, Version lastVersion, Registration reg, EntityChangedMessage message) {
+        try {
+            if (!subscription.matches(persistenceManager, entity, changedFields)) {
+                return lastVersion;
+            }
+            if (lastVersion != subscription.getVersion()) {
+                entity.setSelfLink(null);
+                lastVersion = subscription.getVersion();
+            }
+            final Entity newEntity = subscription.fetchExpand(persistenceManager, entity);
+            final String envelope = buildEnvelope(reg.id(), message, subscription, newEntity);
+            if (envelope == null) {
+                return lastVersion;
+            }
+            deliverTo(reg, envelope);
+        } catch (RuntimeException ex) {
+            LOGGER.warn("Failed to handle subscription {}: {}", reg, ex.getMessage());
+            LOGGER.trace("Failure details:", ex);
+        }
+        return lastVersion;
     }
 
     private String buildEnvelope(long subscriptionId, EntityChangedMessage message, Subscription subscription, Entity entity) {
@@ -293,7 +298,9 @@ public class FrostSubscriptionRegistry implements MessageListener {
             return;
         }
         delivery.subscribe(
-                ok -> {},
+                ok -> {
+                    // nothing to do when all is ok.
+                },
                 err -> handleSendFailure(reg.sessionId(), err));
     }
 
@@ -302,7 +309,7 @@ public class FrostSubscriptionRegistry implements MessageListener {
         removeSession(sessionId);
     }
 
-    private void requireEntityVisible(String sessionId, PrincipalExtended principal, FrostEntitySubscription subscription) throws FrostSubscriptionException {
+    private void requireEntityVisible(PrincipalExtended principal, FrostEntitySubscription subscription) throws FrostSubscriptionException {
         final PathElementEntity lastElement = (PathElementEntity) subscription.getPath().getLastElement();
         final Object result;
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(coreSettings).create()) {
@@ -402,8 +409,8 @@ public class FrostSubscriptionRegistry implements MessageListener {
     }
 
     /**
-     * Stops listening and clears all registrations. Call before shutting
-     * down the bus or transport.
+     * Stops listening and clears all registrations. Call before shutting down
+     * the bus or transport.
      */
     public synchronized void shutdown() {
         if (listening.compareAndSet(true, false)) {

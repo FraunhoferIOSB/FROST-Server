@@ -26,17 +26,20 @@ import de.fraunhofer.iosb.ilt.frostserver.mqtt.subscription.AbstractSubscription
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntity;
 import de.fraunhofer.iosb.ilt.frostserver.path.PathElementEntitySet;
 import de.fraunhofer.iosb.ilt.frostserver.path.ResourcePath;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
+import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncorrectRequestException;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
  * An MCP subscription on a single entity, e.g. Things(1) or
- * Datastreams(2)/ObservedProperty. No query options are allowed at all. For
- * the direct two-element shape (entity set plus identified entity) a cheap
+ * Datastreams(2)/ObservedProperty. No query options are allowed at all. For the
+ * direct two-element shape (entity set plus identified entity) a cheap
  * primary-key matcher is installed; deeper shapes fall back to the
  * match-expression machinery of the base class.
  */
@@ -108,7 +111,7 @@ public class FrostEntitySubscription extends AbstractSubscription {
     }
 
     @Override
-    public boolean matches(de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager persistenceManager, Entity newEntity, java.util.Set<de.fraunhofer.iosb.ilt.frostserver.property.Property> fields) {
+    public boolean matches(PersistenceManager persistenceManager, Entity newEntity, Set<Property> fields) {
         if (matcher != null && !matcher.test(newEntity)) {
             return false;
         }
@@ -127,6 +130,16 @@ public class FrostEntitySubscription extends AbstractSubscription {
         } finally {
             PrincipalExtended.setLocalPrincipal(oldLocalPrincipal);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
 }

@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.request.ServiceContext;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import java.util.List;
 
@@ -70,9 +71,8 @@ public class FrostSubscriptionFactory {
      * @throws IllegalArgumentException on parse or gate failures.
      */
     public Subscription create(PrincipalExtended principal, Version version, String staPath, String filter, List<String> select) {
-        if (StringHelper.isNullOrEmpty(staPath)) {
-            throw new IllegalArgumentException("Missing subscription path.");
-        }
+        Exceptions.illegalArgumentIf(StringHelper.isNullOrEmpty(staPath), "Missing subscription path.");
+
         final boolean anonymous = isAnonymous(PrincipalExtended.fromPrincipal(principal));
         principal = PrincipalExtended.fromPrincipal(principal);
 
@@ -86,45 +86,36 @@ public class FrostSubscriptionFactory {
                 .setQueryDefaults(queryDefaults)
                 .setPrefixGen(() -> queryDefaults.getServiceRootUrl() + '/' + version.urlPart + '/');
 
-        final ResourcePath path;
-        try {
-            path = PathParser.parsePath(context, version, staPath, principal);
-        } catch (RuntimeException ex) {
-            throw new IllegalArgumentException("Invalid STA path: " + ex.getMessage(), ex);
-        }
+        final ResourcePath path = PathParser.parsePath(context, version, staPath, principal);
         final PathElement lastElement = path.getLastElement();
-        if (lastElement instanceof PathElementProperty) {
-            throw new IllegalArgumentException("Invalid subscription to: '" + staPath + "': property subscriptions are not supported; subscribe to the entity instead.");
-        }
+        Exceptions.illegalArgumentIf(
+                lastElement instanceof PathElementProperty,
+                "Invalid subscription to: '{}': property subscriptions are not supported; subscribe to the entity instead.",
+                staPath);
 
         final String decodedQuery = assembleQuery(filter, select);
         Query query = null;
         if (!StringHelper.isNullOrEmpty(decodedQuery)) {
-            try {
-                query = QueryParser.parseQuery(decodedQuery, context, path, PrincipalExtended.ANONYMOUS_PRINCIPAL).validate();
-            } catch (RuntimeException ex) {
-                throw new IllegalArgumentException("Invalid STA query: " + ex.getMessage(), ex);
-            }
+            query = QueryParser.parseQuery(decodedQuery, context, path, PrincipalExtended.ANONYMOUS_PRINCIPAL).validate();
         }
 
         final String queryPart = query == null ? "" : "?" + query.toUnencodedString(false);
         final String canonicalTopic = version.urlPart + "/" + path.getUrl() + queryPart;
-        final Subscription subscription;
+
         if (lastElement instanceof PathElementEntitySet) {
-            subscription = anonymous
+            return anonymous
                     ? new FrostEntitySetSubscription(coreSettings, canonicalTopic, path, query)
                     : new FrostEntitySetSubscription(coreSettings, principal, canonicalTopic, path, query);
         } else if (lastElement instanceof PathElementEntity) {
-            if (query != null) {
-                throw new IllegalArgumentException("Invalid subscription to: '" + staPath + "': query options are not allowed for subscription on an entity.");
-            }
-            subscription = anonymous
+            Exceptions.illegalArgumentIf(
+                    query != null,
+                    "Invalid subscription to: '{}': query options are not allowed for subscription on an entity.",
+                    staPath);
+            return anonymous
                     ? new FrostEntitySubscription(coreSettings, canonicalTopic, path)
                     : new FrostEntitySubscription(coreSettings, principal, canonicalTopic, path);
-        } else {
-            throw new IllegalArgumentException("Invalid subscription to: '" + staPath + "': path must be an entity set or an entity.");
         }
-        return subscription;
+        throw new IllegalArgumentException("Invalid subscription to: '" + staPath + "': path must be an entity set or an entity.");
     }
 
     private static boolean isAnonymous(PrincipalExtended principal) {

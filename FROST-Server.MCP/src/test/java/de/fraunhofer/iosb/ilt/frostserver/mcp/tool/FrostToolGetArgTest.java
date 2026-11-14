@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.modelcontextprotocol.spec.McpError;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -94,7 +93,7 @@ class FrostToolGetArgTest {
         assertEquals(Optional.of(Boolean.TRUE), FrostToolGet.boolArg(arguments, "count"));
         arguments.put("count", "false");
         assertEquals(Optional.of(Boolean.FALSE), FrostToolGet.boolArg(arguments, "count"));
-        assertTrue(FrostToolGet.boolArg(new HashMap<>(Map.of("count", Boolean.FALSE)), "count").get().equals(Boolean.FALSE));
+        assertEquals(Boolean.FALSE, FrostToolGet.boolArg(new HashMap<>(Map.of("count", Boolean.FALSE)), "count").get());
     }
 
 }

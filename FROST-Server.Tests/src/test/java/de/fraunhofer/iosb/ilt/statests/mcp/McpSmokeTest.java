@@ -45,7 +45,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -113,7 +115,7 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     @Test
-    public void testInitializeHandshake() {
+    void testInitializeHandshake() {
         LOGGER.info("  testInitializeHandshake");
         // initialize() ran during setUpVersion; a working tools/list proves it.
         assertNotNull(mcpClient, "Client must be initialised.");
@@ -122,7 +124,7 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     @Test
-    public void testToolsList() {
+    void testToolsList() {
         LOGGER.info("  testToolsList");
         List<Tool> tools = mcpClient.listTools().tools();
         Set<String> names = tools.stream().map(Tool::name).collect(Collectors.toSet());
@@ -136,7 +138,7 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     @Test
-    public void testCrudRoundTrip() {
+    void testCrudRoundTrip() {
         LOGGER.info("  testCrudRoundTrip");
         // CREATE a Thing
         Map<String, Object> thing = new LinkedHashMap<>();
@@ -206,7 +208,7 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     @Test
-    public void testResources() {
+    void testResources() {
         LOGGER.info("  testResources");
         ReadResourceResult index = mcpClient.readResource(
                 McpSchema.ReadResourceRequest.builder("frost://index").build());
@@ -239,19 +241,21 @@ public class McpSmokeTest extends AbstractTestClass {
     }
 
     @Test
-    public void testInvalidPathBecomesProtocolError() {
+    void testInvalidPathBecomesProtocolError() {
         LOGGER.info("  testInvalidPathBecomesProtocolError");
         // Invalid entity set name; rejected by the STA parser surfaces as an
         // MCP protocol error (-32602) instead of a tool result.
+        CallToolRequest tool = CallToolRequest.builder("frost_get")
+                .arguments(Map.of("path", "NotAnEntitySet"))
+                .build();
         Assertions.assertThrows(
                 McpError.class,
-                () -> mcpClient.callTool(CallToolRequest.builder("frost_get")
-                        .arguments(Map.of("path", "NotAnEntitySet")).build()),
+                () -> mcpClient.callTool(tool),
                 "Calling with an invalid path must raise an MCP error.");
     }
 
     @Test
-    public void testSubscriptionRoundTrip() throws InterruptedException {
+    void testSubscriptionRoundTrip() {
         LOGGER.info("  testSubscriptionRoundTrip");
         loggingNotifications.clear();
 
@@ -302,18 +306,20 @@ public class McpSmokeTest extends AbstractTestClass {
 
         // An invalid subscription path is an MCP protocol error, like the
         // other tools.
+        CallToolRequest tool = CallToolRequest.builder("frost_subscribe")
+                .arguments(Map.of("path", "NotAnEntitySet"))
+                .build();
         Assertions.assertThrows(
                 McpError.class,
-                () -> mcpClient.callTool(CallToolRequest.builder("frost_subscribe")
-                        .arguments(Map.of("path", "NotAnEntitySet")).build()),
+                () -> mcpClient.callTool(tool),
                 "Subscribing to an invalid path must raise an MCP error.");
     }
 
-    private Map<String, Object> awaitNotification(long subscriptionId) throws InterruptedException {
-        final long deadline = System.currentTimeMillis() + 30_000;
-        while (loggingNotifications.isEmpty() && System.currentTimeMillis() < deadline) {
-            Thread.sleep(100);
-        }
+    private Map<String, Object> awaitNotification(long subscriptionId) {
+        Awaitility.await()
+                .atMost(30, TimeUnit.SECONDS)
+                .pollInterval(100, TimeUnit.MILLISECONDS)
+                .until(() -> !loggingNotifications.isEmpty());
         assertFalse(loggingNotifications.isEmpty(), "A subscription notification must arrive.");
         LoggingMessageNotification notification = loggingNotifications.peek();
         assertEquals("frost", notification.logger(), "The notification must carry the frost logger.");
