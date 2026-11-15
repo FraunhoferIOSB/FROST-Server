@@ -23,7 +23,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mcp.subscription;
  * Carries an HTTP-like code and message for the tool layer to render as an
  * isError tool result.
  */
-public class FrostSubscriptionException extends Exception {
+public class SubscriptionException extends Exception {
 
     private final int code;
 
@@ -33,7 +33,7 @@ public class FrostSubscriptionException extends Exception {
      * @param code The HTTP-like status code (429, 404, 403).
      * @param message The human-readable message.
      */
-    public FrostSubscriptionException(int code, String message) {
+    public SubscriptionException(int code, String message) {
         super(message);
         this.code = code;
     }

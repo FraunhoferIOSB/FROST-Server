@@ -43,7 +43,7 @@ import java.util.function.Predicate;
  * primary-key matcher is installed; deeper shapes fall back to the
  * match-expression machinery of the base class.
  */
-public class FrostEntitySubscription extends AbstractSubscription {
+public class EntitySubscription extends AbstractSubscription {
 
     private final Query emptyQuery;
     private final Predicate<? super Entity> matcher;
@@ -55,7 +55,7 @@ public class FrostEntitySubscription extends AbstractSubscription {
      * @param topic The canonical topic: the version path of the entity.
      * @param path The parsed path. The last element must be an entity.
      */
-    public FrostEntitySubscription(CoreSettings settings, String topic, ResourcePath path) {
+    public EntitySubscription(CoreSettings settings, String topic, ResourcePath path) {
         super(settings, topic, path);
         this.emptyQuery = buildEmptyQuery();
         this.matcher = buildMatcher();
@@ -71,7 +71,7 @@ public class FrostEntitySubscription extends AbstractSubscription {
      * @param topic The canonical topic: the version path of the entity.
      * @param path The parsed path. The last element must be an entity.
      */
-    public FrostEntitySubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path) {
+    public EntitySubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path) {
         super(settings, userPrincipal, topic, path);
         this.emptyQuery = buildEmptyQuery();
         this.matcher = buildMatcher();

@@ -60,9 +60,9 @@ import tools.jackson.databind.JsonNode;
  * TestPmMcp dummy persistence manager, mirroring the core module's
  * MqttManagerTest idiom.
  */
-class FrostSubscriptionRegistryTest {
+class SubscriptionRegistryTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FrostSubscriptionRegistryTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionRegistryTest.class);
 
     private static final String SESSION_A = "session-a";
     private static final String SESSION_B = "session-b";
@@ -71,7 +71,7 @@ class FrostSubscriptionRegistryTest {
     private CoreSettings coreSettings;
     private TestModelMcp testModel;
     private CapturingSink sink;
-    private FrostSubscriptionRegistry registry;
+    private SubscriptionRegistry registry;
     private volatile boolean sessionPresent = true;
 
     @BeforeEach
@@ -99,7 +99,7 @@ class FrostSubscriptionRegistryTest {
         MessageBusFactory.createMessageBus(coreSettings);
         sessionPresent = true;
         sink = new CapturingSink(Set.of(SESSION_GONE));
-        registry = new FrostSubscriptionRegistry(coreSettings, sink, sessionId -> sessionPresent);
+        registry = new SubscriptionRegistry(coreSettings, sink, sessionId -> sessionPresent);
     }
 
     @AfterEach
@@ -110,9 +110,9 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testEntitySetSubscriptionDeliversCreateUpdateDelete() throws FrostSubscriptionException {
+    void testEntitySetSubscriptionDeliversCreateUpdateDelete() throws SubscriptionException {
         LOGGER.info("*** testEntitySetSubscriptionDeliversCreateUpdateDelete ***");
-        final FrostSubscriptionResult result = subscribe(SESSION_A, "Rooms", null, null);
+        final SubscriptionResult result = subscribe(SESSION_A, "Rooms", null, null);
         assertFalse(result.alreadyExisted());
         assertTrue(result.sessionActive());
         assertEquals(1, registry.registrationCount());
@@ -136,7 +136,7 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testBareSetIgnoresOtherTypes() throws FrostSubscriptionException {
+    void testBareSetIgnoresOtherTypes() throws SubscriptionException {
         LOGGER.info("*** testBareSetIgnoresOtherTypes ***");
         subscribe(SESSION_A, "Houses", null, null);
         sendMessage(entityEvent(testModel.etHouse, 7, EntityChangedMessage.Type.CREATE));
@@ -152,7 +152,7 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testParentedSetMatchesOnlyItsParent() throws FrostSubscriptionException {
+    void testParentedSetMatchesOnlyItsParent() throws SubscriptionException {
         LOGGER.info("*** testParentedSetMatchesOnlyItsParent ***");
         subscribe(SESSION_A, "Houses(1)/Rooms", null, null);
         sendMessage(creEvent(7, 1L, EntityChangedMessage.Type.CREATE));
@@ -168,15 +168,14 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testEntitySubscriptionPkMatcherAndVisibility() throws FrostSubscriptionException {
+    void testEntitySubscriptionPkMatcherAndVisibility() throws SubscriptionException {
         LOGGER.info("*** testEntitySubscriptionPkMatcherAndVisibility ***");
-        final FrostSubscriptionResult ok = subscribe(SESSION_A, "Rooms(1)", null, null);
+        final SubscriptionResult ok = subscribe(SESSION_A, "Rooms(1)", null, null);
         assertFalse(ok.alreadyExisted());
         assertEquals("int/Rooms(1)", ok.topic(), "The entity subscription topic carries no query.");
 
         // Entity -1 is absent from the dummy store → not visible → 404.
-        final FrostSubscriptionException notFound = assertThrows(
-                FrostSubscriptionException.class, () -> subscribe(SESSION_A, "Rooms(-1)", null, null));
+        final SubscriptionException notFound = assertThrows(SubscriptionException.class, () -> subscribe(SESSION_A, "Rooms(-1)", null, null));
         assertEquals(404, notFound.getCode());
         assertTrue(notFound.getMessage().contains("not found"), notFound.getMessage());
 
@@ -195,10 +194,10 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testDedupeSessionsAndSelect() throws FrostSubscriptionException {
+    void testDedupeSessionsAndSelect() throws SubscriptionException {
         LOGGER.info("*** testDedupeSessionsAndSelect ***");
-        final FrostSubscriptionResult first = subscribe(SESSION_A, "Rooms", null, null);
-        final FrostSubscriptionResult duplicate = subscribe(SESSION_A, "Rooms", null, null);
+        final SubscriptionResult first = subscribe(SESSION_A, "Rooms", null, null);
+        final SubscriptionResult duplicate = subscribe(SESSION_A, "Rooms", null, null);
         assertTrue(duplicate.alreadyExisted(), "Identical subscription must dedupe.");
         assertEquals(first.subscriptionId(), duplicate.subscriptionId());
         assertEquals(1, registry.registrationCount());
@@ -221,15 +220,15 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testSelectTopicRoundTrip() throws FrostSubscriptionException {
+    void testSelectTopicRoundTrip() throws SubscriptionException {
         LOGGER.info("*** testSelectTopicRoundTrip ***");
-        final FrostSubscriptionResult selected = subscribe(SESSION_A, "Rooms", null, List.of("id", "name"));
+        final SubscriptionResult selected = subscribe(SESSION_A, "Rooms", null, List.of("id", "name"));
         assertTrue(selected.topic().startsWith("int/Rooms?"), "Topic: " + selected.topic());
         assertTrue(selected.topic().contains("$select=@iot.id,name"), "Topic: " + selected.topic());
         assertFalse(selected.topic().contains("$orderby"), "Default orderby must not leak into the topic: " + selected.topic());
         assertEquals(1, registry.registrationCount());
 
-        final FrostSubscriptionResult filtered = subscribe(SESSION_B, "Rooms", "name eq 'n7'", null);
+        final SubscriptionResult filtered = subscribe(SESSION_B, "Rooms", "name eq 'n7'", null);
         assertTrue(filtered.topic().contains("$filter=(name"), "Topic: " + filtered.topic());
         assertFalse(filtered.topic().contains("$orderby"), "Default orderby must not leak into the topic: " + filtered.topic());
     }
@@ -252,13 +251,12 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testCap() throws FrostSubscriptionException {
+    void testCap() throws SubscriptionException {
         LOGGER.info("*** testCap ***");
         subscribe(SESSION_A, "Rooms", null, null);
         subscribe(SESSION_A, "Houses", null, null);
         subscribe(SESSION_A, "Houses(1)/Rooms", null, null);
-        final FrostSubscriptionException capped = assertThrows(
-                FrostSubscriptionException.class, () -> subscribe(SESSION_A, "Rooms(2)", null, null));
+        final SubscriptionException capped = assertThrows(SubscriptionException.class, () -> subscribe(SESSION_A, "Rooms(2)", null, null));
         assertEquals(429, capped.getCode());
         assertTrue(capped.getMessage().contains("mcp.maxSubscriptionsPerSession"), capped.getMessage());
 
@@ -273,9 +271,9 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testUnsubscribe() throws FrostSubscriptionException {
+    void testUnsubscribe() throws SubscriptionException {
         LOGGER.info("*** testUnsubscribe ***");
-        final FrostSubscriptionResult one = subscribe(SESSION_A, "Rooms", null, null);
+        final SubscriptionResult one = subscribe(SESSION_A, "Rooms", null, null);
         subscribe(SESSION_A, "Houses", null, null);
         assertEquals(2, registry.registrationCount());
 
@@ -290,7 +288,7 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testEventsStopAfterUnsubscribe() throws FrostSubscriptionException {
+    void testEventsStopAfterUnsubscribe() throws SubscriptionException {
         LOGGER.info("*** testEventsStopAfterUnsubscribe ***");
         subscribe(SESSION_A, "Rooms", null, null);
         sendMessage(creEvent(7, 1L, EntityChangedMessage.Type.CREATE));
@@ -307,7 +305,7 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testDeliveryFailureDropsSession() throws FrostSubscriptionException {
+    void testDeliveryFailureDropsSession() throws SubscriptionException {
         LOGGER.info("*** testDeliveryFailureDropsSession ***");
         // SESSION_GONE deliveries fail in the sink → the registry drops that
         // session's registrations; SESSION_A keeps receiving.
@@ -325,7 +323,7 @@ class FrostSubscriptionRegistryTest {
 
     @Timeout(60)
     @Test
-    void testMissingSessionDropsRegistrations() throws FrostSubscriptionException {
+    void testMissingSessionDropsRegistrations() throws SubscriptionException {
         LOGGER.info("*** testMissingSessionDropsRegistrations ***");
         subscribe(SESSION_A, "Rooms", null, null);
         assertEquals(1, registry.registrationCount());
@@ -349,7 +347,7 @@ class FrostSubscriptionRegistryTest {
 
     }
 
-    private FrostSubscriptionResult subscribe(String sessionId, String path, String filter, List<String> select) throws FrostSubscriptionException {
+    private SubscriptionResult subscribe(String sessionId, String path, String filter, List<String> select) throws SubscriptionException {
         return registry.subscribe(sessionId, PrincipalExtended.ANONYMOUS_PRINCIPAL, Version.INTERNAL, path, filter, select);
     }
 
@@ -391,7 +389,7 @@ class FrostSubscriptionRegistryTest {
 
     private void assertEnvelope(CapturingSink.Captured captured, long subscriptionId, String eventType, String entityType) {
         assertEquals(SESSION_A, captured.sessionId());
-        assertEquals(FrostSubscriptionRegistry.LOGGER_NAME, captured.notification().logger());
+        assertEquals(SubscriptionRegistry.LOGGER_NAME, captured.notification().logger());
         assertEquals(McpSchema.LoggingLevel.INFO, captured.notification().level());
         final JsonNode envelope = StaJsonHelper.parseOrNull(captured.notification().data());
         assertNotNull(envelope, "The envelope must be valid JSON.");

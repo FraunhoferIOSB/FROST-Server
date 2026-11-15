@@ -32,23 +32,23 @@ class FrostResourceHandlerSplitTest {
 
     @Test
     void testSplitStaTarget() {
-        assertArrayEquals(new String[]{"Things", null}, FrostResourceHandler.splitStaTarget("Things"));
-        assertArrayEquals(new String[]{"Things(1)", null}, FrostResourceHandler.splitStaTarget("Things(1)"));
-        assertArrayEquals(new String[]{"Things", "$top=1"}, FrostResourceHandler.splitStaTarget("Things?$top=1"));
+        assertArrayEquals(new String[]{"Things", null}, ResourceHandler.splitStaTarget("Things"));
+        assertArrayEquals(new String[]{"Things(1)", null}, ResourceHandler.splitStaTarget("Things(1)"));
+        assertArrayEquals(new String[]{"Things", "$top=1"}, ResourceHandler.splitStaTarget("Things?$top=1"));
         assertArrayEquals(new String[]{"Things", "$filter=name eq 'a?b'"},
-                FrostResourceHandler.splitStaTarget("Things?$filter=name eq 'a?b'"),
+                ResourceHandler.splitStaTarget("Things?$filter=name eq 'a?b'"),
                 "Only the first '?' starts the query part.");
-        assertArrayEquals(new String[]{"", null}, FrostResourceHandler.splitStaTarget(""));
+        assertArrayEquals(new String[]{"", null}, ResourceHandler.splitStaTarget(""));
         assertArrayEquals(new String[]{"Things(1)/name/$value", "$select=nothing"},
-                FrostResourceHandler.splitStaTarget("Things(1)/name/$value?$select=nothing"));
+                ResourceHandler.splitStaTarget("Things(1)/name/$value?$select=nothing"));
     }
 
     @Test
     void testSplitStaTargetOnlyQuery() {
-        final String[] parts = FrostResourceHandler.splitStaTarget("?$top=5");
+        final String[] parts = ResourceHandler.splitStaTarget("?$top=5");
         assertEquals("", parts[0]);
         assertEquals("$top=5", parts[1]);
-        assertNull(FrostResourceHandler.splitStaTarget("Things")[1]);
+        assertNull(ResourceHandler.splitStaTarget("Things")[1]);
     }
 
 }

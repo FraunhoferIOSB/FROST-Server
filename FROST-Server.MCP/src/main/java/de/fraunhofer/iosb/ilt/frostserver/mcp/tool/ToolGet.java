@@ -50,7 +50,7 @@ import java.util.Optional;
  * protocol errors), the MCP paging/count caps are applied, and the request is
  * executed against the FROST core Service.
  */
-public class FrostToolGet implements FrostTool {
+public class ToolGet implements FrostTool {
 
     /**
      * The tool name.
@@ -66,7 +66,7 @@ public class FrostToolGet implements FrostTool {
 
     private final FrostToolHandler handler;
 
-    public FrostToolGet(FrostToolHandler handler) {
+    public ToolGet(FrostToolHandler handler) {
         this.handler = handler;
     }
 

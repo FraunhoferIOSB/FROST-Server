@@ -52,7 +52,7 @@ import java.util.Map;
  * returns only the new @iot.id, 'representation' the full created entity (
  * honoured by STA v2; v1 always creates with an empty body, like HTTP).
  */
-public class FrostToolCreate implements FrostTool {
+public class ToolCreate implements FrostTool {
 
     /**
      * The tool name.
@@ -66,7 +66,7 @@ public class FrostToolCreate implements FrostTool {
 
     private final FrostToolHandler handler;
 
-    public FrostToolCreate(FrostToolHandler handler) {
+    public ToolCreate(FrostToolHandler handler) {
         this.handler = handler;
     }
 
@@ -127,13 +127,13 @@ public class FrostToolCreate implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = FrostToolGet.requireStringArg(arguments, KEY_PATH);
+        final String path = ToolGet.requireStringArg(arguments, KEY_PATH);
         final Object entity = arguments.get(KEY_ENTITY);
         if (!(entity instanceof Map)) {
             throw FrostToolHandler.invalidParams("Missing required argument 'entity' (must be a JSON object).");
         }
-        final String prefer = FrostToolGet.stringArg(arguments, KEY_PREFER);
-        final String versionName = FrostToolGet.stringArg(arguments, "version");
+        final String prefer = ToolGet.stringArg(arguments, KEY_PREFER);
+        final String versionName = ToolGet.stringArg(arguments, "version");
         final String entityJson = StaJsonHelper.writeValueAsString(entity);
 
         final Version version = handler.resolveVersion(versionName);

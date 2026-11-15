@@ -44,7 +44,7 @@ import java.util.List;
  * Parse and gate failures surface as IllegalArgumentException for the tool
  * layer to map to MCP -32602.
  */
-public class FrostSubscriptionFactory {
+public class SubscriptionFactory {
 
     private final CoreSettings coreSettings;
 
@@ -53,7 +53,7 @@ public class FrostSubscriptionFactory {
      *
      * @param coreSettings The server settings.
      */
-    public FrostSubscriptionFactory(CoreSettings coreSettings) {
+    public SubscriptionFactory(CoreSettings coreSettings) {
         this.coreSettings = coreSettings;
     }
 
@@ -104,16 +104,16 @@ public class FrostSubscriptionFactory {
 
         if (lastElement instanceof PathElementEntitySet) {
             return anonymous
-                    ? new FrostEntitySetSubscription(coreSettings, canonicalTopic, path, query)
-                    : new FrostEntitySetSubscription(coreSettings, principal, canonicalTopic, path, query);
+                    ? new EntitySetSubscription(coreSettings, canonicalTopic, path, query)
+                    : new EntitySetSubscription(coreSettings, principal, canonicalTopic, path, query);
         } else if (lastElement instanceof PathElementEntity) {
             Exceptions.illegalArgumentIf(
                     query != null,
                     "Invalid subscription to: '{}': query options are not allowed for subscription on an entity.",
                     staPath);
             return anonymous
-                    ? new FrostEntitySubscription(coreSettings, canonicalTopic, path)
-                    : new FrostEntitySubscription(coreSettings, principal, canonicalTopic, path);
+                    ? new EntitySubscription(coreSettings, canonicalTopic, path)
+                    : new EntitySubscription(coreSettings, principal, canonicalTopic, path);
         }
         throw new IllegalArgumentException("Invalid subscription to: '" + staPath + "': path must be an entity set or an entity.");
     }

@@ -19,20 +19,20 @@ package de.fraunhofer.iosb.ilt.frostserver;
 
 import de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthFilter;
 import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakFilter;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.resource.FrostResourceHandler;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.resource.ResourceHandler;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.NotificationSink;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.SubscriptionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostTool;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolCreate;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolDelete;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolGet;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolQuery;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolReplace;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolSubscribe;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolUnsubscribe;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolUpdate;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolCreate;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolDelete;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolGet;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolQuery;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolReplace;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolSubscribe;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolUnsubscribe;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolUpdate;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.McpSdkWorkarounds;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
@@ -102,7 +102,7 @@ public class FrostMcpServer {
     private HTTPServer metricsServer;
     private Server jettyServer;
     private McpSyncServer mcpServer;
-    private FrostSubscriptionRegistry subscriptionRegistry;
+    private SubscriptionRegistry subscriptionRegistry;
     private Thread shutdownHook;
 
     private Class<? extends jakarta.servlet.Filter> authFilterClass;
@@ -246,8 +246,8 @@ public class FrostMcpServer {
 
     private McpSyncServer buildMcpServer(HttpServletStreamableServerTransportProvider transportProvider) {
         final FrostToolHandler toolHandler = new FrostToolHandler(coreSettings, mcpSettings);
-        final FrostResourceHandler resourceHandler = new FrostResourceHandler(toolHandler);
-        subscriptionRegistry = new FrostSubscriptionRegistry(coreSettings, buildNotificationSink(transportProvider), McpSdkWorkarounds.sessionPresence(transportProvider));
+        final ResourceHandler resourceHandler = new ResourceHandler(toolHandler);
+        subscriptionRegistry = new SubscriptionRegistry(coreSettings, buildNotificationSink(transportProvider), McpSdkWorkarounds.sessionPresence(transportProvider));
 
         final McpServerFeatures.SyncToolSpecification[] tools = collectTools(toolHandler, subscriptionRegistry);
         final McpServer.SyncSpecification<McpServer.StreamableSyncSpecification> specification = McpServer.sync(transportProvider)
@@ -261,16 +261,15 @@ public class FrostMcpServer {
         return mcpServer;
     }
 
-    private McpServerFeatures.SyncToolSpecification[] collectTools(FrostToolHandler handler, FrostSubscriptionRegistry registry) {
-        return Stream.of(
-                toolSpec(handler, new FrostToolGet(handler)),
-                toolSpec(handler, new FrostToolQuery(handler)),
-                toolSpec(handler, new FrostToolCreate(handler)),
-                toolSpec(handler, new FrostToolUpdate(handler)),
-                toolSpec(handler, new FrostToolReplace(handler)),
-                toolSpec(handler, new FrostToolDelete(handler)),
-                toolSpec(handler, new FrostToolSubscribe(handler, registry)),
-                toolSpec(handler, new FrostToolUnsubscribe(handler, registry)))
+    private McpServerFeatures.SyncToolSpecification[] collectTools(FrostToolHandler handler, SubscriptionRegistry registry) {
+        return Stream.of(toolSpec(handler, new ToolGet(handler)),
+                toolSpec(handler, new ToolQuery(handler)),
+                toolSpec(handler, new ToolCreate(handler)),
+                toolSpec(handler, new ToolUpdate(handler)),
+                toolSpec(handler, new ToolReplace(handler)),
+                toolSpec(handler, new ToolDelete(handler)),
+                toolSpec(handler, new ToolSubscribe(handler, registry)),
+                toolSpec(handler, new ToolUnsubscribe(handler, registry)))
                 .filter(Objects::nonNull)
                 .toArray(McpServerFeatures.SyncToolSpecification[]::new);
     }
