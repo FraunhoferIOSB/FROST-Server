@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ADDITIONAL_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_DESCRIPTION;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_ENTITY;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PATH;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_PROPERTIES;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_REQUIRED;
@@ -27,10 +28,12 @@ import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_V
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
 
+import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
+import de.fraunhofer.iosb.ilt.frostserver.util.Constants;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
@@ -40,14 +43,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The frost_delete tool: DELETEs an entity (or a $ref navigation link).
+ * The frost_replace tool: PUT (UPDATE_ALL) an existing entity — a full replace
+ * that overwrites every property not present in the entity with its
+ * default/null. It is separate from frost_update because MCP tool annotations
+ * are static per registration: only a dedicated tool can carry
+ * destructiveHint=true, letting clients gate full replaces behind an approval
+ * flow while auto-allowing patches.
  */
-public class FrostToolDelete implements FrostTool {
+public class ToolReplace implements FrostTool {
 
     /**
      * The tool name.
      */
-    public static final String NAME = "frost_delete";
+    public static final String NAME = "frost_replace";
 
     @Override
     public String toolName() {
@@ -56,12 +64,12 @@ public class FrostToolDelete implements FrostTool {
 
     private final FrostToolHandler handler;
 
-    public FrostToolDelete(FrostToolHandler handler) {
+    public ToolReplace(FrostToolHandler handler) {
         this.handler = handler;
     }
 
     /**
-     * The input schema for frost_delete.
+     * The input schema for frost_replace.
      *
      * @return the JSON schema map.
      */
@@ -69,29 +77,29 @@ public class FrostToolDelete implements FrostTool {
         final Map<String, Object> properties = new LinkedHashMap<>();
         properties.put(KEY_PATH, Map.of(
                 KEY_TYPE, TYPE_STRING,
-                KEY_DESCRIPTION, "Path to the entity to delete, e.g. 'Observations(4711)'."));
+                KEY_DESCRIPTION, "Path to the entity to replace, e.g. 'Things(1)'."));
+        properties.put(KEY_ENTITY, Map.of(
+                KEY_TYPE, TYPE_OBJECT,
+                KEY_DESCRIPTION, "The complete new entity, as STA JSON. Every property not present is overwritten with its default value (PUT semantics — full replace)."));
         properties.put(KEY_VERSION, Map.of(
                 KEY_TYPE, TYPE_STRING,
                 KEY_DESCRIPTION, "STA version part, e.g. 'v1.1'. Default: the server's default version."));
-        return Map.of(
-                KEY_TYPE, TYPE_OBJECT,
-                KEY_REQUIRED, List.of(KEY_PATH),
+        return Map.of(KEY_TYPE, TYPE_OBJECT,
+                KEY_REQUIRED, List.of(KEY_PATH, KEY_ENTITY),
                 KEY_PROPERTIES, properties,
                 KEY_ADDITIONAL_PROPERTIES, false);
     }
 
     /**
-     * Builds the tool registration for frost_delete.
+     * Builds the tool registration for frost_replace.
      *
      * @return the sync tool specification.
      */
     @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder()
-                .name(NAME)
-                .title("Delete an entity")
+        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
+                .title("Replace an existing entity (full replace)")
                 .description(description())
-                .inputSchema(inputSchema())
                 .annotations(McpSchema.ToolAnnotations.builder()
                         .destructiveHint(Boolean.TRUE)
                         .idempotentHint(Boolean.TRUE)
@@ -102,16 +110,24 @@ public class FrostToolDelete implements FrostTool {
     }
 
     private String description() {
-        return "Delete a SensorThings entity by path. "
-                + handler.entitySetCheatSheet();
+        return "Replace an existing SensorThings entity with PUT semantics: the entity is fully "
+                + "overwritten; any property not present in 'entity' is reset to its default. "
+                + "Prefer frost_update (patch) to change only individual properties. "
+                + handler.entitySetCheatSheet() + " "
+                + "Property details: frost://model resource.";
     }
 
     private McpSchema.CallToolResult call(McpSyncServerExchange exchange, McpSchema.CallToolRequest request) {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = FrostToolGet.requireStringArg(arguments, "path");
-        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
+        final String path = ToolGet.requireStringArg(arguments, KEY_PATH);
+        final Object entity = arguments.get(KEY_ENTITY);
+        if (!(entity instanceof Map)) {
+            throw FrostToolHandler.invalidParams("Missing required argument 'entity' (must be a JSON object).");
+        }
+        final String versionName = ToolGet.stringArg(arguments, KEY_VERSION);
+        final String entityJson = StaJsonHelper.writeValueAsString(entity);
 
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
@@ -121,8 +137,10 @@ public class FrostToolDelete implements FrostTool {
         final ServiceRequest serviceRequest = new ServiceRequest()
                 .setContext(handler.buildContext(handler.getCoreSettings().getQueryDefaults().copy(), version))
                 .setVersion(version)
-                .setRequestType(RequestTypeUtils.DELETE)
+                .setRequestType(RequestTypeUtils.UPDATE_ALL)
                 .setUrlPath(path)
+                .setContent(entityJson)
+                .setContentType(Constants.CONTENT_TYPE_APPLICATION_JSON)
                 .setUserPrincipal(principal);
         final ServiceResponseDefault response = handler.execute(serviceRequest);
         return handler.toCallToolResult(NAME, path, principal, version.urlPart, response);

@@ -38,62 +38,62 @@ class FrostToolGetArgTest {
     @Test
     void testStringArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        assertNull(FrostToolGet.stringArg(arguments, "missing"));
+        assertNull(ToolGet.stringArg(arguments, "missing"));
         arguments.put("asNumber", 7);
-        assertEquals("7", FrostToolGet.stringArg(arguments, "asNumber"), "Non-strings are stringified.");
+        assertEquals("7", ToolGet.stringArg(arguments, "asNumber"), "Non-strings are stringified.");
         arguments.put("asString", "text");
-        assertEquals("text", FrostToolGet.stringArg(arguments, "asString"));
+        assertEquals("text", ToolGet.stringArg(arguments, "asString"));
     }
 
     @Test
     void testRequireStringArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        final McpError missing = assertThrows(McpError.class, () -> FrostToolGet.requireStringArg(arguments, "path"));
+        final McpError missing = assertThrows(McpError.class, () -> ToolGet.requireStringArg(arguments, "path"));
         assertEquals(McpSchema.ErrorCodes.INVALID_PARAMS, missing.getJsonRpcError().code());
         arguments.put("path", "  ");
-        assertThrows(McpError.class, () -> FrostToolGet.requireStringArg(arguments, "path"), "Blank values are missing.");
+        assertThrows(McpError.class, () -> ToolGet.requireStringArg(arguments, "path"), "Blank values are missing.");
         arguments.put("path", "Things(1)");
-        assertEquals("Things(1)", FrostToolGet.requireStringArg(arguments, "path"));
+        assertEquals("Things(1)", ToolGet.requireStringArg(arguments, "path"));
     }
 
     @Test
     void testStringListArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        assertEquals(List.of(), FrostToolGet.stringListArg(arguments, "select"));
+        assertEquals(List.of(), ToolGet.stringListArg(arguments, "select"));
         arguments.put("select", List.of("id", "name"));
-        assertEquals(List.of("id", "name"), FrostToolGet.stringListArg(arguments, "select"));
+        assertEquals(List.of("id", "name"), ToolGet.stringListArg(arguments, "select"));
         arguments.put("select", "single");
-        assertEquals(List.of("single"), FrostToolGet.stringListArg(arguments, "select"), "A bare string becomes a one-item list.");
+        assertEquals(List.of("single"), ToolGet.stringListArg(arguments, "select"), "A bare string becomes a one-item list.");
         arguments.put("select", 4);
-        assertThrows(McpError.class, () -> FrostToolGet.stringListArg(arguments, "select"), "Other types are invalid.");
+        assertThrows(McpError.class, () -> ToolGet.stringListArg(arguments, "select"), "Other types are invalid.");
     }
 
     @Test
     void testIntArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        assertEquals(Optional.empty(), FrostToolGet.intArg(arguments, "top"));
+        assertEquals(Optional.empty(), ToolGet.intArg(arguments, "top"));
         arguments.put("top", 5);
-        assertEquals(Optional.of(5), FrostToolGet.intArg(arguments, "top"));
+        assertEquals(Optional.of(5), ToolGet.intArg(arguments, "top"));
         arguments.put("top", 5.7);
-        assertEquals(Optional.of(5), FrostToolGet.intArg(arguments, "top"), "Floating point numbers are truncated.");
+        assertEquals(Optional.of(5), ToolGet.intArg(arguments, "top"), "Floating point numbers are truncated.");
         arguments.put("top", "12");
-        assertEquals(Optional.of(12), FrostToolGet.intArg(arguments, "top"), "Numeric strings are parsed.");
+        assertEquals(Optional.of(12), ToolGet.intArg(arguments, "top"), "Numeric strings are parsed.");
         arguments.put("top", "twelve");
-        final McpError error = assertThrows(McpError.class, () -> FrostToolGet.intArg(arguments, "top"));
+        final McpError error = assertThrows(McpError.class, () -> ToolGet.intArg(arguments, "top"));
         assertEquals(McpSchema.ErrorCodes.INVALID_PARAMS, error.getJsonRpcError().code());
     }
 
     @Test
     void testBoolArg() {
         final Map<String, Object> arguments = new HashMap<>();
-        assertEquals(Optional.empty(), FrostToolGet.boolArg(arguments, "count"));
+        assertEquals(Optional.empty(), ToolGet.boolArg(arguments, "count"));
         arguments.put("count", true);
-        assertEquals(Optional.of(Boolean.TRUE), FrostToolGet.boolArg(arguments, "count"));
+        assertEquals(Optional.of(Boolean.TRUE), ToolGet.boolArg(arguments, "count"));
         arguments.put("count", "true");
-        assertEquals(Optional.of(Boolean.TRUE), FrostToolGet.boolArg(arguments, "count"));
+        assertEquals(Optional.of(Boolean.TRUE), ToolGet.boolArg(arguments, "count"));
         arguments.put("count", "false");
-        assertEquals(Optional.of(Boolean.FALSE), FrostToolGet.boolArg(arguments, "count"));
-        assertEquals(Boolean.FALSE, FrostToolGet.boolArg(new HashMap<>(Map.of("count", Boolean.FALSE)), "count").get());
+        assertEquals(Optional.of(Boolean.FALSE), ToolGet.boolArg(arguments, "count"));
+        assertEquals(Boolean.FALSE, ToolGet.boolArg(new HashMap<>(Map.of("count", Boolean.FALSE)), "count").get());
     }
 
 }

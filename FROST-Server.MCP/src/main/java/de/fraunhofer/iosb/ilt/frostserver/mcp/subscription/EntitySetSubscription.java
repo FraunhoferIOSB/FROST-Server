@@ -40,7 +40,7 @@ import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
  * query is supplied pre-parsed by the FrostSubscriptionFactory; this class only
  * applies the subscription gates and builds the matcher infrastructure.
  */
-public class FrostEntitySetSubscription extends AbstractSubscription {
+public class EntitySetSubscription extends AbstractSubscription {
 
     private final Query query;
 
@@ -54,7 +54,7 @@ public class FrostEntitySetSubscription extends AbstractSubscription {
      * @param query The parsed (validated) query carrying the agent's options,
      * or null when there are none.
      */
-    public FrostEntitySetSubscription(CoreSettings settings, String topic, ResourcePath path, Query query) {
+    public EntitySetSubscription(CoreSettings settings, String topic, ResourcePath path, Query query) {
         super(settings, topic, path);
         this.query = query;
         init();
@@ -72,7 +72,7 @@ public class FrostEntitySetSubscription extends AbstractSubscription {
      * @param query The parsed (validated) query carrying the agent's options,
      * or null when there are none.
      */
-    public FrostEntitySetSubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path, Query query) {
+    public EntitySetSubscription(CoreSettings settings, PrincipalExtended userPrincipal, String topic, ResourcePath path, Query query) {
         super(settings, userPrincipal, topic, path);
         this.query = query;
         init();

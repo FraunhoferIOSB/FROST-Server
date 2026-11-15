@@ -109,11 +109,11 @@ class ModelResourceGeneratorTest {
 
     @Test
     void testFrostUriConstants() {
-        assertEquals("frost://index", FrostResourceHandler.URI_INDEX);
-        assertEquals("frost://model", FrostResourceHandler.URI_MODEL);
-        assertEquals("frost://model/{entitySet}", FrostResourceHandler.URI_TEMPLATE_MODEL_SET);
-        assertEquals("frost://sta/{path}", FrostResourceHandler.URI_TEMPLATE_STA);
-        assertEquals("frost://sta/", FrostResourceHandler.URI_PREFIX_STA);
+        assertEquals("frost://index", ResourceHandler.URI_INDEX);
+        assertEquals("frost://model", ResourceHandler.URI_MODEL);
+        assertEquals("frost://model/{entitySet}", ResourceHandler.URI_TEMPLATE_MODEL_SET);
+        assertEquals("frost://sta/{path}", ResourceHandler.URI_TEMPLATE_STA);
+        assertEquals("frost://sta/", ResourceHandler.URI_PREFIX_STA);
     }
 
 }

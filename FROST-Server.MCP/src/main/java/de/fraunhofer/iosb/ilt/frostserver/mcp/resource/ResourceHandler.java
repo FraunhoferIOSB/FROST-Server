@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * the session principal's rights, exactly like tools; error outcomes and
  * over-size results surface as JSON error documents in the resource text.
  */
-public class FrostResourceHandler {
+public class ResourceHandler {
 
     private static final String ANONYMOUS_ACCESS_NOT_ALLOWED = "Anonymous access is not allowed.";
     private static final String READ_PERMISSION_DENIED = "Read permission denied.";
@@ -73,7 +73,7 @@ public class FrostResourceHandler {
     private final ModelResourceGenerator modelGenerator;
     private final Map<String, String> modelCache = new ConcurrentHashMap<>();
 
-    public FrostResourceHandler(FrostToolHandler handler) {
+    public ResourceHandler(FrostToolHandler handler) {
         this.handler = handler;
         this.modelGenerator = new ModelResourceGenerator(handler.getModelRegistry());
     }

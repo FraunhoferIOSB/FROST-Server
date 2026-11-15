@@ -31,8 +31,8 @@ import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
 
-import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionException;
-import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.SubscriptionException;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.SubscriptionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -49,7 +49,7 @@ import java.util.Map;
  * The notifications arrive as MCP logging notifications (logger "frost", level
  * INFO).
  */
-public class FrostToolSubscribe implements FrostTool {
+public class ToolSubscribe implements FrostTool {
 
     public static final String KEY_SUBSCRIPTION_ID = "subscriptionId";
 
@@ -64,9 +64,9 @@ public class FrostToolSubscribe implements FrostTool {
     }
 
     private final FrostToolHandler handler;
-    private final FrostSubscriptionRegistry registry;
+    private final SubscriptionRegistry registry;
 
-    public FrostToolSubscribe(FrostToolHandler handler, FrostSubscriptionRegistry registry) {
+    public ToolSubscribe(FrostToolHandler handler, SubscriptionRegistry registry) {
         this.handler = handler;
         this.registry = registry;
     }
@@ -128,10 +128,10 @@ public class FrostToolSubscribe implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String path = FrostToolGet.requireStringArg(arguments, KEY_PATH);
-        final String filter = FrostToolGet.stringArg(arguments, KEY_FILTER);
-        final List<String> select = FrostToolGet.stringListArg(arguments, KEY_SELECT);
-        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
+        final String path = ToolGet.requireStringArg(arguments, KEY_PATH);
+        final String filter = ToolGet.stringArg(arguments, KEY_FILTER);
+        final List<String> select = ToolGet.stringListArg(arguments, KEY_SELECT);
+        final String versionName = ToolGet.stringArg(arguments, KEY_VERSION);
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
@@ -147,7 +147,7 @@ public class FrostToolSubscribe implements FrostTool {
             return mcpResult(structured);
         } catch (IllegalArgumentException ex) {
             throw FrostToolHandler.invalidParams(ex.getMessage());
-        } catch (FrostSubscriptionException ex) {
+        } catch (SubscriptionException ex) {
             final ServiceResponseDefault response = new ServiceResponseDefault(ex.getCode(), ex.getMessage());
             return handler.toCallToolResult(NAME, path, principal, version.urlPart, response);
         }

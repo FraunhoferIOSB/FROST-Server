@@ -26,9 +26,9 @@ import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.KEY_V
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_INTEGER;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_OBJECT;
 import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_STRING;
-import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolSubscribe.KEY_SUBSCRIPTION_ID;
+import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.ToolSubscribe.KEY_SUBSCRIPTION_ID;
 
-import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.FrostSubscriptionRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.SubscriptionRegistry;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
@@ -45,7 +45,7 @@ import java.util.Optional;
  * The frost_unsubscribe tool: removes one subscription (by id) or all
  * subscriptions of the calling session.
  */
-public class FrostToolUnsubscribe implements FrostTool {
+public class ToolUnsubscribe implements FrostTool {
 
     /**
      * The tool name.
@@ -58,9 +58,9 @@ public class FrostToolUnsubscribe implements FrostTool {
     }
 
     private final FrostToolHandler handler;
-    private final FrostSubscriptionRegistry registry;
+    private final SubscriptionRegistry registry;
 
-    public FrostToolUnsubscribe(FrostToolHandler handler, FrostSubscriptionRegistry registry) {
+    public ToolUnsubscribe(FrostToolHandler handler, SubscriptionRegistry registry) {
         this.handler = handler;
         this.registry = registry;
     }
@@ -111,8 +111,8 @@ public class FrostToolUnsubscribe implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final Optional<Integer> subscriptionId = FrostToolGet.intArg(arguments, KEY_SUBSCRIPTION_ID);
-        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
+        final Optional<Integer> subscriptionId = ToolGet.intArg(arguments, KEY_SUBSCRIPTION_ID);
+        final String versionName = ToolGet.stringArg(arguments, KEY_VERSION);
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
