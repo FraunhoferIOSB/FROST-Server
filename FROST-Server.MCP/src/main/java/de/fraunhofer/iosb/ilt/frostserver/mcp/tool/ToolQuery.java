@@ -62,7 +62,7 @@ import java.util.Optional;
  * the STA QueryParser (so filter expressions keep full STA expressiveness),
  * then executed on the same code path as frost_get.
  */
-public class FrostToolQuery implements FrostTool {
+public class ToolQuery implements FrostTool {
 
     /**
      * The tool name.
@@ -76,7 +76,7 @@ public class FrostToolQuery implements FrostTool {
 
     private final FrostToolHandler handler;
 
-    public FrostToolQuery(FrostToolHandler handler) {
+    public ToolQuery(FrostToolHandler handler) {
         this.handler = handler;
     }
 
@@ -158,15 +158,15 @@ public class FrostToolQuery implements FrostTool {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
-        final String entitySet = FrostToolGet.requireStringArg(arguments, KEY_ENTITY_SET);
-        final String filter = FrostToolGet.stringArg(arguments, KEY_FILTER);
-        final List<String> select = FrostToolGet.stringListArg(arguments, KEY_SELECT);
-        final List<String> expand = FrostToolGet.stringListArg(arguments, KEY_EXPAND);
-        final String orderby = FrostToolGet.stringArg(arguments, KEY_ORDERBY);
-        final Optional<Integer> top = FrostToolGet.intArg(arguments, KEY_TOP);
-        final Optional<Integer> skip = FrostToolGet.intArg(arguments, KEY_SKIP);
-        final Optional<Boolean> count = FrostToolGet.boolArg(arguments, KEY_COUNT);
-        final String versionName = FrostToolGet.stringArg(arguments, KEY_VERSION);
+        final String entitySet = ToolGet.requireStringArg(arguments, KEY_ENTITY_SET);
+        final String filter = ToolGet.stringArg(arguments, KEY_FILTER);
+        final List<String> select = ToolGet.stringListArg(arguments, KEY_SELECT);
+        final List<String> expand = ToolGet.stringListArg(arguments, KEY_EXPAND);
+        final String orderby = ToolGet.stringArg(arguments, KEY_ORDERBY);
+        final Optional<Integer> top = ToolGet.intArg(arguments, KEY_TOP);
+        final Optional<Integer> skip = ToolGet.intArg(arguments, KEY_SKIP);
+        final Optional<Boolean> count = ToolGet.boolArg(arguments, KEY_COUNT);
+        final String versionName = ToolGet.stringArg(arguments, KEY_VERSION);
 
         final Version version = handler.resolveVersion(versionName);
         final int readGate = handler.checkCanRead(principal);

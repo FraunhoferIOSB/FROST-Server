@@ -62,9 +62,9 @@ import reactor.core.publisher.Mono;
  * concurrency-friendly collections and one shared persistence manager per
  * event.</p>
  */
-public class FrostSubscriptionRegistry implements MessageListener {
+public class SubscriptionRegistry implements MessageListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FrostSubscriptionRegistry.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionRegistry.class.getName());
 
     /**
      * The logger name clients see on subscription notifications.
@@ -75,7 +75,7 @@ public class FrostSubscriptionRegistry implements MessageListener {
     private final McpSettings mcpSettings;
     private final NotificationSink sink;
     private final Predicate<String> sessionPresence;
-    private final FrostSubscriptionFactory factory;
+    private final SubscriptionFactory factory;
 
     private final Map<EntityType, List<Registration>> byType = new ConcurrentHashMap<>();
     private final Map<String, List<Registration>> bySession = new ConcurrentHashMap<>();
@@ -106,12 +106,12 @@ public class FrostSubscriptionRegistry implements MessageListener {
      * @param sessionPresence Tells whether a session id is currently served;
      * used to drop subscriptions of gone sessions.
      */
-    public FrostSubscriptionRegistry(CoreSettings coreSettings, NotificationSink sink, Predicate<String> sessionPresence) {
+    public SubscriptionRegistry(CoreSettings coreSettings, NotificationSink sink, Predicate<String> sessionPresence) {
         this.coreSettings = coreSettings;
         this.mcpSettings = coreSettings.getMcpSettings();
         this.sink = sink;
         this.sessionPresence = sessionPresence;
-        this.factory = new FrostSubscriptionFactory(coreSettings);
+        this.factory = new SubscriptionFactory(coreSettings);
     }
 
     /**
@@ -126,11 +126,11 @@ public class FrostSubscriptionRegistry implements MessageListener {
      * @param filter The raw $filter expression, without prefix. May be null.
      * @param select The $select items. May be null or empty.
      * @return the subscription result.
-     * @throws FrostSubscriptionException on cap or visibility failures.
+     * @throws SubscriptionException on cap or visibility failures.
      */
-    public synchronized FrostSubscriptionResult subscribe(
+    public synchronized SubscriptionResult subscribe(
             String sessionId, PrincipalExtended principal, Version version,
-            String staPath, String filter, List<String> select) throws FrostSubscriptionException {
+            String staPath, String filter, List<String> select) throws SubscriptionException {
         Objects.requireNonNull(sessionId, "sessionId");
         Objects.requireNonNull(version, "version");
         principal = PrincipalExtended.fromPrincipal(principal);
@@ -138,20 +138,20 @@ public class FrostSubscriptionRegistry implements MessageListener {
 
         final Registration existing = findRegistration(sessionId, subscription);
         if (existing != null) {
-            return new FrostSubscriptionResult(existing.id(), existing.subscription().getTopic(), true, sessionPresence.test(sessionId));
+            return new SubscriptionResult(existing.id(), existing.subscription().getTopic(), true, sessionPresence.test(sessionId));
         }
 
         final int cap = mcpSettings.getMaxSubscriptionsPerSession();
         if (countForSession(sessionId) >= cap) {
-            throw new FrostSubscriptionException(429, "Subscription limit reached: at most " + cap + " active subscriptions per session (mcp.maxSubscriptionsPerSession).");
+            throw new SubscriptionException(429, "Subscription limit reached: at most " + cap + " active subscriptions per session (mcp.maxSubscriptionsPerSession).");
         }
-        if (subscription instanceof FrostEntitySubscription entitySubscription) {
+        if (subscription instanceof EntitySubscription entitySubscription) {
             requireEntityVisible(principal, entitySubscription);
         }
         final long newId = idCounter.incrementAndGet();
         addRegistration(new Registration(newId, sessionId, subscription));
         startListening();
-        return new FrostSubscriptionResult(newId, subscription.getTopic(), false, sessionPresence.test(sessionId));
+        return new SubscriptionResult(newId, subscription.getTopic(), false, sessionPresence.test(sessionId));
     }
 
     /**
@@ -309,7 +309,7 @@ public class FrostSubscriptionRegistry implements MessageListener {
         removeSession(sessionId);
     }
 
-    private void requireEntityVisible(PrincipalExtended principal, FrostEntitySubscription subscription) throws FrostSubscriptionException {
+    private void requireEntityVisible(PrincipalExtended principal, EntitySubscription subscription) throws SubscriptionException {
         final PathElementEntity lastElement = (PathElementEntity) subscription.getPath().getLastElement();
         final Object result;
         try (PersistenceManager persistenceManager = PersistenceManagerFactory.getInstance(coreSettings).create()) {
@@ -322,11 +322,11 @@ public class FrostSubscriptionRegistry implements MessageListener {
             }
         } catch (RuntimeException ex) {
             LOGGER.warn("Visibility check for subscription to {} failed: {}", subscription.getTopic(), ex.getMessage());
-            throw new FrostSubscriptionException(404, "Entity '" + subscription.getTopic() + "' not found or not readable.");
+            throw new SubscriptionException(404, "Entity '" + subscription.getTopic() + "' not found or not readable.");
         }
         if (result == null) {
             final int code = isAnonymous(principal) ? 404 : 403;
-            throw new FrostSubscriptionException(code, "Entity '" + subscription.getTopic() + "' not found or not readable.");
+            throw new SubscriptionException(code, "Entity '" + subscription.getTopic() + "' not found or not readable.");
         }
     }
 

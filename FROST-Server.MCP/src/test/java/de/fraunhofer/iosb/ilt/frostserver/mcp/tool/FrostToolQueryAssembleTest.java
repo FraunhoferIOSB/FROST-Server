@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
  */
 class FrostToolQueryAssembleTest {
 
-    private static FrostToolQuery tool;
+    private static ToolQuery tool;
 
     @BeforeAll
     static void beforeAll() {
@@ -50,7 +50,7 @@ class FrostToolQueryAssembleTest {
         coreSettings.getModelRegistry().initFinalise();
         final Properties properties = new Properties();
         properties.forEach((key, value) -> coreSettings.getSettings().set(String.valueOf(key), String.valueOf(value)));
-        tool = new FrostToolQuery(new FrostToolHandler(
+        tool = new ToolQuery(new FrostToolHandler(
                 coreSettings,
                 coreSettings.getMcpSettings()));
     }
@@ -74,7 +74,7 @@ class FrostToolQueryAssembleTest {
 
     @Test
     void testName() {
-        assertEquals("frost_query", FrostToolQuery.NAME);
+        assertEquals("frost_query", ToolQuery.NAME);
         assertEquals("frost_query", tool.toolName());
     }
 

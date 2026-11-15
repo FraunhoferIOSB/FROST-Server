@@ -30,7 +30,7 @@ package de.fraunhofer.iosb.ilt.frostserver.mcp.subscription;
  * @param sessionActive Whether the session is currently known to the
  * transport.
  */
-public record FrostSubscriptionResult(long subscriptionId, String topic, boolean alreadyExisted, boolean sessionActive) {
+public record SubscriptionResult(long subscriptionId, String topic, boolean alreadyExisted, boolean sessionActive) {
 
     /**
      * Renders the result as structured content for the tool result.
