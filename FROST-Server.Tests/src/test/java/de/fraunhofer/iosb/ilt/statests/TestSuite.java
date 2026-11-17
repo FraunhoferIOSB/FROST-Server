@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import de.fraunhofer.iosb.ilt.statests.TestSuite.SuiteFinaliser1;
 import de.fraunhofer.iosb.ilt.statests.TestSuite.SuiteFinaliser2;
+import de.fraunhofer.iosb.ilt.statests.TestSuite.SuiteFinaliserMcp;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests10;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1CoreOnlyTests11;
 import de.fraunhofer.iosb.ilt.statests.c01sensingcore.Capability1Tests10;
@@ -156,6 +157,7 @@ import org.slf4j.LoggerFactory;
     ProjectAuthTestsBasic11.class,
     ProjectAuthTestsBasicAnon11.class,
     SuiteFinaliser1.class,
+    SuiteFinaliserMcp.class,
     DateTimeTests20.class,
     ReferenceTests20.class,
     GeoTests20.class,
@@ -206,6 +208,32 @@ class TestSuite {
         }
     }
 
+    static class SuiteFinaliserMcp {
+
+        @Test
+        void finalTest() {
+            LOGGER.info("Stopping Servers...");
+            assertDoesNotThrow(() -> {
+                getInstance().stopAllServers();
+            });
+            HTTPMethods.logStats();
+            final int countDelete = HTTPMethods.getCountDelete();
+            final int countGet = HTTPMethods.getCountGet();
+            final int countPatch = HTTPMethods.getCountPatch();
+            final int countPost = HTTPMethods.getCountPost();
+            final int countPut = HTTPMethods.getCountPut();
+            final int countSets = HTTPMethods.getSetCount();
+
+            HTTPMethods.resetStats();
+            Assertions.assertEquals(0, countDelete, "Unexpected number of DELETE calls.");
+            Assertions.assertEquals(0, countGet, "Unexpected number of GET calls.");
+            Assertions.assertEquals(0, countPatch, "Unexpected number of PATCH calls.");
+            Assertions.assertEquals(0, countPost, "Unexpected number of POST calls.");
+            Assertions.assertEquals(0, countPut, "Unexpected number of PUT calls.");
+            Assertions.assertEquals(0, countSets, "Unexpected number of call sets.");
+        }
+    }
+
     static class SuiteFinaliser2 {
 
         @Test
@@ -220,12 +248,15 @@ class TestSuite {
             final int countPatch = HTTPMethods.getCountPatch();
             final int countPost = HTTPMethods.getCountPost();
             final int countPut = HTTPMethods.getCountPut();
+            final int countSets = HTTPMethods.getSetCount();
+
             HTTPMethods.resetStats();
             Assertions.assertEquals(207, countDelete, "Unexpected number of DELETE calls.");
             Assertions.assertEquals(1139, countGet, "Unexpected number of GET calls.");
             Assertions.assertEquals(34, countPatch, "Unexpected number of PATCH calls.");
             Assertions.assertEquals(271, countPost, "Unexpected number of POST calls.");
             Assertions.assertEquals(48, countPut, "Unexpected number of PUT calls.");
+            Assertions.assertEquals(5, countSets, "Unexpected number of call sets.");
         }
     }
 
