@@ -323,6 +323,10 @@ public class FrostMcpServer {
                     .addFilter(FILTER_NAME, authFilterClass);
             authFilterInitParams.stringPropertyNames()
                     .forEach(name -> filter.setInitParameter(name, authFilterInitParams.getProperty(name)));
+            // The MCP streamable transport uses request.startAsync() for tool
+            // calls; Jetty only allows that if every holder in the chain,
+            // including this filter, is async-supported.
+            filter.setAsyncSupported(true);
             filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, SERVLET_PATH);
         }
 
