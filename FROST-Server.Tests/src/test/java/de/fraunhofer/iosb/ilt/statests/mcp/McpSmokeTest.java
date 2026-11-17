@@ -112,6 +112,7 @@ public class McpSmokeTest extends AbstractTestClass {
             mcpClient = null;
         }
         loggingNotifications.clear();
+        AbstractTestClass.cleanup();
     }
 
     @Test
