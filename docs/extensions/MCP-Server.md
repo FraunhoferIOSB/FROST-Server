@@ -86,8 +86,9 @@ own MCP notification stream.
 * **Sessions:** subscriptions are bound to the MCP session and disappear with it.
   Identical repeated subscriptions return the existing subscription id; a session can
   hold at most `mcp.maxSubscriptionsPerSession` subscriptions (default 16).
-* **Permissions:** subscribing requires the read role for the entity type; the same
-  per-user and per-property rules apply as for reading via `frost_get`.
+* **Permissions:** as for reading via `frost_get`: anonymous access requires
+  anonymous read to be enabled; otherwise the same per-user and per-property rules
+  apply as for the HTTP interface.
 
 Note: the MCP server pushes notifications it receives via its **own** message bus
 connection. As a stand-alone process it uses the in-JVM internal bus by default, which

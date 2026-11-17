@@ -118,7 +118,7 @@ class FrostToolHandlerTest {
         final PrincipalExtended admin = new PrincipalExtended("admin", true, Set.of());
 
         assertEquals(401, handler.checkCanRead(anon), "Anonymous read is off by default.");
-        assertEquals(403, handler.checkCanRead(named), "Named user without the read role is denied.");
+        assertEquals(0, handler.checkCanRead(named), "Named users pass the coarse gate; the service layer decides.");
         assertEquals(0, handler.checkCanRead(reader));
         assertEquals(0, handler.checkCanRead(admin), "Admins can always read.");
 
