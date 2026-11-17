@@ -257,23 +257,25 @@ public class FrostToolHandler {
     }
 
     /**
-     * The coarse read gate, mirroring the MQTT adapter: the principal must have
-     * the read or admin role; anonymous principals are only allowed when
-     * anonymous read is enabled in the settings.
+     * The coarse read gate, mirroring the HTTP filter in authenticate-only
+     * mode: named users always pass, and the fine-grained security rules in the
+     * service layer decide; anonymous principals are only allowed when
+     * anonymous read is enabled in the settings. The read and admin roles are
+     * kept as a fast path, mirroring the MQTT adapter.
      *
      * @param principal The principal making the call.
-     * @return 0 when allowed, 401 when anonymous and not allowed, 403 when a
-     * named user lacks the read role.
+     * @return 0 when allowed, 401 when anonymous and not allowed.
      */
     public int checkCanRead(PrincipalExtended principal) {
         if (principal.hasRole(roleRead) || principal.hasRole(roleAdmin) || principal.isAdmin()) {
             return 0;
         }
-        if (isAnonymous(principal)
-                && coreSettings.getAuthSettings().getBoolean(CoreSettings.TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class)) {
-            return 0;
+        if (isAnonymous(principal)) {
+            return coreSettings.getAuthSettings().getBoolean(CoreSettings.TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class)
+                    ? 0
+                    : 401;
         }
-        return isAnonymous(principal) ? 401 : 403;
+        return 0;
     }
 
     private static boolean isAnonymous(PrincipalExtended principal) {
