@@ -11,6 +11,7 @@
     <variable name="FROST_LL_service" value="${FROST_LL_service:-INFO}" />
     <variable name="FROST_LL_settings" value="${FROST_LL_settings:-INFO}" />
     <variable name="FROST_LL_queries" value="${FROST_LL_queries:-INFO}" />
+    <variable name="FROST_LL_io_mcp" value="${FROST_LL_io_mcp:-INFO}" />
     <variable name="FROST_LL_io_moquette" value="${FROST_LL_io_moquette:-WARN}" />
     <variable name="FROST_LL_liquibase" value="${FROST_LL_liquibase:-INFO}" />
     <variable name="FROST_LL_org_jooq" value="${FROST_LL_org_jooq:-INFO}" />
@@ -51,6 +52,7 @@
     <logger name="de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.QueryBuilder" level="${FROST_LL_queries}"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.service" level="${FROST_LL_service}"/>
     <logger name="de.fraunhofer.iosb.ilt.frostserver.settings" level="${FROST_LL_settings}"/>
+    <logger name="io.modelcontextprotocol" level="${FROST_LL_io_mcp}"/>
     <logger name="io.moquette" level="${FROST_LL_io_moquette}"/>
     <logger name="liquibase" level="${FROST_LL_liquibase}"/>
     <logger name="org.jooq" level="${FROST_LL_org_jooq}"/>
