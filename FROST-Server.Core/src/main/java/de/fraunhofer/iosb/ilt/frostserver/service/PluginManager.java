@@ -50,8 +50,8 @@ public class PluginManager implements ConfigDefaults {
 
     public static final String VALUE_PROVIDED_PLUGINS = "de.fraunhofer.iosb.ilt.frostserver.formatter.PluginResultFormatInternal"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreService"
-            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreServiceV2"
+            + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.PluginCoreModelV2"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.actuation.PluginActuation"
             + ",de.fraunhofer.iosb.ilt.frostserver.plugin.multidatastream.PluginMultiDatastream"
