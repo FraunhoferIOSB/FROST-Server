@@ -3,6 +3,8 @@
 ## Version 2.8.3-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Fixed fine-grained auth for Actuators in the Projects plugin joining a non-existent
+  table, causing reads by users without a global read role to fail.
 
 
 ## Version 2.8.2
