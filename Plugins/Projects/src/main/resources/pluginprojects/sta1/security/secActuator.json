@@ -114,15 +114,15 @@
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
                 "joins": [
                   {
-                    "targetTable": "TASKINGCAPABILITIES_PROJECTS",
-                    "targetAlias": "tcp",
-                    "joinOnSql": "t.\"ID\" \u003d tcp.\"TASKINGCAPABILITY_ID\"",
+                    "targetTable": "ACTUATOR_PROJECTS",
+                    "targetAlias": "ap",
+                    "joinOnSql": "t.\"ID\" \u003d ap.\"ACTUATOR_ID\"",
                     "joinType": "INNER"
                   },
                   {
                     "targetTable": "PROJECTS",
                     "targetAlias": "pr",
-                    "joinOnSql": "tcp.\"PROJECT_ID\" \u003d pr.\"ID\"",
+                    "joinOnSql": "ap.\"PROJECT_ID\" \u003d pr.\"ID\"",
                     "joinType": "INNER"
                   },
                   {

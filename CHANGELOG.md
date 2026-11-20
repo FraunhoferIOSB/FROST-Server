@@ -10,6 +10,10 @@
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
+* Fixed Projects plugin auth rules using non-existent tables for Actuators, Tasks,
+  TaskingCapabilities and ObservedProperties. Reading Actuators and Tasks failed for users
+  without a global read role, and the TaskingCapability and ObservedProperty rules were
+  never applied.
 * Fixed namespaces with only property types not being registered.
 * Fixed "is null" not working on phenomenonTime/end.
 * Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
