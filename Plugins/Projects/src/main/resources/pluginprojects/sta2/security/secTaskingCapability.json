@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "tableName": "taskingcapabilities",
+      "tableName": "tasking_capabilities",
       "wrappers": [
         {
           "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.ValidatorCUD",

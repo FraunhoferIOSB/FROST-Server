@@ -102,9 +102,9 @@
                 "@class": "de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.utils.validator.SecurityWrapperJoin",
                 "joins": [
                   {
-                    "targetTable": "taskingcapabilities",
+                    "targetTable": "tasking_capabilities",
                     "targetAlias": "tc",
-                    "joinOnSql": "t.\"taskingcapability_id\" \u003d tc.\"id\"",
+                    "joinOnSql": "t.\"tasking_capability_id\" \u003d tc.\"id\"",
                     "joinType": "INNER"
                   },
                   {
