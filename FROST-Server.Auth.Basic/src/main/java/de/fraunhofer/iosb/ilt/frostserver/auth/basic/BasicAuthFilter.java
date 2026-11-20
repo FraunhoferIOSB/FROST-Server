@@ -23,6 +23,7 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TA
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PATCH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_POST;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PUT;
+import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_AUTH_HEADER_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_USERNAME_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
@@ -77,6 +78,7 @@ public class BasicAuthFilter implements Filter {
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
     private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
+    private int maxAuthHeaderLength = MAX_PASSWORD_LENGTH;
 
     private DatabaseHandler databaseHandler;
 
@@ -129,12 +131,17 @@ public class BasicAuthFilter implements Filter {
         methodCheckers.put(HttpMethod.PATCH, (userData, response) -> requireRole(rolePatch, userData, response));
         methodCheckers.put(HttpMethod.PUT, (userData, response) -> requireRole(rolePut, userData, response));
         methodCheckers.put(HttpMethod.DELETE, (userData, response) -> requireRole(roleDelete, userData, response));
+        maxAuthHeaderLength = authSettings.getInt(TAG_MAX_AUTH_HEADER_LENGTH, BasicAuthProvider.class);
     }
 
     private UserData findCredentials(HttpServletRequest request) {
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authHeader == null || !authHeader.startsWith(BASIC_PREFIX)) {
             LOGGER.debug("No basic auth header.");
+            return USER_DATA_NO_USER;
+        }
+        if (authHeader.length() > maxAuthHeaderLength) {
+            LOGGER.debug("Basic auth header too long.");
             return USER_DATA_NO_USER;
         }
 
