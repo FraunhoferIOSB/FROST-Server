@@ -3,6 +3,7 @@
 ## Version 2.8.3-SNAPSHOT
 
 **Internal changes & Bugfixes**
+* Added configurable limit to allowed length of Authorization header for Basic auth.
 * Fixed Projects plugin auth rules using non-existent tables for Actuators, Tasks,
   TaskingCapabilities and ObservedProperties. Reading Actuators and Tasks failed for users
   without a global read role, and the TaskingCapability and ObservedProperty rules were

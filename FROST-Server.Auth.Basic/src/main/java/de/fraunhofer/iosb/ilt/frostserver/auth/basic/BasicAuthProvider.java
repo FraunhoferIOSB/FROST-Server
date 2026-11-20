@@ -67,6 +67,9 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @DefaultValueInt(MAX_USERNAME_LENGTH)
     public static final String TAG_MAX_USERNAME_LENGTH = "maxUsernameLength";
 
+    @DefaultValueInt(MAX_PASSWORD_LENGTH)
+    public static final String TAG_MAX_AUTH_HEADER_LENGTH = "maxAuthHeaderLength";
+
     @DefaultValueInt(60_000)
     public static final String TAG_USER_CACHE_LIFE_MS = "userCacheLifeMs";
 
