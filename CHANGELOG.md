@@ -10,6 +10,7 @@
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
+* Simplified Auth plugins.
 * Fixed Projects plugin auth rules using non-existent tables for Actuators, Tasks,
   TaskingCapabilities and ObservedProperties. Reading Actuators and Tasks failed for users
   without a global read role, and the TaskingCapability and ObservedProperty rules were

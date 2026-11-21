@@ -213,6 +213,12 @@ public class TableCollection {
         }
     }
 
+    public void generateMissingSecurityValidators() {
+        if (securityValidators == null) {
+            securityValidators = new HashMap<>();
+        }
+    }
+
     public void addSecurityValidator(String tableName, HookValidator hv) {
         if (securityValidators == null) {
             securityValidators = new HashMap<>();

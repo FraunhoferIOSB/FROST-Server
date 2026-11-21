@@ -496,7 +496,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
         createForFail(GLOBAL_OBS_CREATE, serviceGlObsCr, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
         createForFail(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, anonymousReadAllowed ? H403 : H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlProjects.etProject), PROJECTS, H403);
@@ -545,7 +545,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -564,7 +564,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -589,7 +589,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
                 .build();
         createForOk(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         createForOk(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
@@ -610,7 +610,8 @@ abstract class ProjectAuthTests extends AbstractTestClass {
 
         List<MqttCreateTester> testers = new ArrayList<>();
         if (anonymousReadAllowed) {
-            testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, mdlSensing.etThing, false));
+            testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, mdlSensing.etThing, false)
+                    .addExpectedException(org.eclipse.paho.client.mqttv3.MqttException.class));
         } else {
             testers.add(new MqttCreateTester(mqttHelperAnon, ehAdmin, ANONYMOUS, creator, filterCreator, topic, mdlSensing.etThing, false)
                     .addExpectedException(org.eclipse.paho.client.mqttv3.MqttSecurityException.class));
@@ -649,7 +650,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         Entity original = DATASTREAMS.get(0);
 
         updateForFail(READ, serviceRead, creator, original, H403);
-        updateForFail(ANONYMOUS, serviceAnon, creator, original, anonymousReadAllowed ? H403 : H401);
+        updateForFail(ANONYMOUS, serviceAnon, creator, original, H401, H403);
         updateForFail(ADMIN_P1, serviceAdminProject1, creator, original, H403);
         updateForFail(ADMIN_P2, serviceAdminProject2, creator, original, H403);
         updateForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, original, H403);
@@ -1205,7 +1206,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         createForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(GLOBAL_OBS_CREATE, serviceGlObsCr, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForOk(GLOBAL_OBSPROP_CREATE, serviceGlObsPropCr, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS);
-        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, anonymousReadAllowed ? H403 : H401);
+        createForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H401, H403);
         createForFail(ADMIN_P1, serviceAdminProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(ADMIN_P2, serviceAdminProject2, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
         createForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etObservedProperty), O_PROPS, H403);
@@ -1233,7 +1234,7 @@ abstract class ProjectAuthTests extends AbstractTestClass {
         LOGGER.info("  test_20a_ThingDelete");
         EntityCreator creator = user -> THINGS.get(0);
 
-        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, anonymousReadAllowed ? H403 : H401);
+        deleteForFail(ANONYMOUS, serviceAnon, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H401, H403);
         deleteForFail(READ, serviceRead, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(WRITE, serviceWrite, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
         deleteForFail(OBS_CREATE_P1, serviceObsCreaterProject1, creator, serviceAdmin.dao(mdlSensing.etThing), THINGS, H403);
