@@ -144,6 +144,7 @@ public class Service implements AutoCloseable {
     private final ModelRegistry modelRegistry;
     private PersistenceManager persistenceManager;
     private boolean transactionActive = false;
+    private boolean rollbackOnError = true;
 
     public Service(CoreSettings settings) {
         this.settings = settings;
@@ -251,6 +252,11 @@ public class Service implements AutoCloseable {
         return this;
     }
 
+    public Service setRollbackOnError(boolean rollbackOnError) {
+        this.rollbackOnError = rollbackOnError;
+        return this;
+    }
+
     /**
      * Commits and ends an explicitly started transaction. If there is no active
      * explicitly started transaction, this will do nothing,
@@ -295,7 +301,7 @@ public class Service implements AutoCloseable {
         }
     }
 
-    public void rollbackAndClose(PersistenceManager pm) {
+    private void rollbackAndClose(PersistenceManager pm) {
         if (pm != null) {
             pm.rollbackAndClose();
         }
@@ -305,6 +311,16 @@ public class Service implements AutoCloseable {
         if (!transactionActive) {
             getPm().rollbackAndClose();
             persistenceManager = null;
+        }
+    }
+
+    private void errorInTransaction(PersistenceManager pm) {
+        if (transactionActive) {
+            if (rollbackOnError) {
+                rollbackAndClose(pm);
+            }
+        } else {
+            rollbackAndClose(pm);
         }
     }
 
@@ -350,15 +366,15 @@ public class Service implements AutoCloseable {
         try {
             return handleGet(pm, request, response);
         } catch (UnauthorizedException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
             LOGGER.debug(EXCEPTION, e);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to execute query. See logs for details.");
         } finally {
             maybeRollbackAndClose();
@@ -418,15 +434,15 @@ public class Service implements AutoCloseable {
             }
         } catch (UnsupportedOperationException e) {
             LOGGER.error("Unsupported operation.", e);
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Unsupported operation: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             LOGGER.trace("Illegal operation.", e);
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Illegal operation: " + e.getMessage());
         } catch (ClassCastException e) {
             LOGGER.error("Result did not match expected format", e);
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Illegal result type: " + e.getMessage());
         } finally {
             maybeCommitAndClose();
@@ -469,19 +485,19 @@ public class Service implements AutoCloseable {
                 return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, POST_ONLY_ALLOWED_TO_COLLECTIONS);
             }
         } catch (UnauthorizedException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (IllegalArgumentException e) {
             LOGGER.debug(EXCEPTION, e);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Incorrect request: " + e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, e.getMessage());
             LOGGER.debug(EXCEPTION, e);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to store data.");
         } finally {
             maybeRollbackAndClose();
@@ -584,10 +600,10 @@ public class Service implements AutoCloseable {
             }
             return formatResponse(response, formatter, query, path, entity);
         } catch (DuplicateIdException exc) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException exc) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, exc.getMessage());
         }
     }
@@ -615,15 +631,15 @@ public class Service implements AutoCloseable {
             }
             return handlePatch(pm, request, response);
         } catch (UnauthorizedException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (IncompleteEntityException | RuntimeException exc) {
             LOGGER.error(FAILED_TO_HANDLE_REQUEST_DETAILS_IN_DEBUG, exc.getMessage());
             LOGGER.debug(EXCEPTION, exc);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_INTERNAL_ERROR, "Failed to store data.");
         } finally {
             maybeRollbackAndClose();
@@ -661,14 +677,14 @@ public class Service implements AutoCloseable {
                 response.setCode(HttpURLConnection.HTTP_OK);
                 return response;
             } else {
-                pm.rollbackAndClose();
+                errorInTransaction(pm);
                 return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Failed to patch entity.");
             }
         } catch (DuplicateIdException exc) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (IllegalArgumentException | IncompleteEntityException | NoSuchEntityException e) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }
     }
@@ -700,14 +716,14 @@ public class Service implements AutoCloseable {
                 maybeCommitAndClose();
                 return successResponse(response, HttpURLConnection.HTTP_OK, "JSON-Patch applied.");
             } else {
-                pm.rollbackAndClose();
+                errorInTransaction(pm);
                 return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, FAILED_TO_UPDATE_ENTITY);
             }
         } catch (DuplicateIdException exc) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (IllegalArgumentException | NoSuchEntityException e) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }
     }
@@ -752,14 +768,14 @@ public class Service implements AutoCloseable {
             pm = getPm();
             return handlePut(pm, request, response);
         } catch (UnauthorizedException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (RuntimeException e) {
             LOGGER.trace("Failed to handle request", e);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } finally {
             maybeRollbackAndClose();
@@ -927,14 +943,14 @@ public class Service implements AutoCloseable {
                 maybeCommitAndClose();
                 return successResponse(response, HttpURLConnection.HTTP_OK, "Updated.");
             } else {
-                pm.rollbackAndClose();
+                errorInTransaction(pm);
                 return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, FAILED_TO_UPDATE_ENTITY);
             }
         } catch (DuplicateIdException exc) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_CONFLICT, exc.getMessage());
         } catch (NoSuchEntityException | IncompleteEntityException e) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         }
     }
@@ -986,14 +1002,14 @@ public class Service implements AutoCloseable {
 
             return handleDeleteEntity(pm, mainEntity, response);
         } catch (UnauthorizedException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (ForbiddenException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (Exception e) {
             LOGGER.trace("", e);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } finally {
             maybeRollbackAndClose();
@@ -1007,11 +1023,11 @@ public class Service implements AutoCloseable {
                 response.setCode(HttpURLConnection.HTTP_OK);
                 return response;
             } else {
-                pm.rollbackAndClose();
+                errorInTransaction(pm);
                 return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, "Failed to delete entity.");
             }
         } catch (NoSuchEntityException e) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, e.getMessage());
         }
     }
@@ -1033,14 +1049,14 @@ public class Service implements AutoCloseable {
 
             return handleDeleteSet(request, response, pm, path);
         } catch (ForbiddenException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_FORBIDDEN, e.getMessage());
         } catch (UnauthorizedException e) {
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
             LOGGER.trace("", e);
-            rollbackAndClose(pm);
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } finally {
             maybeRollbackAndClose();
@@ -1075,7 +1091,7 @@ public class Service implements AutoCloseable {
             maybeCommitAndClose();
             return successResponse(response, HttpURLConnection.HTTP_OK, "Deleted.");
         } catch (NoSuchEntityException e) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, e.getMessage());
         }
     }
@@ -1149,9 +1165,10 @@ public class Service implements AutoCloseable {
             maybeCommitAndClose();
             return successResponse(response, HttpURLConnection.HTTP_NO_CONTENT, "");
         } catch (IncompleteEntityException ex) {
-            pm.rollbackAndClose();
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_BAD_METHOD, ex.getMessage());
         } catch (NoSuchEntityException ex) {
+            errorInTransaction(pm);
             return errorResponse(response, HttpURLConnection.HTTP_NOT_FOUND, ex.getMessage());
         }
     }

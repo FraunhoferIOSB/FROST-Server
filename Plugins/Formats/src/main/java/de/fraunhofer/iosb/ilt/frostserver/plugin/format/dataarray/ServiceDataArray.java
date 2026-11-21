@@ -99,7 +99,9 @@ public class ServiceDataArray {
             JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getVersion(), request.getUserPrincipal());
             List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
+            service.setRollbackOnError(false);
             for (DataArrayValue daValue : postData) {
+                service.startTransaction(request.getUserPrincipal());
                 Entity datastream = daValue.getDatastream();
                 Entity multiDatastream = daValue.getMultiDatastream();
                 List<ArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
@@ -107,8 +109,10 @@ public class ServiceDataArray {
                     handlers.add(arrayValueHandlers.getHandler(settings, component));
                 }
                 handleDataArrayItems(query, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
+                service.commitTransaction();
             }
             service.maybeCommitAndClose();
+            service.setRollbackOnError(true);
             ResultFormatter formatter = settings.getFormatter(version, FORMAT_NAME_DEFAULT);
             response.setContentType(formatter.getContentType());
             response.setCode(201);
