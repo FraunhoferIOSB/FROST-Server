@@ -21,7 +21,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_MAX_USERNAME_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_REGISTER_USER_LOCALLY;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
@@ -70,7 +69,6 @@ public class KeycloakAuthProvider implements AuthProvider {
     private CoreSettings coreSettings;
     private String roleAdmin;
     private boolean registerUserLocally;
-    private boolean authenticateOnly;
     private DatabaseHandler databaseHandler;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
@@ -94,12 +92,12 @@ public class KeycloakAuthProvider implements AuthProvider {
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, KeycloakSettings.class);
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, KeycloakSettings.class);
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakSettings.class);
-        authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
-        PersistenceManagerFactory pm = PersistenceManagerFactory.getInstance(coreSettings);
+
+        PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create();
         if (pm instanceof JooqPersistenceManager jpm) {
             // Ensure security validators are initialised even if no specific
             // security validators are defined.
-            jpm.getTableCollection().addSecurityValidator("", null);
+            jpm.getTableCollection().generateMissingSecurityValidators();
         }
         if (registerUserLocally) {
             DatabaseHandler.init(coreSettings);
@@ -116,6 +114,11 @@ public class KeycloakAuthProvider implements AuthProvider {
     @Override
     public void addFilter(Object context, CoreSettings coreSettings) {
         KeycloakFilterHelper.createFilters(context, coreSettings);
+    }
+
+    @Override
+    public String getFilterClassName() {
+        return KeycloakFilter.class.getName();
     }
 
     @Override
@@ -179,23 +182,6 @@ public class KeycloakAuthProvider implements AuthProvider {
             LOGGER.debug("Exception:", ex);
             return false;
         }
-    }
-
-    @Override
-    public boolean userHasRole(String clientId, String userName, String roleName) {
-        Client client = CLIENTMAP.get(clientId);
-        if (client == null) {
-            LOGGER.info("No user for {}", clientId);
-            return false;
-        }
-        client.setLastSeen(Instant.now());
-        if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
-            LOGGER.trace("Only authenticating, not checking if User {} has role {}", userName, roleName);
-            return true;
-        }
-        boolean hasRole = client.getSubject().getPrincipals().stream().anyMatch(p -> p.getName().equalsIgnoreCase(roleName));
-        LOGGER.trace("User {} has role {}: {}", userName, roleName, hasRole);
-        return hasRole;
     }
 
     @Override

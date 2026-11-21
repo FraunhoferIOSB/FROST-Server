@@ -17,7 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME_LENGTH;
@@ -92,7 +91,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
 
     private CoreSettings coreSettings;
     private String roleAdmin;
-    private boolean authenticateOnly;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
 
@@ -103,7 +101,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         this.coreSettings = coreSettings;
         DatabaseHandler.init(coreSettings);
         final Settings authSettings = coreSettings.getAuthSettings();
-        authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, getClass());
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, getClass());
@@ -114,7 +111,7 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
             if (pm instanceof JooqPersistenceManager jpm) {
                 // Ensure security validators are initialised even if no specific
                 // security validators are defined.
-                jpm.getTableCollection().addSecurityValidator("", null);
+                jpm.getTableCollection().generateMissingSecurityValidators();
             }
         }
 
@@ -129,6 +126,11 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
     @Override
     public void addFilter(Object context, CoreSettings coreSettings) {
         BasicAuthFilterHelper.createFilters(context, coreSettings);
+    }
+
+    @Override
+    public String getFilterClassName() {
+        return BasicAuthFilter.class.getName();
     }
 
     @Override
@@ -150,16 +152,6 @@ public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDef
         userCaches.registerClientId(userInfo, clientId);
 
         return validUser;
-    }
-
-    @Override
-    public boolean userHasRole(String clientId, String userName, String roleName) {
-        if (authenticateOnly && !roleName.equalsIgnoreCase(roleAdmin)) {
-            LOGGER.trace("Only authenticating, not checking if User {} has role {}", userName, roleName);
-            return true;
-        }
-        return DatabaseHandler.getInstance(coreSettings)
-                .userHasRole(userName, roleName);
     }
 
     @Override

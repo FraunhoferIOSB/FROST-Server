@@ -132,8 +132,11 @@ public class MqttHelper11 {
             MqttConnectOptions connOpts = new MqttConnectOptions();
             if (isAuthSet()) {
                 MqttConfig mqttConfig = sSrvc.getMqttConfig();
-                connOpts.setUserName(mqttConfig.getUsername());
-                connOpts.setPassword(mqttConfig.getPassword().toCharArray());
+                final String username = mqttConfig.getUsername();
+                final String password = mqttConfig.getPassword();
+                LOGGER.debug("  {} Connecting using {} / {}", clientId, username, password);
+                connOpts.setUserName(username);
+                connOpts.setPassword(password.toCharArray());
             }
             connOpts.setCleanSession(true);
             LOGGER.debug("  {} Connecting publisher...", clientId);
@@ -145,9 +148,9 @@ public class MqttHelper11 {
             LOGGER.debug("  {} Done.", clientId);
         } catch (RuntimeException | MqttException ex) {
             if (expectedExceptions.contains(ex.getClass())) {
-                LOGGER.debug("Got expected exception {}", ex.getClass());
+                LOGGER.debug("{} Got expected exception {}", clientId, ex.getClass());
             } else {
-                LOGGER.error("Exception on server {} :", mqttServerUri, ex);
+                LOGGER.error("{} Exception on server {} :{}", ex.getClass(), clientId, mqttServerUri, ex);
                 fail("error publishing message on MQTT: " + ex.getMessage());
             }
         }
@@ -784,7 +787,7 @@ public class MqttHelper11 {
                     message = "Failed for " + name + ". Entity: " + Objects.toString(createdEntity) + " expectSuccess: " + expectSuccess;
                 }
             } catch (RuntimeException | ServiceFailureException ex) {
-                LOGGER.error("Failed to create JSON or fetch entity");
+                LOGGER.error("{} Failed to create JSON or fetch entity: {}", name, topic);
                 message = "Exception for " + name + " " + ex.getMessage();
             }
             LOGGER.debug("  Execution done for {}", name);

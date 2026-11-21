@@ -18,15 +18,9 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.basic;
 
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_AUTH_REALM_NAME;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_DELETE;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_GET;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PATCH;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_POST;
-import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_HTTP_ROLE_PUT;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_AUTH_HEADER_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_PASSWORD_LENGTH;
 import static de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider.TAG_MAX_USERNAME_LENGTH;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
@@ -35,7 +29,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.util.user.UserData.MAX_USERNAME
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.ConfigUtils;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.UserData;
@@ -52,8 +45,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.EnumMap;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +54,6 @@ import org.slf4j.LoggerFactory;
  */
 public class BasicAuthFilter implements Filter {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthFilter.class);
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -74,32 +62,18 @@ public class BasicAuthFilter implements Filter {
     private static final UserData USER_DATA_NO_USER = new UserData(null, null);
 
     private boolean allowAnonymous;
-    private boolean authenticateOnly;
     private int maxPassLength = MAX_PASSWORD_LENGTH;
     private int maxNameLength = MAX_USERNAME_LENGTH;
-    private final Map<HttpMethod, AuthChecker> methodCheckers = new EnumMap<>(HttpMethod.class);
     private int maxAuthHeaderLength = MAX_PASSWORD_LENGTH;
 
     private DatabaseHandler databaseHandler;
-
     private String authHeaderValue;
-
     private String roleAdmin;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         LOGGER.info("Turning on Basic authentication.");
         roleAdmin = getInitParamWithDefault(filterConfig, TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
-        String roleGet = getInitParamWithDefault(filterConfig, TAG_HTTP_ROLE_GET, BasicAuthProvider.class);
-        String rolePost = getInitParamWithDefault(filterConfig, TAG_HTTP_ROLE_POST, BasicAuthProvider.class);
-        String rolePatch = getInitParamWithDefault(filterConfig, TAG_HTTP_ROLE_PATCH, BasicAuthProvider.class);
-        String rolePut = getInitParamWithDefault(filterConfig, TAG_HTTP_ROLE_PUT, BasicAuthProvider.class);
-        String roleDelete = getInitParamWithDefault(filterConfig, TAG_HTTP_ROLE_DELETE, BasicAuthProvider.class);
-        String anonRead = getInitParamWithDefault(filterConfig, TAG_AUTH_ALLOW_ANON_READ, "F");
-        String authOnly = getInitParamWithDefault(filterConfig, TAG_AUTHENTICATE_ONLY, "F");
-
-        allowAnonymous = "T".equals(anonRead);
-        authenticateOnly = "T".equals(authOnly);
 
         ServletContext context = filterConfig.getServletContext();
         Object attribute = context.getAttribute(TAG_CORE_SETTINGS);
@@ -109,28 +83,15 @@ public class BasicAuthFilter implements Filter {
         CoreSettings coreSettings = (CoreSettings) attribute;
         Settings authSettings = coreSettings.getAuthSettings();
 
+        allowAnonymous = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
+        roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
+
         databaseHandler = DatabaseHandler.getInstance(coreSettings);
         String realmName = authSettings.get(TAG_AUTH_REALM_NAME, BasicAuthProvider.class);
         authHeaderValue = "Basic realm=\"" + realmName + "\", charset=\"UTF-8\"";
 
         maxPassLength = authSettings.getInt(TAG_MAX_PASSWORD_LENGTH, BasicAuthProvider.class);
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, BasicAuthProvider.class);
-
-        final AuthChecker allAllowed = (userData, response) -> true;
-        methodCheckers.put(HttpMethod.OPTIONS, allAllowed);
-
-        if (allowAnonymous) {
-            methodCheckers.put(HttpMethod.HEAD, allAllowed);
-            methodCheckers.put(HttpMethod.GET, allAllowed);
-        } else {
-            methodCheckers.put(HttpMethod.HEAD, (userData, response) -> requireRole(roleGet, userData, response));
-            methodCheckers.put(HttpMethod.GET, (userData, response) -> requireRole(roleGet, userData, response));
-        }
-
-        methodCheckers.put(HttpMethod.POST, (userData, response) -> requireRole(rolePost, userData, response));
-        methodCheckers.put(HttpMethod.PATCH, (userData, response) -> requireRole(rolePatch, userData, response));
-        methodCheckers.put(HttpMethod.PUT, (userData, response) -> requireRole(rolePut, userData, response));
-        methodCheckers.put(HttpMethod.DELETE, (userData, response) -> requireRole(roleDelete, userData, response));
         maxAuthHeaderLength = authSettings.getInt(TAG_MAX_AUTH_HEADER_LENGTH, BasicAuthProvider.class);
     }
 
@@ -165,58 +126,20 @@ public class BasicAuthFilter implements Filter {
         }
     }
 
-    private boolean requireRole(String roleName, UserData userData, HttpServletResponse response) {
-        if (userData.isEmpty()) {
-            LOGGER.debug("Rejecting request: No user data.");
-            throwAuthRequired(response);
-            return false;
-        }
-
-        if (!userData.roles.contains(roleName)) {
-            LOGGER.debug("Rejecting request: User {} does not have role {}.", userData.userName, roleName);
-            throwInsufficientRights(response);
-            return false;
-        }
-        LOGGER.debug("Accepting request: User {} has role {}.", userData.userName, roleName);
-        return true;
-    }
-
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) req;
         final HttpServletResponse response = (HttpServletResponse) resp;
 
-        final HttpMethod method;
-        try {
-            method = HttpMethod.valueOf(request.getMethod().toUpperCase());
-        } catch (IllegalArgumentException exc) {
-            LOGGER.debug("Rejecting request: Unknown method: {}.", request.getMethod());
-            LOGGER.trace("", exc);
-            throwInsufficientRights(response);
-            return;
-        }
-
         UserData userData = findCredentials(request);
 
-        if (authenticateOnly) {
-            if (!allowAnonymous && userData == USER_DATA_NO_USER) {
-                // We only authenticate, there is no user, but we don't allow anonymous.
-                throwAuthRequired(response);
+        if (userData == USER_DATA_NO_USER) {
+            if (allowAnonymous) {
+                chain.doFilter(new RequestWrapper(request, PrincipalExtended.ANONYMOUS_PRINCIPAL), response);
             } else {
-                boolean admin = userData.roles.contains(roleAdmin);
-                chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin, userData.roles)), response);
+                throwAuthRequired(response);
             }
-            return;
-        }
-
-        AuthChecker checker = methodCheckers.get(method);
-        if (checker == null) {
-            LOGGER.debug("Rejecting request: No checker for method: {}.", request.getMethod());
-            throwInsufficientRights(response);
-            return;
-        }
-
-        if (checker.isAllowed(userData, response)) {
+        } else {
             boolean admin = userData.roles.contains(roleAdmin);
             chain.doFilter(new RequestWrapper(request, new PrincipalExtended(userData.userName, admin, userData.roles)), response);
         }
@@ -257,21 +180,6 @@ public class BasicAuthFilter implements Filter {
         }
         LOGGER.info("Filter setting {}, set to value: {}", paramName, value);
         return value;
-    }
-
-    /**
-     * An interface for helper classes to check requests.
-     */
-    private static interface AuthChecker {
-
-        /**
-         * Check if the request is allowed.
-         *
-         * @param userData The request to check.
-         * @param response The response to use for sending errors back.
-         * @return False if the request is not allowed.
-         */
-        public boolean isAllowed(UserData userData, HttpServletResponse response);
     }
 
 }

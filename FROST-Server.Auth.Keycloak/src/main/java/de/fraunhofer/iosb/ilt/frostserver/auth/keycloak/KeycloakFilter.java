@@ -18,14 +18,11 @@
 package de.fraunhofer.iosb.ilt.frostserver.auth.keycloak;
 
 import static de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakSettings.TAG_REGISTER_USER_LOCALLY;
-import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTHENTICATE_ONLY;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ALLOW_ANON_READ;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_ROLE_ADMIN;
 import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_SETTINGS;
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
-import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
-import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils.Role;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
@@ -42,9 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.keycloak.adapters.AdapterDeploymentContext;
 import org.keycloak.adapters.AuthenticatedActionsHandler;
@@ -73,12 +68,9 @@ public class KeycloakFilter implements Filter {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakFilter.class);
 
-    private final Map<String, Utils.MethodRoleMapper> roleMappersByPath = new HashMap<>();
-
-    private Map<Role, String> roleMappings;
     private String roleAdmin;
-    private boolean authenticateOnly;
     private boolean registerUserLocally;
+    private boolean allowAnonymous;
     private DatabaseHandler databaseHandler;
 
     private AdapterDeploymentContext deploymentContext;
@@ -95,48 +87,12 @@ public class KeycloakFilter implements Filter {
         }
         CoreSettings coreSettings = (CoreSettings) attribute;
         Settings authSettings = coreSettings.getAuthSettings();
-        roleMappings = AuthUtils.loadRoleMapping(authSettings);
         roleAdmin = authSettings.get(TAG_AUTH_ROLE_ADMIN, CoreSettings.class);
-        authenticateOnly = authSettings.getBoolean(TAG_AUTHENTICATE_ONLY, CoreSettings.class);
+        allowAnonymous = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
+
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakSettings.class);
         if (registerUserLocally) {
             databaseHandler = DatabaseHandler.getInstance(coreSettings);
-        }
-
-        final boolean anonRead = authSettings.getBoolean(TAG_AUTH_ALLOW_ANON_READ, CoreSettings.class);
-        roleMappersByPath.put("/Data", method -> Role.ADMIN);
-        roleMappersByPath.put("/keyc", method -> Role.ADMIN);
-        final Utils.MethodRoleMapper roleMapperSta = (HttpMethod method) -> {
-            switch (method) {
-                case DELETE:
-                    return Role.DELETE;
-
-                case GET:
-                case HEAD:
-                    if (anonRead) {
-                        return Role.NONE;
-                    }
-                    return Role.READ;
-
-                case PATCH:
-                    return Role.UPDATE;
-
-                case POST:
-                    return Role.CREATE;
-
-                case PUT:
-                    return Role.UPDATE;
-
-                case OPTIONS:
-                    return Role.NONE;
-
-                default:
-                    LOGGER.error("Unknown method: {}", method);
-                    return Role.ERROR;
-            }
-        };
-        for (String version : coreSettings.getPluginManager().getVersions().keySet()) {
-            roleMappersByPath.put("/" + version, roleMapperSta);
         }
 
         try {
@@ -170,16 +126,6 @@ public class KeycloakFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        Role requiredRole = findRequiredRoleForRequest(httpRequest);
-        if (!authenticateOnly && requiredRole == Role.NONE) {
-            chain.doFilter(request, response);
-            return;
-        }
-        if (requiredRole == Role.ERROR) {
-            throwHttpError(400, httpResponse);
-            return;
-        }
-
         OIDCServletHttpFacade facade = new OIDCServletHttpFacade(httpRequest, httpResponse);
         KeycloakDeployment deployment = deploymentContext.resolveDeployment(facade);
         if (deployment == null || !deployment.isConfigured()) {
@@ -202,15 +148,14 @@ public class KeycloakFilter implements Filter {
         FilterRequestAuthenticator authenticator = new FilterRequestAuthenticator(deployment, tokenStore, facade, httpRequest, 8443);
         AuthOutcome outcome = authenticator.authenticate();
         if (outcome == AuthOutcome.AUTHENTICATED) {
-            filterAuthenticated(facade, deployment, httpRequest, chain, response, requiredRole, httpResponse);
+            filterAuthenticated(facade, deployment, httpRequest, chain, response, httpResponse);
             return;
         }
-
-        if (requiredRole == Role.NONE) {
+        HttpMethod method = findMethodForRequest(httpRequest);
+        if (allowAnonymous && (method == HttpMethod.GET || method == HttpMethod.HEAD || method == HttpMethod.OPTIONS)) {
             chain.doFilter(request, response);
             return;
         }
-
         AuthChallenge challenge = authenticator.getChallenge();
         if (challenge != null) {
             LOGGER.debug("Challenge.");
@@ -225,7 +170,7 @@ public class KeycloakFilter implements Filter {
         throwHttpError(401, httpResponse);
     }
 
-    private void filterAuthenticated(OIDCServletHttpFacade facade, KeycloakDeployment deployment, HttpServletRequest httpRequest, FilterChain chain, ServletResponse response, Role requiredRole, HttpServletResponse httpResponse) throws IOException, ServletException {
+    private void filterAuthenticated(OIDCServletHttpFacade facade, KeycloakDeployment deployment, HttpServletRequest httpRequest, FilterChain chain, ServletResponse response, HttpServletResponse httpResponse) throws IOException, ServletException {
         LOGGER.debug("User is authenticated...");
         if (facade.isEnded()) {
             LOGGER.debug("Facade is ended.");
@@ -244,17 +189,7 @@ public class KeycloakFilter implements Filter {
         if (registerUserLocally) {
             databaseHandler.enureUserInUsertable(userName, roles);
         }
-        if (authenticateOnly) {
-            chain.doFilter(new RequestWrapper(httpRequest, pe), response);
-            return;
-        }
-        if (roles.contains(roleMappings.get(requiredRole))) {
-            LOGGER.debug("User has correct role.");
-            chain.doFilter(new RequestWrapper(httpRequest, pe), response);
-            return;
-        }
-        LOGGER.debug("User is not allowed.");
-        throwHttpError(403, httpResponse);
+        chain.doFilter(new RequestWrapper(httpRequest, pe), response);
     }
 
     private KeycloakAccount findKeycloakAccount(HttpServletRequest httpRequest) {
@@ -277,14 +212,7 @@ public class KeycloakFilter implements Filter {
         // Nothing to clean up.
     }
 
-    private Role findRequiredRoleForRequest(HttpServletRequest httpRequest) {
-        final HttpMethod method;
-        try {
-            method = HttpMethod.valueOf(httpRequest.getMethod().toUpperCase());
-        } catch (IllegalArgumentException exc) {
-            LOGGER.debug("Rejecting request: Unknown method: {}.", httpRequest.getMethod());
-            return Role.ERROR;
-        }
+    private String getPath(HttpServletRequest httpRequest) {
         final String requestURI = httpRequest.getRequestURI();
         final String contextPath = httpRequest.getContextPath();
         final String servletPath = httpRequest.getServletPath();
@@ -301,16 +229,16 @@ public class KeycloakFilter implements Filter {
             pathInfo = servletPath;
         }
         LOGGER.trace("\nrequestURI: {}\ncontextPath: {}\nservletPath: {}\nfullPath: {}\npathInfo: {}", requestURI, contextPath, servletPath, preVersionPath, pathInfo);
-        Utils.MethodRoleMapper mapper = roleMappersByPath.get(pathInfo.substring(0, 5));
-        if (mapper == null) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("No role mapper for servletPath: {}", StringHelper.cleanForLogging(servletPath));
-            }
-            return Role.ERROR;
+        return pathInfo;
+    }
+
+    private HttpMethod findMethodForRequest(HttpServletRequest httpRequest) {
+        try {
+            return HttpMethod.valueOf(httpRequest.getMethod().toUpperCase());
+        } catch (IllegalArgumentException exc) {
+            LOGGER.debug("Rejecting request: Unknown method: {}.", httpRequest.getMethod());
+            return null;
         }
-        Role requiredRole = mapper.findRole(method);
-        LOGGER.debug("Role {} required for request {} {}", requiredRole, httpRequest.getMethod(), httpRequest.getRequestURI());
-        return requiredRole;
     }
 
     private void throwHttpError(int code, HttpServletResponse response) {

@@ -45,11 +45,9 @@ import io.moquette.broker.subscriptions.Topic;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +71,12 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
         }
 
         @Override
-        public boolean isValidUser(String clientId, String userName, String password) {
-            return false;
+        public String getFilterClassName() {
+            return null;
         }
 
         @Override
-        public boolean userHasRole(String clientId, String userName, String roleName) {
+        public boolean isValidUser(String clientId, String userName, String password) {
             return false;
         }
 
@@ -114,7 +112,6 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     private final AuthProvider authProvider;
     private final boolean anonymousRead;
     private final String roleAdmin;
-    private final String roleCeate;
     private final String roleRead;
     private final String frostClientId;
     private final Pattern topicAllowPattern;
@@ -142,26 +139,9 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
 
         Map<AuthUtils.Role, String> roleMapping = AuthUtils.loadRoleMapping(authSettings);
         roleAdmin = roleMapping.get(AuthUtils.Role.ADMIN);
-        roleCeate = roleMapping.get(AuthUtils.Role.CREATE);
         roleRead = roleMapping.get(AuthUtils.Role.READ);
 
-        AuthProvider tempAuthProvider;
-
-        try {
-            Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
-            if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
-                Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                tempAuthProvider = filterConfigClass.getDeclaredConstructor().newInstance();
-                tempAuthProvider.init(coreSettings);
-            } else {
-                LOGGER.error("Configured class does not implement AuthProvider: {}", authProviderClassName);
-                tempAuthProvider = AUTH_PROVIDER_DENY_ALL;
-            }
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException exc) {
-            LOGGER.error("Could not initialise auth class.", exc);
-            tempAuthProvider = AUTH_PROVIDER_DENY_ALL;
-        }
-        authProvider = tempAuthProvider;
+        authProvider = AuthUtils.loadAuthProvider(authProviderClassName, coreSettings, AUTH_PROVIDER_DENY_ALL);
     }
 
     @Override
@@ -174,12 +154,30 @@ public class AuthWrapper implements IAuthenticator, IAuthorizatorPolicy {
     }
 
     @Override
-    public boolean canWrite(Topic topic, String user, String clientId) {
+    public boolean canWrite(Topic mqttTopic, String user, String clientId) {
         if (frostClientId.equalsIgnoreCase(clientId)) {
             LOGGER.error("FROST-ClientID Used in write");
             return true;
         }
-        return authProvider.userHasRole(clientId, user, roleCeate);
+        String topic = mqttTopic.toString();
+        PrincipalExtended userPrincipal = authProvider.getUserCaches().getUserPrincipal(clientId);
+        if (PrincipalExtended.ANONYMOUS_PRINCIPAL == userPrincipal) {
+            LOGGER.debug("Denied write access to {}, user {}, Anonymous.", topic, user);
+            return false;
+        }
+        if (userPrincipal.hasRole(roleRead) || userPrincipal.hasRole(roleAdmin)) {
+            return true;
+        }
+        Version version;
+        try {
+            version = MqttManager.getVersionFromTopic(coreSettings, topic);
+        } catch (UnknownVersionException ex) {
+            LOGGER.debug("Denied write access to {}, user {}, unknown version.", topic, user);
+            return false;
+        }
+        String internalTopic = topic.substring(version.urlPart.length() + 1);
+        internalTopic = SubscriptionFactory.getPathFromTopic(internalTopic);
+        return validatePath(version, internalTopic, userPrincipal);
     }
 
     @Override

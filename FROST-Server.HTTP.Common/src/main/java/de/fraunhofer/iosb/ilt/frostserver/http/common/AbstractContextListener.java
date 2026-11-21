@@ -25,9 +25,11 @@ import de.fraunhofer.iosb.ilt.frostserver.messagebus.MessageBusFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
@@ -38,11 +40,9 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.SessionCookieConfig;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.Properties;
-import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -231,24 +231,15 @@ public abstract class AbstractContextListener implements ServletContextListener 
         String authProviderClassName = authSettings.get(CoreSettings.TAG_AUTH_PROVIDER, CoreSettings.class);
         if (!StringHelper.isNullOrEmpty(authProviderClassName)) {
             LOGGER.info("Turning on authentication.");
-            try {
-                Class<?> authConfigClass = ClassUtils.getClass(authProviderClassName);
-                if (AuthProvider.class.isAssignableFrom(authConfigClass)) {
-                    Class<AuthProvider> filterConfigClass = (Class<AuthProvider>) authConfigClass;
-                    AuthProvider filterConfigurator = filterConfigClass.getDeclaredConstructor().newInstance();
-                    filterConfigurator.init(coreSettings);
-                    filterConfigurator.addFilter(servletContext, coreSettings);
+            AuthProvider authProvider = AuthUtils.loadAuthProvider(authProviderClassName, coreSettings, null);
+            Exceptions.illegalArgumentIf(
+                    authProvider == null,
+                    "Could not find or load auth class: {}",
+                    authProviderClassName);
+            authProvider.addFilter(servletContext, coreSettings);
 
-                    // If all went well, register the filter so it can upgrade its database.
-                    coreSettings.addLiquibaseUser(filterConfigurator);
-                } else {
-                    throw new IllegalArgumentException("Configured class does not implement AuthProvider.");
-                }
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                throw new IllegalArgumentException("Could not find or load auth class: " + authProviderClassName, ex);
-            }
+            // If all went well, register the filter so it can upgrade its database.
+            coreSettings.addLiquibaseUser(authProvider);
         }
-
     }
-
 }

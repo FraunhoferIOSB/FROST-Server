@@ -36,6 +36,13 @@ public interface AuthProvider extends LiquibaseUser {
     public void addFilter(Object context, CoreSettings coreSettings);
 
     /**
+     * Get the class name of the Filter class.
+     *
+     * @return the class name of the Filter class.
+     */
+    public String getFilterClassName();
+
+    /**
      * Check if a user exists that has the given username and the given
      * password.
      *
@@ -46,15 +53,5 @@ public interface AuthProvider extends LiquibaseUser {
      * otherwise.
      */
     public boolean isValidUser(String clientId, String username, String password);
-
-    /**
-     * Check if the given user has the given role.
-     *
-     * @param clientId The clientId used in MQTT.
-     * @param userName The username of the user to check.
-     * @param roleName The role to check.
-     * @return true if the given user has the given role, false otherwise.
-     */
-    public boolean userHasRole(String clientId, String userName, String roleName);
 
 }

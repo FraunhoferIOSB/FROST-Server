@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author scf
+ * Helper class for KeyCloak.
  */
 public class KeycloakFilterHelper {
 

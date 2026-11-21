@@ -81,7 +81,7 @@ public abstract class DatabaseHandler {
                 LOGGER.info("Initialising DatabaseHandler with uppercase table names.");
                 return new DatabaseHandlerV2(coreSettings);
             } else {
-                LOGGER.info("Initialising DatabaseHandler with lowercase table names.");
+                LOGGER.info("Initialising DatabaseHandler with uppercase table names.");
                 return new DatabaseHandlerV1(coreSettings);
             }
         });

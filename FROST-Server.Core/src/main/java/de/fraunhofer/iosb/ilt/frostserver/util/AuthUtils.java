@@ -25,14 +25,19 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_AUTH_
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.settings.Settings;
+import java.lang.reflect.InvocationTargetException;
 import java.util.EnumMap;
 import java.util.Map;
+import org.apache.commons.lang3.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author scf
+ * Helper methods for Auth.
  */
 public class AuthUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthUtils.class.getName());
 
     private AuthUtils() {
         // Utility class.
@@ -79,4 +84,40 @@ public class AuthUtils {
         return mapping;
     }
 
+    public static <T> Class<T> findClass(String className, Class<T> requiredInterface) {
+        try {
+            Class<?> foundClass = ClassUtils.getClass(className);
+            if (requiredInterface.isAssignableFrom(foundClass)) {
+                return (Class<T>) foundClass;
+            } else {
+                LOGGER.error("Configured class does not implement {}: {}", requiredInterface, className);
+                return null;
+            }
+        } catch (ClassNotFoundException | SecurityException exc) {
+            LOGGER.error("Could not initialise auth class.", exc);
+        }
+        return null;
+    }
+
+    public static <T> T instantiateClass(String className, Class<T> requiredInterface, T fallback) {
+        Class<T> foundClass = findClass(className, requiredInterface);
+        if (foundClass == null) {
+            return fallback;
+        }
+        try {
+            return foundClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException exc) {
+            LOGGER.error("Could not initialise auth class.", exc);
+        }
+        return fallback;
+    }
+
+    public static AuthProvider loadAuthProvider(String authProviderClassName, CoreSettings coreSettings, AuthProvider fallback) {
+        AuthProvider tempProvider = instantiateClass(authProviderClassName, AuthProvider.class, fallback);
+        if (tempProvider == fallback) {
+            return fallback;
+        }
+        tempProvider.init(coreSettings);
+        return tempProvider;
+    }
 }

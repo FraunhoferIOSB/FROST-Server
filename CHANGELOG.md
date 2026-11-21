@@ -10,6 +10,7 @@
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
+* Simplified Auth plugins.
 * Fixed namespaces with only property types not being registered.
 * Fixed "is null" not working on phenomenonTime/end.
 * Fixed unsubscribe not working correctly in some cases, causing duplicate messages.
