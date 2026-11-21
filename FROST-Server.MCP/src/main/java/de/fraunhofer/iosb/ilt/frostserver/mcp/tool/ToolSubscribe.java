@@ -33,12 +33,16 @@ import static de.fraunhofer.iosb.ilt.frostserver.mcp.tool.FrostToolHandler.TYPE_
 
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.SubscriptionException;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.SubscriptionRegistry;
+import de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.Tool;
+import io.modelcontextprotocol.spec.McpSchema.ToolAnnotations;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,17 +106,17 @@ public class ToolSubscribe implements FrostTool {
      * @return the sync tool specification.
      */
     @Override
-    public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
+    public SyncToolSpecification specification() {
+        final Tool tool = Tool.builder(NAME, inputSchema())
                 .title("Subscribe to entity changes")
                 .description(description())
-                .annotations(McpSchema.ToolAnnotations.builder()
+                .annotations(ToolAnnotations.builder()
                         .readOnlyHint(Boolean.TRUE)
                         .idempotentHint(Boolean.TRUE)
                         .openWorldHint(Boolean.FALSE)
                         .build())
                 .build();
-        return new McpServerFeatures.SyncToolSpecification(tool, this::call);
+        return new SyncToolSpecification(tool, this::call);
     }
 
     private String description() {
@@ -124,7 +128,7 @@ public class ToolSubscribe implements FrostTool {
                 + "End subscriptions with frost_unsubscribe or by closing the session.";
     }
 
-    private McpSchema.CallToolResult call(McpSyncServerExchange exchange, McpSchema.CallToolRequest request) {
+    private CallToolResult call(McpSyncServerExchange exchange, CallToolRequest request) {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);
@@ -153,10 +157,10 @@ public class ToolSubscribe implements FrostTool {
         }
     }
 
-    private McpSchema.CallToolResult mcpResult(Object structured) {
-        return McpSchema.CallToolResult.builder()
+    private CallToolResult mcpResult(Object structured) {
+        return CallToolResult.builder()
                 .structuredContent(structured)
-                .addTextContent(de.fraunhofer.iosb.ilt.frostserver.mcp.util.StaJsonHelper.writeValueAsPrettyString(structured))
+                .addTextContent(StaJsonHelper.writeValueAsPrettyString(structured))
                 .isError(false)
                 .build();
     }

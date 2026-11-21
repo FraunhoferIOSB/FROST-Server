@@ -43,7 +43,8 @@ import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpError;
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.ErrorCodes;
 import io.prometheus.metrics.core.datapoints.Timer;
 import io.prometheus.metrics.core.metrics.Counter;
 import io.prometheus.metrics.core.metrics.Histogram;
@@ -195,7 +196,7 @@ public class FrostToolHandler {
      * @param code 401 or 403.
      * @return the MCP tool result.
      */
-    public McpSchema.CallToolResult readDeniedResult(String toolName, String path, PrincipalExtended principal, String versionName, int code) {
+    public CallToolResult readDeniedResult(String toolName, String path, PrincipalExtended principal, String versionName, int code) {
         final ServiceResponseDefault response = new ServiceResponseDefault(
                 code, code == 401
                         ? "Anonymous access is not allowed."
@@ -439,7 +440,7 @@ public class FrostToolHandler {
      * @param response The executed service response.
      * @return the MCP tool result.
      */
-    public McpSchema.CallToolResult toCallToolResult(
+    public CallToolResult toCallToolResult(
             String toolName, String path, PrincipalExtended principal, String versionName,
             ServiceResponseDefault response) {
         final int code = response.getCode();
@@ -454,7 +455,7 @@ public class FrostToolHandler {
                     return errorResult(tooLargeObject(parsed));
                 }
                 outcome = OUTCOME_SUCCESS;
-                return McpSchema.CallToolResult.builder()
+                return CallToolResult.builder()
                         .structuredContent(structured)
                         .addTextContent(StaJsonHelper.writeValueAsPrettyString(structured))
                         .isError(false)
@@ -513,8 +514,8 @@ public class FrostToolHandler {
         return formatted;
     }
 
-    private McpSchema.CallToolResult errorResult(Object structured) {
-        return McpSchema.CallToolResult.builder()
+    private CallToolResult errorResult(Object structured) {
+        return CallToolResult.builder()
                 .structuredContent(structured)
                 .addTextContent(StaJsonHelper.writeValueAsPrettyString(structured))
                 .isError(true)
@@ -554,7 +555,7 @@ public class FrostToolHandler {
      * @return the McpError to throw from the handler.
      */
     public static McpError invalidParams(String message) {
-        return McpError.builder(McpSchema.ErrorCodes.INVALID_PARAMS)
+        return McpError.builder(ErrorCodes.INVALID_PARAMS)
                 .message(message)
                 .build();
     }
@@ -566,7 +567,7 @@ public class FrostToolHandler {
      * @return the McpError to throw from the handler.
      */
     public static McpError methodNotFound(String message) {
-        return McpError.builder(McpSchema.ErrorCodes.METHOD_NOT_FOUND)
+        return McpError.builder(ErrorCodes.METHOD_NOT_FOUND)
                 .message(message)
                 .build();
     }

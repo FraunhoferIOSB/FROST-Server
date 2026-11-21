@@ -17,15 +17,15 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.subscription;
 
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import reactor.core.publisher.Mono;
 
 /**
  * The delivery target for subscription notifications. In production this is a
  * thin adapter over the transport provider's notifyClient; tests capture the
- * notifications instead. Deliveries are Monos: the caller triggers them
- * without blocking the message-bus worker thread, and treats errors as a
- * signal to drop the subscriptions of the failing session.
+ * notifications instead. Deliveries are Monos: the caller triggers them without
+ * blocking the message-bus worker thread, and treats errors as a signal to drop
+ * the subscriptions of the failing session.
  */
 public interface NotificationSink {
 
@@ -35,9 +35,9 @@ public interface NotificationSink {
      * @param sessionId The MCP session to deliver to.
      * @param notification The notification to deliver.
      * @return a Mono completing when the transport accepted the notification
-     * for sending; erroring when delivery is not possible (e.g. the session
-     * is gone).
+     * for sending; erroring when delivery is not possible (e.g. the session is
+     * gone).
      */
-    public Mono<Void> deliver(String sessionId, McpSchema.LoggingMessageNotification notification);
+    public Mono<Void> deliver(String sessionId, LoggingMessageNotification notification);
 
 }

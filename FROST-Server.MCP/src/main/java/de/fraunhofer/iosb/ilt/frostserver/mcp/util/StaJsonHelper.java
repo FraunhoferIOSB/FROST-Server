@@ -18,6 +18,7 @@
 package de.fraunhofer.iosb.ilt.frostserver.mcp.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Map;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
@@ -27,9 +28,9 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.datatype.jsonp.JSONPModule;
 
 /**
- * JSON helpers for the MCP layer: parsing STA responses into structures the
- * MCP SDK can embed as structuredContent, pretty-printing for the text blob,
- * and byte-cap checking.
+ * JSON helpers for the MCP layer: parsing STA responses into structures the MCP
+ * SDK can embed as structuredContent, pretty-printing for the text blob, and
+ * byte-cap checking.
  */
 public final class StaJsonHelper {
 
@@ -123,12 +124,12 @@ public final class StaJsonHelper {
      */
     public static Object toStructuredContent(JsonNode node) {
         if (node == null || node.isNull()) {
-            return java.util.Map.of();
+            return Map.of();
         }
         if (node.isObject()) {
-            return MAPPER.treeToValue(node, java.util.Map.class);
+            return MAPPER.treeToValue(node, Map.class);
         }
-        return java.util.Map.of("value", MAPPER.treeToValue(node, Object.class));
+        return Map.of("value", MAPPER.treeToValue(node, Object.class));
     }
 
 }

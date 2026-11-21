@@ -31,7 +31,8 @@ import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.LoggingLevel;
+import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -239,7 +240,7 @@ public class SubscriptionRegistry implements MessageListener {
         }
     }
 
-    private Version handleSubscription(final Subscription subscription, final PersistenceManager persistenceManager, final Entity entity, final Set<Property> changedFields, Version lastVersion, Registration reg, EntityChangedMessage message) {
+    private Version handleSubscription(Subscription subscription, PersistenceManager persistenceManager, Entity entity, Set<Property> changedFields, Version lastVersion, Registration reg, EntityChangedMessage message) {
         try {
             if (!subscription.matches(persistenceManager, entity, changedFields)) {
                 return lastVersion;
@@ -288,10 +289,8 @@ public class SubscriptionRegistry implements MessageListener {
             removeSession(reg.sessionId());
             return;
         }
-        final McpSchema.LoggingMessageNotification notification = McpSchema.LoggingMessageNotification.builder()
-                .level(McpSchema.LoggingLevel.INFO)
+        final LoggingMessageNotification notification = LoggingMessageNotification.builder(LoggingLevel.INFO, envelope)
                 .logger(LOGGER_NAME)
-                .data(envelope)
                 .build();
         final Mono<Void> delivery = sink.deliver(reg.sessionId(), notification);
         if (delivery == null) {

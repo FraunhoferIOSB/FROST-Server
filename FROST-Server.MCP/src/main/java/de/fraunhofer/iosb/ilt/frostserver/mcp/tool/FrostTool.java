@@ -17,7 +17,7 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.tool;
 
-import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncToolSpecification;
 
 /**
  * A FROST MCP tool: knows its tool name and builds its own sync tool
@@ -38,5 +38,5 @@ public interface FrostTool {
      *
      * @return the sync tool specification.
      */
-    McpServerFeatures.SyncToolSpecification specification();
+    SyncToolSpecification specification();
 }
