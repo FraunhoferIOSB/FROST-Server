@@ -39,7 +39,10 @@ import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
+import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import io.modelcontextprotocol.spec.McpSchema.Tool;
+import io.modelcontextprotocol.spec.McpSchema.ToolAnnotations;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,10 +102,10 @@ public class ToolGet implements FrostTool {
      */
     @Override
     public McpServerFeatures.SyncToolSpecification specification() {
-        final McpSchema.Tool tool = McpSchema.Tool.builder(NAME, inputSchema())
+        final Tool tool = Tool.builder(NAME, inputSchema())
                 .title("Read a STA resource")
                 .description(description())
-                .annotations(McpSchema.ToolAnnotations.builder()
+                .annotations(ToolAnnotations.builder()
                         .readOnlyHint(Boolean.TRUE)
                         .idempotentHint(Boolean.TRUE)
                         .openWorldHint(Boolean.FALSE)
@@ -121,7 +124,7 @@ public class ToolGet implements FrostTool {
                 + "Model details: frost://model resource.";
     }
 
-    private McpSchema.CallToolResult call(McpSyncServerExchange exchange, McpSchema.CallToolRequest request) {
+    private CallToolResult call(McpSyncServerExchange exchange, CallToolRequest request) {
         final Map<String, Object> arguments = request.arguments() == null ? Map.of() : request.arguments();
         final PrincipalExtended principal = handler.principalFrom(exchange);
         handler.requireToolAllowed(NAME);

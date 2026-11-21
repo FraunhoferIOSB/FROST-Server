@@ -35,8 +35,7 @@ import java.util.Map;
  * The single introspection point for the frost://model resources: walks the
  * live ModelRegistry and generates the model overview and per-entity-type
  * detail documents. Never mentions STA types directly; Edm.* property type
- * names surface verbatim, Edm.Untyped becomes the free-form object
- * annotation.
+ * names surface verbatim, Edm.Untyped becomes the free-form object annotation.
  */
 public class ModelResourceGenerator {
 
@@ -77,8 +76,8 @@ public class ModelResourceGenerator {
     }
 
     /**
-     * Generates the summary map for one entity type: names, primary key,
-     * entity properties and navigation properties.
+     * Generates the summary map for one entity type: names, primary key, entity
+     * properties and navigation properties.
      *
      * @param entityType The entity type to describe.
      * @return the entity-type descriptor map.
@@ -89,14 +88,16 @@ public class ModelResourceGenerator {
         type.put("entitySet", entityType.plural);
 
         final PrimaryKey primaryKey = entityType.getPrimaryKey();
-        if (primaryKey != null && primaryKey.size() == 1) {
-            final Property<?> keyProperty = primaryKey.getKeyProperties().get(0);
-            type.put("key", keyProperty.getName());
-            type.put("keyType", edmName(keyProperty.getType()));
-        } else if (primaryKey != null) {
-            final List<String> keys = new ArrayList<>();
-            primaryKey.getKeyProperties().forEach(property -> keys.add(property.getName()));
-            type.put("key", keys);
+        if (primaryKey != null) {
+            if (primaryKey.size() == 1) {
+                final Property<?> keyProperty = primaryKey.getKeyProperties().get(0);
+                type.put("key", keyProperty.getName());
+                type.put("keyType", edmName(keyProperty.getType()));
+            } else {
+                final List<String> keys = new ArrayList<>();
+                primaryKey.getKeyProperties().forEach(property -> keys.add(property.getName()));
+                type.put("key", keys);
+            }
         }
 
         final List<Map<String, Object>> properties = new ArrayList<>();

@@ -25,10 +25,15 @@ import de.fraunhofer.iosb.ilt.frostserver.service.RequestTypeUtils;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponseDefault;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
-import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncResourceSpecification;
+import io.modelcontextprotocol.server.McpServerFeatures.SyncResourceTemplateSpecification;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpError;
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.ReadResourceRequest;
+import io.modelcontextprotocol.spec.McpSchema.ReadResourceResult;
+import io.modelcontextprotocol.spec.McpSchema.Resource;
+import io.modelcontextprotocol.spec.McpSchema.ResourceContents;
+import io.modelcontextprotocol.spec.McpSchema.ResourceTemplate;
 import io.modelcontextprotocol.spec.McpSchema.TextResourceContents;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -83,12 +88,12 @@ public class ResourceHandler {
      *
      * @return the sync resource specification.
      */
-    public McpServerFeatures.SyncResourceSpecification indexSpecification() {
-        final McpSchema.Resource resource = McpSchema.Resource.builder(URI_INDEX, "STA index document")
+    public SyncResourceSpecification indexSpecification() {
+        final Resource resource = Resource.builder(URI_INDEX, "STA index document")
                 .description("The SensorThings API index document: entity set URLs, server settings, conformance list.")
                 .mimeType(MIME_JSON)
                 .build();
-        return new McpServerFeatures.SyncResourceSpecification(resource, this::readIndex);
+        return new SyncResourceSpecification(resource, this::readIndex);
     }
 
     /**
@@ -96,12 +101,12 @@ public class ResourceHandler {
      *
      * @return the sync resource specification.
      */
-    public McpServerFeatures.SyncResourceSpecification modelSpecification() {
-        final McpSchema.Resource resource = McpSchema.Resource.builder(URI_MODEL, "STA model overview")
+    public SyncResourceSpecification modelSpecification() {
+        final Resource resource = Resource.builder(URI_MODEL, "STA model overview")
                 .description("The generated model overview: entity types with properties and navigation properties.")
                 .mimeType(MIME_JSON)
                 .build();
-        return new McpServerFeatures.SyncResourceSpecification(resource, this::readModel);
+        return new SyncResourceSpecification(resource, this::readModel);
     }
 
     /**
@@ -109,12 +114,12 @@ public class ResourceHandler {
      *
      * @return the sync resource template specification.
      */
-    public McpServerFeatures.SyncResourceTemplateSpecification modelSetSpecification() {
-        final McpSchema.ResourceTemplate template = McpSchema.ResourceTemplate.builder(URI_TEMPLATE_MODEL_SET, "STA entity model")
+    public SyncResourceTemplateSpecification modelSetSpecification() {
+        final ResourceTemplate template = ResourceTemplate.builder(URI_TEMPLATE_MODEL_SET, "STA entity model")
                 .description("Model detail for one entity set: properties, navigation properties, key.")
                 .mimeType(MIME_JSON)
                 .build();
-        return new McpServerFeatures.SyncResourceTemplateSpecification(template, this::readModelSet);
+        return new SyncResourceTemplateSpecification(template, this::readModelSet);
     }
 
     /**
@@ -122,20 +127,20 @@ public class ResourceHandler {
      *
      * @return the sync resource template specification.
      */
-    public McpServerFeatures.SyncResourceTemplateSpecification staSpecification() {
-        final McpSchema.ResourceTemplate template = McpSchema.ResourceTemplate.builder(URI_TEMPLATE_STA, "Live STA resource")
+    public SyncResourceTemplateSpecification staSpecification() {
+        final ResourceTemplate template = ResourceTemplate.builder(URI_TEMPLATE_STA, "Live STA resource")
                 .description("Live read of a STA path with the MCP paging caps applied, e.g. frost://sta/Things(1).")
                 .mimeType(MIME_JSON)
                 .build();
-        return new McpServerFeatures.SyncResourceTemplateSpecification(template, this::readSta);
+        return new SyncResourceTemplateSpecification(template, this::readSta);
     }
 
-    private McpSchema.ReadResourceResult readIndex(McpSyncServerExchange exchange, McpSchema.ReadResourceRequest request) {
+    private ReadResourceResult readIndex(McpSyncServerExchange exchange, ReadResourceRequest request) {
         final String json = executeStaRead(exchange, "", null);
         return textResult(request.uri(), json);
     }
 
-    private McpSchema.ReadResourceResult readModel(McpSyncServerExchange exchange, McpSchema.ReadResourceRequest request) {
+    private ReadResourceResult readModel(McpSyncServerExchange exchange, ReadResourceRequest request) {
         final PrincipalExtended principal = handler.principalFrom(exchange);
         final int readGate = handler.checkCanRead(principal);
         if (readGate != 0) {
@@ -146,7 +151,7 @@ public class ResourceHandler {
         return textResult(request.uri(), json);
     }
 
-    private McpSchema.ReadResourceResult readModelSet(McpSyncServerExchange exchange, McpSchema.ReadResourceRequest request) {
+    private ReadResourceResult readModelSet(McpSyncServerExchange exchange, ReadResourceRequest request) {
         final String entitySet = extractEntitySet(request.uri());
         if (entitySet == null) {
             throw McpError.RESOURCE_NOT_FOUND.apply(request.uri());
@@ -164,7 +169,7 @@ public class ResourceHandler {
         return textResult(request.uri(), json);
     }
 
-    private McpSchema.ReadResourceResult readSta(McpSyncServerExchange exchange, McpSchema.ReadResourceRequest request) {
+    private ReadResourceResult readSta(McpSyncServerExchange exchange, ReadResourceRequest request) {
         final String staPath = extractStaPath(request.uri());
         if (staPath == null) {
             throw McpError.RESOURCE_NOT_FOUND.apply(request.uri());
@@ -275,12 +280,12 @@ public class ResourceHandler {
         return StaJsonHelper.writeValueAsString(FrostToolHandler.errorObject(statusCode, message));
     }
 
-    private McpSchema.ReadResourceResult textResult(String uri, String text) {
-        final List<McpSchema.ResourceContents> contents = List.of(
+    private ReadResourceResult textResult(String uri, String text) {
+        final List<ResourceContents> contents = List.of(
                 TextResourceContents.builder(uri, text)
                         .mimeType(MIME_JSON)
                         .build());
-        return McpSchema.ReadResourceResult.builder(contents).build();
+        return ReadResourceResult.builder(contents).build();
     }
 
 }

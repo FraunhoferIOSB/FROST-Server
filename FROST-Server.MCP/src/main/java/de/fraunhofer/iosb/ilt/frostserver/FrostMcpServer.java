@@ -17,8 +17,6 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver;
 
-import de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthFilter;
-import de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakFilter;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.resource.ResourceHandler;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.session.PrincipalExtractor;
 import de.fraunhofer.iosb.ilt.frostserver.mcp.subscription.NotificationSink;
@@ -41,6 +39,8 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManagerFactory;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.JooqPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.McpSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthProvider;
+import de.fraunhofer.iosb.ilt.frostserver.util.AuthUtils;
 import de.fraunhofer.iosb.ilt.frostserver.util.GitVersionInfo;
 import de.fraunhofer.iosb.ilt.frostserver.util.MetricsSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
@@ -53,6 +53,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
 import jakarta.servlet.FilterRegistration;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -88,8 +89,6 @@ public class FrostMcpServer {
     private static final String CONFIG_FILE_NAME = "FrostMcp.properties";
     private static final String SERVLET_PATH = "/mcp";
     private static final String FILTER_NAME = "AuthFilterMcp";
-    private static final String PROVIDER_BASIC = "de.fraunhofer.iosb.ilt.frostserver.auth.basic.BasicAuthProvider";
-    private static final String PROVIDER_KEYCLOAK = "de.fraunhofer.iosb.ilt.frostserver.auth.keycloak.KeycloakAuthProvider";
 
     private static final String INSTRUCTIONS = "Tools for the OGC SensorThings API. "
             + "Use frost_query for typed entity-set queries (results carry @iot.nextLink for paging) "
@@ -105,7 +104,7 @@ public class FrostMcpServer {
     private SubscriptionRegistry subscriptionRegistry;
     private Thread shutdownHook;
 
-    private Class<? extends jakarta.servlet.Filter> authFilterClass;
+    private Class<? extends Filter> authFilterClass;
     private final Properties authFilterInitParams = new Properties();
 
     public FrostMcpServer(CoreSettings coreSettings) {
@@ -165,7 +164,7 @@ public class FrostMcpServer {
     private void installSecurityValidators() {
         try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
             if (pm instanceof JooqPersistenceManager jpm) {
-                jpm.getTableCollection().addSecurityValidator("", null);
+                jpm.getTableCollection().generateMissingSecurityValidators();
             }
         }
     }
@@ -196,20 +195,15 @@ public class FrostMcpServer {
             failSafeNoAuthProvider(null);
             return;
         }
-        switch (providerClassName) {
-            case PROVIDER_BASIC ->
-                authFilterClass = BasicAuthFilter.class;
-            case PROVIDER_KEYCLOAK ->
-                authFilterClass = KeycloakFilter.class;
-            default -> {
-                failSafeNoAuthProvider(providerClassName);
-                return;
-            }
+        AuthProvider authProvider = AuthUtils.loadAuthProvider(providerClassName, coreSettings, null);
+        if (authProvider == null) {
+            failSafeNoAuthProvider(providerClassName);
+            return;
         }
-        authFilterInitParams.setProperty(CoreSettings.TAG_AUTHENTICATE_ONLY, "T");
-        authFilterInitParams.setProperty(
-                CoreSettings.TAG_AUTH_ALLOW_ANON_READ,
-                mcpSettings.isRequireAuthenticated() ? "F" : "T");
+        authFilterClass = AuthUtils.findClass(authProvider.getFilterClassName(), Filter.class);
+        if (authFilterClass == null) {
+            failSafeNoAuthProvider(providerClassName);
+        }
     }
 
     private void failSafeNoAuthProvider(String className) {
@@ -218,10 +212,10 @@ public class FrostMcpServer {
                 : "Auth provider '" + className + "' cannot be mapped onto the /mcp endpoint.";
         if (mcpSettings.isRequireAuthenticated()) {
             throw new IllegalStateException(detail
-                    + " Refusing to start the MCP server because mcp.auth.requireAuthenticated=T "
+                    + " Refusing to start the MCP server because mcp.auth.requireAuthenticated=true "
                     + "would leave the endpoint unprotected otherwise.");
         }
-        LOGGER.warn("{} The /mcp endpoint runs unprotected (mcp.auth.requireAuthenticated=F).", detail);
+        LOGGER.warn("{} The /mcp endpoint runs unprotected (mcp.auth.requireAuthenticated=false).", detail);
     }
 
     /**
@@ -356,6 +350,7 @@ public class FrostMcpServer {
         if (metricsServer != null) {
             metricsServer.stop();
         }
+        coreSettings.getMessageBus().stop();
         if (jettyServer != null) {
             try {
                 jettyServer.stop();

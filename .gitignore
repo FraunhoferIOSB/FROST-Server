@@ -20,6 +20,8 @@ dependency-reduced-pom.xml
 
 FROST-Server.HTTP/keycloak.json
 FROST-Server.MQTT/FrostMqtt.properties
+FROST-Server.MCP/FrostMcp.properties
+FROST-Server.HTTP/src/main/webapp/META-INF/context*.xml
 logs
 Tools/ModelExtractor/examples
 *.tgz

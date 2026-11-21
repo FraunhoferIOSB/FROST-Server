@@ -17,6 +17,9 @@
  */
 package de.fraunhofer.iosb.ilt.frostserver.mcp.subscription;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * The outcome of a subscribe call: the subscription id, the canonical topic,
  * and the flags of the tool result. The tool layer renders this as structured
@@ -25,10 +28,9 @@ package de.fraunhofer.iosb.ilt.frostserver.mcp.subscription;
  * @param subscriptionId The server-assigned subscription id.
  * @param topic The canonical topic: version path plus the validated query
  * string, or null when the query carries no options.
- * @param alreadyExisted True when an identical subscription already existed
- * for the session; no new registration was created.
- * @param sessionActive Whether the session is currently known to the
- * transport.
+ * @param alreadyExisted True when an identical subscription already existed for
+ * the session; no new registration was created.
+ * @param sessionActive Whether the session is currently known to the transport.
  */
 public record SubscriptionResult(long subscriptionId, String topic, boolean alreadyExisted, boolean sessionActive) {
 
@@ -38,7 +40,7 @@ public record SubscriptionResult(long subscriptionId, String topic, boolean alre
      * @return the structured content map.
      */
     public java.util.Map<String, Object> toStructuredContent() {
-        final java.util.Map<String, Object> content = new java.util.LinkedHashMap<>();
+        final Map<String, Object> content = new LinkedHashMap<>();
         content.put("subscriptionId", subscriptionId);
         content.put("topic", topic);
         if (alreadyExisted) {
