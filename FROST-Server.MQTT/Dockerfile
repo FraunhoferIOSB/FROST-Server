@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-alpine
+FROM eclipse-temurin:21-jre-resolute
 
 EXPOSE 1883
 EXPOSE 9876

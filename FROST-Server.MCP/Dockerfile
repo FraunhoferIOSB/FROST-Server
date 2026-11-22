@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-alpine
+FROM eclipse-temurin:21-jre-resolute
 
 # Expose the MCP endpoint (mcp.port) and the optional internal Prometheus
 # metrics endpoint (metrics.endpointPort, only active when enabled with
