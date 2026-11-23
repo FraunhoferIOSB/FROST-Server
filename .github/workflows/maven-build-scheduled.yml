@@ -57,7 +57,7 @@ jobs:
         export HTTP_NAME=$(./mvnw -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTTP_NAME=$(./mvnw -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTT_NAME=$(./mvnw -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MCP_NAME=$(./mvnw -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MCP_NAME=$(./mvnw -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q | true)
         echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
         echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
         echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV

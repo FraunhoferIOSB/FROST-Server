@@ -53,7 +53,7 @@ jobs:
         export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MODEL_EDITOR_NAME=$(mvn -pl Tools/ModelEditor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MODEL_EXTRACTOR_NAME=$(mvn -pl Tools/ModelExtractor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
+        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q | true)
 
         echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
         echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
@@ -99,6 +99,7 @@ jobs:
         archive: false
 
     - name: Upload MCP jar
+      if: env.MCP_ARTIFACT != '' && startsWith(env.MCP_ARTIFACT, 'FROST-Server.MCP-')
       uses: actions/upload-artifact@v7
       with:
         path: FROST-Server.MCP/target/${{ env.MCP_ARTIFACT }}
@@ -184,6 +185,7 @@ jobs:
 
 
     - name: Build and push - MCP
+      if: env.MCP_ARTIFACT != '' && startsWith(env.MCP_ARTIFACT, 'FROST-Server.MCP-')
       uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
