@@ -1,8 +1,11 @@
 # Changelog
 
-## Version 2.8.3-SNAPSHOT
+## Version 2.8.3
 
 **Internal changes & Bugfixes**
+* Bumped dependencies.
+* Change docker base image to same as tomcat: eclipse-temurin:21-jr-resolute.
+* Improved order of plugins, and thus landing page items.
 * Added configurable limit to allowed length of Authorization header for Basic auth.
 * Fixed Projects plugin auth rules using non-existent tables for Actuators, Tasks,
   TaskingCapabilities and ObservedProperties. Reading Actuators and Tasks failed for users
