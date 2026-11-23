@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        refs: [refs/tags/v2.8.2, refs/tags/v2.7.4, refs/tags/v2.6.5]
+        refs: [refs/heads/v2.8.x, refs/heads/v2.7.x, refs/heads/v2.6.x]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Source
@@ -41,11 +41,9 @@ jobs:
         java-version: 21
 
 
-    - name: Get Date
-      id: get-date
+    - name: Checkout latest tag
       run: |
-        echo "date=$(/bin/date -u "+%Y-%m-%dT%H:%M:%S")" >> $GITHUB_OUTPUT
-      shell: bash
+        git checkout $(git describe --abbrev=0 --tags)
 
 
     - name: Build with Maven
