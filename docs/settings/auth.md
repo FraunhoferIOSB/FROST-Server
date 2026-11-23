@@ -121,6 +121,8 @@ The BasicAuthProvider has the following specific settings:
   Otherwise password can use any result of the [PostgreSQL crypt function](https://www.postgresql.org/docs/current/pgcrypto.html#id-1.11.7.37.8.7),
   for example with Blowfish variant 2a (recommended):
   `INSERT INTO "USERS" VALUES ('my_user', crypt('my_password', gen_salt('bf', 12)))`.
+* **auth.maxAuthHeaderLength:** since 2.8.3, Default: `128`  
+  The maximum accepted length of the `Authorization` header. When a client sends this header with a really long value, it is most likely not a real login attempt and trying to parse the header will just waste resources.
 * **auth.db.jndi.datasource:**  
   JNDI data source name, used when running in Tomcat/Wildfly. When using JNDI only set this option. When not using JNDI all other options can be used.
 * **auth.db.driver:** Default: empty  
