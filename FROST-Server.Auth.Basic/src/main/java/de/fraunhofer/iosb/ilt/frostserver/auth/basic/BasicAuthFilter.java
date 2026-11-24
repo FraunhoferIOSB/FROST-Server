@@ -159,15 +159,6 @@ public class BasicAuthFilter implements Filter {
         }
     }
 
-    private void throwInsufficientRights(HttpServletResponse response) {
-        response.addHeader(AUTHORIZATION_REQUIRED_HEADER, authHeaderValue);
-        try {
-            response.sendError(403);
-        } catch (IOException exc) {
-            LOGGER.error("Exception sending back error.", exc);
-        }
-    }
-
     private static String getInitParamWithDefault(FilterConfig filterConfig, String paramName, Class<? extends ConfigDefaults> defaultsProvider) {
         return getInitParamWithDefault(filterConfig, paramName, ConfigUtils.getDefaultValue(defaultsProvider, paramName));
     }

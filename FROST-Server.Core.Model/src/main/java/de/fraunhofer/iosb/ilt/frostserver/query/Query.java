@@ -91,12 +91,14 @@ public class Query {
 
     /**
      * Create a new Query bound to the ServiceRequest, Path and Principal form
-     * the given parent expand.
+     * the given parent expand. This is not done as a constructor, since Sonar
+     * would see it as a copy constructor and complain.
      *
      * @param expandParent The parent expand to use as a basis.
+     * @return The child Query.
      */
-    public Query(Query expandParent) {
-        this(expandParent.getContext(), expandParent.getPath(), expandParent.getPrincipal());
+    public static Query forParent(Query expandParent) {
+        return new Query(expandParent.getContext(), expandParent.getPath(), expandParent.getPrincipal());
     }
 
     public Query(ServiceContext context, ResourcePath path) {

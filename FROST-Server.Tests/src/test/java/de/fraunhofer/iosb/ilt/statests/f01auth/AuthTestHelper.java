@@ -166,17 +166,6 @@ public class AuthTestHelper {
         EntityUtils.testFilterResults(validateDoa, "", expected);
     }
 
-    public void linkForOk(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target) {
-        try {
-            source.dao(property)
-                    .linkEntity(target.asReference());
-        } catch (ServiceFailureException ex) {
-            String failMessage = "User " + user + " should be able to link " + source + "/" + property + " to " + target;
-            LOGGER.error(failMessage, ex);
-            fail(failMessage);
-        }
-    }
-
     private static class EntityReference {
 
         @JsonProperty("@id")
@@ -189,14 +178,6 @@ public class AuthTestHelper {
         public static EntityReference of(String selfLink) {
             return new EntityReference(selfLink);
         }
-    }
-
-    public void linkForFail(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target, int... expectedCodes) {
-        String failMsg = Exceptions.replacePlaceholders("User {} should not be able to link {}/{} to {}", user, source, property, target);
-        StatusCodeException ex = Assertions.assertThrows(StatusCodeException.class,
-                () -> source.dao(property).linkEntity(target.asReference()),
-                failMsg);
-        expectStatusCodeException(failMsg, ex, expectedCodes);
     }
 
     public void linkForOk11(String user, SensorThingsService service, Entity source, NavigationPropertyEntitySet property, Entity target) {

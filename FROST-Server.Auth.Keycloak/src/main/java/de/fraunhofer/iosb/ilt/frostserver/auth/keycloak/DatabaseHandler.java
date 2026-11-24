@@ -61,7 +61,7 @@ public class DatabaseHandler {
     private final long cleanupIntervalMs;
     private Thread cleanupThread;
 
-    private LinkedHashMap<String, SeenUser> seenUsers = new LinkedHashMap<>();
+    private final LinkedHashMap<String, SeenUser> seenUsers = new LinkedHashMap<>();
 
     public static void init(CoreSettings coreSettings) {
         if (INSTANCES.get(coreSettings) == null) {

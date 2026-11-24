@@ -33,9 +33,6 @@ public class AllowedTokens extends AbstractConstraint<AllowedTokens, String> {
      */
     private String pattern;
 
-    public AllowedTokens() {
-    }
-
     @Override
     public int hashCode() {
         int hash = 5;

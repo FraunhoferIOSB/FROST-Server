@@ -94,7 +94,7 @@ public class RelationManyToMany<S extends StaMainTable<S>, L extends StaTable<L>
      * If the relation is symmetrical, on insert both [A,B] and [B,A] tuples are
      * inserted, and on delete both are deleted.
      */
-    private boolean symmetrical;
+    private final boolean symmetrical;
 
     private final SortedSet<SortingWrapper<Double, HookRelation>> hooks = new TreeSet<>();
 

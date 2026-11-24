@@ -43,7 +43,7 @@ public final class StaTableDynamic extends StaTableAbstract<StaTableDynamic> {
 
     private final Name tableName;
     private final transient EntityType entityType;
-    private int[] pkFieldIdx;
+    private final int[] pkFieldIdx;
     private List<Field> pkFields;
 
     public <I> StaTableDynamic(Name tableName, EntityType entityType, DataType<I> idType) {

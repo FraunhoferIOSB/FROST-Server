@@ -103,7 +103,7 @@ public class Expand implements Comparable<Expand> {
 
     public Query getSubQuery() {
         if (subQuery == null) {
-            final Query newSubQuery = new Query(parentQuery)
+            final Query newSubQuery = Query.forParent(parentQuery)
                     .validate(null, validatedPath.getEntityType());
             setSubQuery(newSubQuery);
         }
@@ -173,7 +173,7 @@ public class Expand implements Comparable<Expand> {
             }
             rawPath.clear();
             rawPath.add(firstRawPath);
-            subQuery = new Query(parentQuery);
+            subQuery = Query.forParent(parentQuery);
             subQuery.addExpand(subExpand);
             subQuery.setParentExpand(this);
         }

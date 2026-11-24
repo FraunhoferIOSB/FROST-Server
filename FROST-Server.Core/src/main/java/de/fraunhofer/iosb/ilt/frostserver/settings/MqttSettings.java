@@ -92,7 +92,7 @@ public class MqttSettings extends ConfigProvider<MqttSettings> {
     /**
      * The core settings that is the parent of this mqttSettings.
      */
-    private CoreSettings coreSettings;
+    private final CoreSettings coreSettings;
     /**
      * Fully-qualified class name of the MqttServer implementation class.
      */

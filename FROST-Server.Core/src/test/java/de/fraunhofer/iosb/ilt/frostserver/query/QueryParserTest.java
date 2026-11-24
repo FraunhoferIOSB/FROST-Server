@@ -475,7 +475,7 @@ class QueryParserTest {
                         IntervalConstant.parse("2015-10-14T01:01:01.000+02:00/P1Y2M3W4DT1H2M3S")));
         result = QueryParser.parseQuery(query, context, path);
         result.validate(testModel.etRoom);
-        assert (result.equals(expResult));
+        assertEquals(expResult, result);
 
         query = "$filter=overlaps(time,P1D/2015-10-14T01:01:01.000+02:00)";
         expResult = new Query(context, path);

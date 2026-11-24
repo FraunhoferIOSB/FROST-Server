@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.LineStringCo
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PointConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.PolygonConstant;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.constant.StringConstant;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -50,9 +51,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Function<T extends Function<T>> implements Expression<T> {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger LOGGER = LoggerFactory.getLogger(Function.class);
 
     private final List<Expression<?>> parameters = new ArrayList<>();
@@ -114,7 +112,7 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
     @Override
     public <R> R handle(ExpressionHelper h) {
         if (!hasHandler()) {
-            LOGGER.error("No hanlder for {} ({})", getName(), getClass());
+            Exceptions.illegalArgumentIf(!hasHandler(), "No hanlder for {} ({})", getName(), getClass());
         }
         return (R) handler.handle(this, h);
     }

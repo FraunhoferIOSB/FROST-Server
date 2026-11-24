@@ -31,13 +31,13 @@ public class DynamicContext {
     /**
      * The user to render the query for.
      */
-    private ThreadLocal<PrincipalExtended> user = new ThreadLocal<>();
+    private final ThreadLocal<PrincipalExtended> user = new ThreadLocal<>();
 
     /**
      * The entity to render the query for. When editing, this is the entity
      * being edited.
      */
-    private ThreadLocal<Entity> entity = new ThreadLocal<>();
+    private final ThreadLocal<Entity> entity = new ThreadLocal<>();
 
     /**
      * Clear all data from the context.

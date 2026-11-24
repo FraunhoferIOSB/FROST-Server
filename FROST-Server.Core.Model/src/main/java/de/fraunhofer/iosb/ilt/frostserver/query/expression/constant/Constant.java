@@ -22,9 +22,8 @@ import de.fraunhofer.iosb.ilt.frostserver.path.ParserContext;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHandler;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.ExpressionHelper;
 import de.fraunhofer.iosb.ilt.frostserver.query.expression.Value;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The abstract class for constant values.
@@ -34,9 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Constant<T extends Constant<T, V>, V> implements Value<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Constant.class.getName());
-
-    private String name;
+    private final String name;
     private ExpressionHandler handler;
 
     protected V value;
@@ -78,7 +75,7 @@ public abstract class Constant<T extends Constant<T, V>, V> implements Value<T> 
     @Override
     public <R> R handle(ExpressionHelper h) {
         if (!hasHandler()) {
-            LOGGER.error("No hanlder for {} ({})", getName(), getClass());
+            Exceptions.illegalArgumentIf(!hasHandler(), "No hanlder for {} ({})", getName(), getClass());
         }
         return (R) handler.handle(this, h);
     }

@@ -25,7 +25,7 @@ import tools.jackson.databind.ValueDeserializer;
  */
 public abstract class TypeSimple extends PropertyType {
 
-    private Parser parser;
+    private final Parser parser;
     private final TypeSimplePrimitive underlyingType;
 
     protected TypeSimple(String name, String description, TypeReference typeReference) {

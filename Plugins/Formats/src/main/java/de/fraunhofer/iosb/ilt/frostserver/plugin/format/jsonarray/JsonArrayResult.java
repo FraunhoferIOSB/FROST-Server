@@ -44,37 +44,42 @@ import tools.jackson.core.JsonGenerator;
 public class JsonArrayResult {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonArrayResult.class);
+
+    private static final String KEY_AT_COUNT = "@count";
+    private static final String KEY_AT_NEXT_LINK = "@nextLink";
+    private static final String KEY_ATTRIBUTE = "attribute";
+    private static final String KEY_STRUCTURE = "structure";
+    private static final String KEY_VALUE = "value";
+
     private Query query;
     private Structure structure;
     private EntitySet entitySet;
 
     public void serialiseData(JsonGenerator gen) {
         gen.writeStartObject();
-        gen.writeName("structure");
+        gen.writeName(KEY_STRUCTURE);
         structure.serialise(gen);
 
         long count = entitySet.getCount();
         if (count >= 0) {
-            gen.writeNumberProperty("@count", count);
+            gen.writeNumberProperty(KEY_AT_COUNT, count);
         }
-        if (entitySet != null) {
-            gen.writeName("value");
 
+        gen.writeName(KEY_VALUE);
+        gen.writeStartArray();
+        for (Entity e : entitySet) {
             gen.writeStartArray();
-            for (Entity e : entitySet) {
-                gen.writeStartArray();
-                for (var element : structure.elements) {
-                    element.serialiseData(e, gen);
-                }
-                gen.writeEndArray();
+            for (var element : structure.elements) {
+                element.serialiseData(e, gen);
             }
             gen.writeEndArray();
         }
+        gen.writeEndArray();
 
         if (query.getMetadata() != Metadata.OFF) {
             String nextLink = entitySet.getNextLink();
             if (nextLink != null) {
-                gen.writeStringProperty("@nextLink", nextLink);
+                gen.writeStringProperty(KEY_AT_NEXT_LINK, nextLink);
             }
         }
         gen.writeEndObject();
@@ -206,8 +211,8 @@ public class JsonArrayResult {
         @Override
         public void serialiseStructure(JsonGenerator gen) {
             gen.writeStartObject();
-            gen.writeStringProperty("attribute", property.getJsonName());
-            gen.writeName("structure");
+            gen.writeStringProperty(KEY_ATTRIBUTE, property.getJsonName());
+            gen.writeName(KEY_STRUCTURE);
             structure.serialise(gen);
             gen.writeEndObject();
         }
@@ -248,11 +253,11 @@ public class JsonArrayResult {
         @Override
         public void serialiseStructure(JsonGenerator gen) {
             if (query.isCountOrDefault()) {
-                gen.writeString(property.getJsonName() + "@count");
+                gen.writeString(property.getJsonName() + KEY_AT_COUNT);
             }
             gen.writeStartObject();
-            gen.writeStringProperty("attribute", property.getJsonName());
-            gen.writeName("structure");
+            gen.writeStringProperty(KEY_ATTRIBUTE, property.getJsonName());
+            gen.writeName(KEY_STRUCTURE);
             gen.writeStartArray();
             for (var element : structure.elements) {
                 element.serialiseStructure(gen);
@@ -261,7 +266,7 @@ public class JsonArrayResult {
             gen.writeEndObject();
             if (query.getMetadata() != Metadata.OFF) {
                 writeNextLink = true;
-                gen.writeString(property.getJsonName() + "@nextLink");
+                gen.writeString(property.getJsonName() + KEY_AT_NEXT_LINK);
             }
         }
 
@@ -276,7 +281,7 @@ public class JsonArrayResult {
             if (value instanceof EntitySet es) {
                 long count = es.getCount();
                 if (count >= 0) {
-                    gen.writeNumberProperty(property.getJsonName() + "@count", count);
+                    gen.writeNumberProperty(property.getJsonName() + KEY_AT_COUNT, count);
                 }
                 gen.writeStartArray();
                 for (Entity e : es) {
@@ -306,10 +311,8 @@ public class JsonArrayResult {
 
         private final NavigationPropertyEntity property;
         private final Structure structure;
-        private final Query query;
 
         public ElementExpandEntity(NavigationPropertyEntity property, Query query) {
-            this.query = query;
             this.property = property;
             this.structure = Structure.of(query);
         }
@@ -317,8 +320,8 @@ public class JsonArrayResult {
         @Override
         public void serialiseStructure(JsonGenerator gen) {
             gen.writeStartObject();
-            gen.writeStringProperty("attribute", property.getJsonName());
-            gen.writeName("structure");
+            gen.writeStringProperty(KEY_ATTRIBUTE, property.getJsonName());
+            gen.writeName(KEY_STRUCTURE);
             structure.serialise(gen);
             gen.writeEndObject();
         }

@@ -71,7 +71,7 @@ public class Version {
         private EditFeatures createFeatures;
         private EditFeatures updateFeatures;
         private SyntheticPropertyRegistry spr = new SyntheticPropertyRegistry();
-        private Map<CannedResponseType, CannedResponse> responses = new TreeMap<>();
+        private final Map<CannedResponseType, CannedResponse> responses = new TreeMap<>();
         private boolean mqttNotifyDelete;
         private boolean mqttFullUrls;
 

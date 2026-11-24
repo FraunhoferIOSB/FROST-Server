@@ -41,7 +41,7 @@ public class TableData {
     private Node node;
     private TableDataController controller;
     private final String setPostFix;
-    private boolean keepTableName;
+    private final boolean keepTableName;
 
     public TableData(String tableName, String setPostFix, boolean keepTableName) {
         this.tableName = tableName;

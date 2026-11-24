@@ -41,15 +41,11 @@ import de.fraunhofer.iosb.ilt.settings.annotation.DefaultValueInt;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A FROST Auth implementation for Basic Authentication.
  */
 public class BasicAuthProvider implements AuthProvider, LiquibaseUser, ConfigDefaults {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthProvider.class.getName());
 
     @DefaultValueBoolean(false)
     public static final String TAG_AUTO_UPDATE_DATABASE = "autoUpdateDatabase";

@@ -85,14 +85,12 @@ class SubscriptionSet {
         }
         int newCount = clientCount.decrementAndGet();
         LOGGER.debug("Now {} subscriptions for {}.", newCount, subscription);
-        if (newCount <= 0) {
-            if (clientCount.get() == 0) {
-                subscriptions.remove(subscription);
-                topicCount.decrementAndGet();
-                LOGGER.debug("Removed last subscription for {}.", subscription);
-                if (clientCount.get() != 0) {
-                    LOGGER.error("Possible race condition removing last subscription for {}.", subscription);
-                }
+        if (newCount <= 0 && clientCount.get() == 0) {
+            subscriptions.remove(subscription);
+            topicCount.decrementAndGet();
+            LOGGER.debug("Removed last subscription for {}.", subscription);
+            if (clientCount.get() != 0) {
+                LOGGER.error("Possible race condition removing last subscription for {}.", subscription);
             }
         }
     }

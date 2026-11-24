@@ -712,7 +712,7 @@ public class MxGraphGenerator {
 
     private static class Root {
 
-        private List<MxCell> mxCell = new ArrayList<>();
+        private final List<MxCell> mxCell = new ArrayList<>();
 
         @JacksonXmlElementWrapper(useWrapping = false)
         public List<MxCell> getMxCell() {

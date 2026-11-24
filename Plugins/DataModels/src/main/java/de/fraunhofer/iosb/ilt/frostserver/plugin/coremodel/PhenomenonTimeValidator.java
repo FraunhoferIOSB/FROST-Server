@@ -22,6 +22,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeValue;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 
 /**
@@ -36,6 +37,7 @@ public class PhenomenonTimeValidator implements EntityValidator {
     public void validate(Entity entity) throws IncompleteEntityException {
         if (epPhenomenonTime == null) {
             epPhenomenonTime = entity.getType().getEntityProperty(PluginCoreModel.NAME_EP_PHENOMENONTIME);
+            Exceptions.illegalArgumentIf(epPhenomenonTime == null, "No property {} found on entity type of {}", PluginCoreModel.NAME_EP_PHENOMENONTIME, entity);
         }
         if (entity.getProperty(epPhenomenonTime) == null) {
             entity.setProperty(epPhenomenonTime, new TimeValue(TimeInstant.now()));

@@ -32,6 +32,8 @@ import de.fraunhofer.iosb.ilt.frostserver.request.ServiceRequest;
 import de.fraunhofer.iosb.ilt.frostserver.service.Service;
 import de.fraunhofer.iosb.ilt.frostserver.service.ServiceResponse;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
+import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,9 @@ public class ServiceBatchProcessing {
     }
 
     public ServiceResponse executeBatchOperation(final Service service, final ServiceRequest request, final ServiceResponse response) {
-        String ct = request.getContentType().split(";", 2)[0].toLowerCase();
+        final String contentType = request.getContentType();
+        Exceptions.illegalArgumentIf(StringHelper.isNullOrEmpty(contentType), "Missing Content-Type");
+        String ct = contentType.split(";", 2)[0].toLowerCase();
         switch (ct) {
             case CONTENT_TYPE_MULTIPART_MIXED:
                 BatchFactory<?> batchFactory = new MultipartFactory();
@@ -91,7 +95,7 @@ public class ServiceBatchProcessing {
                 return response;
 
             default:
-                throw new IllegalArgumentException("Invalid Content-Type: " + request.getContentType());
+                throw Exceptions.illegalArgument("Invalid Content-Type: {}", contentType);
         }
     }
 

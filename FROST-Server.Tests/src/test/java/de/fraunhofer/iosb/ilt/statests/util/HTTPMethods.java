@@ -211,7 +211,8 @@ public class HTTPMethods {
     public static RequestHook getCountHook() {
         if (countHook == null) {
             countHook = (request) -> {
-                switch (request.getMethod()) {
+                final String method = request.getMethod();
+                switch (method) {
                     case HttpDelete.METHOD_NAME -> {
                         LOGGER.debug("    Deleting: {}", request);
                         HTTPMethods.incrementCountDelete();
@@ -232,6 +233,10 @@ public class HTTPMethods {
                         LOGGER.debug("    Putting: {}", request);
                         HTTPMethods.incrementCountPut();
                     }
+                    default -> {
+                        LOGGER.warn("Unknown method: {}", method);
+                    }
+
                 }
                 return request;
             };
