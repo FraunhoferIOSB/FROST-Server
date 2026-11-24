@@ -24,7 +24,6 @@ import static de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings.TAG_CORE_
 
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
 import de.fraunhofer.iosb.ilt.frostserver.util.HttpMethod;
-import de.fraunhofer.iosb.ilt.frostserver.util.StringHelper;
 import de.fraunhofer.iosb.ilt.frostserver.util.user.PrincipalExtended;
 import de.fraunhofer.iosb.ilt.settings.Settings;
 import jakarta.servlet.Filter;
@@ -148,7 +147,7 @@ public class KeycloakFilter implements Filter {
         FilterRequestAuthenticator authenticator = new FilterRequestAuthenticator(deployment, tokenStore, facade, httpRequest, 8443);
         AuthOutcome outcome = authenticator.authenticate();
         if (outcome == AuthOutcome.AUTHENTICATED) {
-            filterAuthenticated(facade, deployment, httpRequest, chain, response, httpResponse);
+            filterAuthenticated(facade, deployment, httpRequest, chain, response);
             return;
         }
         HttpMethod method = findMethodForRequest(httpRequest);
@@ -170,7 +169,7 @@ public class KeycloakFilter implements Filter {
         throwHttpError(401, httpResponse);
     }
 
-    private void filterAuthenticated(OIDCServletHttpFacade facade, KeycloakDeployment deployment, HttpServletRequest httpRequest, FilterChain chain, ServletResponse response, HttpServletResponse httpResponse) throws IOException, ServletException {
+    private void filterAuthenticated(OIDCServletHttpFacade facade, KeycloakDeployment deployment, HttpServletRequest httpRequest, FilterChain chain, ServletResponse response) throws IOException, ServletException {
         LOGGER.debug("User is authenticated...");
         if (facade.isEnded()) {
             LOGGER.debug("Facade is ended.");
@@ -210,26 +209,6 @@ public class KeycloakFilter implements Filter {
     @Override
     public void destroy() {
         // Nothing to clean up.
-    }
-
-    private String getPath(HttpServletRequest httpRequest) {
-        final String requestURI = httpRequest.getRequestURI();
-        final String contextPath = httpRequest.getContextPath();
-        final String servletPath = httpRequest.getServletPath();
-        final String preVersionPath = contextPath + servletPath;
-        String pathInfo;
-        if (requestURI.startsWith(preVersionPath)) {
-            pathInfo = StringHelper.urlDecode(requestURI.substring(preVersionPath.length()));
-        } else if (!servletPath.isEmpty()) {
-            pathInfo = servletPath;
-        } else {
-            throw new IllegalArgumentException("Path oddness!");
-        }
-        if (pathInfo.isEmpty()) {
-            pathInfo = servletPath;
-        }
-        LOGGER.trace("\nrequestURI: {}\ncontextPath: {}\nservletPath: {}\nfullPath: {}\npathInfo: {}", requestURI, contextPath, servletPath, preVersionPath, pathInfo);
-        return pathInfo;
     }
 
     private HttpMethod findMethodForRequest(HttpServletRequest httpRequest) {

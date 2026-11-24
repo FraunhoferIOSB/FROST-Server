@@ -81,7 +81,7 @@ import de.fraunhofer.iosb.ilt.statests.f02customlinks.CustomLinksTests11;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests10;
 import de.fraunhofer.iosb.ilt.statests.f03metadata.MetadataTests11;
 import de.fraunhofer.iosb.ilt.statests.mcp.McpSmokeTest;
-import de.fraunhofer.iosb.ilt.statests.mcp.ProjectAuthTestsBasicMcp11;
+import de.fraunhofer.iosb.ilt.statests.mcp.ProjectAuthBasicMcpTests11;
 import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.v2cud.DateTimeTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.GeoTests20;
@@ -160,7 +160,7 @@ import org.slf4j.LoggerFactory;
     ProjectAuthTestsBasicAnon11.class,
     SuiteFinaliser1.class,
     McpSmokeTest.class,
-    ProjectAuthTestsBasicMcp11.class,
+    ProjectAuthBasicMcpTests11.class,
     SuiteFinaliserMcp.class,
     DateTimeTests20.class,
     ReferenceTests20.class,

@@ -88,15 +88,14 @@ import org.slf4j.LoggerFactory;
  * deterministic; all per-user access runs through the MCP tools.
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class ProjectAuthTestsBasicMcp11 extends AbstractTestClass {
+public class ProjectAuthBasicMcpTests11 extends AbstractTestClass {
 
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectAuthTestsBasicMcp11.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProjectAuthBasicMcpTests11.class.getName());
 
     private static final int H200 = 200;
-    private static final int H401 = 401;
     private static final int H403 = 403;
     private static final int H404 = 404;
 
@@ -116,7 +115,7 @@ public class ProjectAuthTestsBasicMcp11 extends AbstractTestClass {
     /**
      * The users of the original test. The password is always the user name.
      */
-    private static final String[] USERS_CLIENT = new String[]{
+    private static final String[] USERS_CLIENT = {
         ADMIN,
         WRITE,
         READ,
@@ -176,7 +175,7 @@ public class ProjectAuthTestsBasicMcp11 extends AbstractTestClass {
         SERVER_PROPERTIES.put("mcp.auth.requireAuthenticated", "true");
     }
 
-    public ProjectAuthTestsBasicMcp11() {
+    public ProjectAuthBasicMcpTests11() {
         super(ServerVersion.V_1_1, SERVER_PROPERTIES);
     }
 
@@ -287,8 +286,7 @@ public class ProjectAuthTestsBasicMcp11 extends AbstractTestClass {
                             throw new IllegalArgumentException("Type " + type + " should not have been created.");
                     }
                 }
-                Collections.sort(USERS, Comparator.comparing(
-                        user -> String.valueOf(user.getProperty(EP_USERNAME)).toLowerCase()));
+                USERS.sort(Comparator.comparing(user -> String.valueOf(user.getProperty(EP_USERNAME)).toLowerCase()));
             } catch (RuntimeException ex) {
                 LOGGER.error("Exception in createEntities.", ex);
                 fail("Exception in createEntities: " + ex.getMessage());
@@ -307,10 +305,9 @@ public class ProjectAuthTestsBasicMcp11 extends AbstractTestClass {
 
     private static String getBatchPostData() {
         try {
-            return IOUtils.resourceToString(
-                    "projects/dataBatchPost.json",
+            return IOUtils.resourceToString("projects/dataBatchPost.json",
                     StandardCharsets.UTF_8,
-                    ProjectAuthTestsBasicMcp11.class.getClassLoader());
+                    ProjectAuthBasicMcpTests11.class.getClassLoader());
         } catch (IOException ex) {
             throw new IllegalStateException("Could not read projects/dataBatchPost.json", ex);
         }
@@ -1228,11 +1225,10 @@ public class ProjectAuthTestsBasicMcp11 extends AbstractTestClass {
     }
 
     private Entity newObservationEntity(String user) {
-        final Entity entity = mdlSensing.buildObservation()
+        return mdlSensing.buildObservation()
                 .setResult(user + " Observation")
                 .setDatastream(DATASTREAMS.get(0))
                 .build();
-        return entity;
     }
 
     @Test

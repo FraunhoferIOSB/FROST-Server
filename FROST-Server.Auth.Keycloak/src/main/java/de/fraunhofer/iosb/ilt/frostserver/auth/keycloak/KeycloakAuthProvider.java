@@ -93,11 +93,12 @@ public class KeycloakAuthProvider implements AuthProvider {
         maxNameLength = authSettings.getInt(TAG_MAX_USERNAME_LENGTH, KeycloakSettings.class);
         registerUserLocally = authSettings.getBoolean(TAG_REGISTER_USER_LOCALLY, KeycloakSettings.class);
 
-        PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create();
-        if (pm instanceof JooqPersistenceManager jpm) {
-            // Ensure security validators are initialised even if no specific
-            // security validators are defined.
-            jpm.getTableCollection().generateMissingSecurityValidators();
+        try (PersistenceManager pm = PersistenceManagerFactory.getInstance(coreSettings).create()) {
+            if (pm instanceof JooqPersistenceManager jpm) {
+                // Ensure security validators are initialised even if no specific
+                // security validators are defined.
+                jpm.getTableCollection().generateMissingSecurityValidators();
+            }
         }
         if (registerUserLocally) {
             DatabaseHandler.init(coreSettings);
