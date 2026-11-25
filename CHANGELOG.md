@@ -7,6 +7,9 @@
   of a set. Requesting the Tasks of a TaskingCapability that has more than one Task failed.
 * Fixed MQTT subscriptions turning off alwaysOrderbyId for the whole server. Collection
   requests without $orderby were no longer ordered by id when MQTT was enabled.
+* Fixed the Projects plugin FeatureType rule for STA 2.0 being registered on the Sensors table.
+  FeatureTypes had no rule, and the global sensorcreate, sensorupdate and sensordelete roles
+  were not enough to change Sensors.
 
 
 ## Version 2.8.3
