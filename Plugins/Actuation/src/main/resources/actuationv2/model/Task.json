@@ -93,7 +93,7 @@
           "priority": 0,
           "inverse": {
             "name": "Tasks",
-            "entitySet": false,
+            "entitySet": true,
             "required": false,
             "priority": 0,
             "annotations": []
