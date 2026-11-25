@@ -11,6 +11,9 @@
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
+* Fixed the Projects plugin FeatureType rule for STA 2.0 being registered on the Sensors table.
+  FeatureTypes had no rule, and the global sensorcreate, sensorupdate and sensordelete roles
+  were not enough to change Sensors.
 * Fixed MQTT subscriptions turning off alwaysOrderbyId for the whole server. Collection
   requests without $orderby were no longer ordered by id when MQTT was enabled.
 * Fixed the STA 2.0 Actuation model defining TaskingCapability/Tasks as a single entity instead
