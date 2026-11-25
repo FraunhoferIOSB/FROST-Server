@@ -11,6 +11,8 @@
 * Introduced [entityType][create/update/delete] roles for the fine-grained auth system.
 
 **Internal changes & Bugfixes**
+* Fixed the STA 2.0 Actuation model defining TaskingCapability/Tasks as a single entity instead
+  of a set. Requesting the Tasks of a TaskingCapability that has more than one Task failed.
 * Simplified Auth plugins.
 * Fixed Projects plugin auth rules using non-existent tables for Actuators, Tasks,
   TaskingCapabilities and ObservedProperties. Reading Actuators and Tasks failed for users
