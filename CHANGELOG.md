@@ -5,6 +5,8 @@
 **Internal changes & Bugfixes**
 * Fixed the STA 2.0 Actuation model defining TaskingCapability/Tasks as a single entity instead
   of a set. Requesting the Tasks of a TaskingCapability that has more than one Task failed.
+* Fixed MQTT subscriptions turning off alwaysOrderbyId for the whole server. Collection
+  requests without $orderby were no longer ordered by id when MQTT was enabled.
 
 
 ## Version 2.8.3

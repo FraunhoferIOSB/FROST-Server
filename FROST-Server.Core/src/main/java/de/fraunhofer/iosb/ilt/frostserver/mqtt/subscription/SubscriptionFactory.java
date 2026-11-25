@@ -57,7 +57,7 @@ public class SubscriptionFactory {
         context = new ServiceContext()
                 .setModelRegistry(settings.getModelRegistry())
                 .setFunctionRegistry(settings.getFunctionRegistry())
-                .setQueryDefaults(settings.getQueryDefaults().setAlwaysOrder(false));
+                .setQueryDefaults(settings.getQueryDefaults().copy().setAlwaysOrder(false));
         this.userCaches = userCaches;
         fineGrainedAuth = settings.getAuthSettings().getBoolean(TAG_AUTH_MQTT_FINE_GRAINED_AUTH, CoreSettings.class);
     }
