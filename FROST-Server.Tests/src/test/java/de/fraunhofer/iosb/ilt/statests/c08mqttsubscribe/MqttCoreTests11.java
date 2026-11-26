@@ -111,7 +111,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     }
 
     @Test
-    void check01a_SubscribeToEntitySetInsert() throws ServiceFailureException {
+    void check01a_SubscribeToEntitySetInsert() {
         LOGGER.info("  check01a_SubscribeToEntitySetInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -216,7 +216,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     }
 
     @Test
-    void check04_SubscribeToEntitySetWithMultipleSelectInsert() throws ServiceFailureException {
+    void check04_SubscribeToEntitySetWithMultipleSelectInsert() {
         LOGGER.info("  check04_SubscribeToEntitySetWithMultipleSelectInsert");
         deleteCreatedEntities();
         // Give the server a second to send out the messages created by the setup.
@@ -361,7 +361,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     }
 
     @Test
-    void check08a_SubscribeToEntitySetsWithDeepInsertThing() throws ServiceFailureException {
+    void check08a_SubscribeToEntitySetsWithDeepInsertThing() {
         LOGGER.info("  check08a_SubscribeToEntitySetsWithDeepInsertThing");
         deleteCreatedEntities();
 
@@ -433,7 +433,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
     }
 
     @Test
-    void check08b_SubscribeToEntitySetsWithDeepInsertObservation() throws ServiceFailureException {
+    void check08b_SubscribeToEntitySetsWithDeepInsertObservation() {
         LOGGER.info("  check08b_SubscribeToEntitySetsWithDeepInsertObservation");
         deleteCreatedEntities();
 

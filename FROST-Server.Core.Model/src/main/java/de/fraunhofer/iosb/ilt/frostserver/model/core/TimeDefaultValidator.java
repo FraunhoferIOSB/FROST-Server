@@ -21,6 +21,7 @@ import de.fraunhofer.iosb.ilt.configurable.annotations.ConfigurableField;
 import de.fraunhofer.iosb.ilt.configurable.editor.EditorString;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import net.time4j.Moment;
 
@@ -41,6 +42,7 @@ public class TimeDefaultValidator implements EntityValidator {
     public void validate(Entity entity) throws IncompleteEntityException {
         if (epTime == null) {
             epTime = entity.getType().getEntityProperty(propertyName);
+            Exceptions.illegalArgumentIf(epTime == null, "No property {} found on entity type of {}", propertyName, entity);
         }
         if (entity.getProperty(epTime) == null) {
             entity.setProperty(epTime, new TimeInstant(Moment.nowInSystemTime()));

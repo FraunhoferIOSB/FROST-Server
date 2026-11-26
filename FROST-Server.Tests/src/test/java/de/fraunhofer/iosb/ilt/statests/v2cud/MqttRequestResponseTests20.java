@@ -69,9 +69,9 @@ import tools.jackson.databind.JsonNode;
 /**
  * Tests for the geospatial functions.
  */
-public class MqttRequestResponse20 extends AbstractTestClass {
+public class MqttRequestResponseTests20 extends AbstractTestClass {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MqttRequestResponse20.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqttRequestResponseTests20.class);
 
     private static final List<Entity> DATASTREAMS = new ArrayList<>();
     private static final List<Entity> FEATURES = new ArrayList<>();
@@ -93,7 +93,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
         SERVER_PROPERTIES.put("mqtt.allowRequestResponse", "true");
     }
 
-    public MqttRequestResponse20() {
+    public MqttRequestResponseTests20() {
         super(ServerVersion.V_2_0, SERVER_PROPERTIES);
     }
 

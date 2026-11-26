@@ -33,8 +33,6 @@ import java.util.Set;
 
 /**
  * List of entity types in SensorThings API.
- *
- * TODO: Add MultiDatastream
  */
 public enum EntityType {
     ACTUATOR("Actuator", "Actuators", ACTUATION),

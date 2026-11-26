@@ -42,11 +42,15 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
@@ -76,6 +80,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
 
     private static final String REFERENCE_JSON_REGEX = "(" + Q_BOPEN + MIDDLE + Q_BCLOSE + "|" + Q_QUOTE + MIDDLE + Q_QUOTE + ")";
     private static final Pattern REFERENCE_JSON_PATTERN = Pattern.compile(REFERENCE_JSON_REGEX);
+    private static final FileAttribute<Set<PosixFilePermission>> onlyUserReadWrite = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
 
     private final Service service;
     private final ServiceRequest request;
@@ -123,7 +128,7 @@ public class JsonBatchProcessor implements Iterator<JsonBatchResultItem> {
             if (stream) {
                 parser = mapper.createParser(request.getContentReader());
             } else {
-                tempFile = Files.createTempFile(null, null);
+                tempFile = Files.createTempFile("batch", ".batch", onlyUserReadWrite);
                 try (BufferedWriter tempWriter = Files.newBufferedWriter(tempFile)) {
                     IOUtils.copy(request.getContentReader(), tempWriter);
                     tempWriter.flush();

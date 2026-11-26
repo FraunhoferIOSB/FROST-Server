@@ -379,7 +379,6 @@ public abstract class Capability1Tests extends AbstractTestClass {
             String nameUrl = entity.get("url").stringValue();
             addedLinks.put(name, true);
             if ("MultiDatastreams".equals(name)) {
-                // TODO: MultiDatastreams are not in the entity list yet.
                 String message = "The URL for MultiDatastreams in Service Root URI is not compliant to SensorThings API.";
                 assertEquals(serverSettings.getServiceUrl(version) + "/MultiDatastreams", nameUrl, message);
             } else {

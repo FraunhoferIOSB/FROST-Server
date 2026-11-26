@@ -86,7 +86,7 @@ import de.fraunhofer.iosb.ilt.statests.util.HTTPMethods;
 import de.fraunhofer.iosb.ilt.statests.v2cud.DateTimeTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.GeoTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.MqttCoreTests20;
-import de.fraunhofer.iosb.ilt.statests.v2cud.MqttRequestResponse20;
+import de.fraunhofer.iosb.ilt.statests.v2cud.MqttRequestResponseTests20;
 import de.fraunhofer.iosb.ilt.statests.v2cud.ReferenceTests20;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -166,7 +166,7 @@ import org.slf4j.LoggerFactory;
     ReferenceTests20.class,
     GeoTests20.class,
     MqttCoreTests20.class,
-    MqttRequestResponse20.class,
+    MqttRequestResponseTests20.class,
     SuiteFinaliser2.class
 })
 @Suite

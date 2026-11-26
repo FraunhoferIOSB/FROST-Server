@@ -1257,7 +1257,6 @@ public abstract class Capability3Tests extends AbstractTestClass {
             EntityType.EntityProperty property = properties.get(i);
             filteredProperties = new ArrayList<>();
             samplePropertyValues = new ArrayList<>();
-            // TODO: Do we need a canFilter here, or are those sets the same?
             if (!property.canSort) {
                 continue;
             }

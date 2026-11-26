@@ -89,7 +89,7 @@ public class LiquibaseTemplates {
     private static final String S_NAME_TABLE_NAME_OTHER = "§{" + VAR_NAME_TABLE_NAME_OTHER + '}';
     private static final String S_NAME_TESTCOLUMN_NAME = "§{" + VAR_NAME_TESTCOLUMN_NAME + '}';
 
-    public static List<ChangeLogBuilder> CreateChangeLogsFor(List<DefModel> models, String date, String author) {
+    public static List<ChangeLogBuilder> createChangeLogsFor(List<DefModel> models, String date, String author) {
         List<ChangeLogBuilder> clBuilders = new ArrayList<>();
         if (StringHelper.isNullOrEmpty(date)) {
             date = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.systemDefault()));
@@ -337,12 +337,12 @@ public class LiquibaseTemplates {
             for (String file : filesKeys) {
                 includes.append(TAG_INCLUDE_START).append(file).append(TAG_INCLUDE_END);
             }
-            String[] searchList = new String[]{
+            String[] searchList = {
                 S_NAME_BLOCK_COPYRIGHT,
                 S_NAME_BLOCK_PROPERTIES,
                 S_NAME_BLOCK_INCLUDES
             };
-            String[] replacementList = new String[]{
+            String[] replacementList = {
                 BLOCK_COPYRIGHT.trim(),
                 properties.toString().trim(),
                 includes.toString().trim()
@@ -374,10 +374,10 @@ public class LiquibaseTemplates {
         private TableChangelogBuilder(String date, String tableName) {
             this.date = date;
             this.tableName = tableName;
-            String[] searchList = new String[]{
+            String[] searchList = {
                 S_NAME_BLOCK_COPYRIGHT
             };
-            String[] replacementList = new String[]{
+            String[] replacementList = {
                 BLOCK_COPYRIGHT.trim()
             };
             base = StringUtils.replaceEach(BLOCK_CHANGLOG, searchList, replacementList);
@@ -483,42 +483,110 @@ public class LiquibaseTemplates {
             }
             return StringUtils.replace(base, S_NAME_BLOCK_CHANGESETS, changeSetString.toString().trim());
         }
-    }
 
-    private static String createChangsetLongId(String author, String date, String tableName, String columnName, String entityName) {
-        String[] searchList = new String[]{
-            S_NAME_CHANGELOG_AUTHOR,
-            S_NAME_CHANGELOG_DATE,
-            S_NAME_TABLE_NAME,
-            S_NAME_COLUMN_NAME,
-            S_NAME_ENTITY_NAME
-        };
-        String[] replacementList = new String[]{
-            author,
-            date,
-            tableName,
-            columnName,
-            entityName
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_IDLONG, searchList, replacementList);
-    }
+        private static String createChangsetLongId(String author, String date, String tableName, String columnName, String entityName) {
+            String[] searchList = {
+                S_NAME_CHANGELOG_AUTHOR,
+                S_NAME_CHANGELOG_DATE,
+                S_NAME_TABLE_NAME,
+                S_NAME_COLUMN_NAME,
+                S_NAME_ENTITY_NAME
+            };
+            String[] replacementList = {
+                author,
+                date,
+                tableName,
+                columnName,
+                entityName
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_IDLONG, searchList, replacementList);
+        }
 
-    private static String createChangsetStringId(String author, String date, String tableName, String columnName, String entityName) {
-        String[] searchList = new String[]{
-            S_NAME_CHANGELOG_AUTHOR,
-            S_NAME_CHANGELOG_DATE,
-            S_NAME_TABLE_NAME,
-            S_NAME_COLUMN_NAME,
-            S_NAME_ENTITY_NAME
-        };
-        String[] replacementList = new String[]{
-            author,
-            date,
-            tableName,
-            columnName,
-            entityName
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_IDSTRING, searchList, replacementList);
+        private static String createChangsetStringId(String author, String date, String tableName, String columnName, String entityName) {
+            String[] searchList = {
+                S_NAME_CHANGELOG_AUTHOR,
+                S_NAME_CHANGELOG_DATE,
+                S_NAME_TABLE_NAME,
+                S_NAME_COLUMN_NAME,
+                S_NAME_ENTITY_NAME
+            };
+            String[] replacementList = {
+                author,
+                date,
+                tableName,
+                columnName,
+                entityName
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_IDSTRING, searchList, replacementList);
+        }
+
+        private static String createChangsetIndex(String author, String date, String tableName, String columnName) {
+            String[] searchList = {
+                S_NAME_CHANGELOG_AUTHOR,
+                S_NAME_CHANGELOG_DATE,
+                S_NAME_TABLE_NAME,
+                S_NAME_COLUMN_NAME
+            };
+            String[] replacementList = {
+                author,
+                date,
+                tableName,
+                columnName
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_INDEX, searchList, replacementList);
+        }
+
+        private static String createChangsetLinkTable(String author, String date, String tableName,
+                EntityTableColumn etc1,
+                EntityTableColumn etc2) {
+            String[] searchList = {
+                S_NAME_CHANGELOG_AUTHOR,
+                S_NAME_CHANGELOG_DATE,
+                S_NAME_TABLE_NAME,
+                S_NAME_ENTITY_NAME_1,
+                S_NAME_TABLE_NAME_1,
+                S_NAME_COLUMN_NAME_1,
+                S_NAME_COLUMN_TYPE_1,
+                S_NAME_ENTITY_NAME_2,
+                S_NAME_TABLE_NAME_2,
+                S_NAME_COLUMN_NAME_2,
+                S_NAME_COLUMN_TYPE_2
+            };
+            String[] replacementList = {
+                author,
+                date,
+                tableName,
+                etc1.entityName,
+                etc1.tableName,
+                etc1.columnName,
+                etc1.columnType,
+                etc2.entityName,
+                etc2.tableName,
+                etc2.columnName,
+                etc2.columnType
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_LINKTABLE, searchList, replacementList);
+        }
+
+        private static String createChangsetForeignKey(String author, String date, String tableName, String columnName, String otherTableName, String otherColumnName) {
+            String[] searchList = {
+                S_NAME_CHANGELOG_AUTHOR,
+                S_NAME_CHANGELOG_DATE,
+                S_NAME_TABLE_NAME,
+                S_NAME_COLUMN_NAME,
+                S_NAME_TABLE_NAME_OTHER,
+                S_NAME_COLUMN_NAME_OTHER
+            };
+            String[] replacementList = {
+                author,
+                date,
+                tableName,
+                columnName,
+                otherTableName,
+                otherColumnName
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_FKEY, searchList, replacementList);
+        }
     }
 
     private static class ChangesetColumnsBuilder implements ChangeSetBuilder {
@@ -596,14 +664,14 @@ public class LiquibaseTemplates {
             if (StringHelper.isNullOrEmpty(tableName)) {
                 throw new IllegalArgumentException("Table must be set!");
             }
-            String[] searchList = new String[]{
+            String[] searchList = {
                 S_NAME_CHANGELOG_AUTHOR,
                 S_NAME_CHANGELOG_DATE,
                 S_NAME_TABLE_NAME,
                 S_NAME_TESTCOLUMN_NAME,
                 S_NAME_BLOCK_COLUMNS
             };
-            String[] replacementList = new String[]{
+            String[] replacementList = {
                 author,
                 date,
                 tableName,
@@ -612,106 +680,38 @@ public class LiquibaseTemplates {
             };
             return StringUtils.replaceEach(BLOCK_CHANGESET_NORMAL_COLUMNS, searchList, replacementList);
         }
-    }
 
-    private static String createBlockColumn(String columnName, String columnType, boolean nullable) {
-        if (nullable) {
-            return createBlockColumn(columnName, columnType);
-        } else {
-            return createBlockColumnNonNull(columnName, columnType);
+        private static String createBlockColumn(String columnName, String columnType, boolean nullable) {
+            if (nullable) {
+                return createBlockColumn(columnName, columnType);
+            } else {
+                return createBlockColumnNonNull(columnName, columnType);
+            }
         }
-    }
 
-    private static String createBlockColumn(String columnName, String columnType) {
-        String[] searchList = new String[]{
-            S_NAME_COLUMN_NAME,
-            S_NAME_COLUMN_TYPE
-        };
-        String[] replacementList = new String[]{
-            columnName,
-            columnType
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_COLUMN, searchList, replacementList);
-    }
+        private static String createBlockColumn(String columnName, String columnType) {
+            String[] searchList = {
+                S_NAME_COLUMN_NAME,
+                S_NAME_COLUMN_TYPE
+            };
+            String[] replacementList = {
+                columnName,
+                columnType
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_COLUMN, searchList, replacementList);
+        }
 
-    private static String createBlockColumnNonNull(String columnName, String columnType) {
-        String[] searchList = new String[]{
-            S_NAME_COLUMN_NAME,
-            S_NAME_COLUMN_TYPE
-        };
-        String[] replacementList = new String[]{
-            columnName,
-            columnType
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_COLUMN_NONNULL, searchList, replacementList);
-    }
-
-    private static String createChangsetIndex(String author, String date, String tableName, String columnName) {
-        String[] searchList = new String[]{
-            S_NAME_CHANGELOG_AUTHOR,
-            S_NAME_CHANGELOG_DATE,
-            S_NAME_TABLE_NAME,
-            S_NAME_COLUMN_NAME
-        };
-        String[] replacementList = new String[]{
-            author,
-            date,
-            tableName,
-            columnName
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_INDEX, searchList, replacementList);
-    }
-
-    private static String createChangsetLinkTable(String author, String date, String tableName,
-            EntityTableColumn etc1,
-            EntityTableColumn etc2) {
-        String[] searchList = new String[]{
-            S_NAME_CHANGELOG_AUTHOR,
-            S_NAME_CHANGELOG_DATE,
-            S_NAME_TABLE_NAME,
-            S_NAME_ENTITY_NAME_1,
-            S_NAME_TABLE_NAME_1,
-            S_NAME_COLUMN_NAME_1,
-            S_NAME_COLUMN_TYPE_1,
-            S_NAME_ENTITY_NAME_2,
-            S_NAME_TABLE_NAME_2,
-            S_NAME_COLUMN_NAME_2,
-            S_NAME_COLUMN_TYPE_2
-        };
-        String[] replacementList = new String[]{
-            author,
-            date,
-            tableName,
-            etc1.entityName,
-            etc1.tableName,
-            etc1.columnName,
-            etc1.columnType,
-            etc2.entityName,
-            etc2.tableName,
-            etc2.columnName,
-            etc2.columnType
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_LINKTABLE, searchList, replacementList);
-    }
-
-    private static String createChangsetForeignKey(String author, String date, String tableName, String columnName, String otherTableName, String otherColumnName) {
-        String[] searchList = new String[]{
-            S_NAME_CHANGELOG_AUTHOR,
-            S_NAME_CHANGELOG_DATE,
-            S_NAME_TABLE_NAME,
-            S_NAME_COLUMN_NAME,
-            S_NAME_TABLE_NAME_OTHER,
-            S_NAME_COLUMN_NAME_OTHER
-        };
-        String[] replacementList = new String[]{
-            author,
-            date,
-            tableName,
-            columnName,
-            otherTableName,
-            otherColumnName
-        };
-        return StringUtils.replaceEach(BLOCK_CHANGESET_FKEY, searchList, replacementList);
+        private static String createBlockColumnNonNull(String columnName, String columnType) {
+            String[] searchList = {
+                S_NAME_COLUMN_NAME,
+                S_NAME_COLUMN_TYPE
+            };
+            String[] replacementList = {
+                columnName,
+                columnType
+            };
+            return StringUtils.replaceEach(BLOCK_CHANGESET_COLUMN_NONNULL, searchList, replacementList);
+        }
     }
 
     private static String idColumnType(String entityType) {

@@ -23,6 +23,7 @@ import org.apache.commons.lang3.Strings;
 /**
  * A collection of helper methods for throwing exceptions.
  */
+@SuppressWarnings("javabugs:S6416")
 public class Exceptions {
 
     private static final String PREDICATE_FAILED = "Predicate failed.";

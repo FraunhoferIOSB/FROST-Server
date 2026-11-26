@@ -20,7 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.format.jsonarray;
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.*;
 import de.fraunhofer.iosb.ilt.frostserver.request.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;

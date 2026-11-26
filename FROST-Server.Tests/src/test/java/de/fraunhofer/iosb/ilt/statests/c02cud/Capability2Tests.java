@@ -1181,7 +1181,6 @@ public abstract class Capability2Tests extends AbstractTestClass {
         checkPut(EntityType.OBSERVATION, entity, updatedEntity, diffs);
     }
 
-    //TODO: Add invalid PATCH test for other entities when it is implemented in the sSrvc
     /**
      * This method is testing invalid partial update or PATCH. The PATCH request
      * is invalid if the body contains related entities as inline content.

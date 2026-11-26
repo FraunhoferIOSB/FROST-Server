@@ -136,7 +136,7 @@ public class FXMLController implements Initializable {
         }
         final String dateText = textFieldDate.getText();
         final String authorText = StringUtils.defaultIfBlank(textFieldAuthor.getText(), "generated");
-        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.CreateChangeLogsFor(models, dateText, authorText);
+        List<ChangeLogBuilder> liquibaseChangeLogs = LiquibaseTemplates.createChangeLogsFor(models, dateText, authorText);
         File liquibasePath = new File(currentPath, textFieldLiquibasePath.getText());
         if (!liquibaseChangeLogs.isEmpty()) {
             liquibasePath.mkdirs();
