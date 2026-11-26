@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.format.jsonarray;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.*;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import java.util.ArrayList;
@@ -33,13 +34,13 @@ import tools.jackson.core.type.TypeReference;
  * Class for the DataArray value object.
  */
 @JsonIgnoreProperties("dataArray@iot.count")
-public class DataArrayValue {
+public class JsonArrayValue {
 
     /**
      * The typereference for a list of DataArrayValues, used for type-safe json
      * deserialization.
      */
-    public static final TypeReference<List<DataArrayValue>> LIST_OF_DATAARRAYVALUE = new TypeReference<List<DataArrayValue>>() {
+    public static final TypeReference<List<JsonArrayValue>> LIST_OF_DATAARRAYVALUE = new TypeReference<List<JsonArrayValue>>() {
         // Empty by design.
     };
     @JsonProperty(value = "Datastream")
@@ -49,11 +50,11 @@ public class DataArrayValue {
     private List<String> components;
     private List<List<Object>> dataArray = new ArrayList<>();
 
-    public DataArrayValue() {
+    public JsonArrayValue() {
         components = new ArrayList<>();
     }
 
-    public DataArrayValue(Entity parentEntitiy, List<String> components, EntityType datastream) {
+    public JsonArrayValue(Entity parentEntitiy, List<String> components, EntityType datastream) {
         if (parentEntitiy.getType() == datastream) {
             this.datastream = parentEntitiy;
         } else {
@@ -62,7 +63,7 @@ public class DataArrayValue {
         this.components = components;
     }
 
-    public DataArrayValue(Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
+    public JsonArrayValue(Entity observation, List<String> components, NavigationPropertyMain<Entity> npDatastream, NavigationPropertyMain<Entity> npMultiDatastream) {
         this.datastream = observation.getProperty(npDatastream);
         this.components = components;
         final String urlPrefix = observation.getQuery().getContext().getPrefixGen().getUrlPrefix();
@@ -115,12 +116,12 @@ public class DataArrayValue {
         this.dataArray = dataArray;
     }
 
-    public DataArrayValue newItemList() {
+    public JsonArrayValue newItemList() {
         dataArray.add(new ArrayList<>());
         return this;
     }
 
-    public DataArrayValue addItemToTail(Object item) {
+    public JsonArrayValue addItemToTail(Object item) {
         dataArray
                 .get(dataArray.size() - 1)
                 .add(item);
@@ -143,7 +144,7 @@ public class DataArrayValue {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final DataArrayValue other = (DataArrayValue) obj;
+        final JsonArrayValue other = (JsonArrayValue) obj;
         if (!Objects.equals(this.datastream, other.datastream)) {
             return false;
         }

@@ -15,13 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json;
+package de.fraunhofer.iosb.ilt.frostserver.plugin.format.jsonarray;
 
 import de.fraunhofer.iosb.ilt.frostserver.json.deserialize.custom.CustomEntityDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.model.EntityType;
 import de.fraunhofer.iosb.ilt.frostserver.model.ModelRegistry;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
+import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.*;
 import de.fraunhofer.iosb.ilt.frostserver.request.JsonReader;
 import de.fraunhofer.iosb.ilt.frostserver.request.Version;
 import de.fraunhofer.iosb.ilt.frostserver.settings.CoreSettings;
@@ -42,56 +41,54 @@ import tools.jackson.databind.deser.DeserializationContextExt;
 /**
  * DeSerializer for DataArray JSON documents.
  */
-public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue>> {
+public class JsonArrayValueDeserializer extends ValueDeserializer<List<JsonArrayValue>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataArrayDeserializer.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonArrayValueDeserializer.class.getName());
     private static final TypeReference<List<List<Object>>> LIST_LIST_OBJECT = new TypeReference<List<List<Object>>>() {
         // empty by design
     };
 
     private final ModelRegistry modelRegistry;
-    private final PluginCoreModel pluginCoreModel;
-    private final EntityType etMultiDatastream;
+    private final EntityType etDatastream;
     private final Version version;
 
-    public DataArrayDeserializer(CoreSettings settings, Version version) {
+    public JsonArrayValueDeserializer(CoreSettings settings, Version version) {
         this.version = version;
         modelRegistry = settings.getModelRegistry();
-        pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        etMultiDatastream = modelRegistry.getEntityTypeForName("MultiDatastream");
+        etDatastream = modelRegistry.getEntityTypeForName("Datastream");
     }
 
-    public static List<DataArrayValue> deserialize(String value, JsonReader reader, CoreSettings settings) throws JacksonException {
+    public static List<JsonArrayValue> deserialize(String value, JsonReader reader, CoreSettings settings) throws JacksonException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
-            return new DataArrayDeserializer(settings, reader.getVersion()).deserialize(parser, dsc);
+            return new JsonArrayValueDeserializer(settings, reader.getVersion()).deserialize(parser, dsc);
         }
     }
 
-    public static List<DataArrayValue> deserialize(Reader value, JsonReader reader, CoreSettings settings) throws JacksonException {
+    public static List<JsonArrayValue> deserialize(Reader value, JsonReader reader, CoreSettings settings) throws JacksonException {
         ObjectMapper mapper = reader.getMapper();
         try (final JsonParser parser = mapper.createParser(value)) {
             DeserializationContextExt dsc = mapper._deserializationContext();
-            return new DataArrayDeserializer(settings, reader.getVersion()).deserialize(parser, dsc);
+            return new JsonArrayValueDeserializer(settings, reader.getVersion()).deserialize(parser, dsc);
         }
     }
 
     @Override
-    public List<DataArrayValue> deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
-        List<DataArrayValue> result = new ArrayList<>();
+    public List<JsonArrayValue> deserialize(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
+        List<JsonArrayValue> result = new ArrayList<>();
         JsonToken currentToken = parser.nextToken();
         expect(JsonToken.START_ARRAY, currentToken);
         currentToken = parser.nextToken();
         while (currentToken == JsonToken.START_OBJECT) {
-            result.add(deserializeDataArrayValue(parser, ctxt));
+            result.add(deserializeJsonArrayValue(parser, ctxt));
             currentToken = parser.nextToken();
         }
         return result;
     }
 
-    private DataArrayValue deserializeDataArrayValue(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
-        DataArrayValue result = new DataArrayValue();
+    private JsonArrayValue deserializeJsonArrayValue(JsonParser parser, DeserializationContext ctxt) throws JacksonException {
+        JsonArrayValue result = new JsonArrayValue();
         JsonToken currentToken = parser.nextToken();
         while (currentToken == JsonToken.PROPERTY_NAME) {
             String fieldName = parser.currentName();
@@ -99,17 +96,7 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
                 case "Datastream":
                     parser.nextToken();
                     result.setDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, pluginCoreModel.etDatastream, version)
-                                    .deserialize(parser, ctxt));
-                    break;
-
-                case "MultiDatastream":
-                    if (etMultiDatastream == null) {
-                        throw new IllegalArgumentException("MultiDatastream plugin not enabled.");
-                    }
-                    parser.nextToken();
-                    result.setMultiDatastream(
-                            CustomEntityDeserializer.getInstance(modelRegistry, etMultiDatastream, version)
+                            CustomEntityDeserializer.getInstance(modelRegistry, etDatastream, version)
                                     .deserialize(parser, ctxt));
                     break;
 
@@ -127,11 +114,6 @@ public class DataArrayDeserializer extends ValueDeserializer<List<DataArrayValue
                 case "dataArray":
                     parser.nextToken();
                     result.setDataArray(parser.readValueAs(LIST_LIST_OBJECT));
-                    break;
-
-                case "dataArray@iot.count":
-                    // ignore it, bad artifact of v1.0.
-                    parser.nextToken();
                     break;
 
                 default:

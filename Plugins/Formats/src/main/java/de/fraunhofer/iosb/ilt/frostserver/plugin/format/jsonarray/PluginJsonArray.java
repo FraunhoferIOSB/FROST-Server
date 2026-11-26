@@ -43,7 +43,7 @@ import tools.jackson.databind.module.SimpleModule;
 /**
  *
  */
-public class PluginResultFormatJsonArray implements PluginResultFormat, PluginService, PluginRootDocument, ConfigDefaults {
+public class PluginJsonArray implements PluginResultFormat, PluginService, PluginRootDocument, ConfigDefaults {
 
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_FORMAT_ARRAY = "formatJsonArray.enable";
@@ -104,25 +104,25 @@ public class PluginResultFormatJsonArray implements PluginResultFormat, PluginSe
 
     @Override
     public Collection<String> getVersionedUrlPaths() {
-        return Arrays.asList(ServiceArrayFormat.PATH_CREATE_OBSERVATIONS);
+        return Arrays.asList(ServiceJsonArrayFormat.PATH_CREATE_OBSERVATIONS);
     }
 
     @Override
     public Collection<String> getRequestTypes() {
-        return Arrays.asList(ServiceArrayFormat.REQUEST_TYPE_CREATE_OBSERVATIONS);
+        return Arrays.asList(ServiceJsonArrayFormat.REQUEST_TYPE_CREATE_OBSERVATIONS);
     }
 
     @Override
     public String getRequestTypeFor(Version version, String path, HttpMethod method, String contentType) {
-        if (HttpMethod.POST.equals(method) && ServiceArrayFormat.PATH_CREATE_OBSERVATIONS.equals(path)) {
-            return ServiceArrayFormat.REQUEST_TYPE_CREATE_OBSERVATIONS;
+        if (HttpMethod.POST.equals(method) && ServiceJsonArrayFormat.PATH_CREATE_OBSERVATIONS.equals(path)) {
+            return ServiceJsonArrayFormat.REQUEST_TYPE_CREATE_OBSERVATIONS;
         }
         throw new IllegalArgumentException("Method " + method + "not valid for path " + path);
     }
 
     @Override
     public ServiceResponse execute(Service service, ServiceRequest request, ServiceResponse response) {
-        return new ServiceArrayFormat(settings).executeCreateObservations(service, request, response);
+        return new ServiceJsonArrayFormat(settings).executeCreateObservations(service, request, response);
     }
 
     public static void modifyEntityFormatter() {

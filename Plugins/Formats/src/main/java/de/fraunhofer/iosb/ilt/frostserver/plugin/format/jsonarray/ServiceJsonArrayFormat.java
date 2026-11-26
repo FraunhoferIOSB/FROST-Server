@@ -28,9 +28,6 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.parser.query.QueryParser;
 import de.fraunhofer.iosb.ilt.frostserver.path.UrlHelper;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodel.PluginCoreModel;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.DataArrayValue;
-import de.fraunhofer.iosb.ilt.frostserver.plugin.format.dataarray.json.DataArrayDeserializer;
 import de.fraunhofer.iosb.ilt.frostserver.property.NavigationPropertyMain.NavigationPropertyEntity;
 import de.fraunhofer.iosb.ilt.frostserver.query.Metadata;
 import de.fraunhofer.iosb.ilt.frostserver.query.Query;
@@ -54,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * Handles the service requests for the DataArray plugin. This is the request to
  * /CreateObservations.
  */
-public class ServiceArrayFormat {
+public class ServiceJsonArrayFormat {
 
     /**
      * The path for the CreateObservations request type..
@@ -69,25 +66,25 @@ public class ServiceArrayFormat {
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceArrayFormat.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceJsonArrayFormat.class);
 
     private final CoreSettings settings;
     private final ServiceContext context;
-    private final PluginCoreModel pluginCoreModel;
+    private final EntityType etObservation;
+    private final NavigationPropertyEntity npObservationDatastream;
     private final JsonArrayValueHandlers arrayValueHandlers;
-    private final NavigationPropertyEntity npMultiDatastream;
 
-    public ServiceArrayFormat(CoreSettings settings) {
+    public ServiceJsonArrayFormat(CoreSettings settings) {
         this.settings = settings;
+        final ModelRegistry modelRegistry = settings.getModelRegistry();
         this.context = new ServiceContext()
                 .setFunctionRegistry(settings.getFunctionRegistry())
-                .setModelRegistry(settings.getModelRegistry())
+                .setModelRegistry(modelRegistry)
                 .setQueryDefaults(settings.getQueryDefaults());
-        pluginCoreModel = settings.getPluginManager().getPlugin(PluginCoreModel.class);
-        EntityType entityType = settings.getModelRegistry()
+        etObservation = modelRegistry
                 .getEntityTypeForName("Observation", true);
-        Exceptions.unknownEntityTypeIf(entityType == null, "Unknown EntityType: Observation");
-        npMultiDatastream = entityType.getNavigationPropertyEntity("MultiDatastream");
+        Exceptions.unknownEntityTypeIf(etObservation == null, "Unknown EntityType: Observation");
+        npObservationDatastream = etObservation.getNavigationPropertyEntity("Datastream");
         arrayValueHandlers = new JsonArrayValueHandlers();
     }
 
@@ -98,16 +95,16 @@ public class ServiceArrayFormat {
             final ModelRegistry modelRegistry = context.getModelRegistry();
             Query query = QueryParser.parseQuery(request.getUrlQuery(), context, null, request.getUserPrincipal());
             JsonReaderDefault entityParser = new JsonReaderDefault(modelRegistry, request.getVersion(), request.getUserPrincipal());
-            List<DataArrayValue> postData = DataArrayDeserializer.deserialize(request.getContentReader(), entityParser, settings);
+            List<JsonArrayValue> postData = JsonArrayValueDeserializer.deserialize(request.getContentReader(), entityParser, settings);
             List<String> selfLinks = new ArrayList<>();
-            for (DataArrayValue daValue : postData) {
+            for (JsonArrayValue daValue : postData) {
                 Entity datastream = daValue.getDatastream();
-                Entity multiDatastream = daValue.getMultiDatastream();
+                Exceptions.illegalArgumentIf(datastream == null, "No Datastream given.");
                 List<JsonArrayValueHandlers.ArrayValueHandler> handlers = new ArrayList<>();
                 for (String component : daValue.getComponents()) {
                     handlers.add(arrayValueHandlers.getHandler(settings, component));
                 }
-                handleDataArrayItems(query, version, handlers, daValue, datastream, multiDatastream, pm, selfLinks);
+                handleDataArrayItems(query, version, handlers, daValue, datastream, pm, selfLinks);
             }
             service.maybeCommitAndClose();
             ResultFormatter formatter = settings.getFormatter(version, FORMAT_NAME_DEFAULT);
@@ -132,19 +129,12 @@ public class ServiceArrayFormat {
         }
     }
 
-    private void handleDataArrayItems(Query query, Version version, List<JsonArrayValueHandlers.ArrayValueHandler> handlers, DataArrayValue daValue, Entity datastream, Entity multiDatastream, PersistenceManager pm, List<String> selfLinks) {
+    private void handleDataArrayItems(Query query, Version version, List<JsonArrayValueHandlers.ArrayValueHandler> handlers, JsonArrayValue daValue, Entity datastream, PersistenceManager pm, List<String> selfLinks) {
         int compCount = handlers.size();
         for (List<Object> entry : daValue.getDataArray()) {
             try {
-                Entity observation = new DefaultEntity(pluginCoreModel.etObservation);
-                if (datastream != null) {
-                    observation.setProperty(pluginCoreModel.npDatastreamObservation, datastream);
-                } else {
-                    if (npMultiDatastream == null) {
-                        throw new IllegalArgumentException("No Datastream found and MultiDatastream plugin not enabled.");
-                    }
-                    observation.setProperty(npMultiDatastream, multiDatastream);
-                }
+                Entity observation = new DefaultEntity(etObservation);
+                observation.setProperty(npObservationDatastream, datastream);
                 for (int i = 0; i < compCount; i++) {
                     handlers.get(i).handle(entry.get(i), observation);
                 }
@@ -156,7 +146,7 @@ public class ServiceArrayFormat {
                     String selfLink = UrlHelper.generateSelfLink(urlPrefix, observation);
                     selfLinks.add(selfLink);
                 }
-            } catch (NoSuchEntityException | IncompleteEntityException | IllegalArgumentException exc) {
+            } catch (NoSuchEntityException | IncompleteEntityException | RuntimeException exc) {
                 LOGGER.debug("Failed to create entity", exc);
                 selfLinks.add("error " + exc.getMessage());
             }
