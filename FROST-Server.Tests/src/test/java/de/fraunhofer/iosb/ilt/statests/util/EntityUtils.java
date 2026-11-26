@@ -514,7 +514,7 @@ public class EntityUtils {
             result.append(item.getPrimaryKeyValues().toString());
             result.append(", ");
         }
-        if (result.length() == 0) {
+        if (result.isEmpty()) {
             return "";
         }
         return result.substring(0, result.length() - 2);

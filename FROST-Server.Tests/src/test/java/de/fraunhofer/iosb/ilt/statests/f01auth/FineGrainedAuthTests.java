@@ -306,7 +306,7 @@ abstract class FineGrainedAuthTests extends AbstractTestClass {
 
                 }
             }
-            Collections.sort(USERS, (o1, o2) -> o1.getProperty(EP_USERNAME).toLowerCase().compareTo(o2.getProperty(EP_USERNAME).toLowerCase()));
+            USERS.sort((o1, o2) -> o1.getProperty(EP_USERNAME).toLowerCase().compareTo(o2.getProperty(EP_USERNAME).toLowerCase()));
             OBSERVATIONS.addAll(serviceAdmin.query(mdlSensing.etObservation).top(100).orderBy("id").list().toList());
         } catch (IOException | RuntimeException ex) {
             LOGGER.error("Failed to read resource", ex);

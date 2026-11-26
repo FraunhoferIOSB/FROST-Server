@@ -249,7 +249,7 @@ public class Query {
      */
     public void normalise() {
         select = new TreeSet<>(select);
-        Collections.sort(expand);
+        expand.sort(null);
         for (Expand item : expand) {
             item.normalise();
         }

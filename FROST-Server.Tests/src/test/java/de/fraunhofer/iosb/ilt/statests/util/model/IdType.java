@@ -20,13 +20,12 @@ package de.fraunhofer.iosb.ilt.statests.util.model;
 import tools.jackson.databind.JsonNode;
 
 /**
- *
- * @author hylke
+ * List of the ID Types.
  */
 public enum IdType {
     LONG(() -> Long.MAX_VALUE - 1000),
-    STRING(() -> java.util.UUID.randomUUID()),
-    UUID(() -> java.util.UUID.randomUUID());
+    STRING(java.util.UUID::randomUUID),
+    UUID(java.util.UUID::randomUUID);
 
     private final RandomGenerator generator;
 

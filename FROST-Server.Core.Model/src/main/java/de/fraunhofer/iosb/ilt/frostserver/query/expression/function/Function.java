@@ -243,7 +243,7 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
     protected abstract void initAllowedTypeBindings();
 
     public List<FunctionTypeBinding> getAllowedTypeBindings() {
-        if (allowedTypeBindings == null || allowedTypeBindings.isEmpty()) {
+        if (allowedTypeBindings.isEmpty()) {
             initAllowedTypeBindings();
         }
         return allowedTypeBindings;
@@ -260,6 +260,7 @@ public abstract class Function<T extends Function<T>> implements Expression<T> {
     }
 
     public T setAllowedTypeBindings(List<FunctionTypeBinding> allowedTypeBindings) {
+        Exceptions.illegalArgumentIf(allowedTypeBindings == null, "Can not set allowedTypeBindings to null");
         this.allowedTypeBindings = allowedTypeBindings;
         return getSelf();
     }

@@ -23,6 +23,7 @@ import de.fraunhofer.iosb.ilt.frostserver.model.core.Entity;
 import de.fraunhofer.iosb.ilt.frostserver.model.core.EntityValidator;
 import de.fraunhofer.iosb.ilt.frostserver.model.ext.TimeInstant;
 import de.fraunhofer.iosb.ilt.frostserver.property.EntityPropertyMain;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import de.fraunhofer.iosb.ilt.frostserver.util.exception.IncompleteEntityException;
 import net.time4j.Moment;
 
@@ -38,6 +39,7 @@ public class CreateTimeValidator implements EntityValidator {
     public void validate(Entity entity) throws IncompleteEntityException {
         if (epCreationTime == null) {
             epCreationTime = entity.getType().getEntityProperty(NAME_EP_CREATIONTIME);
+            Exceptions.illegalArgumentIf(epCreationTime == null, "No property {} found on entity type of {}", NAME_EP_CREATIONTIME, entity);
         }
         if (entity.getProperty(epCreationTime) == null) {
             entity.setProperty(epCreationTime, new TimeInstant(Moment.nowInSystemTime()));

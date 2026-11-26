@@ -19,6 +19,7 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.complex;
 
 import de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon.AbstractDataComponent;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,6 +113,29 @@ public class DataArray extends AbstractDataComponent<DataArray, List<Object>> {
     public void gatherDefinitions(Set<String> target) {
         super.gatherDefinitions(target);
         elementType.gatherDefinitions(target);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        final DataArray other = (DataArray) obj;
+        if (!Objects.equals(this.elementType, other.elementType)) {
+            return false;
+        }
+        return Objects.equals(this.values, other.values);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = 31 * hash + Objects.hashCode(this.elementType);
+        hash = 31 * hash + Objects.hashCode(this.values);
+        return hash;
     }
 
 }

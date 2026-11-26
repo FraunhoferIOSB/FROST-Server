@@ -625,19 +625,19 @@ public abstract class Capability3Tests extends AbstractTestClass {
 
         //multiple orderby
         List<String> orderbyPropeties = new ArrayList<>();
-        String orderby = "?$orderby=";
-        String orderbyAsc = "?$orderby=";
-        String orderbyDesc = "?$orderby=";
+        StringBuilder orderby = new StringBuilder("?$orderby=");
+        StringBuilder orderbyAsc = new StringBuilder("?$orderby=");
+        StringBuilder orderbyDesc = new StringBuilder("?$orderby=");
         for (EntityType.EntityProperty property : properties) {
             if (!property.canSort) {
                 continue;
             }
             if (orderby.charAt(orderby.length() - 1) != '=') {
-                orderby += ",";
+                orderby.append(",");
             }
-            orderby += property.name;
+            orderby.append(property.name);
             orderbyPropeties.add(property.name);
-            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderby);
+            String urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderby.toString());
             HttpResponse responseMap = HTTPMethods.doGet(urlString);
             String response = responseMap.response;
             JsonNode array = Utils.MAPPER.readTree(response).get("value");
@@ -651,10 +651,10 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 }
             }
             if (orderbyAsc.charAt(orderbyAsc.length() - 1) != '=') {
-                orderbyAsc += ",";
+                orderbyAsc.append(",");
             }
-            orderbyAsc += property + "%20asc";
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyAsc);
+            orderbyAsc.append(property).append("%20asc");
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyAsc.toString());
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = Utils.MAPPER.readTree(response).get("value");
@@ -668,10 +668,10 @@ public abstract class Capability3Tests extends AbstractTestClass {
                 }
             }
             if (orderbyDesc.charAt(orderbyDesc.length() - 1) != '=') {
-                orderbyDesc += ",";
+                orderbyDesc.append(",");
             }
-            orderbyDesc += property + "%20desc";
-            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyDesc);
+            orderbyDesc.append(property).append("%20desc");
+            urlString = ServiceUrlHelper.buildURLString(serverSettings.getServiceUrl(version), entityType, null, null, orderbyDesc.toString());
             responseMap = HTTPMethods.doGet(urlString);
             response = responseMap.response;
             array = Utils.MAPPER.readTree(response).get("value");

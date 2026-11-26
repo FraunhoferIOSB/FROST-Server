@@ -80,7 +80,7 @@ public class TableRef {
     }
 
     public void getJoinEqual(List<Field> requested) {
-        requested.replaceAll(r -> getJoinEqual(r));
+        requested.replaceAll(this::getJoinEqual);
     }
 
     public Field getJoinEqual(Field requested) {

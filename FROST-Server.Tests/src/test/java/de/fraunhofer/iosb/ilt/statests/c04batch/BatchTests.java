@@ -39,7 +39,7 @@ import de.fraunhofer.iosb.ilt.statests.util.Utils;
 import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.IdType;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.Strings;
@@ -60,7 +60,7 @@ public abstract class BatchTests extends AbstractTestClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchTests.class);
     private static final List<Entity> THINGS = new ArrayList<>();
     private static final List<Entity> OBSERVED_PROPS = new ArrayList<>();
-    private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
+    private static final Map<EntityType, IdType> ID_TYPES = new EnumMap<>(EntityType.class);
     private final ObjectMapper mapper;
 
     private static EntityHelper11 eh2;

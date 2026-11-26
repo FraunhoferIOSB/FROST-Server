@@ -310,7 +310,10 @@ public class ExpressionHandlers {
         }
 
         public static FieldWrapper handle(BooleanConstant node) {
-            return new SimpleFieldWrapper(Boolean.TRUE.equals(node.getValue()) ? DSL.condition("TRUE") : DSL.condition("FALSE"));
+            // Ensure a null value is treated as false.
+            final boolean isTrue = Boolean.TRUE.equals(node.getValue());
+            final Condition value = DSL.condition(isTrue ? "TRUE" : "FALSE");
+            return new SimpleFieldWrapper(value);
         }
 
         public static FieldWrapper handle(DateConstant node) {

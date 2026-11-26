@@ -105,7 +105,7 @@ public class MqttCoreTests11 extends AbstractTestClass {
         AbstractTestClass.cleanup();
     }
 
-    private void deleteCreatedEntities() throws ServiceFailureException {
+    private void deleteCreatedEntities() {
         EntityUtils.deleteAll(sSrvc);
         eh2.clearCaches();
     }

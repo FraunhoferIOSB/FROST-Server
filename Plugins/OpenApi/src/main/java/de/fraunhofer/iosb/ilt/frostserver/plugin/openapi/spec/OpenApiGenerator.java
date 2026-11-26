@@ -51,8 +51,8 @@ public class OpenApiGenerator {
     private static final String PARAM_TOP = "top";
     private static final String PARAM_SKIP = "skip";
     private static final String PARAM_ENTITY_ID = "entityId";
-    private static final String[] REPLACE_CHARS = new String[]{"~1", "%28", "%29", "%7B", "%7D"};
-    private static final String[] FIND_CHARS = new String[]{"/", "(", ")", "{", "}"};
+    private static final String[] REPLACE_CHARS = {"~1", "%28", "%29", "%7B", "%7D"};
+    private static final String[] FIND_CHARS = {"/", "(", ")", "{", "}"};
 
     private static final String GET_200 = "-get-200";
 

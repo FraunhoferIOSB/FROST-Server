@@ -502,7 +502,7 @@ public abstract class AdditionalTests extends AbstractTestClass {
     }
 
     @Test
-    void test06DoubleConflictingNavProp() throws ServiceFailureException {
+    void test06DoubleConflictingNavProp() {
         LOGGER.info("  test06DoubleConflictingNavProp");
         Dao doa = DATASTREAMS.get(0).dao(sMdl.npDatastreamObservations);
         Entity observation = sMdl.buildObservation()

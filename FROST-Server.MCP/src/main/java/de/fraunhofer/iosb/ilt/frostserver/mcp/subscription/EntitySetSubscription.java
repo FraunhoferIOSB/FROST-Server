@@ -121,11 +121,13 @@ public class EntitySetSubscription extends AbstractSubscription {
 
     @Override
     public boolean equals(Object obj) {
+        // query should not be included.
         return super.equals(obj);
     }
 
     @Override
     public int hashCode() {
+        // query should not be included.
         return super.hashCode();
     }
 

@@ -343,10 +343,15 @@ public class MqttRequestResponse20 extends AbstractTestClass {
 
         JsonNode tree = Utils.MAPPER.readTree(publish.getPayloadAsBytes());
 
-        JsonNode context = tree.get("@context");
-        Assertions.assertTrue(context != null && context.isString(), "Field @context is missing, or not a string.");
-        Assertions.assertEquals("v2.0/$metadata", context.stringValue(), "Incorrect context url");
+        JsonNode contextNode = tree.get("@context");
+        Assertions.assertTrue(contextNode != null && contextNode.isString(), "Field @context is missing, or not a string.");
+        Assertions.assertEquals("v2.0/$metadata", contextNode.stringValue(), "Incorrect context url");
 
+        JsonNode serverSettingsNode = tree.get("serverSettings");
+        Assertions.assertNotNull(serverSettingsNode, "serverSettings are missing.");
+        JsonNode functionsNode = serverSettingsNode.get("functions");
+        Assertions.assertTrue(functionsNode.isArray(), "serverSettings/functions is not an array.");
+        Assertions.assertEquals(48, functionsNode.asArray().size(), "Unexpected number of functions found.");
         return true;
     }
 
@@ -487,7 +492,7 @@ public class MqttRequestResponse20 extends AbstractTestClass {
                 }
             } catch (AssertionFailedError e) {
                 // The test used assertions, and failed.
-                LOGGER.debug("    Analyser failed: {}", e.toString(), e);
+                LOGGER.info("    Analyser failed: {}", e.toString(), e);
                 failCount.incrementAndGet();
             }
             if (activeCount.decrementAndGet() == 0) {

@@ -139,4 +139,16 @@ public class EntitySetSubscription extends AbstractSubscription {
         return super.fetchExpand(persistenceManager, newEntity);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        // query and expandQuery should not be included.
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        // query and expandQuery should not be included.
+        return super.hashCode();
+    }
+
 }

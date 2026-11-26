@@ -29,7 +29,7 @@ import tools.jackson.databind.annotation.JsonTypeIdResolver;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonTypeIdResolver(SweTypeIdResolver.class)
-public abstract class AbstractSWEIdentifiable<T extends AbstractSWEIdentifiable<T>> extends AbstractSWE {
+public abstract class AbstractSWEIdentifiable<T extends AbstractSWEIdentifiable<T>> implements AbstractSWE {
 
     /**
      * Identifier

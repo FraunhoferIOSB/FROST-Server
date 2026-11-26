@@ -39,6 +39,7 @@ import de.fraunhofer.iosb.ilt.statests.util.model.EntityType;
 import de.fraunhofer.iosb.ilt.statests.util.model.IdType;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,7 @@ public abstract class Capability2Tests extends AbstractTestClass {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Capability2Tests.class);
 
-    private static final Map<EntityType, IdType> ID_TYPES = new HashMap<>();
+    private static final Map<EntityType, IdType> ID_TYPES = new EnumMap<>(EntityType.class);
 
     /**
      * The list of ids for all the Actuators created during test procedure (will

@@ -210,7 +210,7 @@ public class HTTPMethods {
 
     public static RequestHook getCountHook() {
         if (countHook == null) {
-            countHook = (request) -> {
+            countHook = request -> {
                 final String method = request.getMethod();
                 switch (method) {
                     case HttpDelete.METHOD_NAME -> {
@@ -232,6 +232,9 @@ public class HTTPMethods {
                     case HttpPut.METHOD_NAME -> {
                         LOGGER.debug("    Putting: {}", request);
                         HTTPMethods.incrementCountPut();
+                    }
+                    case HttpHead.METHOD_NAME -> {
+                        LOGGER.debug("    Heading: {}", request);
                     }
                     default -> {
                         LOGGER.warn("Unknown method: {}", method);

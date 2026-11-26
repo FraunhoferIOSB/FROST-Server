@@ -116,12 +116,13 @@ public class JsonArrayResult {
             }
             for (var expand : query.getExpand()) {
                 NavigationProperty np = expand.getPath();
-                if (np instanceof NavigationPropertyEntity npe) {
-                    result.elements.add(new ElementExpandEntity(npe, expand.getSubQuery()));
-                } else if (np instanceof NavigationPropertyEntitySet npes) {
-                    result.elements.add(new ElementExpandSet(npes, expand.getSubQuery()));
-                } else {
-                    LOGGER.warn("Not supported: {}", np);
+                switch (np) {
+                    case NavigationPropertyEntity npe ->
+                        result.elements.add(new ElementExpandEntity(npe, expand.getSubQuery()));
+                    case NavigationPropertyEntitySet npes ->
+                        result.elements.add(new ElementExpandSet(npes, expand.getSubQuery()));
+                    default ->
+                        LOGGER.warn("Not supported: {}", np);
                 }
             }
             return result;
@@ -129,18 +130,20 @@ public class JsonArrayResult {
 
         private static void handleProperty(Property property, Structure target) {
             PropertyType type = property.getType();
-            if (property instanceof EntityPropertyMain epm) {
-                if (epm.hasCustomProperties) {
-                    target.elements.add(new ElementSimple(epm));
-                } else if (type instanceof TypeComplex tc) {
-                    target.elements.add(new ElementComplex(epm, tc));
-                } else {
-                    target.elements.add(new ElementSimple(epm));
+            switch (property) {
+                case EntityPropertyMain epm -> {
+                    if (epm.hasCustomProperties) {
+                        target.elements.add(new ElementSimple(epm));
+                    } else if (type instanceof TypeComplex tc) {
+                        target.elements.add(new ElementComplex(epm, tc));
+                    } else {
+                        target.elements.add(new ElementSimple(epm));
+                    }
                 }
-            } else if (property instanceof EntityPropertyCustomSelect epcs) {
-                target.elements.add(new ElementCustom(epcs));
-            } else {
-                LOGGER.warn("Unhandled: {}", property);
+                case EntityPropertyCustomSelect epcs ->
+                    target.elements.add(new ElementCustom(epcs));
+                default ->
+                    LOGGER.warn("Unhandled: {}", property);
             }
         }
     }

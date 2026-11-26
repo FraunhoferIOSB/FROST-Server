@@ -39,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class CsdlDocument {
 
-    public static enum ODataVersion {
+    public enum ODataVersion {
         V4_0("4.0"),
         V4_01("4.01");
 

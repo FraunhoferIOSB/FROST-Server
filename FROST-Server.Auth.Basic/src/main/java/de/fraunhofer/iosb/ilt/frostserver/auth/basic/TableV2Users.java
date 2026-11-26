@@ -74,4 +74,16 @@ public class TableV2Users extends TableImpl<Record2<String, String>> {
         return new TableV2Users(alias, this);
     }
 
+    @Override
+    public boolean equals(Object that) {
+        // No extra checks needed, since fields must not be included.
+        return super.equals(that);
+    }
+
+    @Override
+    public int hashCode() {
+        // No extra checks needed, since fields must not be included.
+        return super.hashCode();
+    }
+
 }

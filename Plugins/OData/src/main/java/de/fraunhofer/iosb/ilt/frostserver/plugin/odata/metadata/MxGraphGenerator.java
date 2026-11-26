@@ -28,6 +28,7 @@ import de.fraunhofer.iosb.ilt.frostserver.property.NavigationProperty;
 import de.fraunhofer.iosb.ilt.frostserver.property.Property;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.PropertyType;
 import de.fraunhofer.iosb.ilt.frostserver.property.type.TypeComplex;
+import de.fraunhofer.iosb.ilt.frostserver.util.exception.Exceptions;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -374,15 +375,17 @@ public class MxGraphGenerator {
         String etName2;
         String npName1;
         String npName2;
-        if (np.getEntityType().entityName.compareTo(np.getInverse().getEntityType().entityName) > 0) {
+        final NavigationProperty inverse = np.getInverse();
+        Exceptions.illegalArgumentIf(inverse == null, "Inverse of {} is null!", np);
+        if (np.getEntityType().entityName.compareTo(inverse.getEntityType().entityName) > 0) {
             etName1 = np.getEntityType().entityName;
-            etName2 = np.getInverse().getEntityType().entityName;
+            etName2 = inverse.getEntityType().entityName;
             npName1 = np.getName();
-            npName2 = np.getInverse().getName();
+            npName2 = inverse.getName();
         } else {
-            etName1 = np.getInverse().getEntityType().entityName;
+            etName1 = inverse.getEntityType().entityName;
             etName2 = np.getEntityType().entityName;
-            npName1 = np.getInverse().getName();
+            npName1 = inverse.getName();
             npName2 = np.getName();
         }
         return "ET-" + etName1 + "-" + npName1 + "-" + npName2 + "-" + etName2;

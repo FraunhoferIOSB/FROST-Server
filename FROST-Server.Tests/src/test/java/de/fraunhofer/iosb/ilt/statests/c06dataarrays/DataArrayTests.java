@@ -60,7 +60,7 @@ public abstract class DataArrayTests extends AbstractTestClass {
      * The logger for this class.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DataArrayTests.class);
-    private static final String[] OBSERVATION_PROPERTIES = new String[]{
+    private static final String[] OBSERVATION_PROPERTIES = {
         "id",
         "phenomenonTime",
         "result",

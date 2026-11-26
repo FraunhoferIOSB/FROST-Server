@@ -333,7 +333,7 @@ abstract class AbstractAuthTests extends AbstractTestClass {
     }
 
     @Test
-    void test18AnonRead() throws ServiceFailureException {
+    void test18AnonRead() {
         LOGGER.info("  test18AnonRead");
         if (anonymousReadAllowed) {
             EntityUtils.testFilterResults(ANONYMOUS, serviceAnon.dao(sMdl.etThing), "", THINGS);

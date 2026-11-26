@@ -219,7 +219,7 @@ public class QueryParser extends Visitor {
             return;
         }
         for (P_OrderBy orderby : values) {
-            QueryParser.this.handle(orderby);
+            handle(orderby);
         }
     }
 

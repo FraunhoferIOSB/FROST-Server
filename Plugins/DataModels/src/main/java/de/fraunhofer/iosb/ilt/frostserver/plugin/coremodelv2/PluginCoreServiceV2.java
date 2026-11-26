@@ -67,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,7 +109,7 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
     private boolean enabled;
     private final List<String> functionNames = new ArrayList<>();
 
-    private static final Map<Extension, List<String>> CONFORMANCE_BY_EXTENSION = new HashMap<>();
+    private static final Map<Extension, List<String>> CONFORMANCE_BY_EXTENSION = new EnumMap<>(Extension.class);
     private static final String REQ_CLASS_API_CUD = "http://www.opengis.net/spec/sensorthings/2.0/req-class/api/cud";
     private static final String REQ_CLASS_API_READ = "http://www.opengis.net/spec/sensorthings/2.0/req-class/api/read";
     private static final String REQ_CLASS_BINDING_HTTP = "http://www.opengis.net/spec/sensorthings/2.0/req-class/binding/http";
@@ -306,16 +307,13 @@ public class PluginCoreServiceV2 extends ConfigProvider<PluginCoreServiceV2> imp
 
     private void collectFuncionNames() {
         if (functionNames.isEmpty()) {
-            for (var function : coreSettings.getFunctionRegistry().getExpressions()) {
-                if (function instanceof Operator) {
-                    continue;
-                }
-                if (function instanceof Constant) {
-                    continue;
-                }
-                functionNames.add(function.getName());
-            }
-            Collections.sort(functionNames);
+            coreSettings.getFunctionRegistry()
+                    .getExpressions()
+                    .stream()
+                    .filter(t -> !(t instanceof Operator))
+                    .filter(t -> !(t instanceof Constant))
+                    .forEach(t -> functionNames.add(t.getName()));
+            functionNames.sort(null);
         }
     }
 

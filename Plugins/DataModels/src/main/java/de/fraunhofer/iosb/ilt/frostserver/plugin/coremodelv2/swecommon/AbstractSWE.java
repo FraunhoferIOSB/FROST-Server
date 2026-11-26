@@ -20,6 +20,6 @@ package de.fraunhofer.iosb.ilt.frostserver.plugin.coremodelv2.swecommon;
 /**
  * Top-level abstract class for all SWE classes.
  */
-public abstract class AbstractSWE {
+public interface AbstractSWE {
 
 }

@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -107,7 +108,7 @@ public class PluginCoreService implements PluginRootDocument, PluginService, Con
     @DefaultValueBoolean(true)
     public static final String TAG_ENABLE_CORE_SERVICE = "coreService.enable";
 
-    private static final Map<Extension, List<String>> CONFORMANCE_BY_EXTENSION = new HashMap<>();
+    private static final Map<Extension, List<String>> CONFORMANCE_BY_EXTENSION = new EnumMap<>(Extension.class);
 
     static {
         CONFORMANCE_BY_EXTENSION.put(Extension.CORE, Arrays.asList(

@@ -363,6 +363,6 @@ public class FXMLController implements Initializable {
 
     public static interface FileAction {
 
-        abstract public void call(File file);
+        public abstract void call(File file);
     }
 }

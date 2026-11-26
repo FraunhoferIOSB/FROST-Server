@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author Hylke van der Schaaf
+ * Representation of a Query.
  */
 public class Query {
 
@@ -87,10 +86,10 @@ public class Query {
         if (count != null && isCollection) {
             sb.append(separator).append("$count=").append(count);
         }
-        if (sb.length() > 0) {
-            return sb.substring(1);
+        if (sb.isEmpty()) {
+            return "";
         }
-        return "";
+        return sb.substring(1);
     }
 
     private void addSkipTopToString(boolean isCollection, StringBuilder sb, char separator) {

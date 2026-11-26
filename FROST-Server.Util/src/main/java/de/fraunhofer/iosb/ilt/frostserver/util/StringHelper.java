@@ -54,8 +54,7 @@ import net.time4j.tz.ZonalOffset;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
- * @author jab
+ * String methods.
  */
 public class StringHelper {
 
@@ -264,10 +263,5 @@ public class StringHelper {
         public boolean test(ChronoDisplay context) {
             return (context.getInt(this.element) > 0);
         }
-
-        ChronoCondition<ChronoDisplay> or(final NonZeroCondition other) {
-            return context -> (NonZeroCondition.this.test(context) || other.test(context));
-        }
     }
-
 }
