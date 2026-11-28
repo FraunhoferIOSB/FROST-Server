@@ -46,12 +46,12 @@ jobs:
       shell: bash
 
 
-    - name: Build with Maven
+    - name: Build and Test with Maven
       run: |
         mvn -B -Dmaven.javadoc.skip=true install -P coverage
 
 
-    - name: Test with Sonar
+    - name: Analyse with Sonar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
         export HTTP_NAME=$(mvn -pl FROST-Server.HTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTTP_NAME=$(mvn -pl FROST-Server.MQTTP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q | true)
+        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
         echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
         echo "MQTT_ARTIFACT=${MQTT_NAME}-jar-with-dependencies.jar" >> $GITHUB_ENV
@@ -129,9 +129,7 @@ jobs:
 
 
     - name: Build and push - MCP - Master branch latest
-      if: |
-        github.ref == 'refs/heads/v2.x' &&
-        env.MCP_ARTIFACT != '' && startsWith(env.MCP_ARTIFACT, 'FROST-Server.MCP-')
+      if: github.ref == 'refs/heads/v2.x' && env.MCP_ARTIFACT != '' && startsWith(env.MCP_ARTIFACT, 'FROST-Server.MCP-')
       uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64
@@ -187,9 +185,7 @@ jobs:
 
 
     - name: Build and push - MCP - Develop branch latest
-      if: |
-        startsWith(github.ref, 'refs/heads/develop') &&
-        env.MCP_ARTIFACT != '' && startsWith(env.MCP_ARTIFACT, 'FROST-Server.MCP-')
+      if: startsWith(github.ref, 'refs/heads/develop') && env.MCP_ARTIFACT != '' && startsWith(env.MCP_ARTIFACT, 'FROST-Server.MCP-')
       uses: docker/build-push-action@v7
       with:
         platforms: linux/amd64,linux/arm64

@@ -53,7 +53,7 @@ jobs:
         export MQTT_NAME=$(mvn -pl FROST-Server.MQTT -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MODEL_EDITOR_NAME=$(mvn -pl Tools/ModelEditor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
         export MODEL_EXTRACTOR_NAME=$(mvn -pl Tools/ModelExtractor -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
-        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q | true)
+        export MCP_NAME=$(mvn -pl FROST-Server.MCP -Dexec.executable='echo' -Dexec.args='${project.build.finalName}' exec:exec -q)
 
         echo "HTTP_ARTIFACT=${HTTP_NAME}.war"   >> $GITHUB_ENV
         echo "MQTTP_ARTIFACT=${MQTTP_NAME}.war" >> $GITHUB_ENV
